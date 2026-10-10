@@ -199,6 +199,9 @@ const PROCESS_SKILLS = new Set([
   'root-cause-analysis',
   'change-correlation',
   'post-merge-remediation',
+  'decision-log',
+  'unit-identity',
+  'artifact-naming',
 ]);
 
 // Имена, существующие только в фикстурах `tools/__fixtures__`. В продовые перечни не
@@ -226,7 +229,7 @@ if (FIXTURE_TREE) for (const n of FIXTURE_ONLY_SKILLS) ORCHESTRATOR_SKILLS.add(n
 // имя агента без dex-plugin:-префикса эвристику не поднимают.
 // Префикс dex-skill- исключён: агентов в этих плагинах нет ни одного, значит совпадение
 // с ним - всегда ссылка на скилл, и глагол делегирования рядом с ней даёт ложное
-// срабатывание (unit-identity/SKILL.md:45).
+// срабатывание (unit-identity 2.1.2, SKILL.md:45).
 const ORCHESTRATION_VERB_RE = /спавн|делегир|вызыва[ею]т|чинит/i;
 const AGENT_MENTION_RE = /`(?:dex-(?!skill-)[a-z0-9-]+:[a-z0-9-]+|Agent)`/;
 
