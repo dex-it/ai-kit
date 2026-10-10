@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-dotnet-testing-patterns",
-  "version": "2.0.1",
-  "description": "Unit-тестирование .NET: xUnit, Moq, Arrange-Act-Assert, организация тестов и антипаттерны.",
+  "version": "2.1.0",
+  "description": "Unit-тесты .NET: проверка поведения вместо вызовов моков, мок, возвращающий мок.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"

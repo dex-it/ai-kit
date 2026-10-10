@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-dotnet-resilience",
-  "version": "1.1.1",
-  "description": "Устойчивость HTTP-клиентов: Polly, retry, circuit breaker, таймауты, идемпотентность, граница корневого и листового сервиса.",
+  "version": "1.2.0",
+  "description": "Устойчивость вызовов внешней зависимости .NET: где стоит политика, общий timeout, circuit breaker, фильтр сбоев, видимый fallback, конкурентные промахи кэша.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
-  "keywords": ["skill", "resilience", "polly", "retry", "circuit-breaker", "dotnet"],
+  "keywords": ["skill", "resilience", "polly", "retry", "circuit-breaker", "dotnet", "cache"],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"
 }

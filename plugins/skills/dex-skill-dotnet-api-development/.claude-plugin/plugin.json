@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-dotnet-api-development",
-  "version": "2.6.1",
-  "description": "ASP.NET Core Web API: контроллеры, DTO, маршруты и версионирование, пагинация и фильтры, формат ошибки.",
+  "version": "2.7.0",
+  "description": "ASP.NET Core Web API: тонкий контроллер, тип и код ответа action, модель запроса, маршруты и параметры, enum в схеме Swagger.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"

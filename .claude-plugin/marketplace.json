@@ -1,6 +1,6 @@
 {
   "name": "dex-claude-marketplace",
-  "version": "6.13.0",
+  "version": "6.14.0",
   "description": "Маркетплейс AI-агентов для разработчиков. Атомарные плагины с узкой специализацией: Skills (знания), Specialists (агенты), Bundles (наборы).",
   "owner": {
     "name": "Dex Team",
@@ -59,7 +59,7 @@
       "name": "dex-architect-dotnet",
       "source": "./plugins/specialists/architecture/dex-architect-dotnet",
       "description": "Узел зоны дизайна (дизайн-решение) для .NET: reference architecture match, альтернативы с ASP.NET Core / EF Core / MassTransit / Polly / Serilog, решение с CAP/PACELC, deep dive, fact-check библиотек. Требования/capacity/implementation-план ведёт вызывающая команда /design.",
-      "version": "3.7.0",
+      "version": "3.7.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -596,7 +596,7 @@
       "name": "dex-dotnet-coder",
       "source": "./plugins/specialists/dotnet/dex-dotnet-coder",
       "description": "Кодер .NET: пишет код и реализует фичи по требованиям, следует конвенциям проекта, отдаёт статус build/test.",
-      "version": "4.3.0",
+      "version": "4.3.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -622,7 +622,7 @@
       "name": "dex-dotnet-quality-auditor",
       "source": "./plugins/specialists/dotnet/dex-dotnet-quality-auditor",
       "description": "Аудит гигиены качества .NET-проекта: анализаторы, warning-профиль, NuGet security audit, NSDepCop, CI-gates. Отчёт «есть / нет / настроить».",
-      "version": "2.4.0",
+      "version": "2.4.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -653,7 +653,7 @@
       "name": "dex-dotnet-tester",
       "source": "./plugins/specialists/dotnet/dex-dotnet-tester",
       "description": "Test writer node for .NET: unit tests, xUnit, Moq, Arrange-Act-Assert, test patterns. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "4.9.0",
+      "version": "4.9.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -858,7 +858,7 @@
       "name": "dex-knowledge-extractor",
       "source": "./plugins/utilities/dex-knowledge-extractor",
       "description": "Авторский плагин: работает в клоне репозитория маркетплейса. Pipeline извлечения уроков из чужих MR/PR в маркетплейс: /mr-collect собирает review-комментарии, /mr-analyze обобщает в предложения для skills/agents, /mr-apply применяет с self-review и валидацией.",
-      "version": "3.7.0",
+      "version": "3.7.1",
       "category": "utility",
       "keywords": [
         "utility",
@@ -1321,7 +1321,7 @@
       "name": "dex-skill-api-documentation",
       "source": "./plugins/skills/dex-skill-api-documentation",
       "description": "Документация API: OpenAPI/Swagger, XML-комментарии, примеры, генерация клиентов, расхождение спеки с кодом.",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1743,8 +1743,8 @@
     {
       "name": "dex-skill-dotnet-api-development",
       "source": "./plugins/skills/dex-skill-dotnet-api-development",
-      "description": "ASP.NET Core Web API: контроллеры, DTO, маршруты и версионирование, пагинация и фильтры, формат ошибки.",
-      "version": "2.6.1",
+      "description": "ASP.NET Core Web API: тонкий контроллер, тип и код ответа action, модель запроса, маршруты и параметры, enum в схеме Swagger.",
+      "version": "2.7.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1769,21 +1769,6 @@
       ]
     },
     {
-      "name": "dex-skill-dotnet-caching",
-      "source": "./plugins/skills/dex-skill-dotnet-caching",
-      "description": "Кэширование в .NET: HybridCache, IMemoryCache, cache stampede, инвалидация по тегам, негативное кэширование.",
-      "version": "1.0.2",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "dotnet",
-        "cache",
-        "hybridcache",
-        "memorycache",
-        "invalidation"
-      ]
-    },
-    {
       "name": "dex-skill-dotnet-code-quality",
       "source": "./plugins/skills/dex-skill-dotnet-code-quality",
       "description": "Чек-лист гигиены .NET-проекта: AnalysisMode против категорий .editorconfig, транзитивный NuGet-аудит.",
@@ -1799,15 +1784,15 @@
     {
       "name": "dex-skill-dotnet-csproj-hygiene",
       "source": "./plugins/skills/dex-skill-dotnet-csproj-hygiene",
-      "description": "Гигиена MSBuild-проектов: PackageReference и ProjectReference, централизованные версии (CPM), Directory.Build.props/.targets, PrivateAssets.",
-      "version": "1.3.2",
+      "description": "Гигиена MSBuild csproj: свойства решения в Directory.Build.props, язык и флаги сборки проекта, граф ProjectReference.",
+      "version": "1.4.0",
       "category": "skill",
       "keywords": [
         "skill",
         "msbuild",
         "csproj",
-        "cpm",
-        "nuget"
+        "langversion",
+        "dotnet"
       ]
     },
     {
@@ -1840,22 +1825,24 @@
     {
       "name": "dex-skill-dotnet-resilience",
       "source": "./plugins/skills/dex-skill-dotnet-resilience",
-      "description": "Устойчивость HTTP-клиентов: Polly, retry, circuit breaker, таймауты, идемпотентность, граница корневого и листового сервиса.",
-      "version": "1.1.1",
+      "description": "Устойчивость вызовов внешней зависимости .NET: где стоит политика, общий timeout, circuit breaker, фильтр сбоев, видимый fallback, конкурентные промахи кэша.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
         "resilience",
         "polly",
         "retry",
-        "circuit-breaker"
+        "circuit-breaker",
+        "dotnet",
+        "cache"
       ]
     },
     {
       "name": "dex-skill-dotnet-testing-patterns",
       "source": "./plugins/skills/dex-skill-dotnet-testing-patterns",
-      "description": "Unit-тестирование .NET: xUnit, Moq, Arrange-Act-Assert, организация тестов и антипаттерны.",
-      "version": "2.0.1",
+      "description": "Unit-тесты .NET: проверка поведения вместо вызовов моков, мок, возвращающий мок.",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -3078,7 +3065,7 @@
       "name": "dex-test-automator",
       "source": "./plugins/specialists/qa/dex-test-automator",
       "description": "Автоматизатор тестов: UI, API, интеграционные и unit-тесты, Selenium и Playwright, фреймворки автоматизации.",
-      "version": "2.4.0",
+      "version": "2.4.1",
       "category": "specialist",
       "keywords": [
         "specialist",
