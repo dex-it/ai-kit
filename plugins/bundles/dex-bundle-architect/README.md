@@ -48,11 +48,7 @@ Bundle for Software Architects: architecture design, ADR, diagrams, API design, 
 - `dex-skill-doc-standards` - Documentation standards (BRD, PRD, ADR)
 - `dex-skill-adr-quality` - ADR authoring traps (norm vs code, closure)
 - `dex-skill-nfr` - NFR + Security NFR (IDOR, multi-tenant, audit, secrets)
-- `dex-skill-capacity-planning` - Capacity planning, read:write ratio, hot path
-- `dex-skill-scalability` - Scalability, stateless, sharding, consistent hashing
-- `dex-skill-cap-consistency` - CAP/PACELC, quorum, split-brain, saga
-- `dex-skill-tech-evaluation` - Tech evaluation, vendor lock-in, license, expertise
-- `dex-skill-reference-architectures` - Reference architectures (feed/chat/payment/search)
+- `dex-skill-scalability` - Hot partition / hot key under long-tail load
 
 ## Note
 

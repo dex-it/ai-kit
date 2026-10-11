@@ -58,7 +58,6 @@ Understand Requirements -> [Context?] -> Generate -> Validate. Context -- опц
 
 - Для NFR-визуализации, требований -- `dex-skill-nfr:nfr`
 - Для диаграмм масштабирования, шардирования -- `dex-skill-scalability:scalability`
-- Для reference architectures (feed/chat/payment/search) -- `dex-skill-reference-architectures:reference-architectures`
 
 ## Phase 3: Generate
 

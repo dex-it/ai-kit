@@ -36,12 +36,6 @@
     "prompt": "Нужно выровнять карточки в сетке по высоте, чтобы кнопка всегда прижималась к низу. Как это сделать на CSS grid?"
   },
   {
-    "id": "capacity-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-capacity-planning:capacity-planning",
-    "prompt": "Сколько железа заложить под сервис, если ждём 2 млн событий в сутки и пик втрое выше среднего? Прикинь на салфетке."
-  },
-  {
     "id": "docker-in",
     "mode": "in-scope",
     "expect": "dex-skill-docker:docker",
@@ -112,12 +106,6 @@
     "mode": "in-scope",
     "expect": "dex-skill-bug-reproduction:bug-reproduction",
     "prompt": "Баг с двойным списанием воспроизводится на стенде, но стоит добавить логирование вокруг оплаты или поставить брейкпоинт - и он пропадает. Как его поймать?"
-  },
-  {
-    "id": "cap-consistency-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-cap-consistency:cap-consistency",
-    "prompt": "Баланс пользователя читается из реплики и иногда отстаёт от списания. Насколько это нормально и когда так делать нельзя?"
   },
   {
     "id": "change-correlation-in",
@@ -432,12 +420,6 @@
     "prompt": "Поиск в React-компоненте шлёт запрос на сервер на каждый введённый символ, а строки списка в memo всё равно перерисовываются. Как это чинится?"
   },
   {
-    "id": "reference-arch-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-reference-architectures:reference-architectures",
-    "prompt": "Начинаем ленту постов с подписками с нуля. Какие есть типовые схемы доставки постов подписчикам и по какому признаку между ними выбирать?"
-  },
-  {
     "id": "requirement-quality-in",
     "mode": "in-scope",
     "expect": "dex-skill-requirement-quality:requirement-quality",
@@ -477,7 +459,7 @@
     "id": "scalability-in",
     "mode": "in-scope",
     "expect": "dex-skill-scalability:scalability",
-    "prompt": "Сервис держит сессию в памяти инстанса, из-за чего второй инстанс не помогает. Плюс шардирование по остатку от деления упирается в один горячий шард. Что делать?"
+    "prompt": "Шардируем события аналитики по author_id, а один крупный автор даёт почти десятую часть всего потока - его узел перегружен. Как разложить данные?"
   },
   {
     "id": "shared-stand-in",
@@ -508,12 +490,6 @@
     "mode": "in-scope",
     "expect": "dex-skill-tech-audit:tech-audit",
     "prompt": "Команда прислала RFC на новый сервис уведомлений. Проведи аудит предложения: что будет, если не делать, какие альтернативы не рассмотрены и что оно ломает у потребителей."
-  },
-  {
-    "id": "tech-evaluation-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-tech-evaluation:tech-evaluation",
-    "prompt": "Выбираем между managed-сервисом и своим развёртыванием. Как сравнить честно, а не по популярности?"
   },
   {
     "id": "testability-in",

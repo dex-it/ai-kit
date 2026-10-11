@@ -23,8 +23,8 @@ declare -A DOC=([r1]=docs/adr/ADR-0006-incoming-webhooks.md [r0a]=docs/adr/ADR-0
  [r2]=docs/design/PL-30.md [r3]=docs/plans/PL-31.md [r0p]=docs/plans/PL-31.md
  [r0a2]=docs/adr/ADR-0008-image-previews.md [r0p2]=docs/plans/PL-32.md
  [r0a3]=docs/adr/ADR-0009-image-previews.md [r0p3]=docs/plans/PL-34.md)
-declare -A HOME_=([d1]=reference-architectures [d3]=reference-architectures [d4]=reference-architectures
- [d2]=cap-consistency [d5]=scalability [d6]=scalability [d7]=scalability [c1]=capacity-planning [t1]=tech-evaluation [t2]=tech-evaluation [t3]=tech-evaluation
+declare -A HOME_=([d1]=removed/reference-architectures [d3]=removed/reference-architectures [d4]=removed/reference-architectures
+ [d2]=removed/cap-consistency [d5]=scalability [d6]=scalability [d7]=scalability [c1]=removed/capacity-planning [t1]=removed/tech-evaluation [t2]=removed/tech-evaluation [t3]=removed/tech-evaluation
  [w1]=adr-quality [w2]=adr-quality [w3]=adr-quality [w4]=adr-quality [w5]=adr-quality [r1]=adr-quality [r0a]=adr-quality
  [r2]=design-quality [p1]=plan-quality [r3]=plan-quality [r0p]=plan-quality [r0a2]=adr-quality [r0p2]=plan-quality [r0a3]=adr-quality [r0p3]=plan-quality)
 ARCH="cap-consistency scalability capacity-planning reference-architectures tech-evaluation design-quality"

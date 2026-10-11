@@ -18,12 +18,8 @@ capacity, implementation-план и документацию ведёт выз�
 | Skill | Используется в фазах | Зачем |
 |-------|---------------------|-------|
 | `dex-skill-ddd` | Phase 2, 4 (conditional) | Aggregates, naming, bounded contexts |
-| `dex-skill-cap-consistency` | Phase 3 | CAP/PACELC + cheatsheet |
-| `dex-skill-tech-evaluation` | Phase 3 | Vendor lock-in, license, hidden cost |
-| `dex-skill-capacity-planning` | Phase 4 | Capacity, read:write ratio, hot path |
-| `dex-skill-scalability` | Phase 4 | Sharding, stateless |
+| `dex-skill-scalability` | Phase 4 | Горячая партиция / горячий ключ |
 | `dex-skill-api-specification` | Phase 4 | Pagination, idempotency, versioning, ProblemDetails |
-| `dex-skill-reference-architectures` | Phase 4 (conditional) | Feed/chat/payment/search/notifications/rate-limiter anti-patterns |
 
 ### .NET-специфичные skills (только у этого агента)
 

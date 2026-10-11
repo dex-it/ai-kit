@@ -82,7 +82,7 @@ Phase 1 и Phase 2 - это два прохода (Two-Pass): сначала Cla
 - **Интеграции и контракты** - `dex-skill-api-specification:api-specification`; если OpenAPI/Swagger - `dex-skill-api-documentation:api-documentation`; если RabbitMQ - `dex-skill-rabbitmq:rabbitmq` `[справочно]`; если Kafka - `dex-skill-kafka:kafka` `[справочно]`
 - **Конфигурация и зависимости** - если Docker - `dex-skill-docker:docker` `[справочно]`; если Kubernetes - `dex-skill-kubernetes:kubernetes` `[справочно]`
 - **Наблюдаемость** - `dex-skill-observability:observability`
-- **Производительность** - если про масштабирование - `dex-skill-scalability:scalability`, `dex-skill-capacity-planning:capacity-planning`
+- **Производительность** - если про масштабирование - `dex-skill-scalability:scalability`
 - **Качество кода и тестируемость** - `dex-skill-testability:testability`, `dex-skill-solid:solid`, `dex-skill-codebase-conventions:codebase-conventions`
 - **Ключевая бизнес-логика** - `dex-skill-ddd:ddd`
 
