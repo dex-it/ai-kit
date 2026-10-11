@@ -50,8 +50,8 @@
 | [dotnet-code-quality](dotnet-code-quality/README.md) | `dex-skill-dotnet-code-quality` 1.1.1 | код (G4), ревью (RV-Q) | 15 ловушек и чек-лист -> 2 названия; Q4, Q11, Q13 сняты по вреду |
 | [dotnet-testing-patterns](dotnet-testing-patterns/README.md) | `dex-skill-dotnet-testing-patterns` 2.0.1 | код (G-T, G0), ревью (RV-T, RV0) | 7 ловушек -> 2 названия |
 | [dotnet-api-development](dotnet-api-development/README.md) | `dex-skill-dotnet-api-development` 2.6.1 | код (G-A), ревью (RV-A, RV0) | 20 ловушек и чек-лист -> 9 названий; D10, D14 возвращены |
-| [dotnet-csproj-hygiene](dotnet-csproj-hygiene/README.md) | `dex-skill-dotnet-csproj-hygiene` 1.3.2 | код (G-P), ревью (RV-C) | 14 ловушек и чек-лист -> 5 названий; NU1603 снят по вреду; ревизия 4 по решению оператора |
-| [dotnet-resilience](dotnet-resilience/README.md) | `dex-skill-dotnet-resilience` 1.1.1 | код (G-R), ревью (RV-S); общий заход группы 2.2 | 12 ловушек и чек-лист -> 7 названий и H1 |
+| [dotnet-csproj-hygiene](dotnet-csproj-hygiene/README.md) | `dex-skill-dotnet-csproj-hygiene` 1.3.2 | код (G-P), ревью (RV-C) | 14 ловушек и чек-лист -> 5 названий; NU1603 снят по вреду |
+| [dotnet-resilience](dotnet-resilience/README.md) | `dex-skill-dotnet-resilience` 1.1.1 | код (G-R), ревью (RV-S); общий заход группы 2.2 | 12 ловушек и чек-лист -> 6 названий и H1; S11 снят по вреду |
 | [removed/dotnet-caching](removed/dotnet-caching/README.md) | `dex-skill-dotnet-caching` 1.0.2 | код (G-H), ревью (RV-H) | снят; H1 - в `dotnet-resilience` |
 | [ts-nodejs-api](ts-nodejs-api/README.md) | `dex-skill-ts-nodejs-api` 2.0.1 | поручение на код (K1), ревью (R1); общий заход группы 2.3 | 15 ловушек и чек-лист -> 1 пункт-название (env при старте) |
 | [react](react/README.md) | `dex-skill-react` 1.1.1 | поручение на код (K2), ревью (R2) | 16 ловушек и чек-лист -> 2 пункта-названия |
