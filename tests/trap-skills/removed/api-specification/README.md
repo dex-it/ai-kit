@@ -153,9 +153,9 @@ S12, O-S, B-S держатся, Q12a - 2/2. Второй оценщик по G-S
 | `api-designer` 3.6.0 -> 3.7.0 | загрузка в Phase 2 удалена (контракт держит преднагруженный норматив) |
 | `design-reviewer` 2.12.0 -> 2.12.1 | строка оракула в таблице аспектов - по предмету 1.1.0 |
 | `test-automator` 2.4.0 -> 2.4.1, `test-analyst` 1.7.0 -> 1.7.1 | маршрут `api-testing` - по предмету пункта |
-| `interface-definition-openapi` 1.0.0 -> 1.0.1 | фраза о предмете оракула: состав судится по нормативу, оракул - сверх него |
+| `interface-definition-openapi` 1.0.0 -> 1.0.1 | фраза о вердикте: `api-spec-quality` вместе с нормативом (ревью PR #330) |
 | бандлы `dotnet-developer` 2.38.0 -> 2.39.0, `architect` 1.28.0 -> 1.29.0, `ts-fullstack` 1.36.0 -> 1.37.0, `dotnet-fullstack` 2.39.0 -> 2.40.0, `system-analyst` 1.25.0 -> 1.26.0 | скилл убран из `includes`, README `architect`, `system-analyst` |
-| каталог 6.13.0 -> 6.14.0 | запись удалена, версии синхронизированы (`npm run sync:marketplace`), подвал README |
+| каталог 6.13.0 -> 6.15.0 (6.14.0 - #327) | запись удалена, версии синхронизированы (`npm run sync:marketplace`), подвал README |
 | `README.md` | строка Skills «Архитектура и дизайн» |
 | `tests/activation/cases.json` | `api-specification-in` удалён; `api-documentation-in`, `api-testing-in` переведены на предмет пунктов; заведён `api-spec-quality-in` |
 | `docs/SKILL_FRAMEWORK.md` | замер плотности строки пересчитан (нижнюю границу держал этот скилл): 62-353 байта, 114 `SKILL.md` |

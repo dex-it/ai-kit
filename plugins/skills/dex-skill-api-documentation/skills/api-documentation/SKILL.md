@@ -1,6 +1,6 @@
 ---
 name: api-documentation
-description: Документация API в Swagger/OpenAPI (Swashbuckle) - примеры в схемах моделей запросов, пересоздание сгенерированного клиента при изменении схемы, отдельный документ Swagger на версию API. Активируется при swagger, openapi, swashbuckle, nswag, Kiota, пример в схеме, example, генерация клиента, версии API в Swagger, api doc
+description: Документация API в Swagger/OpenAPI - примеры в схемах моделей запросов, пересоздание сгенерированного клиента при изменении схемы, отдельный документ Swagger на версию API. Активируется при swagger, openapi, swashbuckle, nswag, Kiota, пример в схеме, example, генерация клиента, версии API в Swagger, api doc
 ---
 
 # API Documentation - чек-лист

@@ -1334,7 +1334,7 @@
     {
       "name": "dex-skill-api-spec-quality",
       "source": "./plugins/skills/dex-skill-api-spec-quality",
-      "description": "Оракул контракта интерфейса (OpenAPI, AsyncAPI, gRPC IDL) - повтор неидемпотентной операции, миграция ломающего изменения, устаревание, пример ошибки и требование у новой операции",
+      "description": "Оракул контракта интерфейса (OpenAPI, AsyncAPI, gRPC IDL) - повтор неидемпотентной операции, миграция ломающего изменения, устаревание, пример ошибки и требование у операции",
       "version": "1.1.0",
       "category": "skill",
       "keywords": [
