@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-design-quality",
   "version": "1.2.0",
-  "description": "Оракул дизайн-документа: покрытие входного набора требований, открытые развилки с названной ценой, проверяемость, режимы отказа, измеримость NFR.",
+  "description": "Оракул дизайн-документа: обратимость решения с длинным следом - формат хранения, внешняя зависимость, контракт наружу.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
@@ -11,8 +11,7 @@
     "design",
     "review",
     "architecture",
-    "requirements",
-    "plan",
+    "reversibility",
     "quality"
   ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",

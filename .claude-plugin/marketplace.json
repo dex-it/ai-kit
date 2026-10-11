@@ -1289,7 +1289,7 @@
     {
       "name": "dex-skill-adr-quality",
       "source": "./plugins/skills/dex-skill-adr-quality",
-      "description": "Оракул ADR: норма против описания текущего кода, императивность правил, замкнутость, источники требований, работа с файлом решения.",
+      "description": "Оракул ADR: норма против состояния кода, проверка пункта нормы, опора нормы, дефолт открытого вопроса, источник требования, правка существующего ADR или новый.",
       "version": "2.5.0",
       "category": "skill",
       "keywords": [
@@ -1651,7 +1651,7 @@
     {
       "name": "dex-skill-design-quality",
       "source": "./plugins/skills/dex-skill-design-quality",
-      "description": "Оракул дизайн-документа: покрытие входного набора требований, открытые развилки с названной ценой, проверяемость, режимы отказа, измеримость NFR.",
+      "description": "Оракул дизайн-документа: обратимость решения с длинным следом - формат хранения, внешняя зависимость, контракт наружу.",
       "version": "1.2.0",
       "category": "skill",
       "keywords": [
@@ -1659,8 +1659,7 @@
         "design",
         "review",
         "architecture",
-        "requirements",
-        "plan",
+        "reversibility",
         "quality"
       ]
     },
@@ -2281,7 +2280,7 @@
     {
       "name": "dex-skill-plan-quality",
       "source": "./plugins/skills/dex-skill-plan-quality",
-      "description": "Оракул плана реализации: связь шагов с требованиями в обе стороны, порядок и зависимости, проверяемость исхода шага, контракты границ, откат необратимого.",
+      "description": "Оракул плана реализации: связь шагов с требованиями в обе стороны, первый работающий срез раньше последнего шага.",
       "version": "1.1.0",
       "category": "skill",
       "keywords": [
@@ -2641,18 +2640,15 @@
     {
       "name": "dex-skill-scalability",
       "source": "./plugins/skills/dex-skill-scalability",
-      "description": "Масштабируемость: преждевременное горизонтальное масштабирование, stateful-сервисы, разделяемое изменяемое состояние, выбор ключа шардирования и горячие партиции.",
+      "description": "Масштабируемость в дизайне: горячая партиция или горячий ключ под нагрузкой с длинным хвостом.",
       "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
         "scalability",
-        "horizontal-scaling",
-        "stateless",
         "sharding",
-        "consistent-hashing",
         "hot-partition",
-        "multi-tenant"
+        "hot-key"
       ]
     },
     {

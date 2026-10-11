@@ -46,7 +46,7 @@ Bundle for Software Architects: architecture design, ADR, diagrams, API design, 
 - `dex-skill-api-specification` - API specification & contracts
 - `dex-skill-observability` - OpenTelemetry, metrics, tracing
 - `dex-skill-doc-standards` - Documentation standards (BRD, PRD, ADR)
-- `dex-skill-adr-quality` - ADR authoring traps (norm vs code, closure)
+- `dex-skill-adr-quality` - ADR oracle: norm vs code state, checkable norm, open-question default, edit vs new ADR
 - `dex-skill-nfr` - NFR + Security NFR (IDOR, multi-tenant, audit, secrets)
 - `dex-skill-scalability` - Hot partition / hot key under long-tail load
 
