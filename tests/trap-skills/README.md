@@ -16,7 +16,7 @@
 
 `<набор>/sources.md` - основания пунктов, пришедших из `/mr-apply`: MR, триада, самооценка анализатора. По ним строится кейс, когда пункт идёт в заход сжатия.
 
-`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `bookings` - группа 4.2, ASP.NET Core и контракт OpenAPI): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
+`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `loyalty` - группа 3.2, корпус требований, `bookings` - группа 4.2, ASP.NET Core и контракт OpenAPI): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
 
 `removed/` - наборы снятых скиллов: скилла в каталоге нет, набор хранит свидетельство снятия и не
 перезапускается.
@@ -65,6 +65,9 @@
 | [root-cause-analysis](root-cause-analysis/README.md) | `dex-skill-root-cause-analysis` 1.0.0 | причина 500 и исправление (K1), ничего не менять (K0), инцидент и баги QA (K2, K4); общий заход группы 2.4b | 8 ловушек и чек-лист -> process-skill 2.0.0: порядок из трёх шагов |
 | [change-correlation](change-correlation/README.md) | `dex-skill-change-correlation` 1.0.1 | инцидент на общем стенде (K2), регрессия между релизом и develop (K3) | 8 ловушек и чек-лист -> process-skill 2.0.0: порядок; образ на стенде - фраза по провалу n1 |
 | [post-merge-remediation](post-merge-remediation/README.md) | `dex-skill-post-merge-remediation` 1.0.1 | баги QA после мерджа, общий стенд, оператор по ходам (K4) | 6 ловушек -> process-skill 2.0.0: порядок и гейты; гейт выката по свидетельству |
+| [decision-log](decision-log/README.md) | `dex-skill-decision-log` 1.6.1 | поручения аналитику требований (K0-K6, N1, N2); общий заход группы 3.2 | 18 ловушек -> process-skill 2.0.0: процедура владельца, запись, утрата |
+| [unit-identity](unit-identity/README.md) | `dex-skill-unit-identity` 2.1.2 | K1, K3, K4, K5, N1 | 16 ловушек -> process-skill 3.0.0: ключ и дубль, номера указателем, правка |
+| [artifact-naming](artifact-naming/README.md) | `dex-skill-artifact-naming` 1.3.2 | N1, N2, K2 | 10 ловушек -> process-skill 2.0.0: граница конвенции и норма имени |
 | [removed/api-specification](removed/api-specification/README.md) | `dex-skill-api-specification` 1.1.1 | контракт под требования (G-S); общий заход группы 4.2 | снят; S1, S4, S11 - вердикт двойников #327 |
 | [api-spec-quality](api-spec-quality/README.md) | `dex-skill-api-spec-quality` 1.0.0 | ревью MR контракта (RV-Q), автор контракта (G-S), ничего не менять (N-Q3) | 13 ловушек -> вводная и 5 названий; Q11 - дом норматив этапа |
 | [api-testing](api-testing/README.md) | `dex-skill-api-testing` 1.1.1 | тесты по контракту (G-T), ничего не менять в `src/` (N-T) | 11 ловушек и чек-лист -> 1 название (тестовая база) |
