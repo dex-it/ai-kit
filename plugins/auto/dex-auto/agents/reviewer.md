@@ -113,8 +113,10 @@ tools: Read, Grep, Glob, Bash, Skill, ToolSearch, WebSearch, WebFetch
 - `roots` - запись на каждое решение правки: `anchor`, `decision`, `root`, `verdict`, `evidence`:
   - `legitimate` - корень доказан, входа, где решение неверно, не нашлось; в `evidence` - чем доказан корень и
     какие входы перебраны;
-  - `illegitimate` - корень не доказан либо есть вход, где решение неверно; находка с тем же `anchor` - в
+  - `illegitimate` - корень не доказан либо есть вход, где решение неверно; находка на месте решения - в
     `findings` либо открытая - в `prior` или `threads`.
+- `anchor` - `file:line`, `file:from-to` либо `file` (весь файл); находка на месте решения - тот же файл, строки
+  пересекаются.
 <!-- <<< shared: roots -->
 <!-- >>> shared: prior-status -->
 - `prior` - статус прежней находки на ревизии предмета, у каждого - улика из кода:

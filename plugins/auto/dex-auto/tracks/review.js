@@ -56,11 +56,14 @@ const axesGap = (axes, findings) => {
     ...(findings ? a.filter(x => (x.outcome === 'findings') !== count(x.name) > 0).map(x => `исход оси расходится с findings: ${x.name} - ${x.outcome}, находок оси ${count(x.name)}`) : [])].filter(Boolean).join('; ')
 }
 const ROOT_VERDICT = ['legitimate', 'illegitimate']
-const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'file:line решения' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки' }
+const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки' }
 // Нелегитимное решение без открытой находки ушло бы из выхода вердиктом без дефекта, который можно закрыть; у находки ревьюера статуса нет.
 const stillOpen = (f) => !f.status || OPEN_FINDING.includes(f.status)
+// Узлы называют одно место строкой, диапазоном или файлом: строковое равенство якорей разводит их в разные места.
+const spot = (a) => { const s = String(a || '').trim().replace(/:$/, ''), m = /^(.+?):(\d+)(?:-(\d+))?(?::\d+)?$/.exec(s); return m ? [m[1], Math.min(+m[2], +(m[3] || m[2])), Math.max(+m[2], +(m[3] || m[2]))] : [s, 0, Infinity] }
+const sameSpot = (a, b) => { const [fa, a1, a2] = spot(a), [fb, b1, b2] = spot(b); return fa !== '' && fa === fb && a1 <= b2 && b1 <= a2 }
 const rootsGap = (roots, found) => {
-  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => f.anchor === x.anchor && stillOpen(f))).map(x => x.anchor)
+  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
   return bare.length ? `решение нелегитимно без находки: ${bare.join(', ')}` : ''
 }
 // Форма одна у всех ревьюеров: ledger хранит находку одной записью, и поле, которого нет у одного узла, из реестра выпадает молча.
@@ -194,12 +197,16 @@ const axesCheckGap = (axes, check, confirmed) => {
   return [unchecked.length ? `исход оси не сверен скептиком: ${unchecked.join(', ')}` : '', bare.length ? `ось опровергнута без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
 }
 const ROOT_CHECK = ['upheld', 'overturned']
-// Вердикт legitimate ревьюера - claim: решение без записи скептика ушло бы в выход оправданным без сверки.
+// Вердикт ревьюера по решению - claim в обе стороны: legitimate без сверки ушёл бы оправданным, illegitimate - с находкой, которую скептик снял.
+// Запись на несколько решений выносит одной evidence итог по разным вердиктам, а overturned у legitimate и illegitimate значит противоположное.
 const rootsCheckGap = (roots, check, found) => {
-  const c = check || []
-  const unchecked = (roots || []).filter(x => x.verdict === 'legitimate' && !c.some(y => y.anchor === x.anchor)).map(x => x.anchor)
-  const bare = c.filter(x => x.verdict === 'overturned' && !(found || []).some(f => f.anchor === x.anchor && stillOpen(f))).map(x => x.anchor)
-  return [unchecked.length ? `решение не сверено скептиком: ${unchecked.join(', ')}` : '', bare.length ? `решение опровергнуто без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
+  const r = roots || []
+  const hits = (check || []).map(y => [y, r.filter(x => sameSpot(y.anchor, x.anchor))])
+  const wide = hits.filter(([, xs]) => xs.length > 1).map(([y]) => y.anchor)
+  const own = (x) => hits.filter(([, xs]) => xs.length === 1 && xs[0] === x).map(([y]) => y)
+  const unchecked = r.filter(x => !own(x).length).map(x => x.anchor)
+  const bare = r.filter(x => own(x).some(y => (x.verdict === 'legitimate') === (y.verdict === 'overturned')) && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
+  return [wide.length ? `запись сверки покрывает несколько решений: ${wide.join(', ')}` : '', unchecked.length ? `решение не сверено скептиком: ${unchecked.join(', ')}` : '', bare.length ? `решение нелегитимно после сверки без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
 }
 const FALSIFY = { type: 'object', properties: {
   status: STATUS,
