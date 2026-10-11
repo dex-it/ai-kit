@@ -63,7 +63,7 @@ claude -p "$P" --model claude-sonnet-5-5 --effort medium --restricted --strict-m
   --tools Read Write Edit Glob Grep Bash --allowedTools "${tools[@]}" "${add[@]}" \
   --output-format stream-json --verbose > $SP/log/$id.jsonl 2>$SP/log/$id.err
 R=$T/${HOME_[$case_]}/runs/$id; mkdir -p "$R"
-if [[ $out == DIFF.patch ]]; then git add -A -N . || exit 1; git diff > "$R/DIFF.patch"; else cp REVIEW.md "$R/REVIEW.md" 2>/dev/null || echo "(нет REVIEW.md)" > "$R/REVIEW.md"; fi
+if [[ $out == DIFF.patch ]]; then git add -A . || exit 1; git diff --cached > "$R/DIFF.patch"; else cp REVIEW.md "$R/REVIEW.md" 2>/dev/null || echo "(нет REVIEW.md)" > "$R/REVIEW.md"; fi
 cost=$(tail -1 $SP/log/$id.jsonl | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("total_cost_usd"),d.get("subtype"))' 2>/dev/null)
 # пути вне каталога прогона
 esc=$(python3 - "$SP/log/$id.jsonl" "$DIR" "$W/discipline" "$REPO" <<'PY'

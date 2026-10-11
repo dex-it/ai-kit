@@ -11,7 +11,8 @@
 [`_projects/pricing`](../../_projects/pricing/README.md); кейсы скилла - G-H (код, `feature/price-cache`) и
 RV-H (ревью, `feature/card-cache`). Исполнитель - `claude -p`, `claude-sonnet-5-5`, effort medium,
 флаги и промпты - [`run-group-2-2.sh`](../../_projects/pricing/run-group-2-2.sh). Выходы -
-`runs/<кейс>-<набор><N>/`.
+`runs/<кейс>-<набор><N>/`. Среда, порядок и сборка выходов - протокол
+[dotnet-resilience](../../dotnet-resilience/README.md#заход-группы-22).
 
 ## Потребители
 
