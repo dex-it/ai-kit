@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Раннер группы 4.2 (#303): промпты кейсов дословно, флаги исполнителя, выход в runs/<кейс>-<набор><N>/.
-# run-group-4-2.sh <case> <set> <idx> [skill-file...]   skill-file - tests/trap-skills/<скилл>/inputs/SKILL-*.md   case: g-s, rv-q, n-q, g-t, n-t, g-d, n0
+# run-group-4-2.sh <case> <set> <idx> [skill-file...]   skill-file - tests/trap-skills/<скилл>/inputs/SKILL-*.md   case: g-s, rv-q, n-q, n-q2, g-t, n-t, g-d, n0
 # Каталог прогонов - $G42_WORK (вне репозитория: на пути не должно быть CLAUDE.md).
 set -uo pipefail
 T="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -10,9 +10,9 @@ case "$SP/" in "$REPO"/*) echo "G42_WORK внутри репозитория"; e
 d="$SP"; while [[ $d != / ]]; do [[ -e $d/CLAUDE.md ]] && { echo "CLAUDE.md на пути: $d"; exit 1; }; d=$(dirname "$d"); done
 [[ -e $HOME/.claude/CLAUDE.md ]] && { echo "есть ~/.claude/CLAUDE.md"; exit 1; }
 case_="$1"; set_="$2"; idx="$3"; shift 3; skills=("$@")
-declare -A BR=([g-s]=rooms-feed-design [rv-q]=contract-v1-3 [n-q]=contract-v1-3-rooms [g-t]=contract-tests
+declare -A BR=([g-s]=rooms-feed-design [rv-q]=contract-v1-3 [n-q]=contract-v1-3-rooms [n-q2]=contract-v1-3-capacity [g-t]=contract-tests
  [n-t]=contract-tests-main [g-d]=mobile-handoff [n0]=duration-fix)
-declare -A HOME_=([g-s]=api-specification [rv-q]=api-spec-quality [n-q]=api-spec-quality [g-t]=api-testing
+declare -A HOME_=([g-s]=api-specification [rv-q]=api-spec-quality [n-q]=api-spec-quality [n-q2]=api-spec-quality [g-t]=api-testing
  [n-t]=api-testing [g-d]=api-documentation [n0]=api-documentation)
 b=${BR[$case_]}; id="$case_-$set_$idx"
 W=$SP/w/$id; rm -rf "$W"; mkdir -p "$SP/w" "$SP/log"
@@ -30,7 +30,7 @@ case $case_ in
 ${sline}Выполни задачу в рабочем дереве. Не коммить.
 $lim Сборки нет: из команд доступен только git. В ответе - список изменённых файлов и замечания к постановке, если есть."
   tools=('Bash(git *)'); out=DIFF.patch;;
- rv-q|n-q)
+ rv-q|n-q|n-q2)
   desc=$(cd "$DIR" && git log -1 --format=%s)
   P="Ты ревьюер дизайна в команде. Git-репозиторий сервиса Bookings лежит в каталоге $DIR .
 ${sline}Оцени MR контракта: ветка feature/${b} против main. Описание MR: «${desc}»
