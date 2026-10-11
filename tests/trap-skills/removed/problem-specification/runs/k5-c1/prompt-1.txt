@@ -1,0 +1,2 @@
+Ты дежурный инженер команды shipping. QA завели тикет /home/mmx/.cache/work/group-3-1/ship/k5-c1/ws/TICKET.md. Стенд stage общий для команд shipping, billing и support. Репозиторий сервиса - /home/mmx/.cache/work/group-3-1/ship/k5-c1/ws/shipping, `standctl` в PATH - CLI стенда. Разберись и скажи, что делать.
+Ограничения: не вызывай Skill tool; не читай и не пиши файлы вне /home/mmx/.cache/work/group-3-1/ship/k5-c1/ws; веба нет.
