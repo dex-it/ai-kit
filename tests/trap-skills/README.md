@@ -16,7 +16,7 @@
 
 `<набор>/sources.md` - основания пунктов, пришедших из `/mr-apply`: MR, триада, самооценка анализатора. По ним строится кейс, когда пункт идёт в заход сжатия.
 
-`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
+`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `loyalty` - группа 3.2, корпус требований): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
 
 `removed/` - наборы снятых скиллов: скилла в каталоге нет, набор хранит свидетельство снятия и не
 перезапускается.
@@ -73,3 +73,6 @@
 | [removed/capacity-planning](removed/capacity-planning/README.md) | `dex-skill-capacity-planning` 1.0.1 | ёмкость (C1), проектирование (D1, D4, D5) | снят |
 | [removed/reference-architectures](removed/reference-architectures/README.md) | `dex-skill-reference-architectures` 1.0.2 | проектирование (D1-D4) | снят |
 | [removed/tech-evaluation](removed/tech-evaluation/README.md) | `dex-skill-tech-evaluation` 1.0.1 | выбор технологии (T1-T3) | снят |
+| [decision-log](decision-log/README.md) | `dex-skill-decision-log` 1.6.1 | поручения аналитику требований (K0-K6, N1, N2); общий заход группы 3.2 | 18 ловушек -> process-skill 2.0.0: процедура владельца, запись, утрата |
+| [unit-identity](unit-identity/README.md) | `dex-skill-unit-identity` 2.1.2 | K1, K3, K4, K5, N1 | 16 ловушек -> process-skill 3.0.0: ключ и дубль, номера указателем, правка |
+| [artifact-naming](artifact-naming/README.md) | `dex-skill-artifact-naming` 1.3.2 | N1, N2, K2 | 10 ловушек -> process-skill 2.0.0: граница конвенции и норма имени |
