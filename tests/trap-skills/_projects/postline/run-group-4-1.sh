@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Раннер группы 4.1 (#302): промпты дословно, флаги исполнителя, выход в runs/<кейс>-<набор><N>/ протокола-дома кейса.
 # run-group-4-1.sh <case> <set> <idx> [edition-dir]
-#   case: d1..d6, c1, t1, t2, w1..w5, p1, r1, r0a, r2, r3, r0p
+#   case: d1..d7, c1, t1, t2, w1..w5, p1, r1, r0a, r2, r3, r0p
 #   edition-dir: каталог с <скилл>.md; кейсу подаются только скиллы его роли (ROLE ниже), без каталога - контроль.
 # Рабочий каталог прогонов - $G41_WORK (вне репозитория: на пути не должно быть CLAUDE.md).
 set -uo pipefail
@@ -12,16 +12,16 @@ case "$SP/" in "$REPO"/*) echo "G41_WORK внутри репозитория"; e
 d="$SP"; while [[ $d != / ]]; do [[ -e $d/CLAUDE.md ]] && { echo "CLAUDE.md на пути: $d"; exit 1; }; d=$(dirname "$d"); done
 case_="$1"; set_="$2"; idx="$3"; ed="${4:-}"
 declare -A BR=([d1]=feed-design [d2]=donations-design [d3]=live-design [d4]=search-design [d5]=author-analytics-design
- [d6]=moderation-design [c1]=season-capacity [t1]=mail-queue-choice [t2]=studio-components [w1]=outbox-adr
+ [d6]=moderation-design [d7]=exports-design [c1]=season-capacity [t1]=mail-queue-choice [t2]=studio-components [w1]=outbox-adr
  [w2]=retries-update [w3]=webhooks-adr [w4]=module-layout [w5]=errors-draft [p1]=plan-author
  [r1]=webhooks-intake-adr [r0a]=thumbnails-adr [r2]=paid-subs-design [r3]=plan-defects [r0p]=plan-clean)
-declare -A TASK=([d1]=PL-11 [d2]=PL-12 [d3]=PL-13 [d4]=PL-14 [d5]=PL-15 [d6]=PL-16 [c1]=PL-17 [t1]=PL-18 [t2]=PL-19
+declare -A TASK=([d1]=PL-11 [d2]=PL-12 [d3]=PL-13 [d4]=PL-14 [d5]=PL-15 [d6]=PL-16 [d7]=PL-28 [c1]=PL-17 [t1]=PL-18 [t2]=PL-19
  [w1]=PL-20 [w2]=PL-21 [w3]=PL-22 [w4]=PL-23 [w5]=PL-25 [p1]=PL-31 [r1]=PL-26 [r0a]=PL-27 [r2]=PL-30-review
  [r3]=PL-31-review [r0p]=PL-31-review)
 declare -A DOC=([r1]=docs/adr/ADR-0006-incoming-webhooks.md [r0a]=docs/adr/ADR-0007-media-previews.md
  [r2]=docs/design/PL-30.md [r3]=docs/plans/PL-31.md [r0p]=docs/plans/PL-31.md)
 declare -A HOME_=([d1]=reference-architectures [d3]=reference-architectures [d4]=reference-architectures
- [d2]=cap-consistency [d5]=scalability [d6]=scalability [c1]=capacity-planning [t1]=tech-evaluation [t2]=tech-evaluation
+ [d2]=cap-consistency [d5]=scalability [d6]=scalability [d7]=scalability [c1]=capacity-planning [t1]=tech-evaluation [t2]=tech-evaluation
  [w1]=adr-quality [w2]=adr-quality [w3]=adr-quality [w4]=adr-quality [w5]=adr-quality [r1]=adr-quality [r0a]=adr-quality
  [r2]=design-quality [p1]=plan-quality [r3]=plan-quality [r0p]=plan-quality)
 ARCH="cap-consistency scalability capacity-planning reference-architectures tech-evaluation design-quality"
