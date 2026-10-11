@@ -33,7 +33,7 @@ $lim Сборки нет: из команд доступен только git. �
  rv-q|n-q)
   desc=$(cd "$DIR" && git log -1 --format=%s)
   P="Ты ревьюер дизайна в команде. Git-репозиторий сервиса Bookings лежит в каталоге $DIR .
-${sline}Оцени MR контракта: ветка feature/$b против main. Описание MR: «$desc»
+${sline}Оцени MR контракта: ветка feature/${b} против main. Описание MR: «${desc}»
 Запиши в $DIR/REVIEW.md первой строкой вердикт - verdict: passed или verdict: failed; дальше находки, по строке на находку: файл:строка - что не так и чем кончится - severity (blocker/major/minor). Без вступлений и резюме. Файлы репозитория не правь, кроме REVIEW.md.
 $lim Сборки нет: из команд доступен только git. В ответе - только вердикт и число находок по severity."
   tools=('Bash(git *)'); out=REVIEW.md;;
