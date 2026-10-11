@@ -136,8 +136,9 @@ S12, O-S, B-S держатся, Q12a - 2/2. Второй оценщик по G-S
 ## Открыто
 
 - Вердикты S1, S4, S11 взяты по ветке PR #327 до его merge; если там вердикт D13, D14, D15 изменится - пересмотр здесь.
-- Фикстура `dex-knowledge-extractor/test-fixtures/analyze-quality-gate.md` в PR #327 целится в раздел «Pagination»
-  этого скилла; скилл снят - фикстуру переназначить при сведении с #327 (здесь не тронута).
+- Фикстура `dex-knowledge-extractor/test-fixtures/analyze-quality-gate.md` в PR #327 целилась в раздел «Pagination»
+  этого скилла; при сведении с #327 переназначена на `dex-skill-dotnet-api-development` (чек-лист без H2, пункт
+  «Фильтры и пагинация в path вместо query») - закрыто.
 - Сторона потребителей (`architect`, `architect-dotnet`, `api-designer`) на поручениях не мерилась: G-S - роль
   архитектора API без агента-потребителя.
 

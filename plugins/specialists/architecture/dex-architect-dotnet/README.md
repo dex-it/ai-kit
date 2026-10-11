@@ -28,12 +28,12 @@ capacity, implementation-план и документацию ведёт выз�
 
 | Skill | Используется в фазах | Зачем |
 |-------|---------------------|-------|
-| `dex-skill-dotnet-api-development` | Phase 4 | ASP.NET Core controllers, DTO, FluentValidation, pagination |
-| `dex-skill-dotnet-resilience` | Phase 4 | Polly: retry с idempotency / jitter, circuit breaker, timeout |
+| `dex-skill-dotnet-api-development` | Phase 4 | Тонкий контроллер, код ответа, маршруты и параметры |
+| `dex-skill-dotnet-resilience` | Phase 4 | Место политики, общий timeout, circuit breaker, промахи кэша |
 | `dex-skill-dotnet-ef-core` | Phase 4 (conditional) | EF Core: queries, tracking, migrations, owned-types |
 | `dex-skill-dotnet-async-patterns` | Phase 4 (conditional) | `Task.Run` над синхронным вызовом |
 | `dex-skill-dotnet-logging` | Phase 4 (conditional) | Уровень записи, контекст через scope |
-| `dex-skill-dotnet-csproj-hygiene` | Phase 4 (conditional) | CPM, ProjectReference, Directory.Build.props |
+| `dex-skill-dotnet-csproj-hygiene` | Phase 4 (conditional) | Directory.Build.props, LangVersion, TargetFramework, ProjectReference |
 | `dex-skill-dotnet-code-quality` | Phase 4 (conditional) | AnalysisMode, NuGet audit |
 | `dex-skill-project-baseline` | Phase 4 (conditional) | Baseline нового проекта: наследовать solution / закладка с нуля |
 | `dex-skill-codebase-conventions` | Phase 2, 4 (conditional) | Соответствие конвенциям существующего проекта |

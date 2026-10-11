@@ -72,7 +72,7 @@ Understand Requirements -> [Study Project Context?] -> Generate -> Validate. Und
 
 В этой фазе загружай skills через Skill tool:
 
-- Для паттернов тестирования, AAA, моков -- `dex-skill-dotnet-testing-patterns:dotnet-testing-patterns`
+- Для проверки поведения вместо вызовов моков -- `dex-skill-dotnet-testing-patterns:dotnet-testing-patterns`
 - Для тестируемости кода - `dex-skill-testability:testability`
 - Для теста, трогающего границу с внешней системой (мок vs реальный контракт, LLM/внешний API/IO) - `dex-skill-integration-boundary:integration-boundary`
 
