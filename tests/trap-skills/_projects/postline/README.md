@@ -2,9 +2,9 @@
 
 Платформа авторов (публикации, лента, донаты, поиск, уведомления, эфиры, аналитика) - документы с числами
 нагрузки, ADR, дизайн и планы, немного кода модуля уведомлений. Сборки нет. Вход наборов
-[cap-consistency](../../cap-consistency/README.md), [scalability](../../scalability/README.md),
-[capacity-planning](../../capacity-planning/README.md), [reference-architectures](../../reference-architectures/README.md),
-[tech-evaluation](../../tech-evaluation/README.md), [adr-quality](../../adr-quality/README.md),
+[cap-consistency](../../removed/cap-consistency/README.md), [scalability](../../scalability/README.md),
+[capacity-planning](../../removed/capacity-planning/README.md), [reference-architectures](../../removed/reference-architectures/README.md),
+[tech-evaluation](../../removed/tech-evaluation/README.md), [adr-quality](../../adr-quality/README.md),
 [design-quality](../../design-quality/README.md), [plan-quality](../../plan-quality/README.md) (эпик #291, #302).
 Файл - ключ для судьи, исполнителю не подаётся: `setup.sh` копирует в каталог прогона только `stages/` и `branches/`.
 
@@ -96,6 +96,11 @@ key/<кейс>.md             ключ кейса - то, что получае�
   метода: W1, W2, W3, R1, R2, R3, R0A3, R0P3 по 2 прогона; R0A3, R0P3 - ещё пара контроля `c`. Кейсы, которых правка
   `n2` не касается (D1-D7, C1, T1-T3, W4, W5, P1 - их скиллы и клетки не задеты), берутся из `f`. Второй оценщик
   вслепую судит `g2` и `c2` R0A3, R0P3 - так же, как `f2` и `c2`.
+- **Набор `h` (запись до его прогонов, 2026-10-11).** Набор `g` (редакция `n2`) хуже контроля: W2 AQ12 0/2 и R1 AQ2
+  0/2 (контроль 2/2). Редакция `n3` - фраза к каждому провалу в `adr-quality` (`design-quality`, `plan-quality`,
+  `scalability` - как в `n2`). Перепрогон - набор `h`: W1-W5 (все кейсы ADR-автора - правка задевает пункт о правке
+  и новом ADR), R1, R0A3, R0P3 по 2 прогона; R2, R3 берутся из `g` (их скиллы не менялись, `adr-quality` у ревьюера
+  дизайна и плана клеток не имеет). Второй оценщик вслепую - `h2`.
 - **Пограничное.** Ссылка «см. ADR / см. спецификацию» на существующий в репозитории файл - не дыра. Вариант
   «уточнить у владельца» без решения на время ожидания - молчание. Находка ревью, называющая дефект другим
   словом (например, «устареет» вместо «смешение нормы и состояния»), засчитывается, если указывает на то же место
