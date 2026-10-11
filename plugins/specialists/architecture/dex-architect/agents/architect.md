@@ -192,7 +192,6 @@ Skills называют известные грабли - используй и�
 
 - Всегда `dex-skill-capacity-planning:capacity-planning` - read:write ratio, hot path, cache cost asymmetry
 - Всегда `dex-skill-scalability:scalability` - sharding key (hot partition, hash mod N, multi-tenant), stateless, cross-shard queries
-- Всегда `dex-skill-api-specification:api-specification` - pagination, idempotency, versioning, ProblemDetails
 - Если рассматриваемое решение в области feed / chat / payment / search / notifications / rate-limiter - `dex-skill-reference-architectures:reference-architectures`
 - Если доменная сложность требует aggregates / bounded contexts - `dex-skill-ddd:ddd`
 

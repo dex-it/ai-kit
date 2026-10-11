@@ -12,7 +12,7 @@ d="$SP"; while [[ $d != / ]]; do [[ -e $d/CLAUDE.md ]] && { echo "CLAUDE.md на
 case_="$1"; set_="$2"; idx="$3"; shift 3; skills=("$@")
 declare -A BR=([g-s]=rooms-feed-design [rv-q]=contract-v1-3 [n-q]=contract-v1-3-rooms [n-q2]=contract-v1-3-capacity [n-q3]=contract-v1-3-capacity2 [g-t]=contract-tests
  [n-t]=contract-tests-main [g-d]=mobile-handoff [n0]=duration-fix)
-declare -A HOME_=([g-s]=api-specification [rv-q]=api-spec-quality [n-q]=api-spec-quality [n-q2]=api-spec-quality [n-q3]=api-spec-quality [g-t]=api-testing
+declare -A HOME_=([g-s]=removed/api-specification [rv-q]=api-spec-quality [n-q]=api-spec-quality [n-q2]=api-spec-quality [n-q3]=api-spec-quality [g-t]=api-testing
  [n-t]=api-testing [g-d]=api-documentation [n0]=api-documentation)
 b=${BR[$case_]}; id="$case_-$set_$idx"
 W=$SP/w/$id; rm -rf "$W"; mkdir -p "$SP/w" "$SP/log"

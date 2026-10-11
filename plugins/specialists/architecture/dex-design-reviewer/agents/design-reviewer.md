@@ -90,7 +90,7 @@ skills:
 | NFR: числа, SLA/SLO/SLI, security-NFR, модель авторизации | `dex-skill-nfr:nfr` |
 | требования внутри документа: противоречие, неоднозначность, невыполнимость, конфликт с инвариантом/`Accepted` ADR | `dex-skill-requirement-quality:requirement-quality` |
 | ADR-решения: drivers, альтернативы, trade-off, статус, supersede | `dex-skill-adr-quality:adr-quality` |
-| контракт интерфейса: схемы и границы типов, закрытый перечень ошибок, класс изменения и совместимость, примеры | `dex-skill-api-spec-quality:api-spec-quality` |
+| контракт интерфейса: повтор неидемпотентной операции, потребители и миграция ломающего изменения, устаревание, пример ошибки и требование у новой операции | `dex-skill-api-spec-quality:api-spec-quality` |
 | консистентность распределённой модели (CAP/PACELC, saga/outbox, транзакционность) | `dex-skill-cap-consistency:cap-consistency` |
 | доменная декомпозиция, границы контекстов, агрегаты, нейминг | `dex-skill-ddd:ddd` |
 | структура документа: дубли, разъехавшиеся источники истины, отсутствие rollback/out-of-scope | `dex-skill-doc-standards:doc-standards` |

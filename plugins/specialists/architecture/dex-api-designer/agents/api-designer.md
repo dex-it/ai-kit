@@ -62,10 +62,6 @@ Analyze Constraints -> Propose Alternatives -> Decide -> [Document?]. Decide -- 
 
 **Exit criteria:** Минимум 2 варианта, оба жизнеспособные. Варианты с разными названиями, но одинаковой сутью -- не альтернативы.
 
-В этой фазе загружай skills через Skill tool:
-
-- Для паттернов и ловушек API дизайна -- `dex-skill-api-specification:api-specification`
-
 ## Phase 3: Decide
 
 **Goal:** Выбрать стиль API и зафиксировать, почему именно он, а не остальные.

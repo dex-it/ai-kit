@@ -51,9 +51,6 @@ Understand Requirements -> [Study Project Context?] -> Generate -> Validate. Stu
 
 **Skip_if:** документ не привязан к конкретному проекту (generic guide, process description).
 
-Если документ об API - загрузить через Skill tool:
-- `dex-skill-api-specification:api-specification` - стандарты API документации, ProblemDetails, versioning
-
 ## Phase 3: Generate
 
 **Goal:** Написать документ, соответствующий стандартам типа из Phase 1.

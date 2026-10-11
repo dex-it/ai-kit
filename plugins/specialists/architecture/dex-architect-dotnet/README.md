@@ -22,7 +22,6 @@ capacity, implementation-план и документацию ведёт выз�
 | `dex-skill-tech-evaluation` | Phase 3 | Vendor lock-in, license, hidden cost |
 | `dex-skill-capacity-planning` | Phase 4 | Capacity, read:write ratio, hot path |
 | `dex-skill-scalability` | Phase 4 | Sharding, stateless |
-| `dex-skill-api-specification` | Phase 4 | Pagination, idempotency, versioning, ProblemDetails |
 | `dex-skill-reference-architectures` | Phase 4 (conditional) | Feed/chat/payment/search/notifications/rate-limiter anti-patterns |
 
 ### .NET-специфичные skills (только у этого агента)

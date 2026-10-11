@@ -24,7 +24,6 @@ security controls / observability. Требования, capacity, implementatio
 | `dex-skill-tech-evaluation` | Phase 3 | Hype-driven adoption, vendor lock-in, license, hidden cost, team expertise |
 | `dex-skill-capacity-planning` | Phase 4 | Peak vs average, write amplification, read:write ratio, cache cost, hot path |
 | `dex-skill-scalability` | Phase 4 | Sharding key, stateless, hot partition, cross-shard queries |
-| `dex-skill-api-specification` | Phase 4 | Pagination, idempotency, versioning, ProblemDetails |
 | `dex-skill-reference-architectures` | Phase 4 (conditional) | Anti-patterns выбора feed/chat/payment/search/notifications/rate-limiter |
 
 **Установка одной командой:**

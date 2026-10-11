@@ -46,7 +46,6 @@ Bundle for System Analysts: requirements, user stories, BPMN, API specs, documen
 - `dex-skill-agile` - Agile methodology
 - `dex-skill-user-stories` - User story patterns
 - `dex-skill-bpmn` - BPMN notation
-- `dex-skill-api-specification` - API specification
 - `dex-skill-doc-standards` - Documentation standards
 
 ## Note

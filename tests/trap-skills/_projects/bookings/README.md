@@ -3,7 +3,7 @@
 Сервис бронирования переговорных на ASP.NET Core (`net10.0`, контроллеры `[ApiController]`,
 Swashbuckle 6.6.2, EF Core 8 + Npgsql, Postgres с exclusion constraint на пересечение броней) и его
 ручной контракт `api/openapi.yaml` (`openapi: 3.0.3`, версия контракта 1.2.0). Вход наборов
-[api-specification](../../api-specification/README.md), [api-spec-quality](../../api-spec-quality/README.md),
+[api-specification](../../removed/api-specification/README.md), [api-spec-quality](../../api-spec-quality/README.md),
 [api-testing](../../api-testing/README.md), [api-documentation](../../api-documentation/README.md)
 (эпик #291, группа 4.2, #303). Файл - ключ для судьи, исполнителю не подаётся: `setup.sh` его в
 каталог прогона не копирует, как и раннер.

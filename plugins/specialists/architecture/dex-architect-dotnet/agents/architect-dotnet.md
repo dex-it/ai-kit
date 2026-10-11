@@ -228,7 +228,6 @@ implementation-план вызывающей стороны не на чем с�
 
 - Всегда `dex-skill-capacity-planning:capacity-planning` - read:write ratio, hot path, cache cost asymmetry
 - Всегда `dex-skill-scalability:scalability` - sharding key, stateless, cross-shard queries
-- Всегда `dex-skill-api-specification:api-specification` - pagination, idempotency, versioning, ProblemDetails
 - Всегда `dex-skill-dotnet-api-development:dotnet-api-development` - controllers, DTO, pagination, FluentValidation
 - Всегда `dex-skill-dotnet-resilience:dotnet-resilience` - Polly, retry с idempotency / jitter, circuit breaker, timeout
 - Если в области feed / chat / payment / search / notifications / rate-limiter - `dex-skill-reference-architectures:reference-architectures`
