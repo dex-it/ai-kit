@@ -165,19 +165,13 @@
     "id": "dotnet-api-dev-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-api-development:dotnet-api-development",
-    "prompt": "Делаю контроллер выдачи заказов на ASP.NET Core: как разложить DTO, маршруты и постраничную выдачу?"
+    "prompt": "В контроллере ASP.NET Core создание заказа отвечает 200, идентификатор заказа приходит в query, а маршруты не похожи на соседние контроллеры. Как привести эндпоинты в порядок?"
   },
   {
     "id": "dotnet-async-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-async-patterns:dotnet-async-patterns",
     "prompt": "В C# сервисе метод помечен async, но внутри Task.Run оборачивает синхронное чтение файла, хотя у этого API есть асинхронная версия. Как переписать?"
-  },
-  {
-    "id": "dotnet-caching-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-dotnet-caching:dotnet-caching",
-    "prompt": "В .NET сервисе хочу закэшировать справочник в памяти и корректно сбрасывать его при обновлении. Что использовать?"
   },
   {
     "id": "dotnet-code-quality-in",
@@ -189,7 +183,7 @@
     "id": "dotnet-csproj-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene",
-    "prompt": "В решении на C# у каждого проекта своя версия одного пакета, и транзитивные зависимости тянутся куда попало. Как это причесать?"
+    "prompt": "Новый проект в C# решении повторил в csproj TargetFramework и Nullable из Directory.Build.props, а в библиотеке включён CopyLocalLockFileAssemblies. Что поправить в csproj?"
   },
   {
     "id": "dotnet-logging-in",
@@ -201,13 +195,13 @@
     "id": "dotnet-resilience-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-resilience:dotnet-resilience",
-    "prompt": "Наш HttpClient в C# валится, когда соседний сервис моргает. Хочу повторы и защиту, но боюсь задублировать платежи."
+    "prompt": "Повторы к поставщику в C# стоят в сервисе, который вызывает клиент, общего таймаута нет, а на промахе кэша все запросы разом идут к поставщику. Как защитить вызов?"
   },
   {
     "id": "dotnet-testing-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-testing-patterns:dotnet-testing-patterns",
-    "prompt": "Пишу тесты на C# сервис, половина падает через раз в зависимости от порядка запуска. Как правильно оформить и как разложить проверки?"
+    "prompt": "Unit-тесты C# сервиса на Moq проверяют только Verify вызовов, а моки возвращают другие моки. Как переписать тесты, чтобы проверялось поведение?"
   },
   {
     "id": "dotnet-validation-in",
