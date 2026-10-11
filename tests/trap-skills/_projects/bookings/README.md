@@ -21,7 +21,12 @@ run-group-4-2.sh          раннер: промпты кейсов дослов
 `claude -p --model claude-sonnet-5-5 --effort medium --restricted --strict-mcp-config
 --no-session-persistence --disable-slash-commands --permission-mode acceptEdits --max-budget-usd 3`,
 инструменты Read, Write, Edit, Glob, Grep, Bash; разрешён `Bash(git *)`, кодовым кейсам ещё
-`Bash(dotnet *)`. Каталог прогона - `$G42_WORK/w/<id>/bookings` вне репозитория; раннер отказывается
+`Bash(dotnet *)`, кейсам G-T и N-T - и `docker ps/info/images` (только чтение состояния Docker).
+
+Дефект кейса G-T/N-T (2026-10-11, после первой пары контроля): без `docker` в Bash исполнитель не мог
+увидеть, что Docker есть, и во всех четырёх прогонах написал «Docker недоступен» и взял EF InMemory, не
+пробуя Testcontainers. Пара `g-t-x*`, `n-t-x*` в счёт не идёт (лежит в `runs/` как свидетельство),
+раннер разрешил чтение состояния Docker, контроль G-T и N-T перепрогнан парой `c1`, `c2`. Ключ не менялся. Каталог прогона - `$G42_WORK/w/<id>/bookings` вне репозитория; раннер отказывается
 стартовать, если на пути есть `CLAUDE.md` или есть `~/.claude/CLAUDE.md`. Скилл подаётся копией в
 `<work>/discipline/<скилл>.md` через `--add-dir` и строкой промпта «Перед работой прочитай <путь> -
 дисциплина, принятая в команде»; `Skill` tool запрещён промптом, слэш-команды выключены.

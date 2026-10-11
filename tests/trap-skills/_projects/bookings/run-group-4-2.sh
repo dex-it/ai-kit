@@ -40,8 +40,8 @@ $lim Сборки нет: из команд доступен только git. �
  g-t|n-t)
   P="Ты .NET-разработчик тестов в команде. Git-репозиторий сервиса Bookings лежит в каталоге $DIR ; текущая ветка - feature/$b; задача - $task.
 ${sline}Выполни задачу в рабочем дереве. Не коммить.
-$lim Из команд доступны git и dotnet; внешней сети нет, пакеты NuGet - только из локального кэша (версии - Directory.Packages.props). В ответе - список изменённых файлов и описание MR."
-  tools=('Bash(git *)' 'Bash(dotnet *)'); out=DIFF.patch;;
+$lim Из команд доступны git, dotnet и docker ps/info/images; внешней сети нет, пакеты NuGet - только из локального кэша (версии - Directory.Packages.props). В ответе - список изменённых файлов и описание MR."
+  tools=('Bash(git *)' 'Bash(dotnet *)' 'Bash(docker ps*)' 'Bash(docker info*)' 'Bash(docker images*)'); out=DIFF.patch;;
  g-d|n0)
   P="Ты .NET-разработчик в команде. Git-репозиторий сервиса Bookings лежит в каталоге $DIR ; текущая ветка - feature/$b; задача - $task.
 ${sline}Выполни задачу в рабочем дереве. Не коммить.
