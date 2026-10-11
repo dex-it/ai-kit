@@ -58,9 +58,9 @@ const fixSealedP2 = { ...fixSealed, prior: [{ id: 'N1', anchor: 'src/A.cs:9', se
 const AXES_ALL = ['security', 'architecture', 'language', 'business', 'regressions', 'performance', 'coverage', 'loose-ends', 'non-code']
 const axesWith = (set = {}) => [...Object.keys(set), ...AXES_ALL.filter(n => !(n in set))].map(name => ({ name, outcome: set[name] ? set[name][0] : 'n/a', checked: set[name] ? set[name][1] : 'правка ось не задевает' }))
 const axesOk = axesWith()
-const revClean = { status: 'complete', axes: axesOk, findings: [], 'run-status': 'build ok, tests 9/9', 'red-run': 'T1 действует', 'fact-check': 'n/a (триггер не сработал)', intent: 'соответствует', 'intent-status': 'match', prior: [], 'review-verdict': 'APPROVE', missing: '' }
-const revP1 = { status: 'complete', axes: axesOk, findings: [{ severity: 'P1', anchor: 'src/A.cs:8', text: 'ретрай не различает случаи', closure: 'случаи различены тестом' }], 'run-status': 'build ok', 'red-run': 'T1 действует', 'fact-check': 'n/a (триггер не сработал)', intent: 'соответствует', 'intent-status': 'match', prior: [], 'review-verdict': 'REQUEST_CHANGES', missing: '' }
-const revP2 = { status: 'complete', axes: axesOk, findings: [{ severity: 'P2', anchor: 'src/A.cs:9', text: 'имя переменной', closure: 'переименовано' }], 'run-status': 'build ok', 'red-run': 'T1 действует', 'fact-check': 'n/a (триггер не сработал)', intent: 'соответствует', 'intent-status': 'match', prior: [], 'review-verdict': 'APPROVE', missing: '' }
+const revClean = { status: 'complete', axes: axesOk, roots: [], findings: [], 'run-status': 'build ok, tests 9/9', 'red-run': 'T1 действует', 'fact-check': 'n/a (триггер не сработал)', intent: 'соответствует', 'intent-status': 'match', prior: [], 'review-verdict': 'APPROVE', missing: '' }
+const revP1 = { status: 'complete', axes: axesOk, roots: [], findings: [{ severity: 'P1', anchor: 'src/A.cs:8', text: 'ретрай не различает случаи', closure: 'случаи различены тестом' }], 'run-status': 'build ok', 'red-run': 'T1 действует', 'fact-check': 'n/a (триггер не сработал)', intent: 'соответствует', 'intent-status': 'match', prior: [], 'review-verdict': 'REQUEST_CHANGES', missing: '' }
+const revP2 = { status: 'complete', axes: axesOk, roots: [], findings: [{ severity: 'P2', anchor: 'src/A.cs:9', text: 'имя переменной', closure: 'переименовано' }], 'run-status': 'build ok', 'red-run': 'T1 действует', 'fact-check': 'n/a (триггер не сработал)', intent: 'соответствует', 'intent-status': 'match', prior: [], 'review-verdict': 'APPROVE', missing: '' }
 const closedA8 = { id: 'N1', anchor: 'src/A.cs:8', severity: 'P1', text: 'ретрай не различает случаи', status: 'closed', evidence: 'тест T2 различает случаи' }
 const revP1again = { ...revP1, findings: [], prior: [{ id: 'N1', anchor: 'src/A.cs:8', severity: 'P1', axis: '', text: 'ретрай не различает случаи', status: 'open', evidence: 'случаи по-прежнему не различены' }] }
 const revP1ax = { ...revP1, findings: [{ ...revP1.findings[0], axis: 'business' }] }
@@ -74,13 +74,16 @@ const probeF2 = { ...ledgerA88, premise: probeP1.premise }
 const verBlocked = { status: 'blocked', exit_code: -1, pass_count: 0, fail_count: 0, failing: [], build_ok: false, head: '', dirty: false, ahead: 0, repro_test_hash: '', missing: 'нет прав на запуск dotnet test' }
 const ctxMr = { status: 'complete', platform: 'github', base_sha: 'aaa', head_sha: 'bbb', files: ['api/user.ts'], at_head: true, intent: 'issue #12', missing: '' }
 const mrFinding = { anchor: 'api/user.ts:41', severity: 'P1', axis: 'security', text: 'токен в логе', closure: 'убрать поле', evidence: 'logger.info(ctx)' }
-const revMr = { status: 'complete', findings: [mrFinding], 'fact-check': 'n/a (триггер не сработал)', axes: axesWith({ security: ['findings', ''], coverage: ['clean', 'тест на чужой user id'] }), 'review-verdict': 'REQUEST_CHANGES', prior: [], threads: [], questions: ['вопрос по намерению'], missing: '' }
+const revMr = { status: 'complete', roots: [], findings: [mrFinding], 'fact-check': 'n/a (триггер не сработал)', axes: axesWith({ security: ['findings', ''], coverage: ['clean', 'тест на чужой user id'] }), 'review-verdict': 'REQUEST_CHANGES', prior: [], threads: [], questions: ['вопрос по намерению'], missing: '' }
 // Прежняя находка - структура с id реестра ledger; найденная ре-ревьюером в тредах идёт с пустым id.
 const oldP1 = { id: 'N1', anchor: 'api/old.ts:3', severity: 'P1', text: 'проверка владельца', status: 'closed', evidence: 'автор: закрыта' }
 const ledgerF3sec = { id: 'F3', anchor: 'api/old.ts:3', severity: 'P1', axis: 'security', text: 'проверка владельца', closure: 'owner сверяется', status: 'open', run: 1 }
 const oldThread = (({ id, ...t }) => t)(oldP1)
 const ledgerF3 = { id: 'F3', anchor: 'api/old.ts:3', severity: 'P1', text: 'проверка владельца', closure: 'owner сверяется', status: 'open', run: 1 }
-const falOk = { status: 'complete', confirmed: [mrFinding], dropped: [{ anchor: 'api/db.ts:7', reason: 'закрыто соседним коммитом' }], coverage: 'ветка X непокрыта', 'review-verdict': 'REQUEST_CHANGES', prior: [], missing: '' }
+const rootBad = { anchor: 'src/A.cs:20', decision: 'отказ пробы кэшируется на 10 мин', root: 'не пробовать реф, который ручка отвергнет', verdict: 'illegitimate', evidence: 'кэшируется и временный отказ среды' }
+const rootOk = { anchor: 'src/A.cs:30', decision: 'потолок 4 параллельных пробы', root: 'ffprobe держит процесс', verdict: 'legitimate', evidence: 'размотаны пачка и повтор' }
+const axesUpheld = AXES_ALL.map(name => ({ name, verdict: 'upheld', evidence: 'прочитан код оси' }))
+const falOk = { status: 'complete', confirmed: [mrFinding], dropped: [{ anchor: 'api/db.ts:7', reason: 'закрыто соседним коммитом' }], coverage: 'ветка X непокрыта', 'axes-check': axesUpheld, 'roots-check': [], 'review-verdict': 'REQUEST_CHANGES', prior: [], missing: '' }
 
 // Диагноз ledger в форме, какую пишет трек: с техконтекстом подготовки (T1a).
 const reproCtx = { ...reproOk, stack: 'ts', build_cmd: 'tsc', test_cmd: 'npm test', prepare_cmd: 'npm ci', accepted: 'accepted', dispute: '' }
@@ -568,7 +571,7 @@ const SCENARIOS = [
   { name: 'R9 находок нет: скептик судит покрытие', track: 'review', args: reviewArgs,
     responses: { 'ctx:subject': ctxMr,
       'review:first': { ...revMr, findings: [], axes: axesWith({ security: ['clean', 'ввод на границе и права на ресурс'] }), 'review-verdict': 'APPROVE', questions: [] },
-      'falsify+coverage': { status: 'complete', confirmed: [], dropped: [], coverage: 'покрыто: T1', 'review-verdict': 'APPROVE', prior: [], missing: '' } },
+      'falsify+coverage': { status: 'complete', confirmed: [], dropped: [], coverage: 'покрыто: T1', 'axes-check': axesUpheld, 'roots-check': [], 'review-verdict': 'APPROVE', prior: [], missing: '' } },
     expect: ({ result, calls }) => [
       ['статус complete', result.status === 'complete'],
       ['скептик всё равно вызван', labelsOf(calls).includes('falsify+coverage')],
@@ -3078,6 +3081,67 @@ const SCENARIOS = [
   { name: 'R67 исход clean при находке оси в findings -> разрыв', track: 'review', args: reviewArgs,
     responses: { 'ctx:subject': ctxMr, 'review:first': { ...revMr, axes: revMr.axes.map(a => a.name === 'security' ? { name: 'security', outcome: 'clean', checked: 'ввод и права' } : a) }, 'falsify+coverage': falOk },
     expect: ({ result }) => [['расхождение названо', result.status === 'partial' && result.where.includes('ревью: исход оси расходится с findings: security - clean, находок оси 1')]] },
+  { name: 'R68 ось clean либо n/a без записи axes-check скептика -> разрыв с именами', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': revMr, 'falsify+coverage': { ...falOk, 'axes-check': axesUpheld.filter(a => !['coverage', 'architecture'].includes(a.name)) } },
+    expect: ({ result, calls }) => [
+      ['несверенные оси названы', result.status === 'partial' && result.where.includes('фальсификация: исход оси не сверен скептиком: coverage, architecture')],
+      ['ось с исходом findings записи скептика не требует', !/не сверен скептиком: [^;]*security/.test(result.where)],
+      ['скептику поручена сверка осей', promptOf(calls, 'falsify+coverage').includes('фальсификация находок, исходов осей')],
+      ['сверка осей - в выходе трека', Array.isArray(result['axes-check']) && result['axes-check'].length === AXES_ALL.length - 2],
+      ['словарь сверки - общим блоком в файле скептика', ['upheld', 'overturned'].every(v => agentBody('skeptic').includes(`\`${v}\``)) && agentBody('skeptic').includes('<!-- >>> shared: axes-check -->')],
+    ] },
+  { name: 'R69 ось overturned без находки оси в confirmed -> разрыв', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': revMr, 'falsify+coverage': { ...falOk, 'axes-check': axesUpheld.map(a => a.name === 'performance' ? { ...a, verdict: 'overturned', evidence: 'семафор 4 на процесс' } : a) } },
+    expect: ({ result }) => [['опровергнутая ось названа', result.status === 'partial' && result.where.includes('фальсификация: ось опровергнута без находки: performance')]] },
+  { name: 'R69 ось overturned с находкой оси в confirmed -> разрыва нет', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': revMr, 'falsify+coverage': { ...falOk, confirmed: [mrFinding, { ...mrFinding, anchor: 'api/probe.ts:63', axis: 'performance', severity: 'P2', text: 'семафор забит' }], 'axes-check': axesUpheld.map(a => a.name === 'performance' ? { ...a, verdict: 'overturned', evidence: 'семафор 4 на процесс' } : a) } },
+    expect: ({ result }) => [['разрыва по осям у скептика нет', !/фальсификация: /.test(result.where)]] },
+  { name: 'F123 саморевью: решение illegitimate без находки на его anchor -> partial', track: 'feature', args: featureArgs,
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': { ...revClean, roots: [rootBad, rootOk] } },
+    expect: ({ result }) => [['решение названо', result.status === 'partial' && result.where.includes('саморевью: решение нелегитимно без находки: src/A.cs:20') && !result.where.includes('src/A.cs:30')]] },
+  { name: 'F123 решение illegitimate с открытой прежней находкой на его anchor -> разрыва нет', track: 'feature', args: featureArgs,
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': { ...revClean, roots: [{ ...rootBad, anchor: closedA8.anchor }], prior: [{ ...closedA8, status: 'open', evidence: 'случаи не различены' }] } },
+    expect: ({ result }) => [['разрыва решения нет', !String(result.where || '').includes('решение нелегитимно')]] },
+  { name: 'F123 решение illegitimate с закрытой прежней находкой на его anchor -> partial', track: 'feature', args: featureArgs,
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': { ...revClean, roots: [{ ...rootBad, anchor: closedA8.anchor }], prior: [closedA8] } },
+    expect: ({ result }) => [['закрытая находка решение не покрывает', result.status === 'partial' && result.where.includes(`саморевью: решение нелегитимно без находки: ${closedA8.anchor}`)]] },
+  { name: 'B182 саморевью bugfix: решение illegitimate без находки -> partial', track: 'bugfix', args: bugfixArgs,
+    responses: { reproduce: reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': { ...revClean, roots: [rootBad] } },
+    expect: ({ result }) => [['решение названо', result.status === 'partial' && result.where.includes('саморевью: решение нелегитимно без находки: src/A.cs:20')]] },
+  { name: 'R70 решение illegitimate без находки на его anchor -> разрыв, корни в выходе', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': { ...revMr, roots: [rootBad, rootOk] }, 'falsify+coverage': falOk },
+    expect: ({ result }) => [
+      ['решение названо', result.status === 'partial' && result.where.includes('ревью: решение нелегитимно без находки: src/A.cs:20') && !/нелегитимно без находки: [^;]*src\/A\.cs:30/.test(result.where)],
+      ['корни - в выходе трека', Array.isArray(result.roots) && result.roots.length === 2],
+      ['в теле ревьюера - цель корня и словарь', /Ревью идёт от решений правки/.test(agentBody('reviewer')) && agentBody('reviewer').includes('<!-- >>> shared: roots -->') && agentBody('reviewer').includes('`illegitimate`')],
+    ] },
+  { name: 'R70 решение illegitimate с находкой на его anchor -> разрыва нет', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': { ...revMr, roots: [{ ...rootBad, anchor: mrFinding.anchor }] }, 'falsify+coverage': falOk },
+    expect: ({ result }) => [['разрыва решения нет', !String(result.where || '').includes('решение нелегитимно')]] },
+  { name: 'R70 дельта: решение illegitimate с открытой находкой треда на его anchor -> разрыва нет', track: 'review', args: { ...reviewArgs, last_review_sha: 'ccc' },
+    responses: { 'ctx:subject': ctxMr, 'review:delta': { ...revMr, roots: [{ ...rootBad, anchor: oldThread.anchor }], threads: [{ ...oldThread, status: 'open', evidence: 'владелец не сверяется' }] }, 'falsify+coverage': { ...falOk, prior: [{ ...oldP1, status: 'open', evidence: 'владелец не сверяется' }] } },
+    expect: ({ result }) => [['разрыва решения нет', !String(result.where || '').includes('решение нелегитимно')]] },
+  { name: 'R70 дельта: решение illegitimate с закрытой находкой треда -> разрыв', track: 'review', args: { ...reviewArgs, last_review_sha: 'ccc' },
+    responses: { 'ctx:subject': ctxMr, 'review:delta': { ...revMr, roots: [{ ...rootBad, anchor: oldThread.anchor }], threads: [oldThread] }, 'falsify+coverage': { ...falOk, prior: [{ ...oldP1, evidence: 'владелец сверяется' }] } },
+    expect: ({ result }) => [['закрытая находка решение не покрывает', result.status === 'partial' && result.where.includes(`ревью: решение нелегитимно без находки: ${oldThread.anchor}`)]] },
+  { name: 'R69 дельта: ось overturned с открытой прежней находкой оси в prior скептика -> разрыва нет', track: 'review', args: { ...reviewArgs, last_review_sha: 'ccc' },
+    responses: { 'ctx:subject': ctxMr, 'review:delta': { ...revMr, threads: [oldThread] }, 'falsify+coverage': { ...falOk, prior: [{ ...oldP1, axis: 'performance', status: 'open', evidence: 'семафор забит' }], 'axes-check': axesUpheld.map(a => a.name === 'performance' ? { ...a, verdict: 'overturned', evidence: 'семафор 4 на процесс' } : a) } },
+    expect: ({ result }) => [['разрыва по осям у скептика нет', !String(result.where || '').includes('ось опровергнута без находки')]] },
+  { name: 'R71 решение legitimate без записи roots-check скептика -> разрыв с anchor', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': { ...revMr, roots: [rootOk, { ...rootOk, anchor: 'src/A.cs:31' }] }, 'falsify+coverage': { ...falOk, 'roots-check': [{ anchor: 'src/A.cs:31', verdict: 'upheld', evidence: 'корень прочитан' }] } },
+    expect: ({ result, calls }) => [
+      ['несверенное решение названо', result.status === 'partial' && result.where.includes('фальсификация: решение не сверено скептиком: src/A.cs:30') && !result.where.includes('src/A.cs:31')],
+      ['решения ревьюера поданы скептику', promptOf(calls, 'falsify+coverage').includes('Решения ревьюера:\n- src/A.cs:30: потолок 4 параллельных пробы - корень: ffprobe держит процесс - legitimate')],
+      ['скептику поручена сверка решений', promptOf(calls, 'falsify+coverage').includes('фальсификация находок, исходов осей и решений ревьюера')],
+      ['сверка решений - в выходе трека', Array.isArray(result['roots-check']) && result['roots-check'].length === 1],
+      ['в теле скептика - словарь решений и сверки', agentBody('skeptic').includes('<!-- >>> shared: roots -->') && agentBody('skeptic').includes('<!-- >>> shared: roots-check -->')],
+    ] },
+  { name: 'R71 решение опровергнуто скептиком без находки -> разрыв', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': { ...revMr, roots: [rootOk] }, 'falsify+coverage': { ...falOk, 'roots-check': [{ anchor: 'src/A.cs:30', verdict: 'overturned', evidence: 'кэшируется и временный отказ' }] } },
+    expect: ({ result }) => [['опровержение без находки названо', result.status === 'partial' && result.where.includes('фальсификация: решение опровергнуто без находки: src/A.cs:30')]] },
+  { name: 'R71 решение опровергнуто с находкой на его anchor -> разрыва нет', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'review:first': { ...revMr, roots: [{ ...rootOk, anchor: mrFinding.anchor }] }, 'falsify+coverage': { ...falOk, 'roots-check': [{ anchor: mrFinding.anchor, verdict: 'overturned', evidence: 'находка подтверждена' }] } },
+    expect: ({ result }) => [['разрыва решения нет', !String(result.where || '').includes('решение')]] },
   { name: 'D1 узел сдачи - агент dex-auto на sonnet, вход: ветка, цель, файл трека, base не назван, готовым к ревью', track: 'deliver', args: deliverArgs, responses: { deliver: delivered },
     expect: ({ result, calls }) => [
       ['один вызов deliverer на sonnet', labelsOf(calls).join() === 'deliver' && typeOf(calls, 'deliver') === deliverNode && calls[0].model === 'sonnet'],
