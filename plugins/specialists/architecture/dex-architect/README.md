@@ -20,12 +20,8 @@ security controls / observability. Требования, capacity, implementatio
 | Skill | Используется в фазах | Зачем |
 |-------|---------------------|-------|
 | `dex-skill-ddd` | Phase 2, 4 (conditional) | Aggregates, naming, bounded contexts |
-| `dex-skill-cap-consistency` | Phase 3 | CAP/PACELC trade-offs, quorum, split-brain, clock skew, saga compensation + PACELC defaults cheatsheet |
-| `dex-skill-tech-evaluation` | Phase 3 | Hype-driven adoption, vendor lock-in, license, hidden cost, team expertise |
-| `dex-skill-capacity-planning` | Phase 4 | Peak vs average, write amplification, read:write ratio, cache cost, hot path |
-| `dex-skill-scalability` | Phase 4 | Sharding key, stateless, hot partition, cross-shard queries |
+| `dex-skill-scalability` | Phase 4 | Горячая партиция / горячий ключ под нагрузкой с длинным хвостом |
 | `dex-skill-api-specification` | Phase 4 | Pagination, idempotency, versioning, ProblemDetails |
-| `dex-skill-reference-architectures` | Phase 4 (conditional) | Anti-patterns выбора feed/chat/payment/search/notifications/rate-limiter |
 
 **Установка одной командой:**
 
