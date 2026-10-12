@@ -120,9 +120,12 @@ PostgreSQL (в т.ч. из чужого ДЦ, +11 мс) - единицы мс-д
   (`h`, решение оркестратора 6) - 2/2, `d2-h1` спорная: «+11 мс» вставлено в бюджет NFR-4, итог «укладывается» не
   произнесён. Снятие стоит на контроле 2/2, `f` и `h` дополняют его: без скилла 5 из 6. `f1` и `h1` - справка, дающая
   владельцу основание при желании поставить на PACELC отдельный кейс.
-- **Оракул у `design-reviewer`.** Ревьюер дизайна терял оракул `cap-consistency` - строка таблицы оракулов и абзац
-  «Арх-оракулы» синхронизированы (остался `ddd`). В реестре `quality-mark.md` cap-consistency не стоял - проверки
-  без исполнителя не осталось. Сторона ревью мерилась: R2 CC4 2/2 в контроле.
+- **Оракул у `design-reviewer`.** Ревьюер дизайна терял оракул `cap-consistency` - абзац «Арх-оракулы»
+  синхронизирован (остался `ddd`). Аспект «консистентность распределённой модели (CAP/PACELC, saga/outbox,
+  транзакционность)» остался в таблице оракулов с исходом «без оракула» (правка ревьюера `5b478623`): Phase 0 решает
+  по аспекту и «без оракула», Fallback - аспект проходится по знаниям агента с пометкой в Output. Снятый скилл агент
+  не называет. В реестре `quality-mark.md` cap-consistency не стоял - проверки без исполнителя не осталось. Сторона
+  ревью мерилась: R2 CC4 2/2 в контроле.
 - **Phase 3 архитектора без скиллов (решение оркестратора).** После снятия четырёх скиллов группы
   (cap-consistency, capacity-planning, reference-architectures, tech-evaluation) у `architect` и `architect-dotnet`
   Phase 3 остаётся без загрузки скиллов - допустимо как следствие свидетельства. Условие (решение владельца в
@@ -141,12 +144,12 @@ PostgreSQL (в т.ч. из чужого ДЦ, +11 мс) - единицы мс-д
 |---|---|---|
 | агент `architect` 4.7.0 -> 4.8.0 | строки загрузки Phase 3 (cap-consistency, tech-evaluation) и Phase 4 (capacity-planning, reference-architectures); сноска PACELC-defaults в Output Phase 3, сноска каталога reference в Phase 1 | да: Phase 3, сноска PACELC-defaults |
 | агент `architect-dotnet` 3.7.0 -> 3.8.0 | то же | да: Phase 3, сноска PACELC-defaults |
-| агент `design-reviewer` 2.12.0 -> 2.13.0 | строка таблицы оракулов, абзац «Арх-оракулы», README плагина | да |
+| агент `design-reviewer` 2.12.0 -> 2.13.0 | строка таблицы оракулов (аспект - «без оракула», `5b478623`), Phase 0, Fallback, абзац «Арх-оракулы», README плагина | да |
 | `dex-code-discovery` 2.8.0 -> 2.9.0 | `discover-reviewer`, ось «Производительность»: capacity-planning | - |
 | `diagram-creator` 1.6.0 -> 1.7.0 | строка «Для reference architectures» | - |
 | README агентов `dex-architect`, `dex-architect-dotnet` | строки таблицы скиллов | да |
-| бандлы `architect` 1.28.0 -> 1.29.0, `dotnet-developer` 2.38.0 -> 2.39.0, `dotnet-fullstack` 2.39.0 -> 2.40.0, `system-analyst` 1.25.0 -> 1.26.0 | записи четырёх скиллов в `bundle.json` | да |
-| бандл `ts-fullstack` 1.36.0 -> 1.37.0 | запись capacity-planning (других трёх в бандле не было) | - |
+| бандлы `architect` 1.28.0 -> 1.29.0, `dotnet-developer` 2.38.0 -> 2.40.0, `dotnet-fullstack` 2.39.0 -> 2.41.0, `system-analyst` 1.25.0 -> 1.27.0 (повторный бамп после влития develop) | записи четырёх скиллов в `bundle.json` | да |
+| бандл `ts-fullstack` 1.36.0 -> 1.38.0 (повторный бамп после влития develop) | запись capacity-planning (других трёх в бандле не было) | - |
 | каталог `marketplace.json` 6.13.0 -> 6.14.0, подвал README | записи четырёх плагинов, версия каталога | да |
 | витрина README, README бандла `architect` | строка «Архитектура и дизайн», перечень скиллов бандла | да |
 | `tests/activation/cases.json` | сняты `capacity-in`, `cap-consistency-in`, `reference-arch-in`, `tech-evaluation-in` | да: `cap-consistency-in` |

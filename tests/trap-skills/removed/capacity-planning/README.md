@@ -122,8 +122,8 @@ C-, T-, P-кейсам, `f` D1, D4, D5, D6 и `h` - судьи оператор�
 | `dex-code-discovery` 2.8.0 -> 2.9.0 | `discover-reviewer`, ось «Производительность»: capacity-planning | да |
 | `diagram-creator` 1.6.0 -> 1.7.0 | строка «Для reference architectures» | - |
 | README агентов `dex-architect`, `dex-architect-dotnet` | строки таблицы скиллов | да |
-| бандлы `architect` 1.28.0 -> 1.29.0, `dotnet-developer` 2.38.0 -> 2.39.0, `dotnet-fullstack` 2.39.0 -> 2.40.0, `system-analyst` 1.25.0 -> 1.26.0 | записи четырёх скиллов в `bundle.json` | да |
-| бандл `ts-fullstack` 1.36.0 -> 1.37.0 | запись capacity-planning (других трёх в бандле не было) | да |
+| бандлы `architect` 1.28.0 -> 1.29.0, `dotnet-developer` 2.38.0 -> 2.40.0, `dotnet-fullstack` 2.39.0 -> 2.41.0, `system-analyst` 1.25.0 -> 1.27.0 (повторный бамп после влития develop) | записи четырёх скиллов в `bundle.json` | да |
+| бандл `ts-fullstack` 1.36.0 -> 1.38.0 (повторный бамп после влития develop) | запись capacity-planning (других трёх в бандле не было) | да |
 | каталог `marketplace.json` 6.13.0 -> 6.14.0, подвал README | записи четырёх плагинов, версия каталога | да |
 | витрина README, README бандла `architect` | строка «Архитектура и дизайн», перечень скиллов бандла | да |
 | `tests/activation/cases.json` | сняты `capacity-in`, `cap-consistency-in`, `reference-arch-in`, `tech-evaluation-in` | да: `capacity-in` |
