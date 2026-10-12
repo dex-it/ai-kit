@@ -212,8 +212,7 @@ implementation-план вызывающей стороны не на чем с�
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool - кроме общих skills из `dex-architect`,
-дополнительно .NET-skills:
+В этой фазе загружай императивно через Skill tool:
 
 - Всегда `dex-skill-scalability:scalability` - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
 - Всегда `dex-skill-api-specification:api-specification` - pagination, idempotency, versioning, ProblemDetails

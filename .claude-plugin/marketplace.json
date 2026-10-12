@@ -12,7 +12,7 @@
       "name": "dex-adr-writer",
       "source": "./plugins/specialists/architecture/dex-adr-writer",
       "description": "Автор ADR: пишет Architecture Decision Records в формате MADR - драйверы решения, альтернативы, trade-off.",
-      "version": "3.7.0",
+      "version": "3.7.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1667,7 +1667,7 @@
       "name": "dex-skill-doc-standards",
       "source": "./plugins/skills/dex-skill-doc-standards",
       "description": "Стандарты и шаблоны документов: BRD/PRD, ADR, user stories, техспека, спецификация API, процессные документы. Общий skill для PM, аналитика и любой документации.",
-      "version": "1.7.0",
+      "version": "1.7.1",
       "category": "skill",
       "keywords": [
         "skill",
