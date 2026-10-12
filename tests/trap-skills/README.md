@@ -66,9 +66,9 @@
 | [change-correlation](change-correlation/README.md) | `dex-skill-change-correlation` 1.0.1 | инцидент на общем стенде (K2), регрессия между релизом и develop (K3) | 8 ловушек и чек-лист -> process-skill 2.0.0: порядок; образ на стенде - фраза по провалу n1 |
 | [post-merge-remediation](post-merge-remediation/README.md) | `dex-skill-post-merge-remediation` 1.0.1 | баги QA после мерджа, общий стенд, оператор по ходам (K4) | 6 ловушек -> process-skill 2.0.0: порядок и гейты; гейт выката по свидетельству |
 | [scalability](scalability/README.md) | `dex-skill-scalability` 1.0.1 | проектирование (D5, D6, D7; SC7 в D1, SC3, SC5 в D3); мини-проект `postline`, общий заход группы 4.1 | 10 ловушек -> 1 название |
-| [adr-quality](adr-quality/README.md) | `dex-skill-adr-quality` 2.4.0 | письмо ADR (W1-W5), ревью (R1, R0A3) | 14 ловушек -> 6 названий |
+| [adr-quality](adr-quality/README.md) | `dex-skill-adr-quality` 2.4.0 | письмо ADR (W1-W5), ревью (R1, R0A3) | 14 ловушек -> 6 названий; AQ8 - название, форма выше не найдена (ступени 3-4) |
 | [design-quality](design-quality/README.md) | `dex-skill-design-quality` 1.1.2 | ревью дизайна (R2), автор дизайна (D1-D5) | 9 ловушек -> 1 название; DQ3 - открыто |
-| [plan-quality](plan-quality/README.md) | `dex-skill-plan-quality` 1.0.1 | автор плана (P1), ревью плана (R3, R0P3) | 12 ловушек -> 2 названия; PQ6 - открыто |
+| [plan-quality](plan-quality/README.md) | `dex-skill-plan-quality` 1.0.1 | автор плана (P1), ревью плана (R3, R0P3) | 12 ловушек -> 2 названия; PQ6 - форма не найдена (ступени 1-4) |
 | [removed/cap-consistency](removed/cap-consistency/README.md) | `dex-skill-cap-consistency` 1.1.1 | проектирование (D2, D1), ревью дизайна (R2) | снят |
 | [removed/capacity-planning](removed/capacity-planning/README.md) | `dex-skill-capacity-planning` 1.0.1 | ёмкость (C1), проектирование (D1, D4, D5) | снят |
 | [removed/reference-architectures](removed/reference-architectures/README.md) | `dex-skill-reference-architectures` 1.0.2 | проектирование (D1-D4) | снят |
