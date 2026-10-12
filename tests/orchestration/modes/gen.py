@@ -12,7 +12,6 @@ import hashlib, os, random, shutil, sys
 
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
-PLANNER = os.path.join(HERE, '../../../plugins/skills/dex-skill-orchestration-planner/skills/orchestration-planner')
 dst = os.path.abspath(sys.argv[1])
 if os.path.exists(dst):
     shutil.rmtree(dst)
@@ -21,16 +20,13 @@ shutil.copytree(os.path.join(HERE, 'fixture'), dst)
 # *.log в .gitignore: журнал хранится как app.log.txt
 os.rename(os.path.join(dst, 'logs/app.log.txt'), os.path.join(dst, 'logs/app.log'))
 
-# Раздел 6 PLAN.md - копия таблицы категорий (SKILL.md планировщика) и осей, переопределений и правил
-# триажа (routing.md), как в настоящем пакете: оркестратор маршрутизирует новые задачи по ней.
-skill = open(os.path.join(PLANNER, 'SKILL.md'), encoding='utf-8').read()
-routing = open(os.path.join(PLANNER, 'references/routing.md'), encoding='utf-8').read()
-cat_table = skill[skill.index('| Категория | Модель |'):].split('\n\n')[0]
-axes = routing[routing.index('## Оси оценки трудности (0-2)'):routing.index('## Цены')]
+# Раздел 6 PLAN.md - копия таблицы категорий, осей, переопределений и правил триажа и (предмет
+# «промт») правил подбора скиллов, как в настоящем пакете: оркестратор маршрутизирует новые задачи по ней.
+sys.path.insert(0, os.path.join(HERE, '..'))
+from routing_section import routing_section  # noqa: E402
 plan_path = os.path.join(dst, 'pack/PLAN.md')
 plan = open(plan_path, encoding='utf-8').read()
-open(plan_path, 'w', encoding='utf-8').write(
-    plan.replace('{{ROUTING}}', '### Категории\n\n' + cat_table + '\n\n### ' + axes[3:].replace('\n## ', '\n### ').rstrip()))
+open(plan_path, 'w', encoding='utf-8').write(plan.replace('{{ROUTING}}', routing_section(True)))
 
 
 def w(path, text):

@@ -63,7 +63,7 @@
 Записи, ключи латиницей: задача - `id`, `status` (`pending` | `running` | `done` | `failed` |
 `blocked` | `dropped`; `failed` - проверка не пройдена, ждёт следующей попытки), `category`,
 `model`, `effort`, `attempt`, `depends`, `report`, `evidence`, `reason`, `tokens`,
-`duration_ms`, `mode`, `mode_reason`; `routing_log` - `task`, `axes` (`A`, `B`, `N`, `V`), `category`, `rated_by`
+`duration_ms`, `mode`, `mode_reason`, `skills`, `prompts`; `routing_log` - `task`, `axes` (`A`, `B`, `N`, `V`), `category`, `rated_by`
 (`planner` | `orchestrator` | `triage`), `outcome`; `changes` - `what`, `why`. Чужие ключи в
 журнал не вводятся. Задача из `NEW_SUBTASKS` получает запись в `tasks` и в `routing_log` в одном
 изменении.
