@@ -15,7 +15,9 @@
 (норма класса), `design-reviewer`; ревьюеры кода `mr-reviewer`, `self-reviewer`, `mr-check-reviewer`,
 `security-reviewer` и `diagram-creator` в строках загрузки больше его не называют - их предмет
 (security NFR, SLA) снят; скилл `idea-forming`. Бандлы `architect`, `dotnet-developer`,
-`dotnet-fullstack`, `product-manager`, `system-analyst`. Кейс активации `nfr-in`.
+`dotnet-fullstack`, `product-manager`, `system-analyst`. Кейс активации `nfr-in`. Словарь
+`docs/domain/domain-model.md`: дом термина `NFR` - `requirements-analyst` (ветка меры), как у `FR`; 2.0.0
+определения термина не несёт (ревью PR #335).
 
 ## Тип единиц (шаг 0)
 

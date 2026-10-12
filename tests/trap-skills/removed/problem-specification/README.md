@@ -6,11 +6,15 @@
 
 Вход - мини-проект [`_projects/shipping`](../../_projects/shipping/README.md), кейс K5 (стенд и рабочая копия
 K2, подача - тикет QA `cases/K5/TICKET.md`); утверждения тикета против стенда - раздел «K5» README мини-проекта,
-записаны до прогонов. Исполнитель - `claude-sonnet-5-5`, effort medium, Claude Code 2.1.296, `claude -p
+записаны автором до прогонов; ключ и прогоны пришли одним коммитом `9c3f7de7`, порядок по git не
+проверяется. Исполнитель - `claude-sonnet-5-5`, effort medium, Claude Code 2.1.296, `claude -p
 --restricted --strict-mcp-config` без MCP, инструменты Read, Write, Edit, Glob, Grep, Bash; `CLAUDE.md` на пути
 нет. Песочница Bash на машине оператора не поднимается (bwrap под AppArmor), прогон - в режиме `NO_SANDBOX`
 раннера мини-проекта: вместо песочницы allowlist Bash - только `standctl` (заглушка стенда) и `git`. Прогоны `k5-c1`, `k5-c2` -
-контроль без скилла; со скиллом прогонов нет: снятие по контролю.
+контроль без скилла; со скиллом прогонов нет: снятие по контролю. Проверяемо по `runs/k5-c*/meta.json`:
+`initModel` `claude-sonnet-5-5`, effort `medium`, `cliVersion` 2.1.296, `mcp: []`, инструменты Read, Write,
+Edit, Glob, Grep, Bash, выходов за каталог прогона (`outside`) нет; дат прогонов `meta.json` не несёт - на дату
+записи не выгружено в репозиторий: журналы `stream-*.jsonl` и даты прогонов K5.
 
 ## Потребители
 
