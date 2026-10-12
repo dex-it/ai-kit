@@ -28,7 +28,7 @@ declare -A HOME_=([d1]=removed/reference-architectures [d3]=removed/reference-ar
  [w1]=adr-quality [w2]=adr-quality [w3]=adr-quality [w4]=adr-quality [w5]=adr-quality [r1]=adr-quality [r0a]=adr-quality
  [r2]=design-quality [p1]=plan-quality [r3]=plan-quality [r0p]=plan-quality [r0a2]=adr-quality [r0p2]=plan-quality [r0a3]=adr-quality [r0p3]=plan-quality)
 ARCH="cap-consistency scalability capacity-planning reference-architectures tech-evaluation design-quality"
-case $case_ in d*|c*|t*) ROLE="$ARCH";; w*) ROLE="adr-quality";; p*) ROLE="plan-quality";;
+case $case_ in d*|c*|t*) ROLE="$ARCH";; w*) ROLE="adr-quality";; p*) ROLE="plan-quality implementation-plan";;
  r*) ROLE="design-quality plan-quality adr-quality cap-consistency";; esac
 b=${BR[$case_]}; id="$case_-$set_$idx"
 W=$SP/w/$id; rm -rf "$W"; mkdir -p "$SP/w" "$SP/log"

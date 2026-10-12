@@ -23,6 +23,7 @@
     "dex-skill-doc-standards",
     "dex-skill-docs-layout",
     "dex-skill-fact-verification",
+    "dex-skill-implementation-plan",
     "dex-skill-interface-definition-openapi",
     "dex-skill-nfr",
     "dex-skill-node-contract",
