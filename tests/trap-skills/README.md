@@ -72,7 +72,7 @@
 | [requirement-set-quality](requirement-set-quality/README.md) | `dex-skill-requirement-set-quality` 1.7.0 | r2, r5, c0 | 20 ловушек -> process-skill 2.0.0: рамка пунктом, 4 ловушки как написаны, «Готовность набора» |
 | [nfr](nfr/README.md) | `dex-skill-nfr` 1.2.0 | w2, w2n, r1, r2 | 15 ловушек -> 3 пункта |
 | [functional-requirements](functional-requirements/README.md) | `dex-skill-functional-requirements` 1.2.0 | w2, w2n, r1, c0 | 12 ловушек -> 1 пункт с исходом |
-| [use-case-quality](use-case-quality/README.md) | `dex-skill-use-case-quality` 1.0.0 | w3, r3 | 14 ловушек -> 7 пунктов и ловушка заголовка; принят пункт из `use-cases` |
+| [use-case-quality](use-case-quality/README.md) | `dex-skill-use-case-quality` 1.0.0 | w3, r3 | 14 ловушек -> 8 пунктов-названий; принят пункт из `use-cases` |
 | [user-stories](user-stories/README.md) | `dex-skill-user-stories` 1.2.1 | w4, r4 | 18 ловушек и чек-лист -> 4 пункта |
 | [removed/use-cases](removed/use-cases/README.md) | `dex-skill-use-cases` 1.0.2 | w3, r3 | снят; пункт - в `use-case-quality`, реконструкция - `usecase-analyst` |
 | [removed/problem-specification](removed/problem-specification/README.md) | `dex-skill-problem-specification` 1.0.0 | инцидент по тикету QA (K5, `_projects/shipping`) | снят; норма - Phase 1 `incident-investigator` |
