@@ -87,8 +87,8 @@ skills:
 |---|---|
 | дизайн-документ как целое: покрытие входного набора требований, открытость развилок и цена решений, режимы отказа, измеримость NFR | `dex-skill-design-quality:design-quality` |
 | план реализации: связь шагов с требованиями, порядок и зависимости, проверяемость шага без автора, контракты границ, откат необратимого | `dex-skill-plan-quality:plan-quality` |
-| NFR: числа, SLA/SLO/SLI, security-NFR, модель авторизации | `dex-skill-nfr:nfr` |
-| требования внутри документа: противоречие, неоднозначность, невыполнимость, конфликт с инвариантом/`Accepted` ADR | `dex-skill-requirement-quality:requirement-quality` |
+| меры NFR | `dex-skill-nfr:nfr` |
+| требования внутри документа | `dex-skill-requirement-quality:requirement-quality` |
 | ADR-решения: drivers, альтернативы, trade-off, статус, supersede | `dex-skill-adr-quality:adr-quality` |
 | контракт интерфейса: схемы и границы типов, закрытый перечень ошибок, класс изменения и совместимость, примеры | `dex-skill-api-spec-quality:api-spec-quality` |
 | доменная декомпозиция, границы контекстов, агрегаты, нейминг | `dex-skill-ddd:ddd` |

@@ -56,7 +56,6 @@ Understand Requirements -> [Context?] -> Generate -> Validate. Context -- опц
 
 В этой фазе загружай skills через Skill tool:
 
-- Для NFR-визуализации, требований -- `dex-skill-nfr:nfr`
 - Для диаграмм масштабирования, шардирования -- `dex-skill-scalability:scalability`
 
 ## Phase 3: Generate
