@@ -251,7 +251,7 @@
       "name": "dex-bundle-dotnet-developer",
       "source": "./plugins/bundles/dex-bundle-dotnet-developer",
       "description": "Бандл для .NET-разработчика: написание кода, отладка, тесты, code review, EF Core, производительность, интерактивный дизайн .NET-архитектуры.",
-      "version": "2.39.0",
+      "version": "2.40.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -263,7 +263,7 @@
       "name": "dex-bundle-dotnet-fullstack",
       "source": "./plugins/bundles/dex-bundle-dotnet-fullstack",
       "description": "Полный бандл для .NET fullstack: разработка, базы данных, брокеры сообщений, контейнеры, CI/CD, мониторинг, интерактивный дизайн архитектуры.",
-      "version": "2.40.0",
+      "version": "2.41.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -359,7 +359,7 @@
       "name": "dex-bundle-system-analyst",
       "source": "./plugins/bundles/dex-bundle-system-analyst",
       "description": "Бандл для системного аналитика: требования, user stories, BPMN, спецификации API, документация, оценка реализуемости.",
-      "version": "1.26.0",
+      "version": "1.27.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -373,7 +373,7 @@
       "name": "dex-bundle-ts-fullstack",
       "source": "./plugins/bundles/dex-bundle-ts-fullstack",
       "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, Docker, E2E на Playwright.",
-      "version": "1.37.0",
+      "version": "1.38.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -512,7 +512,7 @@
       "name": "dex-design-reviewer",
       "source": "./plugins/specialists/architecture/dex-design-reviewer",
       "description": "Ревью и согласование чужого дизайн-документа (спека, ADR, диаграммы) до написания кода: полнота NFR, дефекты требований, качество ADR-решений, консистентность и слои, полнота и непротиворечивость набора артефактов работы, фальсификация находок, severity. Не архитектура реализованного кода - её ревьюит /review-arch.",
-      "version": "2.12.1",
+      "version": "2.12.2",
       "category": "specialist",
       "keywords": [
         "specialist",
