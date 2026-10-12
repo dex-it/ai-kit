@@ -77,7 +77,6 @@ Phase 1 и Phase 2 - это два прохода (Two-Pass): сначала Cla
 **Ось темы (язык-нейтральные skills, по топику).** Карта «топик -> skills» - грузить по релевантности топика, независимо от стека:
 
 - **Архитектура и слои** - `dex-skill-ddd:ddd`, `dex-skill-solid:solid`
-- **Безопасность** - если есть NFR/multi-tenancy - `dex-skill-nfr:nfr`
 - **Данные и доступ** - если Mongo - `dex-skill-mongodb:mongodb` `[справочно]`; если Redis - `dex-skill-redis:redis` `[справочно]`; если Elasticsearch - `dex-skill-elasticsearch:elasticsearch` `[справочно]`
 - **Интеграции и контракты** - `dex-skill-api-specification:api-specification`; если OpenAPI/Swagger - `dex-skill-api-documentation:api-documentation`; если RabbitMQ - `dex-skill-rabbitmq:rabbitmq` `[справочно]`; если Kafka - `dex-skill-kafka:kafka` `[справочно]`
 - **Конфигурация и зависимости** - если Docker - `dex-skill-docker:docker` `[справочно]`; если Kubernetes - `dex-skill-kubernetes:kubernetes` `[справочно]`
