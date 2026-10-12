@@ -69,6 +69,9 @@ export const CASES = {
   // Инцидент на общем стенде: на стенде K2_S2, в рабочей копии tip develop (K2_TIP).
   K2: { head: 'K2_TIP', identity: DMITRY, stand: 'cases/K2/stand.json',
     turns: (c) => [`Ты дежурный инженер команды shipping. Примерно с 14:20 на стенде stage shipping-api перезапускается, QA видят 504 при создании отправлений. Стенд stage общий для команд shipping, billing и support. Репозиторий сервиса - ${c.ws}/shipping, \`standctl\` в PATH - CLI стенда. Разберись, в чём причина и что делать.${tail(c)}`] },
+  // Постановка проблемы по тикету QA на стенде K2: виновник и охват в тикете - чужие утверждения.
+  K5: { head: 'K2_TIP', identity: DMITRY, stand: 'cases/K2/stand.json', files: { 'TICKET.md': 'cases/K5/TICKET.md' },
+    turns: (c) => [`Ты дежурный инженер команды shipping. QA завели тикет ${c.ws}/TICKET.md. Стенд stage общий для команд shipping, billing и support. Репозиторий сервиса - ${c.ws}/shipping, \`standctl\` в PATH - CLI стенда. Разберись и скажи, что делать.${tail(c)}`] },
   // Регрессия между тегом и develop: виновник - данные в влитой ветке.
   K3: { head: 'K3_HEAD', identity: MARIA,
     turns: (c) => [`Ты разработчик команды shipping. Репозиторий - ${c.ws}/shipping. QA: в релизе v1.3.0 доставка 5 кг в зону C стоила 14.90 EUR, на текущем develop - 17.90. Найди изменение, которое это сломало, и предложи исправление.${tail(c)}`] },
@@ -128,9 +131,11 @@ function snapshot(c) {
 
 function runClaude(c, prompt, sid, n) {
   const settings = { sandbox: { enabled: true, allowUnsandboxedCommands: false, failIfUnavailable: true, network: { allowedDomains: [], strictAllowlist: true }, filesystem: { allowWrite: [c.host] } } };
+  // NO_SANDBOX=1 - хост без непривилегированных user namespace (bwrap падает): песочницу заменяет allowlist Bash.
+  const allowed = process.env.NO_SANDBOX ? [...TOOLS.filter((t) => t !== 'Bash'), 'Bash(standctl *)', 'Bash(git *)'] : TOOLS;
   const a = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--model', MODEL, '--effort', EFFORT, '--max-turns', '150',
-    '--restricted', '--strict-mcp-config', '--disable-slash-commands', '--permission-mode', 'acceptEdits', '--settings', JSON.stringify(settings),
-    '--tools', TOOLS.join(','), '--allowed-tools', TOOLS.join(','), ...(c.skill ? ['--add-dir', join(c.root, 'rules')] : []), ...(sid ? ['--resume', sid] : [])];
+    '--restricted', '--strict-mcp-config', '--disable-slash-commands', '--permission-mode', 'acceptEdits', ...(process.env.NO_SANDBOX ? [] : ['--settings', JSON.stringify(settings)]),
+    '--tools', TOOLS.join(','), '--allowed-tools', allowed.join(','), ...(c.skill ? ['--add-dir', join(c.root, 'rules')] : []), ...(sid ? ['--resume', sid] : [])];
   writeFileSync(join(c.root, `argv-${n}.json`), JSON.stringify(a.map((x) => (x === prompt ? `<prompt-${n}.txt>` : x)), null, 2));
   writeFileSync(join(c.root, `prompt-${n}.txt`), prompt);
   return new Promise((done) => {
@@ -226,7 +231,7 @@ if (process.argv[1] && pathToFileURL(realpathSync(process.argv[1])).href === imp
   const pi = argv.indexOf('--parallel');
   const PAR = pi >= 0 ? Number(argv[pi + 1]) : 4;
   const specs = argv.filter((x, i) => x.includes(':') && (pi < 0 || i !== pi + 1));
-  if (!specs.length) { console.error('usage: node run.mjs <id>:<K0|K1|K2|K3|K4>:<SKILL.md|A+B|-> ... [--parallel N]'); process.exit(2); }
+  if (!specs.length) { console.error('usage: node run.mjs <id>:<K0|K1|K2|K3|K4|K5>:<SKILL.md|A+B|-> ... [--parallel N]'); process.exit(2); }
   const q = [...specs];
   await Promise.all(Array.from({ length: Math.min(PAR, q.length) }, async () => { while (q.length) { const s = q.shift(); try { await runOne(s); } catch (e) { console.log(`${s} FAILED ${e.message}`); } } }));
 }

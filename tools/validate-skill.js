@@ -202,6 +202,8 @@ const PROCESS_SKILLS = new Set([
   'decision-log',
   'unit-identity',
   'artifact-naming',
+  'requirement-quality',
+  'requirement-set-quality',
 ]);
 
 // Имена, существующие только в фикстурах `tools/__fixtures__`. В продовые перечни не

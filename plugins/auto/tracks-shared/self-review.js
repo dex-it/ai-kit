@@ -24,6 +24,7 @@ const REVIEW = { type: 'object', properties: {
     continues: { type: 'string', description: 'id прежней находки из перечня, чьё решение находка продолжает новым путём; иначе пусто' } },
   required: ['anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise', 'continues'] }, description: 'только находки, которых нет в перечне прежних' },
   axes: AXES,
+  roots: ROOTS,
   'run-status': { type: 'string', description: 'прогон свой, не пересказ входа' },
   'red-run': { type: 'string', description: 'вердикт по записям red-run кодера во входе: по каждому тесту дельты запись действует / отсутствует / истекла; записей не было - unverifiable + что искал; тестов в дельте нет - n/a' },
   'fact-check': { type: 'string', description: 'предмет сверки - техутверждения находок' },
@@ -32,7 +33,7 @@ const REVIEW = { type: 'object', properties: {
   prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня прежних - запись с её id, статус с уликой; перечня нет - пусто' },
   'review-verdict': { ...VERDICT, description: 'сигнал оператору, порог допуска трека его не читает' },
   missing: { type: 'string', description: 'при blocked - чего не хватило для ревью; иначе пусто' },
-}, required: ['status', 'findings', 'axes', 'run-status', 'red-run', 'fact-check', 'intent', 'intent-status', 'prior', 'review-verdict', 'missing'] }
+}, required: ['status', 'findings', 'axes', 'roots', 'run-status', 'red-run', 'fact-check', 'intent', 'intent-status', 'prior', 'review-verdict', 'missing'] }
 const UNSETTLED = 'статус саморевью не сверен'
 const LISTED = 'Перечень находок: по каждой - запись в prior с её id, статус с уликой; находка перечня идёт только в prior, в findings - то, чего в перечне нет:'
 // fix перезаписывается каждой попыткой: решения и оспаривание прежней находки без переноса в decisions до выхода не доезжают.
@@ -46,7 +47,7 @@ const closedBy = (f, x) => ((f && f.prior) || []).some(p => p.id === x.id && p.s
 const SKIPPED = 'закрыта правкой, повторное саморевью не куплено - правка покрыта прогоном (uncovered-status: none), наружу не видна (dependents-status: none), верификация зелёная'
 // partial кодера и опровергнутая им сверка - исход автора: зелёная верификация и чистое ревью их не закрывают.
 const authorGap = (f) => !f ? '' : f.status === 'partial' ? `кодер вернул partial: ${f.missing || f['run-status'] || 'нехватка не названа'}` : /^contradicted/.test(f['fact-check'] || '') ? `fact-check кодера: ${f['fact-check']}` : ''
-const reviewGap = (r) => !r || r.status === 'blocked' ? '' : r.status === 'partial' ? `саморевью не завершено: ${r.missing || 'нехватка не названа'}` : r['intent-status'] === 'mismatch' ? `саморевью: реализовано не то: ${r.intent}` : axesGap(r.axes) ? `саморевью: ${axesGap(r.axes)}` : ''
+const reviewGap = (r) => !r || r.status === 'blocked' ? '' : r.status === 'partial' ? `саморевью не завершено: ${r.missing || 'нехватка не названа'}` : r['intent-status'] === 'mismatch' ? `саморевью: реализовано не то: ${r.intent}` : axesGap(r.axes) ? `саморевью: ${axesGap(r.axes)}` : rootsGap(r.roots, [...(r.findings || []), ...(r.prior || [])]) ? `саморевью: ${rootsGap(r.roots, [...(r.findings || []), ...(r.prior || [])])}` : ''
 // Порог допуска: зелёная верификация и ноль открытых P0/P1 реестра прогона; review-verdict - сигнал оператору, порог его не читает.
 const admit = (green, rev, stuck, gaps) => !green ? 'верификация после правки по саморевью не прошла'
   : !rev ? 'саморевьюер не вернул выход'

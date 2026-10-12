@@ -62,11 +62,11 @@
 | Узел | Класс-скилл | Норматив этапа/жанра | Дополнительно | Оракул |
 |---|---|---|---|---|
 | `business-requirements-analyst` | - | `business-analysis-29148` (pre-load) | `product-discovery`, `doc-standards`, `legacy-reconstruction` | `requirement-quality` |
-| `usecase-analyst` | `use-cases` | `use-cases-cockburn` (pre-load) | `legacy-reconstruction` | - |
+| `usecase-analyst` | - | `use-cases-cockburn` (pre-load) | `legacy-reconstruction` | `use-case-quality` (самоконтроль) |
 | `requirements-analyst` | `functional-requirements`, `nfr` | `system-requirements-29148` (pre-load) | `legacy-reconstruction` | `requirement-quality` |
 | `user-story-analyst` | `user-stories` | - | - | `requirement-quality` |
-| команда `/feature` (как судья) | `use-cases`, `functional-requirements`, `nfr`, `user-stories` | `business-analysis-29148` (Phase 2), `use-cases-cockburn` (Phase 3), `system-requirements-29148` (Phase 4) | - | `requirement-quality`, `requirement-set-quality`, `use-case-quality` |
-| `requirements-reviewer` | все четыре класс-скилла | `business-analysis-29148`, `use-cases-cockburn`, `system-requirements-29148` - по предмету ревью | `fact-verification`, `review-evidence`, `codebase-conventions`, `ddd` | `requirement-quality`, `requirement-set-quality`; на наборе сценариев - `use-case-quality` **вместо** оракула набора |
+| команда `/feature` (как судья) | `functional-requirements`, `nfr`, `user-stories` | `business-analysis-29148` (Phase 2), `use-cases-cockburn` (Phase 3), `system-requirements-29148` (Phase 4) | - | `requirement-quality`, `requirement-set-quality`, `use-case-quality` |
+| `requirements-reviewer` | класс-скиллы предмета ревью | `business-analysis-29148`, `use-cases-cockburn`, `system-requirements-29148` - по предмету ревью | `fact-verification`, `review-evidence`, `codebase-conventions`, `ddd` | `requirement-quality`, `requirement-set-quality`; на наборе сценариев - `use-case-quality` **вместо** оракула набора |
 
 Прочерк в любой колонке читается одинаково - артефакта этого рода у узла нет, и закрывается это
 записью `unverifiable` с названной причиной, а не подстановкой соседнего: ни норматив соседней фазы,

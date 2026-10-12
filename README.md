@@ -240,12 +240,12 @@ claude plugins uninstall dex-dotnet-coder
 | Категория | Skills |
 |-----------|--------|
 | **Контракт и адресация артефактов** | `node-contract`, `docs-layout`, `project-docs-map`, `issue-tracking`, `artifact-naming`, `unit-identity`, `decision-log`, `stack-registry` |
-| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `agile`, `epic-planning`, `prioritization`, `user-stories`, `use-cases`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `bpmn`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
+| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `agile`, `epic-planning`, `prioritization`, `user-stories`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `bpmn`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
 | **Оракулы качества артефактов** | `requirement-quality`, `requirement-set-quality`, `use-case-quality`, `adr-quality`, `design-quality`, `plan-quality`, `api-spec-quality`, `completeness-mapping`, `fact-verification`, `legacy-reconstruction`, `verification-planning-29119`, `bdd-gherkin` |
 | **Архитектура и дизайн** | `ddd`, `solid`, `scalability`, `cap-consistency`, `capacity-planning`, `reference-architectures`, `tech-evaluation`, `architecture-definition-42010`, `interface-definition-openapi` |
 | **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `karpathy-guidelines`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
 | **QA и тестирование** | `api-testing`, `test-coverage`, `testability`, `integration-boundary`, `exploratory-testing`, `bug-reproduction`, `deep-audit`, `tech-audit`, `playwright`, `stand-verification` |
-| **Инциденты и RCA** | `problem-specification`, `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
+| **Инциденты и RCA** | `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
 | **.NET** | `dotnet-api-development`, `dotnet-async-patterns`, `dotnet-code-quality`, `dotnet-csproj-hygiene`, `dotnet-ef-core`, `dotnet-logging`, `dotnet-resilience`, `dotnet-testing-patterns`, `dotnet-validation`, `api-documentation` |
 | **Frontend и TypeScript** | `react`, `ts-nodejs-api`, `ts-vitest-jest` |
 | **Инфраструктура** | `docker`, `kubernetes`, `rabbitmq`, `kafka`, `elasticsearch`, `redis`, `mongodb`, `gitlab-ci`, `github-actions`, `jenkins`, `teamcity`, `observability` |
@@ -476,4 +476,4 @@ GPL v3.0 - см. [LICENSE](./LICENSE)
 
 ---
 
-**DEX Team** - Version 6.15.0
+**DEX Team** - Version 6.16.0

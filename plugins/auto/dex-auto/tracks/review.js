@@ -55,6 +55,17 @@ const axesGap = (axes, findings) => {
     ...a.filter(x => x.outcome === 'unverifiable').map(x => `ось не проверена: ${x.name} - ${x.checked || 'причина не названа'}`),
     ...(findings ? a.filter(x => (x.outcome === 'findings') !== count(x.name) > 0).map(x => `исход оси расходится с findings: ${x.name} - ${x.outcome}, находок оси ${count(x.name)}`) : [])].filter(Boolean).join('; ')
 }
+const ROOT_VERDICT = ['legitimate', 'illegitimate']
+const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки' }
+// Нелегитимное решение без открытой находки ушло бы из выхода вердиктом без дефекта, который можно закрыть; у находки ревьюера статуса нет.
+const stillOpen = (f) => !f.status || OPEN_FINDING.includes(f.status)
+// Узлы называют одно место строкой, диапазоном или файлом: строковое равенство якорей разводит их в разные места.
+const spot = (a) => { const s = String(a || '').trim().replace(/:$/, ''), m = /^(.+?):(\d+)(?:-(\d+))?(?::\d+)?$/.exec(s); return m ? [m[1], Math.min(+m[2], +(m[3] || m[2])), Math.max(+m[2], +(m[3] || m[2]))] : [s, 0, Infinity] }
+const sameSpot = (a, b) => { const [fa, a1, a2] = spot(a), [fb, b1, b2] = spot(b); return fa !== '' && fa === fb && a1 <= b2 && b1 <= a2 }
+const rootsGap = (roots, found) => {
+  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
+  return bare.length ? `решение нелегитимно без находки: ${bare.join(', ')}` : ''
+}
 // Форма одна у всех ревьюеров: ledger хранит находку одной записью, и поле, которого нет у одного узла, из реестра выпадает молча.
 const FINDING = { type: 'object', properties: {
   anchor: { type: 'string', description: 'file:line' }, severity: SEV, axis: AXIS,
@@ -170,21 +181,44 @@ const REVIEW = { type: 'object', properties: {
   status: STATUS, findings: { type: 'array', items: FINDING, description: 'только находки, которых нет среди прежних' },
   'fact-check': { type: 'string', description: 'предмет сверки - техутверждения находок' },
   axes: AXES,
+  roots: ROOTS,
   'review-verdict': VERDICT,
   prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня ledger - запись с её id, статус с доказательством; перечня нет - пусто' },
   threads: { type: 'array', items: THREAD, description: 'ре-ревью дельты: прежние находки тредов MR, которых нет в перечне ledger, - статус с доказательством; иначе пусто' },
   questions: { type: 'array', items: { type: 'string' }, description: 'вопросы автору по намерению' },
   missing: { type: 'string' },
-}, required: ['status', 'findings', 'fact-check', 'axes', 'review-verdict', 'prior', 'threads', 'questions', 'missing'] }
+}, required: ['status', 'findings', 'fact-check', 'axes', 'roots', 'review-verdict', 'prior', 'threads', 'questions', 'missing'] }
+const AXIS_CHECK = ['upheld', 'overturned']
+// Исход оси ревьюера - claim: ось clean/n/a без записи скептика ушла бы в выход чистой непроверенной.
+const axesCheckGap = (axes, check, confirmed) => {
+  const c = check || []
+  const unchecked = axes.filter(a => ['clean', 'n/a'].includes(a.outcome) && !c.some(x => x.name === a.name)).map(a => a.name)
+  const bare = c.filter(x => x.verdict === 'overturned' && !(confirmed || []).some(f => f.axis === x.name && stillOpen(f))).map(x => x.name)
+  return [unchecked.length ? `исход оси не сверен скептиком: ${unchecked.join(', ')}` : '', bare.length ? `ось опровергнута без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
+}
+const ROOT_CHECK = ['upheld', 'overturned']
+// Вердикт ревьюера по решению - claim в обе стороны: legitimate без сверки ушёл бы оправданным, illegitimate - с находкой, которую скептик снял.
+// Запись на несколько решений выносит одной evidence итог по разным вердиктам, а overturned у legitimate и illegitimate значит противоположное.
+const rootsCheckGap = (roots, check, found) => {
+  const r = roots || []
+  const hits = (check || []).map(y => [y, r.filter(x => sameSpot(y.anchor, x.anchor))])
+  const wide = hits.filter(([, xs]) => xs.length > 1).map(([y]) => y.anchor)
+  const own = (x) => hits.filter(([, xs]) => xs.length === 1 && xs[0] === x).map(([y]) => y)
+  const unchecked = r.filter(x => !own(x).length).map(x => x.anchor)
+  const bare = r.filter(x => own(x).some(y => (x.verdict === 'legitimate') === (y.verdict === 'overturned')) && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
+  return [wide.length ? `запись сверки покрывает несколько решений: ${wide.join(', ')}` : '', unchecked.length ? `решение не сверено скептиком: ${unchecked.join(', ')}` : '', bare.length ? `решение нелегитимно после сверки без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
+}
 const FALSIFY = { type: 'object', properties: {
   status: STATUS,
   confirmed: { type: 'array', items: FINDING },
   dropped: { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, reason: { type: 'string' } }, required: ['anchor', 'reason'] } },
   coverage: { type: 'string', description: 'вердикт по покрытию изменённого поведения: непокрытые ветки поимённо либо "покрыто: <чем>"' },
+  'axes-check': { type: 'array', items: { type: 'object', properties: { name: AXIS, verdict: { type: 'string', enum: AXIS_CHECK }, evidence: { type: 'string' } }, required: ['name', 'verdict', 'evidence'] } },
+  'roots-check': { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, verdict: { type: 'string', enum: ROOT_CHECK }, evidence: { type: 'string' } }, required: ['anchor', 'verdict', 'evidence'] } },
   'review-verdict': VERDICT,
   prior: { type: 'array', items: PRIOR, description: 'сверенный с кодом статус каждой прежней находки перечня; прежних нет - пусто' },
   missing: { type: 'string' },
-}, required: ['status', 'confirmed', 'dropped', 'coverage', 'review-verdict', 'prior', 'missing'] }
+}, required: ['status', 'confirmed', 'dropped', 'coverage', 'axes-check', 'roots-check', 'review-verdict', 'prior', 'missing'] }
 const PUBLISH = { type: 'object', properties: {
   status: STATUS,
   published: { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, axis: { type: 'string' }, url: { type: 'string' }, note: { type: 'string', description: '"уже был" - тред существовал до прогона; иначе пусто' } }, required: ['anchor', 'axis', 'url', 'note'] } },
@@ -229,7 +263,7 @@ const priorIn = reg.all().map(p => ({ ...p, claim: claimOf[p.id] }))
 
 phase('Falsify')
 loops.falsify = 1
-const fal = await own('скептик', `${HEAD}Шаг 3: фальсификация находок ревьюера и вердикт по покрытию. ${common}\nНаходки:\n${fmt(claims) || '- находок нет: только вердикт по покрытию'}${priorIn.length ? `\nПрежние находки - статус ре-ревьюера:\n${priorIn.map(p => `${priorLine(p)} - ре-ревьюер: ${p.claim ? `${p.claim.status} - ${p.claim.evidence}` : 'статус не назван'}`).join('\n')}` : ''}\nОси ревьюера:\n${axes.map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'}${rev.questions.length ? `\nВопросы автору от ревьюера:\n${rev.questions.map(q => `- ${q}`).join('\n')}` : ''}`,
+const fal = await own('скептик', `${HEAD}Шаг 3: фальсификация находок, исходов осей и решений ревьюера, вердикт по покрытию. ${common}\nНаходки:\n${fmt(claims) || '- находок нет: только вердикт по покрытию'}${priorIn.length ? `\nПрежние находки - статус ре-ревьюера:\n${priorIn.map(p => `${priorLine(p)} - ре-ревьюер: ${p.claim ? `${p.claim.status} - ${p.claim.evidence}` : 'статус не назван'}`).join('\n')}` : ''}\nОси ревьюера:\n${axes.map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'}\nРешения ревьюера:\n${(rev.roots || []).map(x => `- ${x.anchor}: ${x.decision} - корень: ${x.root} - ${x.verdict}${x.evidence ? ` - ${x.evidence}` : ''}`).join('\n') || '- не названы'}${rev.questions.length ? `\nВопросы автору от ревьюера:\n${rev.questions.map(q => `- ${q}`).join('\n')}` : ''}`,
   { label: 'falsify+coverage', phase: 'Falsify', schema: FALSIFY }, NODE.skeptic)
 trail.push({ step: 3, doer: NODE.skeptic.agentType, status: fal ? fal.status : 'null', confirmed: fal ? fal.confirmed.length : -1, dropped: fal ? fal.dropped.length : -1 })
 if (!fal || fal.status === 'blocked') return outcome('blocked', 'Falsify', lack(fal, 'скептик'), { ctx, review: rev, claims, prior: reg.all() })
@@ -260,7 +294,10 @@ if (ctx.status === 'partial') issues.push(`предмет ревью непол�
 else if (!ctx.at_head) issues.push(`дерево трека не на head_sha: ${ctx.missing || 'причина не названа'}`)
 if (rev.status !== 'complete') issues.push(`ревью не завершено: ${rev.missing || 'узел не назвал нехватку'}`)
 if (axesGap(axes, rev.findings)) issues.push(`ревью: ${axesGap(axes, rev.findings)}`)
+if (rootsGap(rev.roots, [...rev.findings, ...(rev.prior || []), ...(rev.threads || [])])) issues.push(`ревью: ${rootsGap(rev.roots, [...rev.findings, ...(rev.prior || []), ...(rev.threads || [])])}`)
 if (fal.status !== 'complete') issues.push(`фальсификация не завершена: ${fal.missing || 'узел не назвал нехватку'}`)
+if (axesCheckGap(axes, fal['axes-check'], [...(fal.confirmed || []), ...(fal.prior || [])])) issues.push(`фальсификация: ${axesCheckGap(axes, fal['axes-check'], [...(fal.confirmed || []), ...(fal.prior || [])])}`)
+if (rootsCheckGap(rev.roots, fal['roots-check'], [...(fal.confirmed || []), ...(fal.prior || [])])) issues.push(`фальсификация: ${rootsCheckGap(rev.roots, fal['roots-check'], [...(fal.confirmed || []), ...(fal.prior || [])])}`)
 if (unsettled.length) issues.push(`статус прежних находок не сверен скептиком: ${unsettled.map(p => p.anchor).join(', ')}`)
 if (!allPublished) issues.push('часть тредов не опубликована')
 // Вердикт выносит скептик, но опровергнуть его открытыми находками может и трек: APPROVE при открытой P0/P1 себя опровергает (BR-AUTO-003).
@@ -269,8 +306,8 @@ if (fal['review-verdict'] === 'APPROVE' && openBlocking.length) issues.push(`rev
 const where = issues.join('; ')
 return outcome(where ? 'partial' : 'complete', where, where, {
   subject: { mr: A.mr, base_sha: ctx.base_sha, head_sha: ctx.head_sha, files: ctx.files.length, platform: ctx.platform },
-  intent: ctx.intent, 'review-verdict': fal['review-verdict'], reviewer_verdict: rev['review-verdict'], axes, 'fact-check': rev['fact-check'], prior, questions: rev.questions,
-  confirmed, dropped: fal.dropped, coverage: fal.coverage,
+  intent: ctx.intent, 'review-verdict': fal['review-verdict'], reviewer_verdict: rev['review-verdict'], axes, roots: rev.roots || [], 'fact-check': rev['fact-check'], prior, questions: rev.questions,
+  confirmed, dropped: fal.dropped, coverage: fal.coverage, 'axes-check': fal['axes-check'], 'roots-check': fal['roots-check'],
   published: pub ? pub.published : [],
   unpublished,
 })

@@ -45,7 +45,7 @@ Understand Requirements -> Generate -> Validate.
 **Exit criteria:** Role, goal и benefit определены (минимум для «As a / I want / So that»). Источник пришёл одной темой либо только бизнес-уровнем (без `FR`/`NFR` системного уровня) - halt + возврат оркестратору по валидации входа выше, не додумывать.
 
 Загрузить через Skill tool:
-- `dex-skill-user-stories:user-stories` - INVEST criteria, splitting techniques, acceptance criteria patterns
+- `dex-skill-user-stories:user-stories` - чек-лист историй и критериев приёмки
 
 `agile` здесь не грузится: DoR/DoD и конвенции спринта - нормы процесса команды, а не требования; история пишется до того, как её кто-то возьмёт в спринт, и от процесса не зависит.
 
@@ -71,7 +71,7 @@ Understand Requirements -> Generate -> Validate.
 - Каждая story independent и поставляема отдельно
 - Порядок stories от highest value к lowest
 
-**Exit criteria:** Каждая story проходит INVEST check по нормам `user-stories`. Acceptance criteria testable (нет «система должна работать корректно»). Каждая story сохранена файлом в `stories/` своей фичи под номером своего ключа.
+**Exit criteria:** Каждая story проверена по чек-листу `user-stories`. Acceptance criteria testable (нет «система должна работать корректно»). Каждая story сохранена файлом в `stories/` своей фичи под номером своего ключа.
 
 **Mandatory:** yes
 
@@ -80,7 +80,7 @@ Understand Requirements -> Generate -> Validate.
 **Goal:** Проверить stories на INVEST compliance и полноту acceptance criteria.
 
 Загрузить через Skill tool:
-- `dex-skill-requirement-quality:requirement-quality` - проверить набор acceptance criteria на дефекты артефакта: неполнота, взаимное противоречие сценариев, неоднозначность без измеримого критерия, конфликт с инвариантом/Accepted ADR, невыполнимость. Дефект устранить до выдачи handoff; неустранимый (нужно решение постановщика) - `status: blocked` оркестратору, не додумывать сценарий за него.
+- `dex-skill-requirement-quality:requirement-quality` - оракул единицы по набору acceptance criteria. Дефект устранить до выдачи handoff; неустранимый (нужно решение постановщика) - `status: blocked` оркестратору, не додумывать сценарий за него.
 
 **Output:** Validation results per story:
 
