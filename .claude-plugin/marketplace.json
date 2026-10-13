@@ -2312,40 +2312,6 @@
       ]
     },
     {
-      "name": "dex-skill-orchestration-executor",
-      "source": "./plugins/skills/dex-skill-orchestration-executor",
-      "description": "Экспериментальный скилл. Исполнитель плана оркестрации: главный поток принимает пакет плана, запускает исполнителей Haiku, Sonnet и Opus семейства 5.5 с заданным effort, проверяет результаты, эскалирует по сигналу провала, маршрутизирует новые задачи, ведёт журнал и отчитывается по свидетельствам, а не по заявлениям исполнителей. Пара к планировщику оркестрации.",
-      "version": "1.0.0",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "orchestration",
-        "executor",
-        "subagents",
-        "escalation",
-        "ledger",
-        "experimental",
-        "process-skill"
-      ]
-    },
-    {
-      "name": "dex-skill-orchestration-planner",
-      "source": "./plugins/skills/dex-skill-orchestration-planner",
-      "description": "Экспериментальный скилл. Планировщик оркестрации для старшей модели: по любому промту или скиллу и задаче пользователя решает, оркестрировать ли вообще, разбивает работу на задачи, назначает каждой модель семейства 5.5 (Haiku, Sonnet, Opus) и effort, пишет брифы исполнителей, исключения из лестницы повторов и правила переплана и расчёт расхода против запуска одной моделью. Результат - пакет файлов для скилла-исполнителя. Команда /do.",
-      "version": "1.0.0",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "orchestration",
-        "planner",
-        "subagents",
-        "model-routing",
-        "effort",
-        "experimental",
-        "process-skill"
-      ]
-    },
-    {
       "name": "dex-skill-perf-profiling",
       "source": "./plugins/skills/dex-skill-perf-profiling",
       "description": "Linux sampling-профилирование: perf record/script, FlameGraph, on-CPU vs off-CPU, JIT-символы для .NET",
@@ -2835,6 +2801,23 @@
         "regression",
         "e2e",
         "scratch-test"
+      ]
+    },
+    {
+      "name": "dex-skill-subagent-dispatch",
+      "source": "./plugins/skills/dex-skill-subagent-dispatch",
+      "description": "Экспериментальный скилл. Грабли раздачи работы исполнителям: когда раздача вообще окупается, параметры запуска (модель и effort свежего исполнителя, перебивающие переменные среды, имя и команды агентов, признак форка), выбор «сам, свежий исполнитель, форк», ожидание в claude -p, приёмка по проверке и повтор по сигналу провала. Команда /do ведёт задачу по лестнице режимов от одной сессии.",
+      "version": "1.0.0",
+      "category": "skill",
+      "keywords": [
+        "skill",
+        "subagents",
+        "fork",
+        "dispatch",
+        "model-routing",
+        "effort",
+        "experimental",
+        "trap-skill"
       ]
     },
     {

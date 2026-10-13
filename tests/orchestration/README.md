@@ -3,7 +3,11 @@
 Предмет - пара экспериментальных скиллов `dex-skill-orchestration-planner:orchestration-planner`
 (план оркестрации) и `dex-skill-orchestration-executor:orchestration-executor` (исполнение
 пакета), а не композиция зон: судится поведение главного потока и исполнителей на заданном
-поручении, форму файла закрывает `npm run validate`.
+поручении, форму файла закрывает `npm run validate`. Пара лежит в [`subject/`](subject/) как
+замеряемая редакция и в каталог плагинов не входит (решение ревью PR #319: в каталоге остаются
+грабли [`subagent-dispatch`](../../plugins/skills/dex-skill-subagent-dispatch/skills/subagent-dispatch/SKILL.md)
+и команда `/do`); наборы ниже воспроизводят замеры на ней. Волна целей `/auto` против одной сессии -
+[`wave/`](wave/README.md).
 
 Вопросов набора шесть:
 

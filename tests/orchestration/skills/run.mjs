@@ -39,7 +39,7 @@ if (mix) spawnSync('rm', ['-rf', join(dir, 'pack')]);
 if (set === 'temp') spawnSync('cp', ['-R', join(HERE, 'fixture/prompts'), join(dir, 'prompts')]);
 
 const fx = mix ? [] : ['fx-csv', 'fx-notes', 'fx-sql', 'fx-export'].flatMap((p) => ['--plugin-dir', join(`${dir}_plugins`, p)]);
-const PLUGINS = join(REPO, 'plugins/skills');
+const PLUGINS = join(REPO, 'tests/orchestration/subject');
 let prompt;
 let plugins;
 let extra = [];

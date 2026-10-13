@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
-const P = join(REPO, 'plugins/skills/dex-skill-orchestration-planner/skills/orchestration-planner/references');
+const P = join(REPO, 'tests/orchestration/subject/dex-skill-orchestration-planner/skills/orchestration-planner/references');
 const INPUTS = join(REPO, 'tests/optimize-for-llm/inputs');
 
 const CASES = {

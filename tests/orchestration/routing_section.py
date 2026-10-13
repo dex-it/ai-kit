@@ -6,7 +6,7 @@
 import os
 
 PLANNER = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       '../../plugins/skills/dex-skill-orchestration-planner/skills/orchestration-planner')
+                       'subject/dex-skill-orchestration-planner/skills/orchestration-planner')
 
 
 def routing_section(with_skills):

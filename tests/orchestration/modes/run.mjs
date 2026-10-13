@@ -31,7 +31,7 @@ const notes = readFileSync(join(HERE, 'notes', `${set}.txt`), 'utf8');
 const prompt = `Используй скилл orchestration-executor: выполни пакет плана в ./pack.\n\n${notes}`;
 const args = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--no-session-persistence',
   '--permission-mode', 'bypassPermissions', '--max-budget-usd', budget,
-  '--plugin-dir', join(REPO, 'plugins/skills/dex-skill-orchestration-executor'),
+  '--plugin-dir', join(REPO, 'tests/orchestration/subject/dex-skill-orchestration-executor'),
   '--model', model, '--effort', effort];
 const r = spawnSync('claude', args, {
   cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 28, timeout: 40 * 60 * 1000,

@@ -1,0 +1,21 @@
+{
+  "name": "dex-skill-subagent-dispatch",
+  "version": "1.0.0",
+  "description": "Экспериментальный скилл. Грабли раздачи работы исполнителям: когда раздача вообще окупается, параметры запуска (модель и effort свежего исполнителя, перебивающие переменные среды, имя и команды агентов, признак форка), выбор «сам, свежий исполнитель, форк», ожидание в claude -p, приёмка по проверке и повтор по сигналу провала. Команда /do ведёт задачу по лестнице режимов от одной сессии.",
+  "author": {
+    "name": "Dex Team",
+    "email": "mmx@dex-it.ru"
+  },
+  "keywords": [
+    "skill",
+    "subagents",
+    "fork",
+    "dispatch",
+    "model-routing",
+    "effort",
+    "experimental",
+    "trap-skill"
+  ],
+  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "license": "GPL-3.0"
+}

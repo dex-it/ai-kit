@@ -11,8 +11,8 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../..');
-const ROUTING = readFileSync(join(REPO, 'plugins/skills/dex-skill-orchestration-planner/skills/orchestration-planner/references/routing.md'), 'utf8');
-const BRIEFS = readFileSync(join(REPO, 'plugins/skills/dex-skill-orchestration-planner/skills/orchestration-planner/references/briefs.md'), 'utf8');
+const ROUTING = readFileSync(join(REPO, 'tests/orchestration/subject/dex-skill-orchestration-planner/skills/orchestration-planner/references/routing.md'), 'utf8');
+const BRIEFS = readFileSync(join(REPO, 'tests/orchestration/subject/dex-skill-orchestration-planner/skills/orchestration-planner/references/briefs.md'), 'utf8');
 
 const [cmd, caseId, dirArg, streamArg] = process.argv.slice(2);
 const dir = resolve(dirArg);

@@ -23,6 +23,7 @@ const REPO = resolve(HERE, '../..');
 const INPUTS = join(REPO, 'tests/optimize-for-llm/inputs');
 const GRADE = join(REPO, 'tests/optimize-for-llm/grade.mjs');
 const PLUGINS = join(REPO, 'plugins/skills');
+const SUBJECT = join(REPO, 'tests/orchestration/subject');
 
 // id -> [файл правки, вход]; список снят с CASES в tests/optimize-for-llm/grade.mjs.
 const CASES = {
@@ -91,7 +92,7 @@ function bulkPrompt(ids) {
 
 function pluginFlags(extra = []) {
   const names = [...(flag('no-subject') ? [] : SKILL_PLUGINS), ...extra];
-  return names.flatMap((n) => ['--plugin-dir', join(PLUGINS, n)]);
+  return names.flatMap((n) => ['--plugin-dir', join(n.startsWith('dex-skill-orchestration-') ? SUBJECT : PLUGINS, n)]);
 }
 
 function runClaude(dir, prompt, { model, effort, agent, budget = 6, extraFlags = [], plugins = [], stream = false }) {
