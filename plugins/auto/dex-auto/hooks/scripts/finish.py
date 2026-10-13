@@ -62,7 +62,7 @@ def register(path, state, evs, run):
         if fid in state:
             rec = dict(state[fid])
             # Пустой premise - суждение ревью «посылка доказана», а не молчание узла (ledger.md R9).
-            rec.update({k: v for k, v in ev.items() if v not in ("", None) or k == "premise"})
+            rec.update({k: v for k, v in ev.items() if v not in ("", None, []) or k == "premise"})
         else:
             # id не из реестра статус чужой записи не меняет (ledger.md R9): находка новая, поданный id - ссылкой.
             rec = dict(ev, ref=fid) if fid else dict(ev)
@@ -91,7 +91,8 @@ def run_section(data, state, changed):
     out += ["- " + text(e) for e in items(data, "trail")]
     # Раздел - разность реестра на конец прогона, а не находки этого прогона: молчание прогона о находке её не закрывает.
     out += ["", "### Открытые находки"]
-    out += [finding_line(r, text(r.get("text")) + (" (закрытие: %s)" % text(r["closure"]) if r.get("closure") else ""))
+    out += [finding_line(r, text(r.get("text")) + (" (закрытие: %s)" % text(r["closure"]) if r.get("closure") else "")
+                         + (" (также: %s)" % ", ".join(text(x) for x in r["places"]) if isinstance(r.get("places"), list) and r["places"] else ""))
             for r in state.values() if r.get("status") in dx.OPEN_FINDING]
     out += ["- не опубликовано %s: %s" % (text(f.get("anchor")), text(f.get("reason")))
             for f in items(data, "unpublished")]

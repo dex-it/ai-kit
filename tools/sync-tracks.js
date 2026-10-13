@@ -141,8 +141,8 @@ enumNamed(domain, /^const AXIS = \{[^}]*enum: \[([^\]]*)\]/m, 'AXIS', 'axes');
 enumNamed(domain, /^const AXIS_OUTCOME = \[([^\]]*)\]/m, 'AXIS_OUTCOME', 'axes');
 enumNamed(domain, /^const PRIOR_STATUS = \[([^\]]*)\]/m, 'PRIOR_STATUS', 'prior-status');
 enumNamed(domain, /^const ROOT_VERDICT = \[([^\]]*)\]/m, 'ROOT_VERDICT', 'roots');
-enumNamed(join(TRACKS, 'review.js'), /^const AXIS_CHECK = \[([^\]]*)\]/m, 'AXIS_CHECK', 'axes-check');
-enumNamed(join(TRACKS, 'review.js'), /^const ROOT_CHECK = \[([^\]]*)\]/m, 'ROOT_CHECK', 'roots-check');
+enumNamed(join(SHARED, 'falsify.js'), /^const AXIS_CHECK = \[([^\]]*)\]/m, 'AXIS_CHECK', 'axes-check');
+enumNamed(join(SHARED, 'falsify.js'), /^const ROOT_CHECK = \[([^\]]*)\]/m, 'ROOT_CHECK', 'roots-check');
 enumNamed(join(TRACKS, 'bugfix.js'), /'diagnosis-check': \{ type: 'string', enum: \[([^\]]*)\]/, 'diagnosis-check', 'diagnosis-acceptance');
 
 if (errors.length) {

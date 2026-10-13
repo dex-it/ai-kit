@@ -11,23 +11,24 @@ const axesGap = (axes, findings) => {
     ...a.filter(x => x.outcome === 'unverifiable').map(x => `ось не проверена: ${x.name} - ${x.checked || 'причина не названа'}`),
     ...(findings ? a.filter(x => (x.outcome === 'findings') !== count(x.name) > 0).map(x => `исход оси расходится с findings: ${x.name} - ${x.outcome}, находок оси ${count(x.name)}`) : [])].filter(Boolean).join('; ')
 }
-const ROOT_VERDICT = ['legitimate', 'illegitimate']
-const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки' }
+const ROOT_VERDICT = ['legitimate', 'illegitimate', 'none']
+const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки; место правки без решения - verdict none' }
 // Нелегитимное решение без открытой находки ушло бы из выхода вердиктом без дефекта, который можно закрыть; у находки ревьюера статуса нет.
 const stillOpen = (f) => !f.status || OPEN_FINDING.includes(f.status)
 // Узлы называют одно место строкой, диапазоном или файлом: строковое равенство якорей разводит их в разные места.
 const spot = (a) => { const s = String(a || '').trim().replace(/:$/, ''), m = /^(.+?):(\d+)(?:-(\d+))?(?::\d+)?$/.exec(s); return m ? [m[1], Math.min(+m[2], +(m[3] || m[2])), Math.max(+m[2], +(m[3] || m[2]))] : [s, 0, Infinity] }
 const sameSpot = (a, b) => { const [fa, a1, a2] = spot(a), [fb, b1, b2] = spot(b); return fa !== '' && fa === fb && a1 <= b2 && b1 <= a2 }
+const atFinding = (f, a) => [f.anchor, ...(f.places || [])].some(p => sameSpot(p, a))
 const rootsGap = (roots, found) => {
-  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
+  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => atFinding(f, x.anchor) && stillOpen(f))).map(x => x.anchor)
   return bare.length ? `решение нелегитимно без находки: ${bare.join(', ')}` : ''
 }
 // Форма одна у всех ревьюеров: ledger хранит находку одной записью, и поле, которого нет у одного узла, из реестра выпадает молча.
 const FINDING = { type: 'object', properties: {
-  anchor: { type: 'string', description: 'file:line' }, severity: SEV, axis: AXIS,
+  anchor: { type: 'string', description: 'file:line' }, places: { type: 'array', items: { type: 'string' } }, severity: SEV, axis: AXIS,
   text: { type: 'string' }, closure: { type: 'string', description: 'критерий закрытия' }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка, которую не доказали ни код, ни прогон, и проба, которая её проверит; посылка доказана - пусто' },
-}, required: ['anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
+}, required: ['anchor', 'places', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
 // Узел выносит статус из PRIOR_STATUS; unverified и dropped ставит только трек. Перечень реестра держат и dexauto.py с finish.py - сверяет sync-tracks --check.
 const PRIOR_STATUS = ['closed', 'partial', 'open', 'disputed', 'no-longer-applicable']
 const OPEN_FINDING = ['open', 'partial', 'unverified']
@@ -35,7 +36,7 @@ const FINDING_STATUS = [...OPEN_FINDING, 'closed', 'disputed', 'no-longer-applic
 // Прежняя находка опознаётся по id реестра ledger: без него finish.sh заводит её новой, и разность «открытые» двоится.
 const PRIOR = { type: 'object', properties: {
   id: { type: 'string', description: 'id находки из перечня; находки в перечне нет - её место в findings, не здесь' },
-  anchor: FINDING.properties.anchor, severity: SEV, axis: { type: 'string', description: 'ось из перечня; не названа - пусто' }, text: { type: 'string' },
+  anchor: FINDING.properties.anchor, places: FINDING.properties.places, severity: SEV, axis: { type: 'string', description: 'ось из перечня; не названа - пусто' }, text: { type: 'string' },
   status: { type: 'string', enum: PRIOR_STATUS }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка находки, всё ещё не доказанная, с пробой; доказана кодом, прогоном либо ответом оператора в цели - пусто' },
 }, required: ['id', 'anchor', 'severity', 'axis', 'text', 'status', 'evidence', 'premise'] }
@@ -44,7 +45,7 @@ const isBlocking = (f) => f.severity === 'P0' || f.severity === 'P1'
 const isFixable = (f) => isBlocking(f) || f.severity === 'P2'
 // Исход такой находки решает проба оператора, а не правка: кодер по ней покупал круг за кругом на недостижимом пути.
 const awaitsProbe = (f) => !!String(f.premise || '').trim()
-const priorLine = (p) => `- ${p.id ? `${p.id} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
+const priorLine = (p) => `- ${p.id ? `${p.id} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${(p.places || []).length ? ` (также: ${p.places.join(', ')})` : ''}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
 const findingLine = (f) => `${priorLine(f)}${f.closure ? ` (закрытие: ${f.closure})` : ''}${f.evidence ? `\n  улика: ${f.evidence}` : ''}`
 // Опознание - по id (ledger.md R10): строка сдвигается правкой, а на одной строке бывают разные находки. Статус прежней - последний, вынесенный узлом; о которой узел промолчал, та остаётся непроверенной.
 // id записей, которые узел закрыл в своём выходе (статус не из открытых).
@@ -56,8 +57,8 @@ function registry(unsettled) {
   const seat = (p, status, evidence) => {
     const i = at(p.id)
     // Важность записи только растёт: повторное ревью, поднявшее P2 до P1, должно держать порог допуска.
-    const base = i < 0 ? { id: p.id || `N${++minted}`, anchor: p.anchor || '', severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '' }
-      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '' }
+    const base = i < 0 ? { id: p.id || `N${++minted}`, anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '' }
+      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [] }
     const rec = { ...base, status: FINDING_STATUS.includes(status) ? status : 'unverified', evidence: FINDING_STATUS.includes(status) ? evidence : `статус вне словаря реестра (${status}): ${evidence}` }
     if (i < 0) list.push(rec); else list[i] = rec
     return rec.id

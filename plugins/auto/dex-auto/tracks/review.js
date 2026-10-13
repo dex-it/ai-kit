@@ -55,23 +55,24 @@ const axesGap = (axes, findings) => {
     ...a.filter(x => x.outcome === 'unverifiable').map(x => `ось не проверена: ${x.name} - ${x.checked || 'причина не названа'}`),
     ...(findings ? a.filter(x => (x.outcome === 'findings') !== count(x.name) > 0).map(x => `исход оси расходится с findings: ${x.name} - ${x.outcome}, находок оси ${count(x.name)}`) : [])].filter(Boolean).join('; ')
 }
-const ROOT_VERDICT = ['legitimate', 'illegitimate']
-const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки' }
+const ROOT_VERDICT = ['legitimate', 'illegitimate', 'none']
+const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки; место правки без решения - verdict none' }
 // Нелегитимное решение без открытой находки ушло бы из выхода вердиктом без дефекта, который можно закрыть; у находки ревьюера статуса нет.
 const stillOpen = (f) => !f.status || OPEN_FINDING.includes(f.status)
 // Узлы называют одно место строкой, диапазоном или файлом: строковое равенство якорей разводит их в разные места.
 const spot = (a) => { const s = String(a || '').trim().replace(/:$/, ''), m = /^(.+?):(\d+)(?:-(\d+))?(?::\d+)?$/.exec(s); return m ? [m[1], Math.min(+m[2], +(m[3] || m[2])), Math.max(+m[2], +(m[3] || m[2]))] : [s, 0, Infinity] }
 const sameSpot = (a, b) => { const [fa, a1, a2] = spot(a), [fb, b1, b2] = spot(b); return fa !== '' && fa === fb && a1 <= b2 && b1 <= a2 }
+const atFinding = (f, a) => [f.anchor, ...(f.places || [])].some(p => sameSpot(p, a))
 const rootsGap = (roots, found) => {
-  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
+  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => atFinding(f, x.anchor) && stillOpen(f))).map(x => x.anchor)
   return bare.length ? `решение нелегитимно без находки: ${bare.join(', ')}` : ''
 }
 // Форма одна у всех ревьюеров: ledger хранит находку одной записью, и поле, которого нет у одного узла, из реестра выпадает молча.
 const FINDING = { type: 'object', properties: {
-  anchor: { type: 'string', description: 'file:line' }, severity: SEV, axis: AXIS,
+  anchor: { type: 'string', description: 'file:line' }, places: { type: 'array', items: { type: 'string' } }, severity: SEV, axis: AXIS,
   text: { type: 'string' }, closure: { type: 'string', description: 'критерий закрытия' }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка, которую не доказали ни код, ни прогон, и проба, которая её проверит; посылка доказана - пусто' },
-}, required: ['anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
+}, required: ['anchor', 'places', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
 // Узел выносит статус из PRIOR_STATUS; unverified и dropped ставит только трек. Перечень реестра держат и dexauto.py с finish.py - сверяет sync-tracks --check.
 const PRIOR_STATUS = ['closed', 'partial', 'open', 'disputed', 'no-longer-applicable']
 const OPEN_FINDING = ['open', 'partial', 'unverified']
@@ -79,7 +80,7 @@ const FINDING_STATUS = [...OPEN_FINDING, 'closed', 'disputed', 'no-longer-applic
 // Прежняя находка опознаётся по id реестра ledger: без него finish.sh заводит её новой, и разность «открытые» двоится.
 const PRIOR = { type: 'object', properties: {
   id: { type: 'string', description: 'id находки из перечня; находки в перечне нет - её место в findings, не здесь' },
-  anchor: FINDING.properties.anchor, severity: SEV, axis: { type: 'string', description: 'ось из перечня; не названа - пусто' }, text: { type: 'string' },
+  anchor: FINDING.properties.anchor, places: FINDING.properties.places, severity: SEV, axis: { type: 'string', description: 'ось из перечня; не названа - пусто' }, text: { type: 'string' },
   status: { type: 'string', enum: PRIOR_STATUS }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка находки, всё ещё не доказанная, с пробой; доказана кодом, прогоном либо ответом оператора в цели - пусто' },
 }, required: ['id', 'anchor', 'severity', 'axis', 'text', 'status', 'evidence', 'premise'] }
@@ -88,7 +89,7 @@ const isBlocking = (f) => f.severity === 'P0' || f.severity === 'P1'
 const isFixable = (f) => isBlocking(f) || f.severity === 'P2'
 // Исход такой находки решает проба оператора, а не правка: кодер по ней покупал круг за кругом на недостижимом пути.
 const awaitsProbe = (f) => !!String(f.premise || '').trim()
-const priorLine = (p) => `- ${p.id ? `${p.id} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
+const priorLine = (p) => `- ${p.id ? `${p.id} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${(p.places || []).length ? ` (также: ${p.places.join(', ')})` : ''}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
 const findingLine = (f) => `${priorLine(f)}${f.closure ? ` (закрытие: ${f.closure})` : ''}${f.evidence ? `\n  улика: ${f.evidence}` : ''}`
 // Опознание - по id (ledger.md R10): строка сдвигается правкой, а на одной строке бывают разные находки. Статус прежней - последний, вынесенный узлом; о которой узел промолчал, та остаётся непроверенной.
 // id записей, которые узел закрыл в своём выходе (статус не из открытых).
@@ -100,8 +101,8 @@ function registry(unsettled) {
   const seat = (p, status, evidence) => {
     const i = at(p.id)
     // Важность записи только растёт: повторное ревью, поднявшее P2 до P1, должно держать порог допуска.
-    const base = i < 0 ? { id: p.id || `N${++minted}`, anchor: p.anchor || '', severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '' }
-      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '' }
+    const base = i < 0 ? { id: p.id || `N${++minted}`, anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '' }
+      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [] }
     const rec = { ...base, status: FINDING_STATUS.includes(status) ? status : 'unverified', evidence: FINDING_STATUS.includes(status) ? evidence : `статус вне словаря реестра (${status}): ${evidence}` }
     if (i < 0) list.push(rec); else list[i] = rec
     return rec.id
@@ -169,45 +170,68 @@ const ledgerList = (v, lost) => {
   return list.filter(f => f && typeof f === 'object')
 }
 // <<< shared: domain
-const CTX = { type: 'object', properties: {
-  status: STATUS, platform: { type: 'string', enum: ['github', 'gitlab', 'other'] },
-  base_sha: { type: 'string' }, head_sha: { type: 'string' }, files: { type: 'array', items: { type: 'string' } },
-  at_head: { type: 'boolean' },
-  intent: { type: 'string', description: 'источник намерения с адресом либо "n/a: <где искали>"' },
-  missing: { type: 'string' },
-}, required: ['status', 'platform', 'base_sha', 'head_sha', 'files', 'at_head', 'intent', 'missing'] }
-const THREAD = { type: 'object', properties: { anchor: PRIOR.properties.anchor, severity: SEV, axis: PRIOR.properties.axis, text: PRIOR.properties.text, status: PRIOR.properties.status, evidence: PRIOR.properties.evidence }, required: ['anchor', 'severity', 'axis', 'text', 'status', 'evidence'] }
-const REVIEW = { type: 'object', properties: {
-  status: STATUS, findings: { type: 'array', items: FINDING, description: 'только находки, которых нет среди прежних' },
-  'fact-check': { type: 'string', description: 'предмет сверки - техутверждения находок' },
-  axes: AXES,
-  roots: ROOTS,
-  'review-verdict': VERDICT,
-  prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня ledger - запись с её id, статус с доказательством; перечня нет - пусто' },
-  threads: { type: 'array', items: THREAD, description: 'ре-ревью дельты: прежние находки тредов MR, которых нет в перечне ledger, - статус с доказательством; иначе пусто' },
-  questions: { type: 'array', items: { type: 'string' }, description: 'вопросы автору по намерению' },
-  missing: { type: 'string' },
-}, required: ['status', 'findings', 'fact-check', 'axes', 'roots', 'review-verdict', 'prior', 'threads', 'questions', 'missing'] }
+// >>> shared: falsify
 const AXIS_CHECK = ['upheld', 'overturned']
 // Исход оси ревьюера - claim: ось clean/n/a без записи скептика ушла бы в выход чистой непроверенной.
 const axesCheckGap = (axes, check, confirmed) => {
   const c = check || []
-  const unchecked = axes.filter(a => ['clean', 'n/a'].includes(a.outcome) && !c.some(x => x.name === a.name)).map(a => a.name)
+  const unchecked = (axes || []).filter(a => ['clean', 'n/a'].includes(a.outcome) && !c.some(x => x.name === a.name)).map(a => a.name)
   const bare = c.filter(x => x.verdict === 'overturned' && !(confirmed || []).some(f => f.axis === x.name && stillOpen(f))).map(x => x.name)
   return [unchecked.length ? `исход оси не сверен скептиком: ${unchecked.join(', ')}` : '', bare.length ? `ось опровергнута без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
 }
 const ROOT_CHECK = ['upheld', 'overturned']
-// Вердикт ревьюера по решению - claim в обе стороны: legitimate без сверки ушёл бы оправданным, illegitimate - с находкой, которую скептик снял.
-// Запись на несколько решений выносит одной evidence итог по разным вердиктам, а overturned у legitimate и illegitimate значит противоположное.
+// Вердикт по решению - claim в обе стороны, а overturned у legitimate и illegitimate значит противоположное: запись сверки - на одно решение.
 const rootsCheckGap = (roots, check, found) => {
-  const r = roots || []
-  const hits = (check || []).map(y => [y, r.filter(x => sameSpot(y.anchor, x.anchor))])
+  const r = (roots || []).filter(x => x.verdict !== 'none')
+  // Решения ревьюера пересекаются между собой: запись с местом решения иначе задела бы и соседнее.
+  const exact = (y) => r.filter(x => String(spot(x.anchor)) === String(spot(y.anchor)))
+  const hits = (check || []).map(y => [y, exact(y).length ? exact(y) : r.filter(x => sameSpot(y.anchor, x.anchor))])
   const wide = hits.filter(([, xs]) => xs.length > 1).map(([y]) => y.anchor)
   const own = (x) => hits.filter(([, xs]) => xs.length === 1 && xs[0] === x).map(([y]) => y)
   const unchecked = r.filter(x => !own(x).length).map(x => x.anchor)
-  const bare = r.filter(x => own(x).some(y => (x.verdict === 'legitimate') === (y.verdict === 'overturned')) && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
+  const bare = r.filter(x => own(x).some(y => (x.verdict === 'legitimate') === (y.verdict === 'overturned')) && !(found || []).some(f => atFinding(f, x.anchor) && stillOpen(f))).map(x => x.anchor)
   return [wide.length ? `запись сверки покрывает несколько решений: ${wide.join(', ')}` : '', unchecked.length ? `решение не сверено скептиком: ${unchecked.join(', ')}` : '', bare.length ? `решение нелегитимно после сверки без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
 }
+// Решение, которого ревьюер не назвал (и под none тоже), сверка его записей не видит - его называет скептик этим полем; запись на месте названного решения - спор о его вердикте, его судит roots-check.
+const rootsMissedGap = (missed, roots) => {
+  const bare = (missed || []).filter(x => !(roots || []).some(r => r.verdict !== 'none' && sameSpot(r.anchor, x.anchor)))
+  return bare.length ? `решение не перечислено ревьюером: ${bare.map(x => `${x.anchor} - ${x.decision}`).join('; ')}` : ''
+}
+// Находка ревьюера - claim: молчание скептика о ней убрало бы её из реестра без следа.
+const silentGap = (findings, fal) => {
+  const seen = [...(fal.confirmed || []), ...(fal.dropped || []), ...(fal.prior || [])]
+  const bare = (findings || []).filter(f => !seen.some(x => sameSpot(x.anchor, f.anchor))).map(f => f.anchor)
+  return bare.length ? `находка не сверена скептиком: ${bare.join(', ')}` : ''
+}
+const checkGap = (rev, fal) => {
+  const found = [...(fal.confirmed || []), ...(fal.prior || [])]
+  return [silentGap(rev.findings, fal), axesCheckGap(rev.axes, fal['axes-check'], found), rootsCheckGap(rev.roots, fal['roots-check'], found), rootsMissedGap(fal['roots-missed'], rev.roots)].filter(Boolean).join('; ')
+}
+// Места правки снимает не ревьюер: перечень, собранный тем, чью полноту он проверяет, ничего не проверяет.
+const hunkList = (hunks) => (hunks || []).length ? `\nМеста правки (без тестов) - каждое пересекает запись roots: решение либо none с причиной:\n${hunks.map(h => `- ${h}`).join('\n')}` : ''
+const hunkGap = (hunks, roots) => {
+  const bare = (hunks || []).filter(h => !(roots || []).some(x => sameSpot(h, x.anchor)))
+  return bare.length ? `место правки без записи roots: ${bare.join(', ')}` : ''
+}
+// Правила проекта ищет узел снимка, читает ревьюер: прочтение - поле выдачи, иначе непрочитанное правило неотличимо от соблюдённого.
+const CONVENTIONS = {
+  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы, которыми проект нормирует код и ревью; не нашёл - пусто' },
+  'conventions-searched': { type: 'string', description: 'где искал правила проекта' },
+}
+const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'пути из правил проекта во входе, прочитанные до суждения' }
+const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
+const conventionsOf = (x) => x && x.status !== 'blocked' ? x.conventions || [] : []
+const conventionsText = (x) => !x || x.status === 'blocked' ? '' : conventionsOf(x).length
+  ? `\nПравила проекта - прочитай каждое до суждения: нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
+  : `\nПравил проекта не найдено (искали: ${x['conventions-searched'] || 'не названо'}).`
+const conventionsGap = (x, rev) => {
+  const path = (c) => String(c).trim().replace(/^\.\//, '')
+  const read = ((rev && rev['conventions-read']) || []).map(path)
+  const unread = conventionsOf(x).filter(c => !read.includes(path(c)))
+  return unread.length ? `правила проекта не прочитаны: ${unread.join(', ')}` : ''
+}
+const axesText = (axes) => (axes || []).map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'
+const rootsText = (roots) => (roots || []).map(x => `- ${x.anchor}: ${x.decision} - корень: ${x.root} - ${x.verdict}${x.evidence ? ` - ${x.evidence}` : ''}`).join('\n') || '- не названы'
 const FALSIFY = { type: 'object', properties: {
   status: STATUS,
   confirmed: { type: 'array', items: FINDING },
@@ -215,10 +239,34 @@ const FALSIFY = { type: 'object', properties: {
   coverage: { type: 'string', description: 'вердикт по покрытию изменённого поведения: непокрытые ветки поимённо либо "покрыто: <чем>"' },
   'axes-check': { type: 'array', items: { type: 'object', properties: { name: AXIS, verdict: { type: 'string', enum: AXIS_CHECK }, evidence: { type: 'string' } }, required: ['name', 'verdict', 'evidence'] } },
   'roots-check': { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, verdict: { type: 'string', enum: ROOT_CHECK }, evidence: { type: 'string' } }, required: ['anchor', 'verdict', 'evidence'] } },
+  'roots-missed': { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, decision: { type: 'string' } }, required: ['anchor', 'decision'] } },
   'review-verdict': VERDICT,
   prior: { type: 'array', items: PRIOR, description: 'сверенный с кодом статус каждой прежней находки перечня; прежних нет - пусто' },
   missing: { type: 'string' },
-}, required: ['status', 'confirmed', 'dropped', 'coverage', 'axes-check', 'roots-check', 'review-verdict', 'prior', 'missing'] }
+}, required: ['status', 'confirmed', 'dropped', 'coverage', 'axes-check', 'roots-check', 'roots-missed', 'review-verdict', 'prior', 'missing'] }
+// <<< shared: falsify
+const CTX = { type: 'object', properties: {
+  status: STATUS, platform: { type: 'string', enum: ['github', 'gitlab', 'other'] },
+  base_sha: { type: 'string' }, head_sha: { type: 'string' }, files: { type: 'array', items: { type: 'string' } },
+  hunks: { type: 'array', items: { type: 'string' }, description: 'путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file' },
+  at_head: { type: 'boolean' },
+  intent: { type: 'string', description: 'источник намерения с адресом либо "n/a: <где искали>"' },
+  conventions: CONVENTIONS.conventions, 'conventions-searched': CONVENTIONS['conventions-searched'],
+  missing: { type: 'string' },
+}, required: ['status', 'platform', 'base_sha', 'head_sha', 'files', 'hunks', 'at_head', 'intent', 'conventions', 'conventions-searched', 'missing'] }
+const THREAD = { type: 'object', properties: { anchor: PRIOR.properties.anchor, severity: SEV, axis: PRIOR.properties.axis, text: PRIOR.properties.text, status: PRIOR.properties.status, evidence: PRIOR.properties.evidence }, required: ['anchor', 'severity', 'axis', 'text', 'status', 'evidence'] }
+const REVIEW = { type: 'object', properties: {
+  status: STATUS, findings: { type: 'array', items: FINDING, description: 'только находки, которых нет среди прежних' },
+  'fact-check': { type: 'string', description: 'предмет сверки - техутверждения находок' },
+  'conventions-read': CONVENTIONS_READ,
+  axes: AXES,
+  roots: ROOTS,
+  'review-verdict': VERDICT,
+  prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня ledger - запись с её id, статус с доказательством; перечня нет - пусто' },
+  threads: { type: 'array', items: THREAD, description: 'ре-ревью дельты: прежние находки тредов MR, которых нет в перечне ledger, - статус с доказательством; иначе пусто' },
+  questions: { type: 'array', items: { type: 'string' }, description: 'вопросы автору по намерению' },
+  missing: { type: 'string' },
+}, required: ['status', 'findings', 'fact-check', 'conventions-read', 'axes', 'roots', 'review-verdict', 'prior', 'threads', 'questions', 'missing'] }
 const PUBLISH = { type: 'object', properties: {
   status: STATUS,
   published: { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, axis: { type: 'string' }, url: { type: 'string' }, note: { type: 'string', description: '"уже был" - тред существовал до прогона; иначе пусто' } }, required: ['anchor', 'axis', 'url', 'note'] } },
@@ -233,7 +281,7 @@ const LEDGER = ledgerList(A.open_findings, 'прежние находки эти
 const fmt = (fs) => fs.map(findingLine).join('\n')
 
 phase('Context')
-const ctx = await node('сбор предмета ревью', `${HEAD}Шаг 1: предмет ревью. Канал хостинга - MCP платформы через ToolSearch, иначе gh/glab. Возьми метаданные ${A.mr}: base/head SHA, список файлов diff, описание. Переключи рабочий каталог на head SHA (git fetch ссылки MR, затем git checkout --detach <sha>); at_head - переключился ли; не переключился - status partial, причина в missing. Источник намерения: ${A.intent || 'не передан - возьми описание MR и связанный тикет; нет и их - "n/a" с перечнем, где искали'}. Код и MR не меняй.`,
+const ctx = await node('сбор предмета ревью', `${HEAD}Шаг 1: предмет ревью. Канал хостинга - MCP платформы через ToolSearch, иначе gh/glab. Возьми метаданные ${A.mr}: base/head SHA, список файлов diff, описание; hunks - места правки ${DELTA ? A.last_review_sha : 'base SHA'}..head SHA по заголовкам @@ git diff -U0 на стороне правки, без файлов тестов. Переключи рабочий каталог на head SHA (git fetch ссылки MR, затем git checkout --detach <sha>); at_head - переключился ли; не переключился - status partial, причина в missing. Источник намерения: ${A.intent || 'не передан - возьми описание MR и связанный тикет; нет и их - "n/a" с перечнем, где искали'}. ${conventionsAsk} Код и MR не меняй.`,
   { label: 'ctx:subject', phase: 'Context', effort: 'low', schema: CTX })
 trail.push({ step: 1, doer: 'general-purpose', status: ctx ? ctx.status : 'null' })
 if (!ctx || ctx.status === 'blocked') return outcome('blocked', 'Context', lack(ctx, 'узел контекста'))
@@ -241,9 +289,9 @@ if (!ctx || ctx.status === 'blocked') return outcome('blocked', 'Context', lack(
 phase('Review')
 // Где читать код правки, знают оба узла суждения: скептик, читающий диск не на head_sha, сбросил бы находки о правке.
 const TREE_AT = `${ctx.at_head ? `Дерево ${A.cwd} переключено на ${ctx.head_sha}, код читай с диска` : `Дерево ${A.cwd} на ${ctx.head_sha} не переключено (${ctx.missing || 'причина не названа'}): код правки читай через канал хостинга на этой ревизии`}; ревизию не переключай - нужна другая, читай её через git show.`
-const common = `MR/PR: ${A.mr}, BASE_SHA ${ctx.base_sha}, HEAD_SHA ${ctx.head_sha}, файлов ${ctx.files.length}. intent: ${ctx.intent}. publish: false - ноль записей в MR. ${TREE_AT}`
+const common = `MR/PR: ${A.mr}, BASE_SHA ${ctx.base_sha}, HEAD_SHA ${ctx.head_sha}, файлов ${ctx.files.length}. intent: ${ctx.intent}. publish: false - ноль записей в MR. ${TREE_AT}${conventionsText(ctx)}`
 const LEDGER_TEXT = LEDGER.length ? `\nПрежние находки из ledger - по каждой запись в prior с её id, статус с доказательством; находка перечня идёт только в prior, в findings - то, чего в перечне нет:\n${LEDGER.map(priorLine).join('\n')}` : ''
-const rev = await own(DELTA ? 'ре-ревьюер дельты' : 'ревьюер MR', `${HEAD}Шаг 2: ${DELTA ? `ре-ревью дельты: LAST_REVIEW_SHA ${A.last_review_sha}, статус прежних находок, новые находки только в дельте` : `первичное ревью правки ${ctx.base_sha}..${ctx.head_sha}`}. ${common}${DELTA ? ' Прежняя находка из тредов MR, которой нет в перечне ledger, - в threads, не в prior.' : ''}${LEDGER_TEXT}`,
+const rev = await own(DELTA ? 'ре-ревьюер дельты' : 'ревьюер MR', `${HEAD}Шаг 2: ${DELTA ? `ре-ревью дельты: LAST_REVIEW_SHA ${A.last_review_sha}, статус прежних находок, новые находки только в дельте` : `первичное ревью правки ${ctx.base_sha}..${ctx.head_sha}`}. ${common}${DELTA ? ' Прежняя находка из тредов MR, которой нет в перечне ledger, - в threads, не в prior.' : ''}${hunkList(ctx.hunks)}${LEDGER_TEXT}`,
   { label: DELTA ? 'review:delta' : 'review:first', phase: 'Review', schema: REVIEW }, NODE.reviewer)
 loops.review = 1
 trail.push({ step: 2, doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1 })
@@ -263,7 +311,7 @@ const priorIn = reg.all().map(p => ({ ...p, claim: claimOf[p.id] }))
 
 phase('Falsify')
 loops.falsify = 1
-const fal = await own('скептик', `${HEAD}Шаг 3: фальсификация находок, исходов осей и решений ревьюера, вердикт по покрытию. ${common}\nНаходки:\n${fmt(claims) || '- находок нет: только вердикт по покрытию'}${priorIn.length ? `\nПрежние находки - статус ре-ревьюера:\n${priorIn.map(p => `${priorLine(p)} - ре-ревьюер: ${p.claim ? `${p.claim.status} - ${p.claim.evidence}` : 'статус не назван'}`).join('\n')}` : ''}\nОси ревьюера:\n${axes.map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'}\nРешения ревьюера:\n${(rev.roots || []).map(x => `- ${x.anchor}: ${x.decision} - корень: ${x.root} - ${x.verdict}${x.evidence ? ` - ${x.evidence}` : ''}`).join('\n') || '- не названы'}${rev.questions.length ? `\nВопросы автору от ревьюера:\n${rev.questions.map(q => `- ${q}`).join('\n')}` : ''}`,
+const fal = await own('скептик', `${HEAD}Шаг 3: фальсификация находок, исходов осей и решений ревьюера, вердикт по покрытию. ${common}\nНаходки:\n${fmt(claims) || '- находок нет: только вердикт по покрытию'}${priorIn.length ? `\nПрежние находки - статус ре-ревьюера:\n${priorIn.map(p => `${priorLine(p)} - ре-ревьюер: ${p.claim ? `${p.claim.status} - ${p.claim.evidence}` : 'статус не назван'}`).join('\n')}` : ''}\nОси ревьюера:\n${axesText(axes)}\nРешения ревьюера:\n${rootsText(rev.roots)}${rev.questions.length ? `\nВопросы автору от ревьюера:\n${rev.questions.map(q => `- ${q}`).join('\n')}` : ''}`,
   { label: 'falsify+coverage', phase: 'Falsify', schema: FALSIFY }, NODE.skeptic)
 trail.push({ step: 3, doer: NODE.skeptic.agentType, status: fal ? fal.status : 'null', confirmed: fal ? fal.confirmed.length : -1, dropped: fal ? fal.dropped.length : -1 })
 if (!fal || fal.status === 'blocked') return outcome('blocked', 'Falsify', lack(fal, 'скептик'), { ctx, review: rev, claims, prior: reg.all() })
@@ -295,9 +343,10 @@ else if (!ctx.at_head) issues.push(`дерево трека не на head_sha: 
 if (rev.status !== 'complete') issues.push(`ревью не завершено: ${rev.missing || 'узел не назвал нехватку'}`)
 if (axesGap(axes, rev.findings)) issues.push(`ревью: ${axesGap(axes, rev.findings)}`)
 if (rootsGap(rev.roots, [...rev.findings, ...(rev.prior || []), ...(rev.threads || [])])) issues.push(`ревью: ${rootsGap(rev.roots, [...rev.findings, ...(rev.prior || []), ...(rev.threads || [])])}`)
+if (hunkGap(ctx.hunks, rev.roots)) issues.push(`ревью: ${hunkGap(ctx.hunks, rev.roots)}`)
+if (conventionsGap(ctx, rev)) issues.push(`ревью: ${conventionsGap(ctx, rev)}`)
 if (fal.status !== 'complete') issues.push(`фальсификация не завершена: ${fal.missing || 'узел не назвал нехватку'}`)
-if (axesCheckGap(axes, fal['axes-check'], [...(fal.confirmed || []), ...(fal.prior || [])])) issues.push(`фальсификация: ${axesCheckGap(axes, fal['axes-check'], [...(fal.confirmed || []), ...(fal.prior || [])])}`)
-if (rootsCheckGap(rev.roots, fal['roots-check'], [...(fal.confirmed || []), ...(fal.prior || [])])) issues.push(`фальсификация: ${rootsCheckGap(rev.roots, fal['roots-check'], [...(fal.confirmed || []), ...(fal.prior || [])])}`)
+if (checkGap(rev, fal)) issues.push(`фальсификация: ${checkGap(rev, fal)}`)
 if (unsettled.length) issues.push(`статус прежних находок не сверен скептиком: ${unsettled.map(p => p.anchor).join(', ')}`)
 if (!allPublished) issues.push('часть тредов не опубликована')
 // Вердикт выносит скептик, но опровергнуть его открытыми находками может и трек: APPROVE при открытой P0/P1 себя опровергает (BR-AUTO-003).
@@ -307,7 +356,7 @@ const where = issues.join('; ')
 return outcome(where ? 'partial' : 'complete', where, where, {
   subject: { mr: A.mr, base_sha: ctx.base_sha, head_sha: ctx.head_sha, files: ctx.files.length, platform: ctx.platform },
   intent: ctx.intent, 'review-verdict': fal['review-verdict'], reviewer_verdict: rev['review-verdict'], axes, roots: rev.roots || [], 'fact-check': rev['fact-check'], prior, questions: rev.questions,
-  confirmed, dropped: fal.dropped, coverage: fal.coverage, 'axes-check': fal['axes-check'], 'roots-check': fal['roots-check'],
+  confirmed, dropped: fal.dropped, coverage: fal.coverage, 'axes-check': fal['axes-check'], 'roots-check': fal['roots-check'], 'roots-missed': fal['roots-missed'],
   published: pub ? pub.published : [],
   unpublished,
 })
