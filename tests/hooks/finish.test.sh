@@ -60,6 +60,12 @@ check "$(grep -c '^- F2 closed \[P1\] src/b.ts:3: проверка добавл�
 "$F" P-1 bugfix partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"F1","status":"open","evidence":"оператор: кадр проброшен","premise":"","text":""}]}' >/dev/null
 check "$("$L" findings P-1 bugfix | python3 -c 'import json,sys; r=json.load(sys.stdin)[0]; print(repr(r["premise"])+"|"+r["text"])')" "''|кадр не проброшен" "реестр: пустой premise снимает пометку пробы, прочие пустые поля запись не перезаписывают"
 
+"$L" open P-2 >/dev/null
+"$F" P-2 review partial <<< '{"status":"partial","trail":[{"step":3}],"confirmed":[{"severity":"P2","anchor":"src/s.ts:4","places":["src/t.ts:9-12"],"text":"флаг не сброшен","closure":"сброшен везде"}]}' >/dev/null
+"$F" P-2 review partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"F1","status":"partial","evidence":"s.ts сброшен","places":[]}]}' >/dev/null
+check "$("$L" findings P-2 review | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["places"])')" "['src/t.ts:9-12']" "реестр: пустой places записи не перезаписывает"
+check "$(grep -c '^- F1 partial \[P2\] src/s.ts:4: флаг не сброшен (закрытие: сброшен везде) (также: src/t.ts:9-12)$' "$("$L" dir P-2)/01-review.md")" "1" "finish: места находки - в строке Открытых находок"
+
 "$L" open F-2 >/dev/null
 "$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":1}],"open_findings":[{"severity":"P1","anchor":"src/a.ts:10","text":"находка прогона 1"}]}' >/dev/null
 "$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":2}],"open_findings":[{"severity":"P1","anchor":"src/b.ts:20","text":"находка прогона 2"}]}' >/dev/null
