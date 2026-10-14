@@ -35,11 +35,14 @@ async function runTrack(track, args, responses, unavailable = []) {
 
 const green = { status: 'complete', exit_code: 0, pass_count: 9, fail_count: 0, failing: [], build_ok: true, head: 'abc feat', dirty: false, ahead: 1, repro_test_hash: '', missing: '' }
 const red = { ...green, exit_code: 1, fail_count: 2, failing: ['T1', 'T2'], head: 'abc wip' }
+const baseGreen = { ...green, ahead: 0, head: 'abc base' }
+const baseRed = (name) => ({ ...baseGreen, exit_code: 1, pass_count: 8, fail_count: 1, failing: [name] })
+const onlyFails = (v, names) => ({ ...v, exit_code: 1, fail_count: names.length, failing: names })
 const dirty = { ...green, dirty: true }
 const ctxOk = { status: 'complete', requirements: ['R1 ...'], files: ['src/A.cs'], corpus: 'docs/', 'conflict-status': 'none', conflicts: [], missing: '' }
 // Техконтекст отдаёт свой узел: в разведке его полей нет вовсе, иначе сценарий не отличит «трек взял у подготовки» от «взял у разведки».
-const prepOk = { status: 'complete', stack: 'dotnet', stack_basis: 'src/A.csproj:1', test_cmd: 'dotnet test', build_cmd: 'dotnet build', prepare_cmd: 'dotnet restore', 'prepare-status': 'done', prepare_log: 'exit 0, obj/project.assets.json на месте', 'baseline-status': 'green', baseline_log: 'сборка ok, тестов 9 прошло', missing: '' }
-const prepTs = { ...prepOk, stack: 'ts', stack_basis: 'package.json:1', test_cmd: 'npm test', build_cmd: 'tsc', prepare_cmd: 'npm ci' }
+const prepOk = { status: 'complete', stack: 'dotnet', stack_basis: 'src/A.csproj:1', test_cmd: 'dotnet test', build_cmd: 'dotnet build', prepare_cmd: 'dotnet restore', 'prepare-status': 'done', prepare_log: 'exit 0, obj/project.assets.json на месте', report_cmd: 'dotnet test --logger trx --results-directory "$DEX_AUTO_JUNIT_DIR"', missing: '' }
+const prepTs = { ...prepOk, stack: 'ts', stack_basis: 'package.json:1', test_cmd: 'npm test', report_cmd: '', build_cmd: 'tsc', prepare_cmd: 'npm ci' }
 const prepNotNeeded = { ...prepOk, prepare_cmd: '', 'prepare-status': 'not-needed', prepare_log: 'зависимости ставит сама сборка' }
 const prepFailed = { ...prepOk, 'prepare-status': 'failed', prepare_log: 'dotnet restore: NU1101 фид недоступен' }
 // Противоречие источников: AC владельца против критерия «готово» цели. Вторая пара - «none» при
@@ -93,8 +96,8 @@ const falWith = (over, of = 'self-review:первое') => (n, prompt, last) => 
 const reproCtx = { ...reproOk, stack: 'ts', build_cmd: 'tsc', test_cmd: 'npm test', prepare_cmd: 'npm ci', accepted: 'accepted', dispute: '' }
 const ctxTech = { ...ctxOk, stack: 'ts', build_cmd: 'tsc', test_cmd: 'npm test', prepare_cmd: 'npm ci' }
 const treeTrail = (e) => '- ' + JSON.stringify({ step: '1-tree', doer: 'подготовка дерева', status: 'complete', baseline: 'green', baseline_log: 'тестов 9 прошло', ...e })
-const featureArgs = { task: 'F-1', goal: 'цель', done: 'npm test -> 0', boundary: 'не трогать схему', mode: 'autonomous', cwd: '/repo-F-1' }
-const bugfixArgs = { task: 'B-1', symptom: 'дубль платежа', expected: 'один платёж', env: 'staging', done: 'npm test -> 0', boundary: 'не трогать схему', mode: 'autonomous', cwd: '/repo-B-1' }
+const featureArgs = { task: 'F-1', goal: 'цель', done: 'npm test -> 0', boundary: 'не трогать схему', mode: 'autonomous', cwd: '/repo-F-1', scripts: '/plug/hooks/scripts' }
+const bugfixArgs = { task: 'B-1', symptom: 'дубль платежа', expected: 'один платёж', env: 'staging', done: 'npm test -> 0', boundary: 'не трогать схему', mode: 'autonomous', cwd: '/repo-B-1', scripts: '/plug/hooks/scripts' }
 const reviewArgs = { task: 'gh-1', mr: 'owner/repo#7', intent: 'issue #12', mode: 'autonomous', cwd: '/repo-gh-1' }
 const goalArgs = { kind: 'feature', corpus: '/tmp/goal-c1', cwd: '/repo' }
 const probeNode = 'dex-auto:goal-reader'
@@ -119,6 +122,8 @@ const labelsOf = (calls) => calls.map(c => c.label)
 // Выход трека - реестр прогона в prior (ledger.md R10): открытые - его разность, как у finish.sh.
 const openOf = (r) => (r.prior || []).filter(p => ['open', 'partial', 'unverified'].includes(p.status))
 const promptOf = (calls, label) => (calls.find(c => c.label === label) || {}).prompt || ''
+// Вход verify.py - hex от JSON в промпте верификатора: сценарий судит разобранную спеку, не hex.
+const specOf = (calls, label) => { const m = /verify\.py' ([0-9a-f]+)/.exec(promptOf(calls, label)); return m ? JSON.parse(decodeURIComponent(m[1].replace(/../g, '%$&'))) : null }
 const prepSchema = (calls) => ((calls.find(c => c.label === 'ctx:tree') || {}).schema || {}).properties || {}
 const typeOf = (calls, label) => (calls.find(c => c.label === label) || {}).agentType
 // Запрет записи держат tools узла, а не промпт, цену ставит трек: сверяется frontmatter агента, который поедет в плагине.
@@ -190,7 +195,7 @@ const SCENARIOS = [
     expect: ({ result, calls }) => [
       ['статус complete', result.status === 'complete'],
       ['две правки', result.loops.fix === 2],
-      ['вторая попытка знает про падение первой', /падают: T1; T2/.test(promptOf(calls, 'fix:2'))],
+      ['вторая попытка знает про падение первой', /новые падения: T1; T2/.test(promptOf(calls, 'fix:2'))],
     ] },
   { name: 'F3 потолок правок исчерпан', track: 'feature', args: featureArgs,
     responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'fix:2': fixOk, 'fix:3': fixOk, 'verify:после попытки 1': red, 'verify:после попытки 2': red, 'verify:после попытки 3': red },
@@ -199,7 +204,7 @@ const SCENARIOS = [
       ['причина названа', /потолок 3/.test(result.where)],
       ['ревью не запускалось', !labelsOf(calls).some(l => l.startsWith('self-review'))],
       ['петли: три правки', result.loops.fix === 3],
-      ['нехватка несёт итог последней верификации', /^дерево не зелёное после 3 попыток: exit=1, build_ok=true, прошло тестов: \d+, падают: /.test(result.missing)],
+      ['нехватка несёт итог последней верификации', /^дерево не зелёное после 3 попыток: exit=1, build_ok=true, прошло тестов: \d+, новые падения: /.test(result.missing)],
     ] },
   { name: 'F4 контекст вернул blocked', track: 'feature', args: featureArgs,
     responses: { 'ctx:R-I': { ...ctxOk, status: 'blocked', missing: 'нет доступа к спеке' } },
@@ -353,7 +358,7 @@ const SCENARIOS = [
     expect: ({ result, calls }) => [
       ['статус complete', result.status === 'complete'],
       ['узел разведки не вызван', !labelsOf(calls).includes('ctx:R-I')],
-      ['команда тестов в промпте верификации - от узла подготовки', /dotnet test/.test(promptOf(calls, 'verify:возобновление'))],
+      ['команда тестов в спеке верификации - от узла подготовки', /dotnet test/.test((specOf(calls, 'verify:возобновление') || {}).test)],
       ['источник разведки назван в trail', /ledger/.test(stepOf(result.trail, '1-req'))],
       ['подготовка дерева куплена: в ctx нет техконтекста, в trail - замера подготовки', labelsOf(calls).includes('ctx:tree')],
     ] },
@@ -441,7 +446,7 @@ const SCENARIOS = [
       ['статус partial', result.status === 'partial'],
       ['причина названа', /потолок 3/.test(result.where)],
       ['первопричина сохранена для следующего прогона', !!result.repro],
-      ['нехватка той же формы, что у feature', /^дерево не зелёное после 3 попыток: exit=1, build_ok=true, прошло тестов: \d+, падают: /.test(result.missing)],
+      ['нехватка той же формы, что у feature', /^дерево не зелёное после 3 попыток: exit=1, build_ok=true, прошло тестов: \d+, новые падения: /.test(result.missing)],
     ] },
   { name: 'B3a возобновление с воспроизведением из ledger: диагност не покупается', track: 'bugfix',
     args: { ...bugfixArgs, resume: true, trail: '- {"step":1}', repro: reproOk },
@@ -667,7 +672,7 @@ const SCENARIOS = [
       ['оба узла в фазе Context', calls.filter(c => ['ctx:tree', 'ctx:R-I'].includes(c.label)).every(c => c.phase === 'Context')],
       ['разведке техконтекст запрещён', /Стек, команды сборки и тестов не выводи/.test(promptOf(calls, 'ctx:R-I'))],
       ['разведке названо, что дерево в работе у соседа', /соседний узел в этот момент ставит в это дерево зависимости/.test(promptOf(calls, 'ctx:R-I'))],
-      ['подготовке запрещено трогать код и чинить упавшее', /Код не правь и упавшее не чини/.test(promptOf(calls, 'ctx:tree'))],
+      ['подготовке запрещено трогать код и гонять сборку с тестами', /Код не правь, сборку и тесты не гоняй/.test(promptOf(calls, 'ctx:tree'))],
       ['оба шага легли в trail', result.trail.some(t => t.step === '1-tree') && result.trail.some(t => t.step === '1-req')],
       ['команды кодеру пришли от подготовки', promptOf(calls, 'fix:1').includes('Тесты: dotnet test') && promptOf(calls, 'fix:1').includes('Сборка: dotnet build')],
     ] },
@@ -1103,7 +1108,7 @@ const SCENARIOS = [
       ['трек complete', result.status === 'complete'],
       ['кодеру назван тест диагноста', promptOf(calls, 'fix:1').includes('Тест диагноста: test/pay.test.ts')],
       ['кодеру предписана приёмка без node-contract', promptOf(calls, 'fix:1').includes('До правки прими диагноз') && !promptOf(calls, 'fix:1').includes('Диагноз принят прошлой попыткой') && !promptOf(calls, 'fix:1').includes('node-contract')],
-      ['верификатор снимает хэш теста и пишет объект', promptOf(calls, 'verify:после попытки 1').includes('git hash-object -w test/pay.test.ts')],
+      ['верификатор снимает хэш теста диагноста', (specOf(calls, 'verify:после попытки 1') || {}).hash_path === 'test/pay.test.ts'],
       ['ревью не получает сигнала о правке теста', !promptOf(calls, 'self-review:первое').includes('изменён кодером')],
       ['исход приёмки в возврате для ledger', result.repro.accepted === 'accepted'],
       ['диагносту предписана судьба прежнего теста', promptOf(calls, 'reproduce').includes('сдаёшь один тест')],
@@ -1116,7 +1121,7 @@ const SCENARIOS = [
       ['улика едет в repro для возобновления', result.repro.dispute.includes('src/pay.ts:40 ключ идемпотентности уже проверяется')],
       ['путь оставленного теста назван', /тест диагноста оставлен в дереве: test\/pay\.test\.ts/.test(result.missing)],
       ['диагност вызван один раз', calls.filter(c => c.label === 'reproduce').length === 1],
-      ['верификация не покупалась', !labelsOf(calls).some(l => l.startsWith('verify:'))],
+      ['верификация правки не покупалась', !labelsOf(calls).some(l => l.startsWith('verify:') && l !== 'verify:база')],
       ['спор в выходе', result.disputes.length === 1],
     ] },
   { name: 'B21 возобновление после спора -> диагност вызван с уликой и прежним тестом, кодер получает новый диагноз', track: 'bugfix',
@@ -1348,7 +1353,7 @@ const SCENARIOS = [
       ['статус partial', result.status === 'partial'],
       ['where называет расхождение', /реализовано не то: R1 требует отказ/.test(result.where)],
     ] },
-  { name: 'F57 коммитов трека нет -> committed ложно, complete не отдаётся', track: 'feature', args: featureArgs,
+  { name: 'F57 коммитов трека нет -> committed ложно, complete не отдаётся', track: 'feature', args: { ...featureArgs, scripts: '' },
     responses: { 'ctx:R-I': ctxOk, 'fix:1': { ...fixOk, commit: '' }, 'verify:после попытки 1': { ...green, ahead: 0 }, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
       ['статус partial', result.status === 'partial'],
@@ -1477,7 +1482,7 @@ const SCENARIOS = [
       ['попытка 2 вызвана', labelsOf(calls).includes('fix:2')],
       ['число прошедших названо', promptOf(calls, 'fix:2').includes('прошло тестов: 0')],
     ] },
-  { name: 'B101 коммитов трека нет -> partial, committed false', track: 'bugfix', args: bugfixArgs,
+  { name: 'B101 коммитов трека нет -> partial, committed false', track: 'bugfix', args: { ...bugfixArgs, scripts: '' },
     responses: { reproduce: reproOk, 'fix:1': fixOk, 'verify:после попытки 1': { ...green, ahead: 0 }, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
       ['статус partial', result.status === 'partial' && /коммитов трека нет/.test(result.where)],
@@ -1792,7 +1797,7 @@ const SCENARIOS = [
       ['дебаггеру - тестов и сборки нет', promptOf(calls, 'reproduce').includes('Тесты: нет. Сборка: нет.')],
       ['кодеру - тестов и сборки нет', promptOf(calls, 'fix:1').includes('Тесты: нет. Сборка: нет.')],
       ['дерево не упомянуто', !promptOf(calls, 'fix:1').includes('Дерево подготовлено')],
-      ['верификатор без команд', promptOf(calls, 'verify:после попытки 1').includes('тестов нет - build_ok по сборке') && !promptOf(calls, 'verify:после попытки 1').includes('сборку:')],
+      ['верификатор без команд', (v => !!v && v.build === '' && v.test === '')(specOf(calls, 'verify:после попытки 1'))],
       ['статус partial: внешнего факта нет', result.status === 'partial' && /внешнего факта нет/.test(result.where)],
       ['поданные done и boundary - в шапке как есть, пропуска нет', promptOf(calls, 'fix:1').includes('критерий «готово»: npm test -> 0\nграница: не трогать схему\n') && !result.degraded.some(d => / в args: /.test(d))],
     ] },
@@ -1827,8 +1832,8 @@ const SCENARIOS = [
       'verify:после попытки 1': { ...red, build_ok: false, failing: [] }, 'verify:после попытки 2': { ...red, build_ok: false, failing: [] }, 'verify:после попытки 3': { ...red, build_ok: false, failing: [] } },
     expect: ({ result, calls }) => [
       ['статус partial', result.status === 'partial'],
-      ['промпту - падают: нет', promptOf(calls, 'fix:2').includes('падают: нет')],
-      ['нехватке - падают: нет', result.missing.includes('падают: нет')],
+      ['промпту - новые падения: нет', promptOf(calls, 'fix:2').includes('новые падения: нет')],
+      ['нехватке - новые падения: нет', result.missing.includes('новые падения: нет')],
     ] },
   { name: 'B69 возобновление после спора, тест прежнего диагноза не назван -> диагносту путь теста не подставлен', track: 'bugfix',
     args: { ...bugfixArgs, resume: true, trail: '- {"step":2}', repro: { ...reproOk, dispute: 'src/a.ts:12 ключ уже проверяется' } },
@@ -2156,12 +2161,12 @@ const SCENARIOS = [
       ['ошибка узла названа', result.degraded.some(d => /запись prior N9 .* не из перечня/.test(d))],
     ] },
   { name: 'B128 база красная -> degraded, диагносту и кодеру названы унаследованные падения', track: 'bugfix', args: bugfixArgs,
-    responses: { 'ctx:tree': { ...prepTs, 'baseline-status': 'red', baseline_log: 'pay.test падает' }, 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'verify:база': baseRed('pay.test'), 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
-      ['красная база названа оператору', result.degraded.some(d => d === 'дерево красное до правок трека: pay.test падает')],
-      ['диагносту падения базы названы унаследованными', promptOf(calls, 'reproduce').includes('уже падали (pay.test падает): эти падения унаследованы')],
-      ['кодеру - тоже', promptOf(calls, 'fix:1').includes('уже падали (pay.test падает): эти падения унаследованы')],
-      ['база легла в trail', (t => t && t.baseline === 'red' && t.baseline_log === 'pay.test падает')(result.trail.find(t => t.step === '1-tree'))],
+      ['красная база названа оператору', result.degraded.some(d => d.startsWith('дерево красное до правок трека: ') && d.includes('pay.test'))],
+      ['диагносту падения базы названы унаследованными', promptOf(calls, 'reproduce').includes('уже падали (pay.test): эти падения унаследованы')],
+      ['кодеру - тоже', promptOf(calls, 'fix:1').includes('уже падали (pay.test): эти падения унаследованы')],
+      ['база легла в trail', (t => t && t.baseline === 'red' && JSON.stringify(t.baseline_failing) === '["pay.test"]')(result.trail.find(t => t.step === '1-tree'))],
     ] },
   { name: 'B129 база зелёная -> диагносту и кодеру любое падение внесено правкой', track: 'bugfix', args: bugfixArgs,
     responses: { 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
@@ -2172,33 +2177,82 @@ const SCENARIOS = [
     ] },
   { name: 'B130 возобновление, база n/a -> кодеру база прошлого прогона из trail', track: 'bugfix',
     args: { ...bugfixArgs, resume: true, trail: ['- ' + JSON.stringify({ step: '1-tree', doer: 'подготовка дерева', status: 'complete', prepare: 'done', baseline: 'red', baseline_log: 'pay.test падает' }), '- {"step":2,"attempt":1,"status":"blocked"}'].join('\n'), repro: JSON.stringify(reproOk) },
-    responses: { 'ctx:tree': { ...prepTs, 'baseline-status': 'n/a', baseline_log: 'в дереве правки трека' }, 'verify:возобновление': { ...green, ahead: 0 }, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'verify:возобновление': { ...green, ahead: 0 }, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
       ['база прошлого прогона названа кодеру', promptOf(calls, 'fix:1').includes('уже падали (pay.test падает): эти падения унаследованы')],
       ['строки базы в degraded нет', !result.degraded.some(d => /дерево красное/.test(d))],
     ] },
   { name: 'B131 возобновление, база n/a и в trail её нет -> строки базы у кодера нет', track: 'bugfix',
     args: { ...bugfixArgs, resume: true, trail: '- {"step":2,"attempt":1,"status":"blocked"}', repro: JSON.stringify(reproOk) },
-    responses: { 'ctx:tree': { ...prepTs, 'baseline-status': 'n/a', baseline_log: 'в дереве правки трека' }, 'verify:возобновление': { ...green, ahead: 0 }, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'verify:база': green, 'verify:возобновление': { ...green, ahead: 0 }, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
       ['строки базы нет', !/До правок трека сборка и тесты/.test(promptOf(calls, 'fix:1'))],
       ['замер этого прогона в trail - n/a', (t => t && t.baseline === 'n/a')(result.trail.find(t => t.step === '1-tree'))],
     ] },
   { name: 'B132 возобновление, в trail база зелёная, свежий замер red -> кодеру база из trail, degraded без строки базы', track: 'bugfix',
     args: { ...bugfixArgs, resume: true, trail: ['- ' + JSON.stringify({ step: '1-tree', doer: 'подготовка дерева', status: 'complete', prepare: 'done', baseline: 'green', baseline_log: 'тестов 9 прошло' }), '- {"step":2,"attempt":1,"status":"blocked"}'].join('\n'), repro: JSON.stringify(reproOk) },
-    responses: { 'ctx:tree': { ...prepTs, 'baseline-status': 'red', baseline_log: 'pay.test падает' }, 'verify:возобновление': { ...green, ahead: 0 }, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'verify:база': baseRed('pay.test'), 'verify:возобновление': { ...green, ahead: 0 }, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
-      ['кодеру названа база из trail', promptOf(calls, 'fix:1').includes('До правок трека сборка и тесты были зелёными') && !promptOf(calls, 'fix:1').includes('pay.test падает')],
+      ['кодеру названа база из trail', promptOf(calls, 'fix:1').includes('До правок трека сборка и тесты были зелёными') && !promptOf(calls, 'fix:1').includes('pay.test')],
       ['строки базы в degraded нет', !result.degraded.some(d => /дерево красное/.test(d))],
+      ['свежий замер не покупался', !labelsOf(calls).includes('verify:база')],
+    ] },
+  { name: 'B204 верификатор bugfix зовёт verify.py: спека несёт тест диагноста, без scripts - degraded', track: 'bugfix', args: bugfixArgs,
+    responses: { 'reproduce': reproTest, 'fix:1': fixOk, 'verify:после попытки 1': greenTest, 'self-review:первое': revClean },
+    expect: ({ calls }) => [
+      ['промпт - запуск скрипта', promptOf(calls, 'verify:после попытки 1').includes("python3 '/plug/hooks/scripts/verify.py' ")],
+      ['тесты без отчёта раннера - test_cmd, хэш теста диагноста', (v => !!v && v.test === 'npm test' && v.hash_path === 'test/pay.test.ts')(specOf(calls, 'verify:после попытки 1'))],
+      ['узел дешёвый', calls.filter(c => c.label.startsWith('verify:')).every(c => c.model === 'haiku' && c.effort === 'low')],
+    ] },
+  { name: 'B204b scripts не подан -> прежний прогон моделью, degraded', track: 'bugfix', args: { ...bugfixArgs, scripts: '' },
+    responses: { 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['пропуск назван оператору', result.degraded.some(d => /args\.scripts/.test(d))],
+      ['прежний прогон моделью', promptOf(calls, 'verify:после попытки 1').includes('тесты: npm test') && !promptOf(calls, 'verify:после попытки 1').includes('verify.py')],
+    ] },
+  { name: 'B205 база - до диагноста; её падения едут верификатору правки известными', track: 'bugfix', args: bugfixArgs,
+    responses: { 'verify:база': baseRed('pay.test'), 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ calls }) => [
+      ['база раньше диагноста', labelsOf(calls).indexOf('verify:база') >= 0 && labelsOf(calls).indexOf('verify:база') < labelsOf(calls).indexOf('reproduce')],
+      ['верификатору правки падения базы известны', JSON.stringify((specOf(calls, 'verify:после попытки 1') || {}).known) === '["pay.test"]'],
+    ] },
+  { name: 'B206 итог красен только падениями базы -> complete, унаследованные в degraded, нестабильные в decisions', track: 'bugfix', args: bugfixArgs,
+    responses: { 'verify:база': baseRed('pay.test'), 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': { ...onlyFails(green, ['pay.test']), flaky: ['T7'] }, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['вторая попытка не покупалась', !labelsOf(calls).includes('fix:2')],
+      ['статус complete', result.status === 'complete'],
+      ['унаследованные названы оператору', result.degraded.includes('падения базы не исправлены и правке не вменены: pay.test')],
+      ['нестабильный назван', result.decisions.some(d => /нестабильные тесты.*T7/.test(d))],
+    ] },
+  { name: 'B207 новое падение при красной базе -> не зелень, кодеру новые отдельно', track: 'bugfix', args: bugfixArgs,
+    responses: { 'verify:база': baseRed('pay.test'), 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': onlyFails(green, ['pay.test', 'refund.test']), 'fix:2': fixOk, 'verify:после попытки 2': green, 'self-review:первое': revClean },
+    expect: ({ calls }) => [
+      ['кодеру новые падения отдельно', promptOf(calls, 'fix:2').includes('новые падения: refund.test, унаследованы от базы: pay.test')],
+    ] },
+  { name: 'B208 база на дереве с коммитами трека -> n/a', track: 'bugfix', args: bugfixArgs,
+    responses: { 'verify:база': red, 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['база n/a с причиной', (t => t && t.baseline === 'n/a' && t.baseline_log === 'в дереве правки трека')(result.trail.find(t => t.step === '1-tree'))],
+      ['строки базы у диагноста нет', !/До правок трека сборка и тесты/.test(promptOf(calls, 'reproduce'))],
+    ] },
+  { name: 'B209 ни сборки, ни тестов -> база не покупается, n/a с причиной', track: 'bugfix', args: bugfixArgs,
+    responses: { 'ctx:tree': { ...prepTs, test_cmd: '', build_cmd: '' }, reproduce: reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['база не покупалась', !labelsOf(calls).includes('verify:база')],
+      ['в trail n/a с причиной', (t => t && t.baseline === 'n/a' && t.baseline_log === 'нет ни сборки, ни тестов')(result.trail.find(t => t.step === '1-tree'))],
+    ] },
+  { name: 'B210 кодер bugfix гоняет тесты задетого, полный набор - верификатору', track: 'bugfix', args: bugfixArgs,
+    responses: { 'reproduce': reproOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ calls }) => [
+      ['кодеру предписан охват', promptOf(calls, 'fix:1').includes('Гоняй тесты задетого правкой, полный набор не гоняй.')],
     ] },
   { name: 'B133 к тесту диагноста дописаны тесты в тот же файл, снимок на итоговом коде зелёный и возвращён -> complete', track: 'bugfix', args: bugfixArgs,
     responses: { 'reproduce': reproTest, 'fix:1': fixOk, 'verify:после попытки 1': { ...greenTest, repro_test_hash: 'b2' }, 'self-review:первое': revClean,
       'verify:снимок': { ...greenTest, repro_test_hash: 'b2', snap_hash: 'b1' } },
     expect: ({ result, calls }) => [
       ['статус complete: дописанное рядом правкой теста не считается', result.status === 'complete'],
-      ['верификатор ставит снимок диагноста', promptOf(calls, 'verify:снимок').includes('git show b1 > test/pay.test.ts')],
-      ['постановка снимка снимается хэшем до сборки', promptOf(calls, 'verify:снимок').includes('git hash-object test/pay.test.ts - в snap_hash')],
-      ['верификатор возвращает файл при любом исходе', promptOf(calls, 'verify:снимок').includes('git checkout -- test/pay.test.ts при любом исходе, blocked тоже')],
+      ['верификатор ставит снимок диагноста на путь теста', (v => !!v && v.snap.blob === 'b1' && v.snap.path === 'test/pay.test.ts')(specOf(calls, 'verify:снимок'))],
+      ['хэш возвращённого файла снимается', (specOf(calls, 'verify:снимок') || {}).hash_path === 'test/pay.test.ts'],
       ['прогон снимка в trail', /"placed":true,"passed":true,"returned":true/.test(stepOf(result.trail, 'snapshot'))],
     ] },
   { name: 'B134 снимок на итоговом коде красный -> partial, разрыв называет красный снимок', track: 'bugfix', args: bugfixArgs,
@@ -2250,7 +2304,7 @@ const SCENARIOS = [
       'verify:снимок': { ...greenTest, repro_test_hash: 'b3', snap_hash: 'b2' } },
     expect: ({ result, calls }) => [
       ['статус complete', result.status === 'complete'],
-      ['снимок - приёмки, не диагноста', promptOf(calls, 'verify:снимок').includes('git show b2 > test/pay.test.ts')],
+      ['снимок - приёмки, не диагноста', ((specOf(calls, 'verify:снимок') || {}).snap || {}).blob === 'b2'],
     ] },
   { name: 'B138 итог после правки по ревью красный -> снимок не прогоняется, разрыв - красное дерево', track: 'bugfix', args: bugfixArgs,
     responses: { 'reproduce': reproTest, 'fix:1': fixOk, 'verify:после попытки 1': greenTest,
@@ -2480,11 +2534,11 @@ const SCENARIOS = [
       ['статус complete', result.status === 'complete'],
     ] },
   { name: 'F86 база красная -> degraded, кодеру названы унаследованные падения, база в trail', track: 'feature', args: featureArgs,
-    responses: { 'ctx:tree': { ...prepOk, 'baseline-status': 'red', baseline_log: 'T9 падает' }, 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'verify:база': baseRed('T9'), 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
-      ['красная база названа оператору', result.degraded.some(d => d === 'дерево красное до правок трека: T9 падает')],
-      ['кодеру падения базы названы унаследованными', promptOf(calls, 'fix:1').includes('До правок трека сборка и тесты уже падали (T9 падает): эти падения унаследованы, прочие внесены правками трека')],
-      ['база легла в trail', (t => t && t.baseline === 'red' && t.baseline_log === 'T9 падает')(result.trail.find(t => t.step === '1-tree'))],
+      ['красная база названа оператору', result.degraded.some(d => d.startsWith('дерево красное до правок трека: ') && d.includes('T9'))],
+      ['кодеру падения базы названы унаследованными', promptOf(calls, 'fix:1').includes('До правок трека сборка и тесты уже падали (T9): эти падения унаследованы, прочие внесены правками трека')],
+      ['база легла в trail', (t => t && t.baseline === 'red' && JSON.stringify(t.baseline_failing) === '["T9"]')(result.trail.find(t => t.step === '1-tree'))],
       ['статус complete', result.status === 'complete'],
     ] },
   { name: 'F87 база зелёная -> кодеру любое падение внесено правкой, degraded без строки базы', track: 'feature', args: featureArgs,
@@ -2496,7 +2550,7 @@ const SCENARIOS = [
     ] },
   { name: 'F88 возобновление, база n/a -> кодеру база прошлого прогона из trail, degraded без строки базы', track: 'feature',
     args: { ...featureArgs, resume: true, trail: ['- ' + JSON.stringify({ step: '1-tree', doer: 'подготовка дерева', status: 'complete', prepare: 'done', baseline: 'red', baseline_log: 'T9 падает' }), '- {"step":2,"attempt":1,"status":"partial"}'].join('\n') },
-    responses: { 'ctx:tree': { ...prepOk, 'baseline-status': 'n/a', baseline_log: 'в дереве правки трека' }, 'ctx:R-I': ctxOk, 'verify:возобновление': red, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'ctx:R-I': ctxOk, 'verify:возобновление': red, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
       ['база прошлого прогона названа кодеру', promptOf(calls, 'fix:1').includes('уже падали (T9 падает): эти падения унаследованы')],
       ['строки базы в degraded нет', !result.degraded.some(d => /дерево красное/.test(d))],
@@ -2504,18 +2558,86 @@ const SCENARIOS = [
     ] },
   { name: 'F89 возобновление, база n/a и в trail её нет -> строки базы у кодера нет', track: 'feature',
     args: { ...featureArgs, resume: true, trail: '- {"step":2,"attempt":1,"status":"partial"}' },
-    responses: { 'ctx:tree': { ...prepOk, 'baseline-status': 'n/a', baseline_log: 'в дереве правки трека' }, 'ctx:R-I': ctxOk, 'verify:возобновление': red, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'verify:база': green, 'ctx:R-I': ctxOk, 'verify:возобновление': red, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
       ['строки базы нет', !/До правок трека сборка и тесты/.test(promptOf(calls, 'fix:1'))],
       ['замер этого прогона в trail - n/a', (t => t && t.baseline === 'n/a')(result.trail.find(t => t.step === '1-tree'))],
     ] },
   { name: 'F90 возобновление, в trail база зелёная, свежий замер red -> кодеру база из trail, degraded без строки базы', track: 'feature',
     args: { ...featureArgs, resume: true, trail: ['- ' + JSON.stringify({ step: '1-tree', doer: 'подготовка дерева', status: 'complete', prepare: 'done', baseline: 'green', baseline_log: 'тестов 9 прошло' }), '- {"step":2,"attempt":1,"status":"partial"}'].join('\n') },
-    responses: { 'ctx:tree': { ...prepOk, 'baseline-status': 'red', baseline_log: 'T3 падает' }, 'ctx:R-I': ctxOk, 'verify:возобновление': red, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    responses: { 'verify:база': baseRed('T3'), 'ctx:R-I': ctxOk, 'verify:возобновление': red, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
     expect: ({ result, calls }) => [
-      ['кодеру названа база из trail', promptOf(calls, 'fix:1').includes('До правок трека сборка и тесты были зелёными') && !promptOf(calls, 'fix:1').includes('T3 падает')],
+      ['кодеру названа база из trail', promptOf(calls, 'fix:1').includes('До правок трека сборка и тесты были зелёными') && !promptOf(calls, 'fix:1').includes('T3')],
       ['строки базы в degraded нет', !result.degraded.some(d => /дерево красное/.test(d))],
-      ['замер этого прогона в trail - как вернул узел', (t => t && t.baseline === 'red')(result.trail.find(t => t.step === '1-tree'))],
+      ['свежий замер не покупался, в trail - n/a с причиной', !labelsOf(calls).includes('verify:база') && (t => t && t.baseline === 'n/a' && t.baseline_log === 'база прошлого прогона в trail')(result.trail.find(t => t.step === '1-tree'))],
+    ] },
+  { name: 'F145 верификатор зовёт verify.py из args.scripts: спека несёт report_cmd подготовки, haiku с effort low', track: 'feature', args: featureArgs,
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['подготовка выводит report_cmd', /report_cmd - test_cmd, дополненная встроенным флагом раннера/.test(promptOf(calls, 'ctx:tree'))],
+      ['промпт - запуск скрипта из каталога плагина', promptOf(calls, 'verify:после попытки 1').includes("python3 '/plug/hooks/scripts/verify.py' ")],
+      ['тесты - report_cmd, сборка - build_cmd', (v => !!v && v.test === prepOk.report_cmd && v.build === 'dotnet build')(specOf(calls, 'verify:после попытки 1'))],
+      ['узел дешёвый', calls.filter(c => c.label.startsWith('verify:')).every(c => c.model === 'haiku' && c.effort === 'low')],
+      ['строки о каталоге скриптов нет', !result.degraded.some(d => /args\.scripts/.test(d))],
+    ] },
+  { name: 'F145b scripts не подан -> верификатор гоняет команды сам, degraded', track: 'feature', args: { ...featureArgs, scripts: '' },
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['пропуск назван оператору', result.degraded.some(d => /args\.scripts/.test(d))],
+      ['прежний прогон моделью', promptOf(calls, 'verify:после попытки 1').includes('Выполни сборку: dotnet build; тесты: dotnet test') && !promptOf(calls, 'verify:после попытки 1').includes('verify.py')],
+    ] },
+  { name: 'F146 база красная -> её падения едут верификатору правки известными, кодеру новые отдельно от унаследованных', track: 'feature', args: featureArgs,
+    responses: { 'verify:база': baseRed('T9'), 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': onlyFails(green, ['T9', 'T5']), 'fix:2': fixOk, 'verify:после попытки 2': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['база - узел верификатора до правок, спека без известных', (v => !!v && v.known.length === 0)(specOf(calls, 'verify:база'))],
+      ['верификатору правки падения базы известны', JSON.stringify((specOf(calls, 'verify:после попытки 1') || {}).known) === '["T9"]'],
+      ['кодеру новые падения отдельно', promptOf(calls, 'fix:2').includes('новые падения: T5, унаследованы от базы: T9')],
+      ['статус complete', result.status === 'complete'],
+    ] },
+  { name: 'F147 итог красен только падениями базы -> зелень, complete, унаследованные в degraded и goal_check', track: 'feature', args: featureArgs,
+    responses: { 'verify:база': baseRed('T9'), 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': onlyFails(green, ['T9']), 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['вторая попытка не покупалась', !labelsOf(calls).includes('fix:2')],
+      ['статус complete', result.status === 'complete'],
+      ['унаследованные названы оператору', result.degraded.includes('падения базы не исправлены и правке не вменены: T9')],
+      ['goal_check несёт унаследованные', JSON.stringify(result.goal_check.inherited) === '["T9"]'],
+    ] },
+  { name: 'F148 падение без имени при красной базе зеленью не считается', track: 'feature', args: featureArgs,
+    responses: { 'verify:база': baseRed('T9'), 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': { ...onlyFails(green, ['T9']), fail_count: 2 }, 'fix:2': fixOk, 'verify:после попытки 2': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['вторая попытка куплена', labelsOf(calls).includes('fix:2')],
+      ['кодеру названо: новых имён нет, падение базы унаследовано', promptOf(calls, 'fix:2').includes('новые падения: нет, унаследованы от базы: T9')],
+      ['статус complete после зелёной', result.status === 'complete'],
+    ] },
+  { name: 'F149 база на дереве с коммитами трека -> n/a, строки базы у кодера нет', track: 'feature', args: featureArgs,
+    responses: { 'verify:база': red, 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['база n/a с причиной', (t => t && t.baseline === 'n/a' && t.baseline_log === 'в дереве правки трека')(result.trail.find(t => t.step === '1-tree'))],
+      ['строки базы нет', !/До правок трека сборка и тесты/.test(promptOf(calls, 'fix:1'))],
+      ['красной базы в degraded нет', !result.degraded.some(d => /дерево красное/.test(d))],
+    ] },
+  { name: 'F149b верификация базы blocked -> n/a с её нехваткой, трек идёт', track: 'feature', args: featureArgs,
+    responses: { 'verify:база': { ...baseGreen, status: 'blocked', missing: 'раннер не найден' }, 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result }) => [
+      ['база n/a с нехваткой', (t => t && t.baseline === 'n/a' && t.baseline_log === 'верификация базы не прогнала: раннер не найден')(result.trail.find(t => t.step === '1-tree'))],
+      ['статус complete', result.status === 'complete'],
+    ] },
+  { name: 'F150 подготовка не удалась -> база не покупается, n/a с причиной', track: 'feature', args: featureArgs,
+    responses: { 'ctx:tree': prepFailed, 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ result, calls }) => [
+      ['база не покупалась', !labelsOf(calls).includes('verify:база')],
+      ['в trail n/a с причиной', (t => t && t.baseline === 'n/a' && t.baseline_log === 'подготовка дерева не удалась')(result.trail.find(t => t.step === '1-tree'))],
+    ] },
+  { name: 'F151 нестабильные тесты верификации -> строка decisions, зелень по повтору', track: 'feature', args: featureArgs,
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': { ...green, flaky: ['T7'] }, 'self-review:первое': revClean },
+    expect: ({ result }) => [
+      ['нестабильный назван', result.decisions.some(d => /нестабильные тесты.*T7/.test(d))],
+      ['статус complete', result.status === 'complete'],
+    ] },
+  { name: 'F152 кодер гоняет тесты задетого, полный набор - верификатору', track: 'feature', args: featureArgs,
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revClean },
+    expect: ({ calls }) => [
+      ['кодеру предписан охват', promptOf(calls, 'fix:1').includes('Гоняй тесты задетого правкой, полный набор не гоняй.')],
     ] },
   { name: 'F91 done и boundary не поданы, файл цели задан -> шапка шлёт узлы в разделы файла цели, пропуск в degraded', track: 'feature',
     args: { ...featureArgs, done: undefined, boundary: undefined, goal_path: 'docs/goals/F-1.md' },
@@ -2823,7 +2945,7 @@ const SCENARIOS = [
     responses: { 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed },
     expect: async ({ calls }) => {
       const bare = await runTrack('feature', { ...featureArgs, resume: true, trail: treeTrail({ prepare: 'done' }), ctx: JSON.stringify({ ...ctxTech, test_cmd: '', build_cmd: '' }), open_findings: JSON.stringify([ledgerA88]) },
-        { ...DEFAULT_REVIEW, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
+        { ...DEFAULT_REVIEW, ...DEFAULT_BASE, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
       return [
         ['prepare failed в последнем замере -> подготовка куплена', labelsOf(calls).includes('ctx:tree')],
         ['в ctx нет команд -> подготовка куплена', labelsOf(bare.calls).includes('ctx:tree')],
@@ -2907,7 +3029,7 @@ const SCENARIOS = [
     responses: { 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed },
     expect: async ({ calls }) => {
       const later = await runTrack('feature', { ...featureArgs, resume: true, trail: ['- {"step":"1-req","doer":"Explore","status":"complete"}', '- {"step":3,"status":"complete","head":"2222222"}', '- {"step":"1-req","doer":"ledger (разведка прошлого прогона)","status":"complete"}'].join('\n'), ctx: JSON.stringify(ctxOk), open_findings: JSON.stringify([ledgerA88]) },
-        { ...DEFAULT_REVIEW, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
+        { ...DEFAULT_REVIEW, ...DEFAULT_BASE, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
       return [
         ['ревью до разведки узлом - не база', !promptOf(calls, 'self-review:первое').includes('дельта от')],
         ['ревью после неё, разведка из ledger - база', promptOf(later.calls, 'self-review:первое').includes('дельта от 2222222')],
@@ -2944,7 +3066,7 @@ const SCENARIOS = [
     responses: { 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed },
     expect: async ({ calls }) => {
       const bare = await runTrack('bugfix', { ...bugfixArgs, resume: true, trail: treeTrail({ prepare: 'done' }), repro: JSON.stringify({ ...reproCtx, test_cmd: '', build_cmd: '' }), open_findings: JSON.stringify([ledgerA88]) },
-        { ...DEFAULT_REVIEW, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
+        { ...DEFAULT_REVIEW, ...DEFAULT_BASE, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
       return [
         ['prepare failed в последнем замере -> подготовка куплена', labelsOf(calls).includes('ctx:tree')],
         ['в repro нет команд -> подготовка куплена', labelsOf(bare.calls).includes('ctx:tree')],
@@ -3058,7 +3180,7 @@ const SCENARIOS = [
     responses: { 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed },
     expect: async ({ calls }) => {
       const later = await runTrack('bugfix', { ...bugfixArgs, resume: true, trail: ['- {"step":"1-repro","doer":"dex-auto:debugger","status":"complete"}', '- {"step":3,"status":"complete","head":"2222222"}', '- {"step":"1-repro","doer":"ledger (воспроизведение прошлого прогона)","status":"complete"}'].join('\n'), repro: JSON.stringify(reproOk), open_findings: JSON.stringify([ledgerA88]) },
-        { ...DEFAULT_REVIEW, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
+        { ...DEFAULT_REVIEW, ...DEFAULT_BASE, 'ctx:tree': prepTs, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revF2closed })
       return [
         ['ревью до диагноза узлом - не база', !promptOf(calls, 'self-review:первое').includes('дельта от')],
         ['ревью после него, диагноз из ledger - база', promptOf(later.calls, 'self-review:первое').includes('дельта от 2222222')],
@@ -3227,7 +3349,7 @@ const SCENARIOS = [
       { name: `${nHunk} ${side}: место правки без записи roots -> разрыв, запись none его покрывает`, track, args,
         responses: { ...base, 'hunks:первое': hunksAt('src/A.cs:20-22', 'src/B.cs:5'), 'self-review:первое': { ...revClean, roots: [{ ...rootOk, anchor: 'src/A.cs:21' }, { anchor: 'src/C.cs:1', decision: '', root: '', verdict: 'none', evidence: 'переименование' }] } },
         expect: async ({ result }) => {
-          const none = (await runTrack(track, args, { ...DEFAULT_REVIEW, 'ctx:tree': DEFAULT_TREE[track], ...base, 'hunks:первое': hunksAt('src/B.cs:5'), 'self-review:первое': { ...revClean, roots: [{ anchor: 'src/B.cs:5', decision: '', root: '', verdict: 'none', evidence: 'переименование' }] } })).result
+          const none = (await runTrack(track, args, { ...DEFAULT_REVIEW, ...DEFAULT_BASE, 'ctx:tree': DEFAULT_TREE[track], ...base, 'hunks:первое': hunksAt('src/B.cs:5'), 'self-review:первое': { ...revClean, roots: [{ anchor: 'src/B.cs:5', decision: '', root: '', verdict: 'none', evidence: 'переименование' }] } })).result
           return [
             ['место без записи названо', result.status === 'partial' && result.where.includes('саморевью: место правки без записи roots: src/B.cs:5') && !/без записи roots: [^;]*src\/A\.cs/.test(result.where)],
             ['none покрывает место и сверки скептика не требует', !/без записи roots|не сверено скептиком/.test(String(none.where || ''))],
@@ -3491,6 +3613,8 @@ const SCENARIOS = [
 // Узел подготовки дерева - фон любого сценария feature / bugfix, а не его предмет: ответ по
 // умолчанию задан здесь, сценарий о самой подготовке перекрывает его своим ключом 'ctx:tree'.
 const DEFAULT_TREE = { feature: prepOk, bugfix: prepTs }
+// База до правок - тот же фон: зелёная, сценарий о базе перекрывает ключ 'verify:база'.
+const DEFAULT_BASE = { 'verify:база': baseGreen }
 // Снимок правки и скептик саморевью - тоже фон: снимок пуст, скептик подтверждает выход своего ревью как есть.
 const hunksNone = { status: 'complete', hunks: [], conventions: [], 'conventions-searched': 'CLAUDE.md', missing: '' }
 const echoSkeptic = (of) => (n, prompt, last) => {
@@ -3519,7 +3643,7 @@ for (const s of SCENARIOS) {
   if (only && !s.name.startsWith(only)) continue
   let checks
   try {
-    const responses = DEFAULT_TREE[s.track] ? { 'ctx:tree': DEFAULT_TREE[s.track], ...DEFAULT_REVIEW, ...s.responses } : s.responses
+    const responses = DEFAULT_TREE[s.track] ? { 'ctx:tree': DEFAULT_TREE[s.track], ...DEFAULT_BASE, ...DEFAULT_REVIEW, ...s.responses } : s.responses
     checks = await s.expect(await runTrack(s.track, s.args, responses, s.unavailable))
   } catch (e) {
     n++; failed++

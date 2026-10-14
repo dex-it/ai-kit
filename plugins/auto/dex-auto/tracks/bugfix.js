@@ -28,7 +28,7 @@ const ownerSide = 'Пункт критерия «готово» или гран�
 const HEAD = `mode: ${A.mode || 'autonomous'}\nцель (${A.task}): починить баг - симптом: ${A.symptom}\nожидаемое: ${A.expected || 'не задано - реконструируй из тестов и корпуса, назови основание'}\nокружение: ${A.env || 'не задано'}\nкритерий «готово»: ${fromGoal(A.done, 'не подан', 'Критерий «готово»', 'не подан')}\nграница: ${fromGoal(A.boundary, 'не подана', 'Граница', 'не выходить за рабочий каталог')}\nфайл цели: ${A.goal_path || 'нет'}\ndecision-log: n/a (трек журнал решений не ведёт; решения - полем decisions)\n${TREE}`
 // Узел подготовки симптома не получает: прочитав его первой строкой, он чинит баг сам, и хвостовой
 // запрет его не держит (зонд P25). Предмет узла - дерево, и шапка несёт только его.
-const PREP_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): подготовить дерево трека к сборке и тестам и замерить их до правок - и только это: баг чинят следующие узлы.\n${TREE}`
+const PREP_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): подготовить дерево трека к сборке и тестам - и только это: баг чинят следующие узлы.\n${TREE}`
 // Возобновление - это «продолжить» плюс след прошлого прогона: без следа прогона не было, и возобновлять нечего.
 const resuming = !!(A.resume && A.trail)
 const DONE = resuming ? `\nВозобновление: шаги ниже уже сделаны (из ledger), не повторяй их, продолжай с незакрытого:\n${A.trail}\n` : ''
@@ -267,6 +267,7 @@ const VERIFY = { type: 'object', properties: {
   status: STATUS,
   exit_code: { type: 'integer' }, pass_count: { type: 'integer' }, fail_count: { type: 'integer' },
   failing: { type: 'array', items: { type: 'string' } },
+  flaky: { type: 'array', items: { type: 'string' }, description: 'упали в первом прогоне и прошли в повторе' },
   build_ok: { type: 'boolean' },
   head: { type: 'string', description: 'git log --oneline -3' },
   dirty: { type: 'boolean', description: 'git status --porcelain непустой' },
@@ -275,11 +276,22 @@ const VERIFY = { type: 'object', properties: {
 }, required: ['status', 'exit_code', 'pass_count', 'fail_count', 'failing', 'build_ok', 'head', 'dirty', 'ahead', 'missing'] }
 const AHEAD_CMD = 'git rev-list --count HEAD --not --exclude="$(git branch --show-current)" --branches'
 const VERIFY_CMDS = `git log --oneline -3, git status --porcelain и ${AHEAD_CMD} (это ahead)`
+// Команды едут скрипту hex-строкой: кавычки и $ в команде проекта шелл модели не портит.
+const hexOf = (s) => encodeURIComponent(s).replace(/%([0-9A-F]{2})|[^%]/g, (m, h) => h ? h.toLowerCase() : m.charCodeAt(0).toString(16).padStart(2, '0'))
+const verifySpec = (t, known, extra) => ({ build: t.build_cmd || '', test: t.report_cmd || t.test_cmd || '', known: known || [], ...extra })
+const verifyRun = (scripts, spec) => `Выполни командой Bash с timeout 600000: python3 '${scripts}/verify.py' ${hexOf(JSON.stringify(spec))}
+stdout - JSON. status running - повтори python3 '${scripts}/verify.py' --wait <его out> тем же timeout, пока status не станет другим. Поля схемы перенеси из итогового JSON как есть; counts null - pass_count, fail_count и failing выведи из test_tail. Команда не вернула JSON - status blocked, в missing её вывод.`
 // Верификатор, не сумевший прогнать, по exit_code неотличим от красных тестов: без этой ветки трек проедает потолок правок вхолостую.
 const noRun = (v) => !v || v.status === 'blocked'
-// exit 0 при упавших тестах даёт конвейер в команде раннера; ноль прошедших при команде тестов - прогон, не бывший прогоном тестов.
-const isGreen = (v, testCmd) => !!v && v.exit_code === 0 && v.fail_count === 0 && v.build_ok && !v.dirty && !(testCmd && v.pass_count === 0)
-const redNote = (v) => `exit=${v.exit_code}, build_ok=${v.build_ok}, прошло тестов: ${v.pass_count}, падают: ${v.failing.join('; ') || 'нет'}, dirty=${v.dirty}`
+const freshFails = (v, known) => ((v && v.failing) || []).filter(f => !(known || []).includes(f))
+// Падение базы правке не вменяется, но безымянное падение (exit не 0 при пустом failing) унаследованным не считается.
+const isGreen = (v, testCmd, known) => !!v && v.build_ok && !v.dirty && !(testCmd && !(v.pass_count > 0)) && !freshFails(v, known).length
+  && ((v.exit_code === 0 && v.fail_count === 0) || (v.failing.length > 0 && v.fail_count <= v.failing.length))
+const inheritedFails = (v, known) => ((v && v.failing) || []).filter(f => (known || []).includes(f))
+const redNote = (v, known) => `exit=${v.exit_code}, build_ok=${v.build_ok}, прошло тестов: ${v.pass_count}, новые падения: ${freshFails(v, known).join('; ') || 'нет'}${inheritedFails(v, known).length ? `, унаследованы от базы: ${inheritedFails(v, known).join('; ')}` : ''}, dirty=${v.dirty}`
+const NO_SCRIPTS = 'каталог скриптов не подан (args.scripts): верификатор гоняет команды сам - без отчёта раннера и повтора нестабильных'
+// Полный набор кодер гонял сам и следом его же гонял верификатор: на больших наборах это удваивало каждую попытку.
+const COVER_ONLY = 'Гоняй тесты задетого правкой, полный набор не гоняй.'
 // <<< shared: verify
 // >>> shared: prep
 // Техконтекст выводится из манифеста, а не из цели: его отдаёт дешёвый узел подготовки, следующие узлы получают команды готовыми.
@@ -288,39 +300,43 @@ const PREP = { type: 'object', properties: {
   stack: { type: 'string', description: 'идентификатор стека по реестру (Skill dex-skill-stack-registry:stack-registry); вне реестра - "other"' },
   stack_basis: { type: 'string', description: 'манифест, из которого выведен стек (путь:строка); манифеста нет - чем определено иначе' },
   test_cmd: { type: 'string', description: 'команда прогона тестов; нет тестов - пустая строка' },
+  report_cmd: { type: 'string', description: 'test_cmd со встроенным флагом раннера, пишущим отчёт JUnit XML либо TRX в $DEX_AUTO_JUNIT_DIR; такой флаг не известен наверняка - пустая строка' },
   build_cmd: { type: 'string', description: 'команда сборки/типизации; нет - пустая строка' },
   prepare_cmd: { type: 'string', description: 'команда подготовки дерева до сборки; подготовка не нужна - пустая строка' },
   // Enum: «дерево готово» и «готовить нечего» ведут к разному промпту дальше, а провал установки пустой строкой неотличим от успеха до первой сборки.
   'prepare-status': { type: 'string', enum: ['done', 'not-needed', 'failed'], description: 'done - команда вернула 0; not-needed - prepare_cmd пуст; failed - команда вернула не 0 либо не запущена' },
   prepare_log: { type: 'string', description: 'при done - код возврата, чем подтверждено и возвращённые пути; при failed - команда и последние строки вывода; при not-needed - почему готовить нечего' },
-  // Без базы унаследованное падение судится внесённым правкой, и кодер лечит чужой дефект из потолка попыток.
-  'baseline-status': { type: 'string', enum: ['green', 'red', 'n/a'], description: 'сборка и тесты до правок трека: green - прошли; red - что-то упало; n/a - не прогонялись: в дереве уже есть правки трека, подготовка failed либо нет ни сборки, ни тестов' },
-  baseline_log: { type: 'string', description: 'при red - что упало: сборка с хвостом вывода, тесты поимённо; при green - сколько тестов прошло; при n/a - почему не прогонялись' },
   missing: { type: 'string', description: 'при blocked - чего не хватает и у кого это есть' },
-}, required: ['status', 'stack', 'stack_basis', 'test_cmd', 'build_cmd', 'prepare_cmd', 'prepare-status', 'prepare_log', 'baseline-status', 'baseline_log', 'missing'] }
-// Правки проверяются до установки: неигнорируемый артефакт установки иначе читался бы правкой трека.
-const PREP_STEPS = `1. Правки трека: git status --porcelain и ${AHEAD_CMD}. Вывод непуст либо число больше нуля - в дереве уже есть правки трека.
-2. Стек - идентификатор по реестру: вызови Skill dex-skill-stack-registry:stack-registry и сопоставь с манифестом дерева; вне реестра - "other". Манифест, из которого вывел, назови в stack_basis - догадка по именам файлов не принимается. По тому же манифесту назови команды сборки и тестов.
+}, required: ['status', 'stack', 'stack_basis', 'test_cmd', 'report_cmd', 'build_cmd', 'prepare_cmd', 'prepare-status', 'prepare_log', 'missing'] }
+const PREP_STEPS = `1. Стек - идентификатор по реестру: вызови Skill dex-skill-stack-registry:stack-registry и сопоставь с манифестом дерева; вне реестра - "other". Манифест, из которого вывел, назови в stack_basis - догадка по именам файлов не принимается. По тому же манифесту назови команды сборки и тестов.
+2. report_cmd - test_cmd, дополненная встроенным флагом раннера, который пишет отчёт JUnit XML либо TRX в каталог "$DEX_AUTO_JUNIT_DIR" (переменную задаёт верификатор), например: dotnet test - --logger trx --results-directory "$DEX_AUTO_JUNIT_DIR"; pytest - --junitxml="$DEX_AUTO_JUNIT_DIR/r.xml"; node --test - --test-reporter=junit --test-reporter-destination="$DEX_AUTO_JUNIT_DIR/r.xml"; vitest - --reporter=junit --outputFile="$DEX_AUTO_JUNIT_DIR/r.xml". Флаг не известен наверняка, требует пакета либо test_cmd - обёртка (npm test, make) без проброса аргументов - пусто.
 3. Подготовка: дереву до сборки нужны зависимости, которых сборка сама не ставит, либо шаг подготовки, названный проектом, - назови команду и выполни её в дереве; не нужны - prepare_cmd пуст, prepare-status: not-needed. Строки git status --porcelain, которых до команды не было, верни: ?? - удали путь, прочие - git checkout -- путь. prepare-status: done - команда вернула 0, иначе failed.
-4. База: правки трека есть, prepare-status failed либо нет ни сборки, ни тестов - baseline-status: n/a с причиной. Иначе выполни сборку и тесты названными командами: всё прошло - green, что-то упало - red, упавшее в baseline_log.
-Код не правь и упавшее не чини: база - замер до правок, чинят следующие узлы.`
+Код не правь, сборку и тесты не гоняй.`
 const steps = (t) => (Array.isArray(t) ? t : String(t || '').split('\n')).map(s => typeof s === 'string' ? fromLedger(s.replace(/^- /, '')) : s).filter(e => e && typeof e === 'object')
 // Первый замер green либо red из trail старше свежего: на возобновлении дерево несёт правки трека, а их опознание узлом не гарантия.
-function baselineOf(p, trail) {
+function baselineOf(fresh, trail) {
   const e = steps(trail).find(x => x.step === '1-tree' && ['green', 'red'].includes(x.baseline))
-  if (e) return { status: e.baseline, log: e.baseline_log || '', fresh: false }
-  if (p && ['green', 'red'].includes(p['baseline-status'])) return { status: p['baseline-status'], log: p.baseline_log || '', fresh: true }
+  if (e) return { status: e.baseline, log: e.baseline_log || '', failing: Array.isArray(e.baseline_failing) ? e.baseline_failing : [], fresh: false }
+  if (fresh && ['green', 'red'].includes(fresh.status)) return { ...fresh, fresh: true }
   return null
 }
+// Замер покупается только там, где он что-то меряет: база прошлого прогона в trail не перебивается свежей (T5a).
+const baseSkip = (p, trail) => !p || p.status === 'blocked' ? 'подготовка не отработала' : p['prepare-status'] === 'failed' ? 'подготовка дерева не удалась'
+  : p['prepare-status'] === 'skipped' ? 'дерево подготовлено прошлым прогоном' : !p.build_cmd && !p.test_cmd ? 'нет ни сборки, ни тестов'
+  : baselineOf(null, trail) ? 'база прошлого прогона в trail' : ''
+const baseFrom = (v) => noRun(v) ? { status: 'n/a', log: `верификация базы не прогнала: ${(v && v.missing) || 'выхода нет'}`, failing: [] }
+  : v.dirty || v.ahead > 0 ? { status: 'n/a', log: 'в дереве правки трека', failing: [] }
+  : v.build_ok && v.exit_code === 0 && !v.failing.length ? { status: 'green', log: `прошло тестов: ${v.pass_count}`, failing: [] }
+  : { status: 'red', log: redNote(v, []), failing: v.failing }
 const baselineNote = (b) => !b ? '' : b.status === 'red'
-  ? ` До правок трека сборка и тесты уже падали (${b.log || 'что упало, не названо'}): эти падения унаследованы, прочие внесены правками трека.`
+  ? ` До правок трека сборка и тесты уже падали (${b.failing.join('; ') || b.log || 'что упало, не названо'}): эти падения унаследованы, прочие внесены правками трека.`
   : ' До правок трека сборка и тесты были зелёными: любое падение внесено правками трека.'
 // Узел подготовки на возобновлении повторял установленное (T1a); опора - последний настоящий замер, пропуск ею не служит.
 function priorPrep(tc, trail) {
   const last = steps(trail).filter(e => e.step === '1-tree' && e.status !== 'skipped').pop()
   const fits = !!tc && typeof tc.stack === 'string' && !!tc.stack && !!(tc.build_cmd || tc.test_cmd)
     && !!last && ['complete', 'partial'].includes(last.status) && last.prepare !== 'failed'
-  return fits ? { status: 'complete', stack: tc.stack, build_cmd: tc.build_cmd || '', test_cmd: tc.test_cmd || '', prepare_cmd: tc.prepare_cmd || '', 'prepare-status': 'skipped' } : null
+  return fits ? { status: 'complete', stack: tc.stack, build_cmd: tc.build_cmd || '', test_cmd: tc.test_cmd || '', report_cmd: tc.report_cmd || '', prepare_cmd: tc.prepare_cmd || '', 'prepare-status': 'skipped' } : null
 }
 const TREE_SKIPPED = { step: '1-tree', doer: 'ledger (техконтекст прошлого прогона)', status: 'skipped' }
 // <<< shared: prep
@@ -478,12 +494,22 @@ const disputes = []
 const decisions = []
 const dec = () => decisions.slice()
 const bail = (where, missing, extra) => outcome('blocked', where, missing, { decisions: dec(), repro, fix, ...extra })
-const passed = (v) => isGreen(v, repro && repro.test_cmd)
+// Падения базы до правок: правке не вменяются.
+let known = []
+const passed = (v) => isGreen(v, repro && repro.test_cmd, known)
 
 // Вход собирает /auto; workflow, вызванный по имени, приходит без него - узлы без цели и каталога не запускаются (T0).
 const noInput = ['task', 'symptom', 'cwd'].filter(k => !String(A[k] || '').trim())
 if (noInput.length) return outcome('blocked', 'Context', `трек вызван без входа: нет ${noInput.join(', ')}`)
 phase('Context')
+const BASE_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): замерить сборку и тесты дерева до правок трека - и только это.\n${TREE}`
+const legacyRun = (t) => `Выполни ${t.build_cmd ? `сборку: ${t.build_cmd}; ` : ''}${t.test_cmd ? `тесты: ${t.test_cmd}` : 'тестов нет - build_ok по сборке, счётчики 0'}; затем ${VERIFY_CMDS}`
+const verifyNode = async (head, tag, ph, schema, body) => {
+  const v = await node('верификатор', `${head}Верификация (${tag}): ТОЛЬКО прогон и отчёт, код не менять${body}`, { label: `verify:${tag}`, phase: ph, model: 'haiku', effort: 'low', schema })
+  if (v && Array.isArray(v.flaky) && v.flaky.length) decisions.push(`верификация (${tag}): нестабильные тесты - упали и прошли в повторе: ${v.flaky.join('; ')}`)
+  return v
+}
+if (!A.scripts) degraded.push(NO_SCRIPTS)
 // Поле возобновления кладёт главный поток из ledger, но подать он может что угодно: непроверенная
 // форма роняла соседний трек на первом же обращении к разведке (зонд P25). Непригодное поле трек не
 // останавливает - воспроизведение покупается узлом, а подмена названа оператору.
@@ -501,16 +527,21 @@ if (resuming && A.repro && !reproFormed) degraded.push('поле repro пода�
 const priorTree = priorPrep(reproResumed, resuming ? A.trail : null)
 // С диагностом не параллельно: воспроизведение идёт по подготовленному дереву, а два узла, ставящие
 // зависимости и гоняющие тесты в одном дереве, портят прогон друг другу.
-const prep = priorTree || await node('подготовка дерева', `${PREP_HEAD}Шаг 1 (техконтекст, подготовка и база):\n${PREP_STEPS}`, { label: 'ctx:tree', phase: 'Context', model: 'haiku', schema: PREP })
+const prep = priorTree || await node('подготовка дерева', `${PREP_HEAD}Шаг 1 (техконтекст и подготовка):\n${PREP_STEPS}`, { label: 'ctx:tree', phase: 'Context', model: 'haiku', schema: PREP })
+// База - до диагноста: его красный тест в дереве замер исказил бы.
+const skip = baseSkip(prep, resuming ? A.trail : null)
+const base = skip ? { status: 'n/a', log: skip, failing: [] }
+  : baseFrom(await verifyNode(BASE_HEAD, 'база', 'Context', VERIFY, `. ${A.scripts ? verifyRun(A.scripts, verifySpec(prep, [])) : `${legacyRun(prep)}. Числа - из вывода раннера как есть.`}`))
 trail.push(priorTree ? TREE_SKIPPED
-  : { step: '1-tree', doer: 'подготовка дерева', status: prep ? prep.status : 'null', prepare: prep ? prep['prepare-status'] : null, baseline: prep ? prep['baseline-status'] : null, baseline_log: prep ? prep.baseline_log : null })
+  : { step: '1-tree', doer: 'подготовка дерева', status: prep ? prep.status : 'null', prepare: prep ? prep['prepare-status'] : null, baseline: base.status, baseline_log: base.log, baseline_failing: base.failing })
 if (!prep || prep.status === 'blocked') return bail('Context: подготовка дерева', lack(prep, 'узел подготовки дерева'))
 if (prep.status === 'partial') degraded.push(`подготовка дерева partial: ${prep.missing || 'нехватка не названа'}`)
 // Провал подготовки - не стоп: дерево лечит следующий узел, но знать о провале он обязан, иначе
 // примет падение установки за падение продукта и назовёт первопричиной его.
 if (prep['prepare-status'] === 'failed') degraded.push(`подготовка дерева не удалась: ${prep.prepare_log || 'причина не названа'}`)
-const treeBase = baselineOf(prep, resuming ? A.trail : null)
+const treeBase = baselineOf(base, resuming ? A.trail : null)
 if (treeBase && treeBase.fresh && treeBase.status === 'red') degraded.push(`дерево красное до правок трека: ${treeBase.log || 'что упало, не названо'}`)
+known = treeBase ? treeBase.failing : []
 const treeState = `${prep['prepare-status'] === 'done' ? ` Дерево подготовлено узлом контекста (${prep.prepare_cmd}) - установку не повторяй.` : prep['prepare-status'] === 'failed' ? ` Подготовка дерева узлом контекста не удалась (${prep.prepare_log || 'причина не названа'}) - до первого прогона выполни её сам: ${prep.prepare_cmd || 'команда не названа, выведи по манифесту'}. Падение установки первопричиной бага не называй.` : prep['prepare-status'] === 'skipped' ? ` Дерево подготовлено прошлым прогоном, подготовка не повторялась: сборка упала на зависимостях - выполни ${prep.prepare_cmd || 'подготовку по манифесту'} сам, падение установки первопричиной бага не называй.` : ''}${baselineNote(treeBase)}`
 
 phase('Reproduce')
@@ -522,7 +553,7 @@ const diag = reproResumed || await own('диагност первопричин�
 trail.push({ step: '1-repro', doer: reproResumed ? 'ledger (воспроизведение прошлого прогона)' : NODE.debugger.agentType, status: diag ? diag.status : 'null' })
 // accepted - факт приёмки кодером, accepted_blob - ожидаемый хэш теста после неё, accepted_pending - снимок ещё не снят: живут в repro, чтобы пережить ledger;
 // новый диагноз их сбрасывает.
-const withCtx = (d) => ({ repro_test: '', ...d, repro_blob: d.repro_test ? String(d.repro_blob || '').trim() : '', dispute: '', accepted: d.accepted || '', accepted_blob: d.repro_test ? String(d.accepted_blob || '').trim() : '', accepted_pending: !!d.accepted_pending, stack: prep.stack, build_cmd: prep.build_cmd, test_cmd: prep.test_cmd, prepare_cmd: prep.prepare_cmd })
+const withCtx = (d) => ({ repro_test: '', ...d, repro_blob: d.repro_test ? String(d.repro_blob || '').trim() : '', dispute: '', accepted: d.accepted || '', accepted_blob: d.repro_test ? String(d.accepted_blob || '').trim() : '', accepted_pending: !!d.accepted_pending, stack: prep.stack, build_cmd: prep.build_cmd, test_cmd: prep.test_cmd, report_cmd: prep.report_cmd || '', prepare_cmd: prep.prepare_cmd })
 // Диагноз без причины на возобновлении: ledger отдаёт его непригодным, и следующий прогон зовёт диагноста заново.
 const RESET = { root_cause: '', files: [] }
 const testLeft = (d) => d && d.repro_test ? `; тест диагноста оставлен в дереве: ${d.repro_test}` : ''
@@ -581,9 +612,10 @@ const disputeExit = (dc, f, where, extra) => {
 
 phase('Fix')
 // -w: хэш прогона может стать снимком приёмки, а git show и git diff читают лишь записанный объект.
-const verifyText = (tag, snap) => `${HEAD}Верификация (${tag}): ТОЛЬКО прогон и отчёт, код не менять${snap ? ` и не коммитить. Сначала git show ${snap} > ${repro.repro_test}, git hash-object ${repro.repro_test} - в snap_hash` : ''}. Выполни ${repro.build_cmd ? `сборку: ${repro.build_cmd}; ` : ''}${repro.test_cmd ? `тесты: ${repro.test_cmd}` : 'тестов нет - build_ok по сборке, счётчики 0'}; затем ${snap ? `git checkout -- ${repro.repro_test} при любом исходе, blocked тоже, после него ` : ''}${VERIFY_CMDS}${repro.repro_test ? `; git hash-object -w ${repro.repro_test} - в repro_test_hash` : '; repro_test_hash пустой'}. Числа - из вывода раннера как есть.`
+const verifyText = (snap) => A.scripts ? `${snap ? ' и не коммитить' : ''}. ${verifyRun(A.scripts, verifySpec(repro, known, { hash_path: repro.repro_test || '', ...(snap ? { snap: { blob: snap, path: repro.repro_test } } : {}) }))}`
+  : `${snap ? ` и не коммитить. Сначала git show ${snap} > ${repro.repro_test}, git hash-object ${repro.repro_test} - в snap_hash` : ''}. Выполни ${repro.build_cmd ? `сборку: ${repro.build_cmd}; ` : ''}${repro.test_cmd ? `тесты: ${repro.test_cmd}` : 'тестов нет - build_ok по сборке, счётчики 0'}; затем ${snap ? `git checkout -- ${repro.repro_test} при любом исходе, blocked тоже, после него ` : ''}${VERIFY_CMDS}${repro.repro_test ? `; git hash-object -w ${repro.repro_test} - в repro_test_hash` : '; repro_test_hash пустой'}. Числа - из вывода раннера как есть.`
 // Фаза параметром: verify зовётся и из Review, а фаза берётся из opts, не из phase().
-const verifyOnce = (tag, ph = 'Fix') => node('верификатор', verifyText(tag, ''), { label: `verify:${tag}`, phase: ph, model: 'haiku', schema: BVERIFY })
+const verifyOnce = (tag, ph = 'Fix') => verifyNode(HEAD, tag, ph, BVERIFY, verifyText(''))
 // Зелёная верификация на цели без прошлого прогона значит «работа не покрыта тестами», а не «сделана»: молча пропустить правку по ней нельзя.
 if (A.resume && !resuming) {
   log('«продолжить» без следа прошлого прогона в ledger: трек идёт как первый, фаза правки не пропускается')
@@ -606,8 +638,8 @@ for (let k = 1; k <= FIX_CEILING && (!passed(ver) || pending); k++) {
   loops.fix = k; pending = false
   // red-run прошлой попытки - установленный факт: без него следующая попытка показывает тот же тест красным заново, проедая потолок.
   const priorRed = fix && fix['red-run'] && !/^(n\/a|unverifiable)/.test(fix['red-run']) ? `\nКрасный прогон уже показан прошлой попыткой и перепроверке не подлежит: ${fix['red-run']}` : ''
-  const prev = ver && !passed(ver) ? `\n${k === 1 ? 'Верификация при возобновлении' : `Попытка ${k - 1}`} не прошла: ${redNote(ver)}.${priorRed}` : ''
-  fix = await own('кодер', `${HEAD}${DONE}${OPEN}Шаг 2, попытка ${k} из ${FIX_CEILING}: лечи первопричину, не симптом; один баг - один фикс, попутного рефакторинга нет.\n${causeText}\nФайлы: ${repro.files.join(', ')}. Тесты: ${repro.test_cmd || 'нет'}. Сборка: ${repro.build_cmd || 'нет'}.${treeState}${prev}\n${acceptance()} Red-run: тест диагноста - твоя проба, в коммит; теста нет - пишешь свой. По завершении: коммит локально (сообщение по симптому).`,
+  const prev = ver && !passed(ver) ? `\n${k === 1 ? 'Верификация при возобновлении' : `Попытка ${k - 1}`} не прошла: ${redNote(ver, known)}.${priorRed}` : ''
+  fix = await own('кодер', `${HEAD}${DONE}${OPEN}Шаг 2, попытка ${k} из ${FIX_CEILING}: лечи первопричину, не симптом; один баг - один фикс, попутного рефакторинга нет.\n${causeText}\nФайлы: ${repro.files.join(', ')}. Тесты: ${repro.test_cmd || 'нет'}. Сборка: ${repro.build_cmd || 'нет'}. ${COVER_ONLY}${treeState}${prev}\n${acceptance()} Red-run: тест диагноста - твоя проба, в коммит; теста нет - пишешь свой. По завершении: коммит локально (сообщение по симптому).`,
     { label: `fix:${k}`, phase: 'Fix', schema: BFIX }, NODE.coder)
   trail.push({ step: 2, attempt: k, doer: NODE.coder.agentType, status: fix ? fix.status : 'null', 'red-run': fix ? fix['red-run'] : null, 'diagnosis-check': fix ? fix['diagnosis-check'] : null })
   if (fix) decisions.push(...said(fix))
@@ -624,7 +656,7 @@ for (let k = 1; k <= FIX_CEILING && (!passed(ver) || pending); k++) {
   if (noRun(ver)) return bail(`Fix#${k}: верификация`, lack(ver, 'верификатор'))
   if (!passed(ver)) log(`попытка ${k}: exit=${ver && ver.exit_code}, build_ok=${ver && ver.build_ok}, fail=${ver && ver.fail_count}, dirty=${ver && ver.dirty}`)
 }
-if (!passed(ver)) return outcome('partial', `Fix: потолок ${FIX_CEILING} исчерпан`, `дерево не зелёное после ${FIX_CEILING} попыток: ${redNote(ver)}`, { ver, repro, fix, decisions: dec() })
+if (!passed(ver)) return outcome('partial', `Fix: потолок ${FIX_CEILING} исчерпан`, `дерево не зелёное после ${FIX_CEILING} попыток: ${redNote(ver, known)}`, { ver, repro, fix, decisions: dec() })
 phase('Review')
 // Диагноз этого прогона - другое намерение: коммиты до прежней базы судились против опровергнутой причины.
 const firstBase = priorBase(reproResumed ? A.trail : null)
@@ -693,9 +725,10 @@ if (rev && rev.status !== 'blocked' && reg.fixable().length) {
 }
 const finalVer = ver2 || ver
 const green = passed(finalVer)
+if (green && inheritedFails(finalVer, known).length) degraded.push(`падения базы не исправлены и правке не вменены: ${inheritedFails(finalVer, known).join('; ')}`)
 // Снимок - когда исход не решили кодер, ревью, P0/P1; его blocked - стоп, как у верификатора круга.
 const wantSnap = !admit(green, rev, reg.blocking(), '') && !authorGap(fix2 || fix) && !!repro.test_cmd && !testMissing(finalVer) && !!expected() && hashOf(finalVer) !== expected()
-const snap = wantSnap ? await node('верификатор', verifyText('снимок', expected()), { label: 'verify:снимок', phase: 'Review', model: 'haiku', schema: BSNAP }) : null
+const snap = wantSnap ? await verifyNode(HEAD, 'снимок', 'Review', BSNAP, verifyText(expected())) : null
 const placed = !!snap && String(snap.snap_hash || '').trim() === expected()
 const back = !!snap && !snap.dirty && hashOf(snap) === hashOf(finalVer) && snap.ahead === finalVer.ahead
 const sha = String(finalVer.head || '').trim().split(/\s/)[0]
@@ -704,7 +737,7 @@ const restore = (A.cwd ? `cd ${A.cwd} && ` : '') + (/^[0-9a-f]+$/i.test(sha) ? `
 if (wantSnap) trail.push({ step: 'snapshot', doer: 'general-purpose', status: snap ? snap.status : 'null', placed, passed: passed(snap), returned: back })
 if (wantSnap && noRun(snap)) return bail('Review: прогон снимка', `${lack(snap, 'верификатор')}; ${repro.repro_test} мог остаться снимком, вернуть: ${restore}`, { fix_after_review: fix2, review: rev, prior: reg.all() })
 const snapNote = !repro.test_cmd ? '; снимок не прогнан: команды тестов нет' : !wantSnap ? ''
-  : (!placed ? `; снимок ${expected()} не поставлен: snap_hash ${snap.snap_hash || 'пусто'}` : !passed(snap) ? `; снимок ${expected()} на итоговом коде не зелёный: ${redNote(snap)}` : '')
+  : (!placed ? `; снимок ${expected()} не поставлен: snap_hash ${snap.snap_hash || 'пусто'}` : !passed(snap) ? `; снимок ${expected()} на итоговом коде не зелёный: ${redNote(snap, known)}` : '')
     + (!back ? `; файл теста после прогона снимка ${expected()} не возвращён: repro_test_hash ${hashOf(snap) || 'пусто'} при итоговом ${hashOf(finalVer)}, ahead ${snap.ahead} при итоговом ${finalVer.ahead}, dirty=${snap.dirty}, вернуть: ${restore}` : '')
 // Удалённый тест - разрыв при любой приёмке и без снимка: путь верификатору назван треком. Правка теста - против ожидания,
 // а не вердикта: суждение «обвязка или проверка» ревью несёт на круге приёмки, дальше тест держится снимком.
@@ -716,7 +749,7 @@ const gap = [ledgerUnread ? LEDGER_UNREAD : '', authorGap(fix2 || fix) || testGa
   !repro.build_cmd && !repro.test_cmd ? 'внешнего факта нет: ни сборки, ни тестов' : '', !finalVer.ahead ? 'коммитов трека нет' : '', reviewGap(rev), spotGap(rev, spots), falsifyGap(rev, fal)].filter(Boolean).join('; ')
 const where = admit(green, rev, reg.blocking(), gap)
 return outcome(where ? 'partial' : 'complete', where, where, {
-  goal_check: { build_ok: finalVer.build_ok, tests_green: finalVer.exit_code === 0 && finalVer.fail_count === 0, committed: !finalVer.dirty && finalVer.ahead > 0, head: finalVer.head },
+  goal_check: { build_ok: finalVer.build_ok, tests_green: finalVer.exit_code === 0 && finalVer.fail_count === 0, inherited: inheritedFails(finalVer, known), committed: !finalVer.dirty && finalVer.ahead > 0, head: finalVer.head },
   repro, fix, fix_after_review: fix2, review: rev, falsify: fal, prior: reg.all(), dropped, disputes,
   decisions: [...dec(), ...probeAsks(reg)],
 })
