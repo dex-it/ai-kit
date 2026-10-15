@@ -5,14 +5,22 @@ const VERIFY = { type: 'object', properties: {
   flaky: { type: 'array', items: { type: 'string' }, description: 'упали в первом прогоне и прошли в повторе' },
   build_ok: { type: 'boolean' },
   head: { type: 'string', description: 'git log --oneline -3' },
+  head_sha: { type: 'string', description: 'git rev-parse HEAD' },
   dirty: { type: 'boolean', description: 'git status --porcelain непустой' },
   ahead: { type: 'integer', description: 'коммитов ветки трека, которых нет ни на одной другой ветке' },
+  delta: { type: ['array', 'null'], items: { type: 'string' }, description: 'места правки от delta_from до рабочего дерева: file:from-to, file:line, file; поля нет в JSON - null' },
   missing: { type: 'string', description: 'при blocked - почему прогон не выполнен; иначе пусто' },
-}, required: ['status', 'exit_code', 'pass_count', 'fail_count', 'failing', 'build_ok', 'head', 'dirty', 'ahead', 'missing'] }
+}, required: ['status', 'exit_code', 'pass_count', 'fail_count', 'failing', 'build_ok', 'head', 'head_sha', 'dirty', 'ahead', 'delta', 'missing'] }
 const AHEAD_CMD = 'git rev-list --count HEAD --not --exclude="$(git branch --show-current)" --branches'
-const VERIFY_CMDS = `git log --oneline -3, git status --porcelain и ${AHEAD_CMD} (это ahead)`
+const VERIFY_CMDS = `git log --oneline -3, git rev-parse HEAD (это head_sha), git status --porcelain и ${AHEAD_CMD} (это ahead)`
 // Команды едут скрипту hex-строкой: кавычки и $ в команде проекта шелл модели не портит.
 const hexOf = (s) => encodeURIComponent(s).replace(/%([0-9A-F]{2})|[^%]/g, (m, h) => h ? h.toLowerCase() : m.charCodeAt(0).toString(16).padStart(2, '0'))
+// Команды ведёт кодер: подготовка снимает их до правки, и раннер, заведённый правкой, иначе не гонялся бы никогда.
+const withCommands = (t, f) => {
+  const c = (f && f.commands) || {}, build = String(c.build_cmd || '').trim(), test = String(c.test_cmd || '').trim()
+  if (!t || (!build && !test)) return t
+  return { ...t, ...(build ? { build_cmd: build } : {}), ...(test && test !== t.test_cmd ? { test_cmd: test, report_cmd: String(c.report_cmd || '').trim() } : {}) }
+}
 const verifySpec = (t, known, extra) => ({ build: t.build_cmd || '', test: t.report_cmd || t.test_cmd || '', known: known || [], ...extra })
 const verifyRun = (scripts, spec) => `Выполни командой Bash с timeout 600000: python3 '${scripts}/verify.py' ${hexOf(JSON.stringify(spec))}
 stdout - JSON. status running - повтори python3 '${scripts}/verify.py' --wait <его out> тем же timeout, пока status не станет другим. Поля схемы перенеси из итогового JSON как есть; counts null - pass_count, fail_count и failing выведи из test_tail. Команда не вернула JSON - status blocked, в missing её вывод.`

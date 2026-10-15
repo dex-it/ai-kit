@@ -2,6 +2,7 @@
 # Прогон кодом, а не моделью: верификатор-модель путал build_ok и счётчики; вход hex - кавычки команд не портятся в шелле модели.
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -10,8 +11,10 @@ import tempfile
 import time
 import xml.etree.ElementTree as ET
 
-USAGE = "usage: verify.py HEX | --wait OUT   (HEX - hex от JSON {build, test, known, snap, hash_path})"
+USAGE = "usage: verify.py HEX | --wait OUT | --hunks [BASE]   (HEX - hex от JSON {build, test, known, snap, hash_path, delta_from})"
+OWN = 'git rev-list HEAD --not --exclude="$(git branch --show-current)" --branches'
 AHEAD = 'git rev-list --count HEAD --not --exclude="$(git branch --show-current)" --branches'
+EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 BUILD = "<build>"
 TAIL = 60
 # Bash агента без поданного timeout обрывает команду на 2 минутах: ожидание короче, дальше --wait.
@@ -94,6 +97,60 @@ def git_hash(path, write=False):
     return p.stdout.decode().strip() if p.returncode == 0 else "missing"
 
 
+HUNK = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
+
+
+def delta(base):
+    # Тесты включительно: признак «внесена правкой» судит место находки, а находка бывает и в тесте.
+    base = base.replace("'", "")
+    code, out = sh("git -c core.quotePath=false diff -U0 --no-color --no-ext-diff '%s' -- 2>/dev/null" % base)
+    if code != 0:
+        return None
+    spots, seen, old, path, head = [], set(), None, None, False
+    for line in out.splitlines():
+        # При -U0 добавленная строка «++ b/x» читается как «+++ b/x»: заголовок файла - только до первого хунка.
+        if line.startswith("diff --git "):
+            head, old, path = True, None, None
+        elif head and line.startswith("--- "):
+            old = line[6:].rstrip("\t") if line.startswith("--- a/") else None
+        elif head and line.startswith("+++ "):
+            path = line[6:].rstrip("\t") if line.startswith("+++ b/") else None
+            if path is None and old:
+                spots.append(old)
+                seen.add(old)
+        elif path:
+            m = HUNK.match(line)
+            if m:
+                head = False
+                c, d = int(m.group(1)), int(m.group(2) if m.group(2) is not None else 1)
+                spots.append("%s:%d" % (path, c) if d == 0 else "%s:%d-%d" % (path, c, c + d - 1))
+                seen.add(path)
+    # Бинарный файл и чистое переименование хунков не дают: такой файл - место правки целиком.
+    code, names = sh("git -c core.quotePath=false diff --name-only -z --no-ext-diff '%s' -- 2>/dev/null" % base)
+    if code != 0:
+        return None
+    spots += [n for n in names.split("\0") if n and n not in seen]
+    code, out = sh("git -c core.quotePath=false ls-files --others --exclude-standard 2>/dev/null")
+    return spots + [f for f in out.splitlines() if f.strip()] if code == 0 else None
+
+
+def hunks_base(base):
+    # База ревью, не предок HEAD, судит чужие коммиты: тогда объём - свои коммиты ветки от родителя первого.
+    if base and sh("git merge-base --is-ancestor '%s' HEAD" % base.replace("'", ""))[0] == 0:
+        return base
+    code, out = sh(OWN)
+    own = out.split() if code == 0 else []
+    if not own:
+        return "HEAD"
+    return own[-1] + "^" if sh("git rev-parse --verify -q '%s^'" % own[-1])[0] == 0 else EMPTY_TREE
+
+
+def hunks(base):
+    b = hunks_base(base)
+    spots = delta(b)
+    print(json.dumps({"base": b, "hunks": spots} if spots is not None else {"base": b, "error": "git diff от базы не выполнен"}, ensure_ascii=False))
+
+
 def verify(spec):
     build, test = spec.get("build") or "", spec.get("test") or ""
     known = set(spec.get("known") or [])
@@ -138,8 +195,13 @@ def verify(spec):
             subprocess.run(["git", "checkout", "--", snap["path"]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     r["exit_code"] = r["build_exit"] if not r["build_ok"] else (r["test_exit"] if r["test_exit"] is not None else 0)
     r["head"] = sh("git log --oneline -3")[1].strip()
+    r["head_sha"] = sh("git rev-parse HEAD")[1].strip()
     code, out = sh(AHEAD)
     r["ahead"] = int(out.strip()) if code == 0 and out.strip().isdigit() else 0
+    if spec.get("delta_from"):
+        d = delta(spec["delta_from"])
+        if d is not None:
+            r["delta"] = d
     if "hash_path" in spec:
         r["repro_test_hash"] = "" if not hash_path else git_hash(hash_path, write=True) if os.path.isfile(hash_path) else "missing"
     return r
@@ -212,6 +274,8 @@ def main():
         return run(a[1], a[2])
     if len(a) == 2 and a[0] == "--wait":
         return wait(a[1])
+    if len(a) in (1, 2) and a[0] == "--hunks":
+        return hunks(a[1] if len(a) == 2 else "")
     if len(a) != 1:
         die(USAGE)
     try:

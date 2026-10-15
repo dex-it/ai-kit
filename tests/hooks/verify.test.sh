@@ -34,6 +34,7 @@ out="$(run "{\"build\": \"true\", \"test\": \"$NODE_JUNIT ok.test.mjs\"}")"
 check "$(echo "$out" | field exit_code)/$(echo "$out" | field build_ok)/$(echo "$out" | field pass_count)/$(echo "$out" | field fail_count)" "0/true/2/0" "зелёный: код 0, сборка ok, прошло 2, упало 0"
 check "$(echo "$out" | field counts)" "report" "зелёный: счётчики из отчёта раннера"
 check "$(echo "$out" | field dirty)/$(echo "$out" | field ahead)" "false/0" "отчёт раннера лёг вне дерева: дерево чистое, коммитов трека нет"
+check "$(echo "$out" | field head_sha)" "$(git -C "$R" rev-parse HEAD)" "head_sha - полный sha HEAD"
 
 out="$(run '{"build": "echo boom; exit 3", "test": "echo never > ran.txt"}')"
 check "$(echo "$out" | field build_ok)/$(echo "$out" | field exit_code)/$(echo "$out" | field failing)" 'false/3/["<build>"]' "сборка упала: build_ok по коду сборки, падение - <build>"
@@ -100,7 +101,35 @@ for _ in $(seq 50); do pgrep -s "$sid" -x sleep >/dev/null && break; sleep 0.1; 
 pkill -9 -s "$sid"; sleep 0.5
 check "$("$V" --wait "$o" | field status)" "blocked" "прогон убит до отчёта - blocked, а не вечное ожидание"
 
+has() { python3 -c 'import sys, json; print(sys.argv[1] in json.load(sys.stdin))' "$1"; }
+printf 'a\nb\nc\n' > "$R/three.txt"; git -C "$R" add three.txt; git -C "$R" commit -qm three
+base="$(git -C "$R" rev-parse HEAD)"
+printf 'a\nB\nc\nd\n' > "$R/three.txt"; git -C "$R" rm -q note.txt; git -C "$R" commit -qam delta; echo z > "$R/fresh.txt"
+out="$(run "{\"delta_from\": \"$base\"}")"
+check "$(echo "$out" | field delta)" '["note.txt", "three.txt:2-2", "three.txt:4-4", "fresh.txt"]' "дельта: удалённый файл, изменённая и добавленная строка, неотслеживаемый файл"
+check "$(run '{"delta_from": "nosuchsha"}' | has delta)/$(run '{}' | has delta)" "False/False" "дельта: база не разобрана либо не подана - поля нет"
+rm -f "$R/fresh.txt"
+base="$(git -C "$R" rev-parse HEAD)"
+printf '++ b/x\nB\nc\nD\n' > "$R/three.txt"; printf 'q\n' > "$R/s p.txt"; git -C "$R" add -A; git -C "$R" commit -qm tricky
+check "$(run "{\"delta_from\": \"$base\"}" | field delta)" '["s p.txt:1-1", "three.txt:1-1", "three.txt:4-4"]' "дельта: строка «++ b/x» хунка - не заголовок файла, путь с пробелом без TAB"
+
 (cd "$R" && "$V" zz >/dev/null 2>&1); check "$?" "64" "вход не hex от JSON - код 64"
+
+H="$T/hrepo"; mkdir -p "$H"
+git -C "$H" init -q -b main; git -C "$H" config user.email t@t; git -C "$H" config user.name t
+printf 'a\nb\nc\n' > "$H/x.txt"; git -C "$H" add -A; git -C "$H" commit -qm base
+git -C "$H" checkout -qb auto/T2
+printf 'a\nB\nc\nd\n' > "$H/x.txt"; git -C "$H" commit -qam own
+hk() { (cd "$H" && "$V" --hunks "$@"); }
+check "$(hk | field hunks)" '["x.txt:2-2", "x.txt:4-4"]' "--hunks без базы: места от родителя первого своего коммита"
+check "$(hk | field base)" "$(git -C "$H" rev-parse auto/T2)^" "--hunks без базы: база названа"
+check "$(hk "$(git -C "$H" rev-parse auto/T2)" | field hunks)" '[]' "--hunks: база - предок HEAD, берётся как есть"
+check "$(hk nosuchsha | field base)" "$(git -C "$H" rev-parse auto/T2)^" "--hunks: база не предок HEAD - как без базы"
+git -C "$H" checkout -q main; printf 'z\n' >> "$H/x.txt"
+check "$(hk | field hunks)/$(hk | field base)" '["x.txt:4-4"]/HEAD' "--hunks: своих коммитов нет - незакоммиченное от HEAD"
+printf '\000\001' > "$H/b.bin"; printf 'y\n' > "$H/y.txt"; git -C "$H" add b.bin y.txt; git -C "$H" commit -qm bin; git -C "$H" branch bin-seen
+printf '\000\002' > "$H/b.bin"; git -C "$H" mv y.txt z.txt
+check "$(hk | field hunks)" '["x.txt:4-4", "b.bin", "z.txt"]' "--hunks: бинарный файл и чистое переименование - место правки целиком"
 
 mkdir -p "$T/keep"; echo '{"status": "complete"}' > "$T/keep/out.json"
 "$V" --wait "$T/keep/out.json" >/dev/null

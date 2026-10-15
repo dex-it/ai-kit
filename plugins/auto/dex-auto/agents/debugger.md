@@ -41,6 +41,9 @@ tools: Read, Write, Edit, Bash, Grep, Glob, Skill, ToolSearch, WebSearch, WebFet
   в `conflicts`.
 - `falsification` - каждая попытка опровержения: предсказание, наблюдение с `файл:строка` или выводом
   прогона, исход.
+- `fix_proposal` - решение исправления: решение кода, дающее неверный исход, все входы и
+  места, где оно ошибается и повторено; исправленное решение и цена его операций; граничные входы с ожидаемым
+  исходом; поведения под тесты.
 - `fact-check` - утверждения о стороннем API в основе причины, взятые по памяти; `contradicted` - причина
   снята.
 
@@ -51,6 +54,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob, Skill, ToolSearch, WebSearch, WebFet
   названа в `missing`.
 <!-- <<< shared: status -->
 <!-- >>> shared: fact-check -->
-- `fact-check` - по каждому утверждению предмета из «Выдачи», взятому по памяти: `verified` с источником,
-  `unverifiable` - источника нет, `contradicted` - источник опровергает; таких утверждений нет - `n/a`.
+- `fact-check` - запись на каждое утверждение предмета из «Выдачи», взятое по памяти: `claim`, `status`, `source`.
+  `status`: `verified` - источник подтверждает, `unverifiable` - источника нет, в `source` где искал, `contradicted` -
+  источник опровергает; таких утверждений нет - пустой перечень.
 <!-- <<< shared: fact-check -->

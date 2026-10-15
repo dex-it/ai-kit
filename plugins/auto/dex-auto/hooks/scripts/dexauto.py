@@ -3,7 +3,6 @@
 import json
 import os
 import re
-import subprocess
 import sys
 
 # Формула slug та же, которой host именует папку проекта; расхождение наблюдается только чтением (ADR-0001, долг 2).
@@ -16,44 +15,12 @@ def config_dir():
     return os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude")
 
 
-LAUNCH_MARK = "dex-auto-launch"
-
-
 def cwd():
-    base = os.path.abspath(os.environ.get("DEX_AUTO_CWD") or os.getcwd())
-    return launch_of(base) or base
-
-
-def launch_of(path):
-    # Ключ ledger - каталог запуска, а после EnterWorktree процесс в дереве трека; git не вызывается (ledger.md T2).
-    here = os.path.abspath(path)
-    while not os.path.isdir(os.path.join(here, ".git")):
-        launch = read_mark(os.path.join(here, ".git"))
-        if launch:
-            return launch
-        up = os.path.dirname(here)
-        if up == here:
-            return None
-        here = up
-    return None
-
-
-def read_mark(dotgit):
-    try:
-        with open(dotgit, encoding="utf-8") as f:
-            head = f.readline().strip()
-        if not head.startswith("gitdir:"):
-            return None
-        with open(os.path.join(os.path.dirname(dotgit), head[len("gitdir:"):].strip(), LAUNCH_MARK), encoding="utf-8") as f:
-            launch = f.read().strip()
-    except (OSError, ValueError):
-        return None
-    # Мёртвая метка (репозиторий перенесён) увела бы ключ в несуществующий каталог, относительная - от каталога процесса.
-    return launch if os.path.isabs(launch) and os.path.isdir(launch) else None
+    return os.path.abspath(os.environ.get("DEX_AUTO_CWD") or os.getcwd())
 
 
 def bind_session(data):
-    # Ключ ledger - каталог запуска сессии (ADR-0001): cwd события после EnterWorktree - дерево трека (P35).
+    # Ключ ledger - каталог запуска сессии (ADR-0001): Bash узла мог сменить cwd события.
     os.environ["DEX_AUTO_CWD"] = os.environ.get("CLAUDE_PROJECT_DIR") or field(data or {}, "cwd") or os.getcwd()
 
 
@@ -145,6 +112,10 @@ def findings_state(path, legacy_track=None):
     return state
 
 
+def findings_top(state):
+    return max([int(i[1:]) for i in state if re.match(r"^F\d+$", i)] + [0])
+
+
 def open_findings(path, legacy_track=None):
     return [r for r in findings_state(path, legacy_track).values() if r.get("status") in OPEN_FINDING]
 
@@ -181,6 +152,7 @@ def get_key(path, key):
 
 
 def set_key(path, key, value):
+    value = re.sub(r"\s*[\r\n]+\s*", "; ", str(value).strip())
     lines = lines_of(path)
     end = head_end(lines)
     for i in range(end):
@@ -245,33 +217,6 @@ def section(path, title, last_line_only=False):
     if last_line_only:
         return collected[-1:]
     return collected
-
-
-def main_root():
-    # Дерево сессии, а не родитель --git-common-dir: в подмодуле это .git суперпроекта, в своём worktree - чужая копия.
-    done = subprocess.run(["git", "-C", cwd(), "rev-parse", "--show-toplevel"], capture_output=True, text=True)
-    if done.returncode != 0:
-        return None
-    return done.stdout.strip()
-
-
-def tree_base(main):
-    # Подмодуль - сосед внешнего суперпроекта: внутри суперпроекта копия ложится в его рабочее дерево непрослеженной.
-    outer = main
-    while True:
-        up = subprocess.run(["git", "-C", outer, "rev-parse", "--show-superproject-working-tree"], capture_output=True, text=True)
-        if up.returncode != 0 or not up.stdout.strip():
-            break
-        outer = up.stdout.strip()
-    return os.path.join(os.path.dirname(outer), os.path.relpath(main, os.path.dirname(outer)).replace(os.sep, "-"))
-
-
-def worktree_path(base, task):
-    return "%s-%s" % (base, slug(task))
-
-
-def branch_of(task):
-    return "auto/%s" % slug(task)
 
 
 def event():
