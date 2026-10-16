@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
 """Плечо «одна сессия»: те же ТЗ одной сессией без dex-auto.
 
-    python3 -I single.py <репо> --out <файл.json> [--model opus] [--budget 12]
+    python3 -I single.py <репо> --out <файл.json> [--model opus] [--effort medium] [--budget 12] [--skill]
+
+`--skill` подключает скилл `subagent-dispatch` из рабочего дерева и называет его в поручении.
 """
 import argparse, json, os, subprocess, time
 
 ap = argparse.ArgumentParser()
 ap.add_argument('repo'); ap.add_argument('--out', required=True)
 ap.add_argument('--model', default='opus'); ap.add_argument('--budget', type=float, default=12)
+ap.add_argument('--effort'); ap.add_argument('--skill', action='store_true')
 a = ap.parse_args()
-prompt = ('Выполни все четыре добавления из TASK.md в этом репозитории. По завершении закоммить локально, push не делать.')
+lead = 'Используй скилл dex-skill-subagent-dispatch:subagent-dispatch.\n\n' if a.skill else ''
+prompt = lead + ('Выполни все четыре добавления из TASK.md в этом репозитории. По завершении закоммить локально, push не делать.')
+args = ['claude', '-p', '--model', a.model, '--dangerously-skip-permissions', '--output-format', 'json',
+        '--max-budget-usd', str(a.budget)]
+if a.effort:
+    args += ['--effort', a.effort]
+if a.skill:
+    plugin = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../plugins/skills/dex-skill-subagent-dispatch')
+    args += ['--plugin-dir', os.path.normpath(plugin)]
 t0 = time.time()
-r = subprocess.run(['claude', '-p', '--model', a.model, '--dangerously-skip-permissions', '--output-format', 'json',
-                    '--max-budget-usd', str(a.budget), prompt], cwd=a.repo, text=True, capture_output=True, timeout=60 * 60,
+r = subprocess.run(args + [prompt], cwd=a.repo, text=True, capture_output=True, timeout=60 * 60,
                    env={k: v for k, v in os.environ.items() if k != 'CLAUDECODE'})
 try:
     data = json.loads(r.stdout)

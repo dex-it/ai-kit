@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-// Грабли раздачи: главный поток со скиллом `subagent-dispatch` (arm skill), с командой `/do` (arm do)
-// и без них (arm none) выполняет шесть работ экзамена способов (modes/), без пакета плана.
+// Грабли раздачи: главный поток со скиллом `subagent-dispatch` (arm skill) и без него (arm none) выполняет шесть работ экзамена способов (modes/), без пакета плана.
 //
-//   node run.mjs <каталог> --arm skill|do|none --model sonnet --effort high [--fork 0|1] [--budget 6]
+//   node run.mjs <каталог> --arm skill|none --model sonnet --effort high [--fork 0|1] [--budget 6]
 //
 // Дерево строит modes/gen.py (пакет плана удаляется), стрим пишется в <каталог>/stream.jsonl,
 // оценка - grade.py.
@@ -21,7 +20,7 @@ const model = arg('model', 'sonnet');
 const effort = arg('effort', 'high');
 const fork = arg('fork', '0');
 const budget = arg('budget', '6');
-if (!['skill', 'do', 'none'].includes(armName)) { console.error('--arm skill|do|none'); process.exit(2); }
+if (!['skill', 'none'].includes(armName)) { console.error('--arm skill|none'); process.exit(2); }
 
 const built = spawnSync('python3', ['-I', join(HERE, '../modes/gen.py'), dir], { encoding: 'utf8' });
 if (built.status !== 0) { console.error(built.stderr); process.exit(2); }
@@ -29,7 +28,7 @@ rmSync(join(dir, 'pack'), { recursive: true, force: true });
 
 const tasks = readFileSync(join(HERE, 'notes/tasks.txt'), 'utf8');
 const lead = armName === 'skill' ? 'Используй скилл dex-skill-subagent-dispatch:subagent-dispatch.\n\n' : '';
-const prompt = armName === 'do' ? `/dex-skill-subagent-dispatch:do ${tasks}` : `${lead}${tasks}`;
+const prompt = `${lead}${tasks}`;
 const args = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--no-session-persistence',
   '--permission-mode', 'bypassPermissions', '--max-budget-usd', budget, '--model', model, '--effort', effort];
 if (armName !== 'none') args.push('--plugin-dir', join(REPO, 'plugins/skills/dex-skill-subagent-dispatch'));
@@ -38,5 +37,5 @@ const r = spawnSync('claude', args, {
   env: { ...process.env, CLAUDE_CODE_FORK_SUBAGENT: fork },
 });
 writeFileSync(join(dir, 'stream.jsonl'), r.stdout ?? '');
-const g = spawnSync('python3', ['-I', join(HERE, 'grade.py'), dir, '--arm', armName, '--orch', model, '--fork', fork], { encoding: 'utf8' });
+const g = spawnSync('python3', ['-I', join(HERE, 'grade.py'), dir, '--arm', armName, '--orch', model, '--orch-effort', effort, '--fork', fork], { encoding: 'utf8' });
 process.stdout.write(g.stdout || g.stderr);
