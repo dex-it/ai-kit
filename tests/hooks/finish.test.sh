@@ -32,6 +32,8 @@ check "$("$L" get BUG-1 Исход)" "complete" "finish: complete закрыва
 check "$("$L" find)" "" "finish: цель исчезла из find"
 check "$("$L" trail BUG-1 feature | grep -c '')" "2" "trail: строки исполнителей"
 check "$("$L" trail BUG-1 review)" "" "trail: файла трека нет -> пусто"
+check "$("$L" decisions BUG-1 feature | grep -c '^- R3: выбран split по дефису$')" "1" "decisions: строки Решений файла трека"
+check "$("$L" decisions BUG-1 review)" "" "decisions: файла трека нет -> пусто"
 
 "$L" open PR-7 >/dev/null
 # без кавычек намеренно: это та форма, которую читает модель в usage и в auto.md

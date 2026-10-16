@@ -27,11 +27,11 @@ async function reviewLoop(t) {
   reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик' : 'саморевьюер')
   // Ревью со своим разрывом базой дельты не служит: повторное по дельте не перепроверило бы место разрыва.
   first.settled = settledOf(rev, spots, fal) && !reviewGap(rev, reg.all())
-  const offeredHere = new Set(), coderClosed = []
+  const offeredHere = new Set()
   let last = first, listed = LEDGER, chain = pairsOf(reg, kept(rev, fal), LEDGER, degraded), base = firstBase
   const advance = () => { if (last.settled && rev && rev.status === 'complete') base = last.head }
   // Вопрос оператору (domain.md §2) едет и в выходе из цикла: иначе P2 видна только записью prior.
-  const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, reg, spots, fix2, ver2, dropped, coderClosed, offeredOnly })
+  const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, reg, spots, fix2, ver2, dropped, offeredOnly })
   advance()
   while (rev && rev.status !== 'blocked') {
     const reviewLeft = loops.review < REVIEW_CEILING
@@ -57,7 +57,7 @@ async function reviewLoop(t) {
       // Зелёная правка одних offered ревью не покупает: их исход итога не держит (domain.md §4).
       if (!must && passed(ver2) && last.settled) {
         const shut = (fix2.prior || []).filter(p => p.status === 'closed' && may.some(f => f.id === p.id))
-        coderClosed.push(...shut.map(p => p.id))
+        shut.forEach(p => reg.seat(p, 'closed', `закрыто кодером без повторного ревью: ${p.evidence}`))
         decisions.push(...shut.map(p => `${p.id}: закрыто кодером без повторного ревью - ${p.evidence}`))
         break
       }

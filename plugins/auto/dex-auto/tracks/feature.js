@@ -31,7 +31,11 @@ const HEAD = `mode: ${A.mode || 'autonomous'}\nцель (${A.task}): ${A.goal}\n
 const PREP_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): подготовить рабочий каталог к сборке и тестам - и только это. Цель трека тебе не передана намеренно: реализацию ведёт другой узел, и код в каталоге не твой предмет.\n${TREE}`
 // Возобновление - это «продолжить» плюс след прошлого прогона: без следа прогона не было, и возобновлять нечего.
 const resuming = !!(A.resume && A.trail)
-const DONE = resuming ? `\nВозобновление: шаги ниже уже сделаны (из ledger), не повторяй их, продолжай с незакрытого:\n${A.trail}\n` : ''
+// Нехватку прошлого прогона и ответ на неё дерево не хранит: без них возобновление прошло бы мимо разрыва, на котором встал прогон.
+const priorMissing = resuming ? String(A.prior_missing || '').trim() : ''
+const goalDecisions = resuming ? (Array.isArray(A.goal_decisions) ? A.goal_decisions.join('\n') : String(A.goal_decisions || '')).trim() : ''
+const RESUMED = `${priorMissing ? `\nПрошлый прогон не довёл: ${priorMissing}` : ''}${goalDecisions ? `\nРешения по цели (оператор и прошлые прогоны):\n${goalDecisions}` : ''}`
+const DONE = resuming ? `\nВозобновление: шаги ниже уже сделаны (из ledger), не повторяй их, продолжай с незакрытого:\n${A.trail}${RESUMED}\n` : ''
 
 // >>> shared: contract
 const STATUS = { type: 'string', enum: ['complete', 'blocked', 'partial'] }
@@ -316,6 +320,12 @@ const withCommands = (t, f) => {
   if (!t || (!build && !test)) return t
   return { ...t, ...(build ? { build_cmd: build } : {}), ...(test && test !== t.test_cmd ? { test_cmd: test, report_cmd: String(c.report_cmd || '').trim() } : {}) }
 }
+const cmdsOf = (t) => ({ build_cmd: String((t && t.build_cmd) || '').trim(), test_cmd: String((t && t.test_cmd) || '').trim() })
+// Созданная кодером на пустом месте команда строки не даёт: судить замену не с чем.
+const swapText = (was, t) => {
+  const now = cmdsOf(t), s = was ? ['build_cmd', 'test_cmd'].filter(k => was[k] && now[k] !== was[k]).map(k => `${k}: было «${was[k]}», стало «${now[k]}»`) : []
+  return s.length ? `\nКодер заменил команды прогона: ${s.join('; ')}. Замена, сужающая охват прогона без причины в плане кодера, - находка.` : ''
+}
 const verifySpec = (t, known, extra) => ({ build: t.build_cmd || '', test: t.report_cmd || t.test_cmd || '', known: known || [], ...extra })
 const verifyRun = (scripts, spec) => `Выполни командой Bash с timeout 600000: python3 '${scripts}/verify.py' ${hexOf(JSON.stringify(spec))}
 stdout - JSON. status running - повтори python3 '${scripts}/verify.py' --wait <его out> тем же timeout, пока status не станет другим. Поля схемы перенеси из итогового JSON как есть; counts null - pass_count, fail_count и failing выведи из test_tail. Команда не вернула JSON - status blocked, в missing её вывод.`
@@ -440,8 +450,7 @@ const admit = (green, rev, stuck, gaps) => !green ? 'верификация по
   : rev.status === 'blocked' ? `саморевью не выполнено: ${lack(rev, 'саморевьюер')}`
   : stuck.some(isBlocking) ? `открытые P0/P1: ${stuck.filter(isBlocking).map(stuckLine).join('; ')}` : gaps
 // Не правится в прогоне и порог не держит, но вопрос оператору не теряется: «продолжить» подаёт такую находку кодеру из ledger.
-// skip - id, закрытые кодером без повторного ревью: у них своя строка с его уликой.
-const askLines = (r, skip = []) => r.asking().filter(f => !skip.includes(f.id)).map(f => `${f.id} [${f.severity}] ${f.anchor}: ${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}порога не держит, решение за оператором - ${f.text}`}`)
+const askLines = (r) => r.asking().map(f => `${f.id} [${f.severity}] ${f.anchor}: ${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}порога не держит, решение за оператором - ${f.text}`}`)
 // Закрытая в прогоне находка в перечне - чтобы ревью сверило, не вернула ли её правка.
 const listedLine = (p) => `${priorLine(p)}${p.status === 'closed' ? ' (закрыта в этом прогоне: сверь, что правка её не вернула)' : ''}`
 // Ревизия - поле head_sha: head - текст git log, у модели-верификатора его первое слово не обязано быть sha.
@@ -535,11 +544,11 @@ async function reviewLoop(t) {
   reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик' : 'саморевьюер')
   // Ревью со своим разрывом базой дельты не служит: повторное по дельте не перепроверило бы место разрыва.
   first.settled = settledOf(rev, spots, fal) && !reviewGap(rev, reg.all())
-  const offeredHere = new Set(), coderClosed = []
+  const offeredHere = new Set()
   let last = first, listed = LEDGER, chain = pairsOf(reg, kept(rev, fal), LEDGER, degraded), base = firstBase
   const advance = () => { if (last.settled && rev && rev.status === 'complete') base = last.head }
   // Вопрос оператору (domain.md §2) едет и в выходе из цикла: иначе P2 видна только записью prior.
-  const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, reg, spots, fix2, ver2, dropped, coderClosed, offeredOnly })
+  const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, reg, spots, fix2, ver2, dropped, offeredOnly })
   advance()
   while (rev && rev.status !== 'blocked') {
     const reviewLeft = loops.review < REVIEW_CEILING
@@ -565,7 +574,7 @@ async function reviewLoop(t) {
       // Зелёная правка одних offered ревью не покупает: их исход итога не держит (domain.md §4).
       if (!must && passed(ver2) && last.settled) {
         const shut = (fix2.prior || []).filter(p => p.status === 'closed' && may.some(f => f.id === p.id))
-        coderClosed.push(...shut.map(p => p.id))
+        shut.forEach(p => reg.seat(p, 'closed', `закрыто кодером без повторного ревью: ${p.evidence}`))
         decisions.push(...shut.map(p => `${p.id}: закрыто кодером без повторного ревью - ${p.evidence}`))
         break
       }
@@ -608,7 +617,7 @@ if (unfedArgs.length) return outcome('blocked', 'Context', `трек вызва�
 const LEDGER = resuming ? ledgerList(A.open_findings, 'находки прошлого прогона кодеру не поданы') : []
 const ASK = LEDGER.filter(f => !awaitsProbe(f))
 const OPEN = ASK.length ? `\nНезакрытые находки прошлого прогона (из ledger): по каждой - запись в prior с тем же id: closed с уликой либо disputed с основанием, почему закрывать не следует:\n${ASK.map(findingLine).join('\n')}\n` : ''
-let ctx = null, fix = null, fix2 = null, ver = null, ver2 = null
+let ctx = null, fix = null, fix2 = null, ver = null, ver2 = null, cmds0 = null
 // Решения копятся по попыткам: fix перезаписывается каждым кругом, и без накопления в ledger уезжает только последний.
 const decisions = []
 const dec = () => decisions.slice()
@@ -708,7 +717,7 @@ if (resuming) {
 }
 // Без коммитов трека прошлый прогон встал до правки: зелёные базовые тесты работу не подтверждают.
 const ahead = !!(ver && ver.ahead)
-let pending = !ahead && (ASK.length > 0 || resuming)
+let pending = (!ahead && (ASK.length > 0 || resuming)) || !!priorMissing
 // Устройство по цене судит opus до кода: кодер на sonnet ради скорости, и его выбор структуры до ревью никто не судил (P114).
 // С коммитами трека решение уже в коде: повторный проектировщик перестраивал бы сделанное (P115).
 let design = null
@@ -737,6 +746,7 @@ for (let k = 1; k <= FIX_CEILING && (!passed(ver) || pending); k++) {
   trail.push({ step: 2, attempt: k, doer: NODE.coder.agentType, status: fix ? fix.status : 'null', 'red-run': fix ? fix['red-run'] : null })
   if (fix) decisions.push(...said(fix))
   if (!fix || fix.status === 'blocked') return bail(`Implement#${k}`, lack(fix, 'узел-кодер'))
+  cmds0 = cmds0 || cmdsOf(ctx)
   ctx = withCommands(ctx, fix)
   ver = await verifyOnce(`после попытки ${k}`)
   trail.push({ step: '2-exit', attempt: k, doer: 'general-purpose', passed: passed(ver) })
@@ -748,13 +758,13 @@ if (!passed(ver)) return outcome('partial', `Implement: потолок ${FIX_CEI
 phase('Review')
 // Разведка этого прогона - другое намерение: коммиты до прежней базы судились против прежних требований.
 const firstBase = priorBase(resuming && ctxResumed ? A.trail : null)
-const review = (tag, f, v, priors, base, h, gaps = '') => own('саморевьюер', `${HEAD}Шаг 3 (${tag}): pre-push саморевью локальной ветки - ${scope(base)}${hunkList(spotsOf(h))}${conventionsText(h)}${gapAsk(gaps)}${coderInput(f)} Источник намерения - требования:\n${reqText}${design ? `\nРешение проектировщика: код, отступивший от него без пункта плана кодера с причиной, - находка.\n${designLines(design)}` : ''}${priors.length ? `\n${LISTED}\n${priors.map(listedLine).join('\n')}` : ''}\nПрогон build/test реальный, итог - в run-status, не в findings. Код не меняй.`,
+const review = (tag, f, v, priors, base, h, gaps = '') => own('саморевьюер', `${HEAD}Шаг 3 (${tag}): pre-push саморевью локальной ветки - ${scope(base)}${hunkList(spotsOf(h))}${conventionsText(h)}${gapAsk(gaps)}${swapText(cmds0, ctx)}${coderInput(f)} Источник намерения - требования:\n${reqText}${design ? `\nРешение проектировщика: код, отступивший от него без пункта плана кодера с причиной, - находка.\n${designLines(design)}` : ''}${priors.length ? `\n${LISTED}\n${priors.map(listedLine).join('\n')}` : ''}${RESUMED}\nПрогон build/test реальный, итог - в run-status, не в findings. Код не меняй.`,
   { label: `self-review:${tag}`, phase: 'Review', schema: { type: 'object', properties: { ...REVIEW.properties, 'conventions-read': conventionsRead(h) }, required: [...REVIEW.required] } }, NODE.reviewer)
-const loop = await reviewLoop({ fix, ver, firstBase, review, coder: async (p) => { const f = await own('кодер', p, { label: 'fix:after-review', phase: 'Review', schema: FIX }, NODE.coder); ctx = withCommands(ctx, f); return f }, intent: () => `Требования:\n${reqText}${designText}`,
+const loop = await reviewLoop({ fix, ver, firstBase, review, coder: async (p) => { const f = await own('кодер', p, { label: 'fix:after-review', phase: 'Review', schema: FIX }, NODE.coder); cmds0 = cmds0 || cmdsOf(ctx); ctx = withCommands(ctx, f); return f }, intent: () => `Требования:\n${reqText}${designText}`,
   verify: (tag, from) => verifyNode(HEAD, tag, ctx, known, 'Review', { delta_from: from }), afterCoder: () => null, afterVerify: () => {},
   run: () => `Тесты: ${ctx.test_cmd || 'нет'}. Сборка: ${ctx.build_cmd || 'нет'}. ${COVER_ONLY}`, red: (v) => redNote(v, known) })
 if (loop.exit) return loop.exit
-const { rev, fal, reg, spots, dropped, coderClosed } = loop
+const { rev, fal, reg, spots, dropped } = loop
 fix2 = loop.fix2; ver2 = loop.ver2
 const finalVer = ver2 || ver
 const gap = coderGap(fix, fix2, loop.offeredOnly)
@@ -765,5 +775,5 @@ const where = admit(green, rev, reg.holding(), gaps)
 return outcome(where ? 'partial' : 'complete', where, where, {
   goal_check: { build_ok: !!finalVer && finalVer.build_ok, tests_green: !!finalVer && finalVer.exit_code === 0 && finalVer.fail_count === 0, inherited: inheritedFails(finalVer, known), committed: !!finalVer && !finalVer.dirty && finalVer.ahead > 0, head: finalVer ? finalVer.head : '' },
   ctx, fix, fix_after_review: fix2, review: rev, falsify: fal, prior: reg.all(), dropped,
-  decisions: [...dec(), ...askLines(reg, coderClosed)],
+  decisions: [...dec(), ...askLines(reg)],
 })
