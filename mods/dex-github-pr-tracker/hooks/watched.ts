@@ -11,17 +11,23 @@ export type Watched = {
   label: string
   /** Found from the current branch; a branch switch drops it, a manual one stays. */
   auto: boolean
+  /**
+   * Взят охватом (`/pr open`, `/pr week`), а не названный руками: смена охвата
+   * снимает такие PR, а названный руками остаётся.
+   */
+  scoped: boolean
   data?: PrData
   /** Why the last poll failed; the previous data stays on screen beside it. */
   error?: string
   updatedMs: number
 }
 
-export const watchedOf = (ref: PrRef, auto: boolean): Watched => ({
+export const watchedOf = (ref: PrRef, auto: boolean, scoped = false): Watched => ({
   ref,
   key: keyOf(ref),
   label: labelOf(ref),
   auto,
+  scoped,
   updatedMs: 0,
 })
 

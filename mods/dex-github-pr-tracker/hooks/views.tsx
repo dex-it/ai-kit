@@ -13,6 +13,7 @@ import type {
   TextProps,
 } from 'claude-code'
 
+import type { FixTarget } from './dispatch.ts'
 import type { Check, CheckLevel, MergeLevel, PrData, Thread } from './github.ts'
 import { decisionWord, mergeLevel, shortenPath, threadTally } from './github.ts'
 import type { Attention, Overview, Row } from './overview.ts'
@@ -40,6 +41,10 @@ export type Actions = {
   openUrl: (url: string) => void
   /** Arms the PR's open threads to ride the next prompt as context. */
   ask: (key: string) => void
+  /** Отдать PR на ревью: команда каталога уходит в сессию. */
+  review: (key: string) => void
+  /** Отдать открытые треды фоновому агенту: все либо один по номеру. */
+  fix: (key: string, target: FixTarget) => void
   stop: (key: string) => void
   toggleResolved: () => void
 }
@@ -69,6 +74,10 @@ export type PaneModel = {
   selectedKey: string | null
   showResolved: boolean
   armedKey: string | null
+  /** PR, над чьими тредами сейчас работает фиксер: повторно его не заказать. */
+  fixingKeys: ReadonlySet<string>
+  /** Охват словами: что именно мод берёт под наблюдение сам. */
+  scopeWord: string
   /** Commits drawn in the pane; the rest are counted, not listed. */
   commitLimit: number
   /** Checks drawn in the pane; a red matrix of thirty jobs is not readable. */
@@ -324,17 +333,29 @@ function listRow(ui: Ui, actions: Actions, entry: Row, withHost: boolean): Rende
         <Text color={ATTENTION_COLOR[entry.attention]}>{`  ${reason}`}</Text>
         {entry.title === '' ? <Text /> : <Text dimColor>{`  ${entry.title}`}</Text>}
       </Text>
+      {entry.state === 'open' || entry.state === 'draft' ? (
+        <Box flexShrink={0}>
+          <Button
+            key={`list-review:${entry.key}`}
+            label="ревью"
+            dimColor
+            onPress={() => actions.review(entry.key)}
+          />
+        </Box>
+      ) : (
+        <Box />
+      )}
     </Box>
   )
 }
 
 /** Итог списка: сколько всего и сколько чего ждёт. */
-function listHead(ui: Ui, overview: Overview): RenderElement {
+function listHead(ui: Ui, overview: Overview, scopeWord: string): RenderElement {
   const { Box, Text } = ui
 
   return (
     <Box flexDirection="column">
-      <Text bold wrap="truncate-end">{`Мониторинг: ${overview.total}`}</Text>
+      <Text bold wrap="truncate-end">{`Мониторинг: ${overview.total} · ${scopeWord}`}</Text>
       <Text wrap="truncate-end">
         {overview.act === 0 ? (
           <Text />
@@ -380,7 +401,7 @@ export function listView(ui: Ui, actions: Actions, model: PaneModel): RenderElem
 
   return (
     <Box flexDirection="column">
-      {listHead(ui, overview)}
+      {listHead(ui, overview, model.scopeWord)}
       {gap(ui, 'gap:list-head')}
       {overview.rows.map(entry => listRow(ui, actions, entry, overview.hosts > 1))}
       {gap(ui, 'gap:list-rows')}
@@ -413,8 +434,15 @@ function tabs(ui: Ui, actions: Actions, model: PaneModel): RenderElement {
   )
 }
 
-function threadRow(ui: Ui, thread: Thread, columns: number): RenderElement {
-  const { Box, Text, Link } = ui
+type ThreadFix = {
+  /** Номер среди открытых тредов - тот же, что у `/pr threads`; у закрытых его нет. */
+  number: number | null
+  isBusy: boolean
+  run: () => void
+}
+
+function threadRow(ui: Ui, thread: Thread, columns: number, fix?: ThreadFix): RenderElement {
+  const { Box, Text, Button, Link } = ui
 
   const address =
     thread.file === null
@@ -442,6 +470,19 @@ function threadRow(ui: Ui, thread: Thread, columns: number): RenderElement {
           <Link href={thread.url} label={where} />
         </Box>
         <Text dimColor wrap="truncate-end">{`  ${meta}`}</Text>
+        {fix === undefined || fix.number === null ? (
+          <Box />
+        ) : (
+          <Box flexShrink={0}>
+            <Text>{' '}</Text>
+            <Button
+              key={`thread-fix:${thread.id}`}
+              label={fix.isBusy ? 'фиксер...' : `поправить ${fix.number}`}
+              dimColor={fix.isBusy}
+              onPress={fix.run}
+            />
+          </Box>
+        )}
       </Box>
       <Box flexDirection="row">
         <Box flexShrink={0}>
@@ -544,6 +585,7 @@ function detailsView(ui: Ui, actions: Actions, model: PaneModel): RenderElement 
   const fact = (name: string, value: string, color?: string) =>
     factRow(ui, columns, name, value, color)
   const reviewWord = decisionWord(data.reviews.decision) ?? 'не требуется'
+  const isFixing = model.fixingKeys.has(watched.key)
 
   return (
     <Box flexDirection="column">
@@ -611,6 +653,31 @@ function detailsView(ui: Ui, actions: Actions, model: PaneModel): RenderElement 
           onPress={() => actions.ask(watched.key)}
         />
         <Text>{' '}</Text>
+        {data.state === 'OPEN' ? (
+          <Box flexDirection="row">
+            <Button
+              key={`pane-review:${watched.key}`}
+              label="ревью"
+              onPress={() => actions.review(watched.key)}
+            />
+            <Text>{' '}</Text>
+            {open.length === 0 ? (
+              <Box />
+            ) : (
+              <Box flexDirection="row">
+                <Button
+                  key={`pane-fix:${watched.key}`}
+                  label={isFixing ? 'фиксер работает...' : `поправить все (${open.length})`}
+                  dimColor={isFixing}
+                  onPress={() => actions.fix(watched.key, 'all')}
+                />
+                <Text>{' '}</Text>
+              </Box>
+            )}
+          </Box>
+        ) : (
+          <Box />
+        )}
         <Button
           key={`pane-stop:${watched.key}`}
           label="снять с отслеживания"
@@ -632,7 +699,13 @@ function detailsView(ui: Ui, actions: Actions, model: PaneModel): RenderElement 
         {open.length === 0 ? 'Открытых тредов нет' : `Открытые треды (${open.length})`}
       </Text>
       {gap(ui, 'gap:open')}
-      {open.map(thread => threadRow(ui, thread, columns))}
+      {open.map((thread, index) =>
+        threadRow(ui, thread, columns, {
+          number: index + 1,
+          isBusy: isFixing,
+          run: () => actions.fix(watched.key, index + 1),
+        }),
+      )}
 
       {bad.length === 0 ? (
         <Box />

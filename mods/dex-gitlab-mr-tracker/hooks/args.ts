@@ -2,6 +2,8 @@
 // nothing, so the command's grammar is settled by tests and not by trying
 // words in a session; resolving `text` into an MR is the caller's job.
 
+import type { Scope } from './scope.ts'
+
 export type Action =
   /** `/mr` - open the pane, or close it when it is open. */
   | { kind: 'toggle' }
@@ -12,6 +14,15 @@ export type Action =
    * какой проект выбран сейчас и откуда он взялся.
    */
   | { kind: 'repo'; text: string }
+  /** `/mr open | week | branch` - какие MR мод берёт под наблюдение сам. */
+  | { kind: 'scope'; scope: Scope }
+  /** `/mr review [123]` - отдать MR на ревью: выбранный либо названный номером. */
+  | { kind: 'review'; iid: number | null }
+  /**
+   * `/mr fix [all | 3]` - отдать треды выбранного MR агенту-фиксеру: все
+   * открытые либо один по номеру из `/mr threads`.
+   */
+  | { kind: 'fix'; target: 'all' | number }
   /** `/mr threads` - print the open threads into the transcript. */
   | { kind: 'threads' }
   /** `/mr status` - print the MR's facts into the transcript. */
@@ -28,6 +39,11 @@ const WORDS: Record<string, Action> = {
   '': { kind: 'toggle' },
   list: { kind: 'list' },
   ls: { kind: 'list' },
+  open: { kind: 'scope', scope: 'open' },
+  week: { kind: 'scope', scope: 'week' },
+  branch: { kind: 'scope', scope: 'branch' },
+  review: { kind: 'review', iid: null },
+  fix: { kind: 'fix', target: 'all' },
   threads: { kind: 'threads' },
   status: { kind: 'status' },
   refresh: { kind: 'refresh' },
@@ -54,6 +70,18 @@ export function parseArgs(raw: string): Action {
     return { kind: 'drop', target: target === 'all' ? 'all' : Number(target) }
   }
 
+  const review = /^review\s+!?#?(\d+)$/.exec(word)
+
+  if (review) return { kind: 'review', iid: Number(review[1]) }
+
+  const fix = /^fix\s+(all|\d+)$/.exec(word)
+
+  if (fix) {
+    const target = fix[1] ?? ''
+
+    return { kind: 'fix', target: target === 'all' ? 'all' : Number(target) }
+  }
+
   // Аргумент берётся из исходного текста, а не из приведённого к нижнему
   // регистру: путь проекта GitLab регистрозависим.
   const repo = /^(?:repo|project)(?:\s+(.+))?$/i.exec(text)
@@ -72,7 +100,10 @@ export function parseArgs(raw: string): Action {
 export const HELP_TEXT = [
   '`/mr` - открыть или закрыть панель: общий список, когда MR несколько, иначе детали.',
   '`/mr list` - общий список наблюдения с итогом.',
+  '`/mr open` - наблюдать все открытые MR проекта; `/mr week` - все, что двигались за неделю; `/mr branch` - только MR текущей ветки.',
   '`/mr 123` или `/mr <ссылка>` - добавить MR к отслеживанию и показать его.',
+  '`/mr review [123]` - отдать MR на ревью (выбранный либо названный номером).',
+  '`/mr fix [all | 3]` - отдать открытые треды выбранного MR агенту-фиксеру: все либо один по номеру из `/mr threads`.',
   '`/mr threads` - выписать открытые треды текстом (их читает модель).',
   '`/mr status` - выписать состояние MR текстом.',
   '`/mr refresh` - опросить GitLab сейчас.',
