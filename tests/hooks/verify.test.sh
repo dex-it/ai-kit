@@ -68,13 +68,26 @@ check "$(echo "$out" | field pass_count)/$(echo "$out" | field failing)" '1/["Ns
 out="$(run '{"test": "cp .runs/r.trx \"$DEX_AUTO_JUNIT_DIR/a.trx\"; cp .runs/r.trx \"$DEX_AUTO_JUNIT_DIR/b.trx\"; exit 1", "known": ["Ns.A.Bad"]}')"
 check "$(echo "$out" | field fail_count)/$(echo "$out" | field failing)" '1/["Ns.A.Bad"]' "одно имя в двух отчётах (два target framework) - одно падение"
 
+cat > "$R/.runs/abort.trx" <<'XML'
+<?xml version="1.0" encoding="utf-8"?>
+<TestRun xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010"><ResultSummary outcome="Failed"><RunInfos>
+<RunInfo computerName="m" outcome="Error" timestamp="2026-10-16T00:00:00"><Text>The active test run was aborted. Reason: Test host process crashed : Process terminated.</Text></RunInfo>
+</RunInfos></ResultSummary></TestRun>
+XML
+out="$(run '{"test": "cp .runs/r.trx \"$DEX_AUTO_JUNIT_DIR/a.trx\"; cp .runs/abort.trx \"$DEX_AUTO_JUNIT_DIR/b.trx\"; exit 1", "known": ["Ns.A.Bad"]}')"
+check "$(echo "$out" | field failing)" '["<aborted>", "Ns.A.Bad"]' "тест-хост упал: прерванный прогон - падение <aborted>, унаследованным не считается"
+
+: > "$R/.runs/n"
+out="$(FLIP="$R/.runs/n" MODE=stable-red DEX_AUTO_FLAKY_MAX=0 run "{\"test\": \"$NODE_JUNIT flip.test.mjs\"}")"
+check "$(cat "$R/.runs/n")/$(echo "$out" | field failing)" '1/["test.flip"]' "новых красных больше потолка повтора: повтора нет"
+
 out="$(run '{"test": "echo art > art.txt"}')"
 check "$(echo "$out" | field dirty)" "false" "dirty снят до прогона: файл, созданный тестами, правкой не считается"
 rm -f "$R/art.txt"
 
 out="$(cd "$R" && DEX_AUTO_VERIFY_LIMIT=1 "$V" "$(hx '{"test": "sleep 37 & sleep 37; wait"}')")"
 sleep 0.5
-check "$(echo "$out" | field status)/$(pgrep -f 'sleep 37' | wc -l)" "blocked/0" "потолок прогона: blocked, команда и её фоновые процессы убиты"
+check "$(echo "$out" | field status)/$(pgrep -f 'sleep 37' | wc -l | tr -d ' ')" "blocked/0" "потолок прогона: blocked, команда и её фоновые процессы убиты"
 
 echo x > "$R/note.txt"; git -C "$R" add note.txt; git -C "$R" commit -qm feat; echo y > "$R/new.txt"
 out="$(run '{"build": "true"}')"
@@ -97,8 +110,9 @@ check "$(echo "$out" | field status)/$(echo "$out" | field test_tail)" "complete
 
 out="$(cd "$R" && DEX_AUTO_VERIFY_WAIT=0 "$V" "$(hx '{"test": "sleep 30"}')")"
 o="$(echo "$out" | field out)"; sid="$(cat "$(dirname "$o")/pid")"
-for _ in $(seq 50); do pgrep -s "$sid" -x sleep >/dev/null && break; sleep 0.1; done
-pkill -9 -s "$sid"; sleep 0.5
+# pid из файла - лидер группы (прогон стартует в новой сессии): -g и отрицательный pid есть и в GNU, и в BSD.
+for _ in $(seq 50); do pgrep -g "$sid" -x sleep >/dev/null && break; sleep 0.1; done
+kill -9 -- "-$sid"; sleep 0.5
 check "$("$V" --wait "$o" | field status)" "blocked" "прогон убит до отчёта - blocked, а не вечное ожидание"
 
 has() { python3 -c 'import sys, json; print(sys.argv[1] in json.load(sys.stdin))' "$1"; }
