@@ -41,7 +41,7 @@ Stop ход не держит. TRACK - `feature` | `bugfix` | `review` | `review
 (не `продолжить`) - только при пустом `git status --porcelain` и нуле от `git rev-list --count HEAD --not
 --exclude="$(git branch --show-current)" --branches`: дельту и коммиты трек считает своими. Иначе до прогона `set TASK Исход
 blocked` и `set TASK Нехватка «каталог не подготовлен под цель: <незакоммиченные файлы либо N коммитов ветки вне локальных
-веток; целевой ветки нет локально - заведи её>»`. Ревью - HEAD на head SHA MR; не на нём - трек вернёт `partial`. После сдачи `complete` при `--pr` - сдача кода:
+веток; целевой ветки нет локально - заведи её>»`. `продолжить` при ветке `auto/<TASK>` (символы TASK вне `A-Za-z0-9-` - `-`), которая есть локально и не текущая, - цель начата до 9.0.0 в дереве рядом: `set TASK Исход blocked`, `set TASK Нехватка «цель начата до 9.0.0 в дереве <путь из git worktree list>: git worktree remove дерева, git switch auto/<TASK> в каталоге запуска, повторить»`. Ревью - HEAD на head SHA MR; не на нём - трек вернёт `partial`. После сдачи `complete` при `--pr` - сдача кода:
 `Workflow` `dex-auto:dex-auto-deliver`, `args` `{task, track, branch, base, default_branch, draft, goal_path, cwd}` (`branch` - `git branch
 --show-current`; `base` без `--base` не подаётся; `default_branch` - `git symbolic-ref --short refs/remotes/origin/HEAD`
 без `origin/`, пусто при ошибке) -> `set TASK PR <url>` при `pr: opened`, иначе

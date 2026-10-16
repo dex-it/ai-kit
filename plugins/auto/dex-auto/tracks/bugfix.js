@@ -509,7 +509,7 @@ const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal
 const KEEP = 'Инварианты правки - источник намерения ниже и закрытые в этом прогоне находки: правка их не нарушает и не сужает поведение допущением о входе или среде, которого в источнике нет; такое допущение находку не закрывает.'
 const keepText = (closed) => `\n${KEEP}${closed.length ? `\nЗакрытые в этом прогоне:\n${closed.map(f => `- ${f.id} ${f.anchor}: ${f.closure || f.text}`).join('\n')}` : ''}`
 const deltaOf = (v) => v && Array.isArray(v.delta) ? v.delta : null
-// Цикл - docs/domain.md §4; t несёт различия треков: review, coder, intent, run (команды прогона), verify, red (итог незелёной верификации либо ''), afterCoder (выход трека либо null), afterVerify.
+// Цикл - docs/domain.md §4; t несёт различия треков: review, coder, intent, run (команды прогона), verify, red (итог незелёной верификации либо ''), afterCoder (выход трека либо null), afterVerify, moved (необязательный: сменила ли правка то, что судит только ревью, - тест диагноста bugfix; true - пропуска ревью нет).
 const OFFERED = 'На твоё решение - порога не держат: правь, только если правка не выходит за места, которые уже меняет правка цели либо называет находка, и не меняет наблюдаемого поведения вне находки; иначе запись prior disputed с основанием.'
 async function reviewLoop(t) {
   const { fix, ver, firstBase } = t
@@ -555,6 +555,7 @@ async function reviewLoop(t) {
       if (fix2) decisions.push(...said(fix2))
       const exit = fix2 && t.afterCoder(fix2, k, { review: rev, prior: reg.all() })
       if (exit) return state(exit)
+      const prevVer = ver2 || ver
       ver2 = !fix2 || fix2.status === 'blocked' ? null : await t.verify('после саморевью', deltaFrom)
       t.afterVerify(ver2)
       offeredOnly = !must
@@ -562,11 +563,12 @@ async function reviewLoop(t) {
       const openNow = { review: rev, falsify: fal, prior: reg.all(), dropped }
       if (!fix2 || fix2.status === 'blocked') return state(bail('Review: правка по находкам', lack(fix2, 'узел-кодер'), openNow))
       if (noRun(ver2)) return state(bail('Review: верификация после правки', lack(ver2, 'верификатор'), openNow))
-      // Зелёная правка одних offered ревью не покупает: их исход итога не держит (domain.md §4).
-      if (!must && passed(ver2) && last.settled) {
+      // Зелёная правка одних offered ревью не покупает: их исход итога не держит (domain.md §4); сменивший тест диагноста круг пропуска не получает (t.moved).
+      if (!must && passed(ver2) && last.settled && !(t.moved && t.moved(prevVer, ver2))) {
         const shut = (fix2.prior || []).filter(p => p.status === 'closed' && may.some(f => f.id === p.id))
         coderClosed.push(...shut.map(p => p.id))
         decisions.push(...shut.map(p => `${p.id}: закрыто кодером без повторного ревью - ${p.evidence}`))
+        trail.push({ step: '3-repeat', doer: 'не куплено: правка одних offered, верификация зелёная', status: 'skipped', closed: shut.length })
         break
       }
       red = passed(ver2) ? '' : t.red(ver2)
@@ -814,7 +816,7 @@ const disputed = (f, k, open) => {
   return disputeExit(dc, f, 'Review: правка по находкам', { fix_after_review: f, ...open })
 }
 const loop = await reviewLoop({ fix, ver, firstBase, review, coder: async (p) => { const f = await own('кодер', p, { label: 'fix:after-review', phase: 'Review', schema: BFIX }, NODE.coder); repro = withCommands(repro, f); return f }, intent: () => `${causeText}\n${acceptance()}`,
-  verify: (tag, from) => verifyNode(HEAD, tag, 'Review', BVERIFY, verifyText('', from)), afterCoder: disputed, afterVerify: settle,
+  verify: (tag, from) => verifyNode(HEAD, tag, 'Review', BVERIFY, verifyText('', from)), afterCoder: disputed, afterVerify: settle, moved: (a, b) => hashOf(a) !== hashOf(b),
   run: () => `Тесты: ${repro.test_cmd || 'нет'}. Сборка: ${repro.build_cmd || 'нет'}. ${COVER_ONLY}`, red: (v) => redNote(v, known) })
 if (loop.exit) return loop.exit
 const { rev, fal, reg, spots, dropped, coderClosed } = loop
