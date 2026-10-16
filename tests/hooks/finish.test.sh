@@ -55,6 +55,25 @@ check "$("$L" trail PR-7 review | grep -c '')" "2" "trail: исполнител�
 check "$(open_ids PR-7 review)" "F5:partial" "findings: статус по id обновляет запись реестра, новой не заводит"
 check "$(grep -c '^- F2 closed \[P1\] src/b.ts:3: проверка добавлена$' "$f")" "1" "finish: обновление по id несёт поля первой записи"
 
+"$L" open P-1 >/dev/null
+"$F" P-1 bugfix partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"N1","severity":"P1","anchor":"src/s.ts:4","text":"кадр не проброшен","status":"open","evidence":"e","premise":"проба на песочнице"}]}' >/dev/null
+"$F" P-1 bugfix partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"F1","status":"open","evidence":"оператор: кадр проброшен","premise":"","text":""}]}' >/dev/null
+check "$("$L" findings P-1 bugfix | python3 -c 'import json,sys; r=json.load(sys.stdin)[0]; print(repr(r["premise"])+"|"+r["text"])')" "''|кадр не проброшен" "реестр: пустой premise снимает пометку пробы, прочие пустые поля запись не перезаписывают"
+
+"$L" open P-2 >/dev/null
+"$F" P-2 review partial <<< '{"status":"partial","trail":[{"step":3}],"confirmed":[{"severity":"P2","anchor":"src/s.ts:4","places":["src/t.ts:9-12"],"text":"флаг не сброшен","closure":"сброшен везде"}]}' >/dev/null
+"$F" P-2 review partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"F1","status":"partial","evidence":"s.ts сброшен","places":[]}]}' >/dev/null
+check "$("$L" findings P-2 review | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["places"])')" "['src/t.ts:9-12']" "реестр: пустой places записи не перезаписывает"
+"$L" open P-9 >/dev/null
+"$F" P-9 review partial <<< '{"status":"partial","trail":[{"step":4}],"findings_top":0,"confirmed":[{"id":"F1","ref":"R1","severity":"P2","anchor":"src/s.ts:4","text":"первая"},{"id":"F2","severity":"P2","anchor":"src/s.ts:4","text":"вторая на том же месте"}],"unpublished":[{"id":"F2","anchor":"src/s.ts:4","axis":"security","reason":"403"}]}' >/dev/null
+check "$(grep -cx -e '- не опубликовано F2 src/s.ts:4: 403' "$("$L" dir P-9)/01-review.md")" "1" "finish: строка «не опубликовано» называет находку id реестра"
+check "$(grep -c '"ref"' "$("$L" dir P-9)/01-review.findings.jsonl")" "0" "finish: ref узла (номер в выходе) в реестр не переносится (ledger.md R9)"
+"$L" open P-3 >/dev/null
+"$F" P-3 feature partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"N2","severity":"P2","anchor":"src/c.ts:30","text":"откат часов","status":"open","evidence":"e","introduced":true}]}' >/dev/null
+"$F" P-3 feature partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"F1","status":"open","evidence":"не закрыта"}]}' >/dev/null
+check "$("$L" findings P-3 feature | python3 -c 'import json,sys; print(json.load(sys.stdin)[0].get("introduced"))')" "True" "реестр: introduced переживает прогон и запись без поля его не снимает (ledger.md R9)"
+check "$(grep -c '^- F1 partial \[P2\] src/s.ts:4: флаг не сброшен (закрытие: сброшен везде) (также: src/t.ts:9-12)$' "$("$L" dir P-2)/01-review.md")" "1" "finish: места находки - в строке Открытых находок"
+
 "$L" open F-2 >/dev/null
 "$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":1}],"open_findings":[{"severity":"P1","anchor":"src/a.ts:10","text":"находка прогона 1"}]}' >/dev/null
 "$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":2}],"open_findings":[{"severity":"P1","anchor":"src/b.ts:20","text":"находка прогона 2"}]}' >/dev/null
@@ -71,6 +90,16 @@ check "$(grep -c '"ref":"F99"' "$("$L" dir F-2)/01-feature.findings.jsonl")" "1"
 "$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":5}],"prior":[{"id":"N1","severity":"P2","anchor":"src/n.ts:1","text":"прогон 5","status":"open"}]}' >/dev/null
 "$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":6}],"prior":[{"id":"N1","severity":"P2","anchor":"src/n.ts:2","text":"прогон 6","status":"open"}]}' >/dev/null
 check "$(open_ids F-2 feature)" "F3:open F4:open F5:open" "finish: N-id прогона - новая F<n> в каждом прогоне, одноимённый N-id прошлого прогона не склеивает"
+check "$("$L" top F-2 feature)" "5" "top: наибольший номер реестра"
+"$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":7}],"findings_top":5,"prior":[{"id":"F9","severity":"P2","anchor":"src/m.ts:1","text":"выдан треком","status":"open"}],"decisions":["F9 [P2] src/m.ts:1: решение за оператором"]}' >/dev/null
+check "$(open_ids F-2 feature)" "F3:open F4:open F5:open F9:open" "finish: F<n> выше реестра, выданный треком от top, заводится своим id"
+check "$(grep -c '"id":"F9".*"ref"' "$("$L" dir F-2)/01-feature.findings.jsonl")" "0" "finish: выданный треком id - без ref"
+check "$(sed -n '/^## Прогон 7/,$p' "$("$L" dir F-2)/01-feature.md" | grep -cx -e '- F9 \[P2\] src/m.ts:1: решение за оператором')" "1" "finish: вопрос оператору и реестр называют один id"
+"$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":8}],"findings_top":9,"prior":[{"id":"F7","severity":"P2","anchor":"src/m.ts:2","text":"номер ниже реестра","status":"open"}]}' >/dev/null
+check "$(open_ids F-2 feature)" "F3:open F4:open F5:open F9:open F10:open" "finish: F<n> не выше реестра и не из него - номер по счёту"
+check "$(grep -c '"id":"F10".*"ref":"F7"\|"ref":"F7".*"id":"F10"' "$("$L" dir F-2)/01-feature.findings.jsonl")" "1" "finish: поданный номер ниже реестра - ссылкой ref"
+"$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":9}],"findings_top":3,"prior":[{"id":"F12","severity":"P2","anchor":"src/m.ts:3","text":"выдан от устаревшего top","status":"open"}]}' >/dev/null
+check "$(grep -c '"id":"F11".*"ref":"F12"\|"ref":"F12".*"id":"F11"' "$("$L" dir F-2)/01-feature.findings.jsonl")" "1" "finish: findings_top выхода не совпал с реестром - поданный id ссылкой ref, номер по счёту"
 echo 'обрыв записи' >> "$("$L" dir F-2)/01-feature.findings.jsonl"
 before="$(wc -l < "$("$L" dir F-2)/01-feature.md")"
 "$F" F-2 feature partial <<< '{"trail":[{"step":4}]}' >/dev/null 2>&1; check "$?" "5" "finish: испорченный реестр -> отказ 5"
@@ -94,6 +123,9 @@ check "$("$L" get T-3 Нехватка)" "цель не подготовлена
 "$F" T-3 bugfix blocked <<< '{"where":"Fix#2"}' >/dev/null
 check "$("$L" get T-3 Нехватка)" "узел не вернул выход, шаг Fix#2" "finish: нет ни аргумента, ни .missing -> шаг where"
 check "$("$L" get T-3 Исход)" "blocked" "finish: blocked -> Исход blocked"
+"$F" T-3 bugfix blocked <<< '{"missing":"нет доступа\r\nСтатус: закрыт"}' >/dev/null
+check "$("$L" get T-3 Нехватка)" "нет доступа; Статус: закрыт" "finish: перевод строки нехватки сведён к '; ' (ledger.md T5)"
+check "$("$L" get T-3 Статус)" "открыт" "finish: строка нехватки не стала полем шапки"
 
 "$L" open C-5 >/dev/null
 "$F" C-5 feature partial <<< '{"loops":{"fix":1},"ctx":{"stack":"ts","test_cmd":"npm test","requirements":["R1 поле"]}}' >/dev/null

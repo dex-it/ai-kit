@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-user-stories",
-  "version": "1.2.0",
-  "description": "User story writing: format, INVEST, acceptance criteria, Given-When-Then; место истории в конвейере требований - критерии рождаются при нарезке, метка правила у каждого критерия, полнота с двух сторон, мера NFR ссылкой на ID.",
+  "version": "2.0.0",
+  "description": "Чек-лист историй и критериев приёмки: ценность для пользователя, покрытие веток сценария, критерии на границе порога, одновременный расход общего ресурса.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"

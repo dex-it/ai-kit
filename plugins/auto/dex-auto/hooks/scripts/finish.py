@@ -52,16 +52,24 @@ def events(data):
     return out
 
 
-def register(path, state, evs, run):
+def register(path, state, evs, run, issued=None):
     # Находка без id - новая: опознание по anchor склеило бы разные находки одной строки.
-    number = lambda i: int(i[1:]) if re.match(r"^F\d+$", i) else 0
-    top = max([number(i) for i in state] + [0])
+    top = dx.findings_top(state)
+    ids = [ev.get("id").strip() if isinstance(ev.get("id"), str) else "" for ev in evs]
+    # Id выдал трек от findings_top (ledger.md R10), только если тот совпал с реестром: иначе номер выше реестра - чужой id, а не выданный.
+    given = issued if isinstance(issued, int) and not isinstance(issued, bool) else None
+    minted = {i for i in ids if given == top and i not in state and re.match(r"^F\d+$", i) and int(i[1:]) > top}
+    top = dx.findings_top(dict.fromkeys(minted, None)) if minted else top
     changed = []
-    for ev in evs:
-        fid = ev.get("id").strip() if isinstance(ev.get("id"), str) else ""
+    for ev, fid in zip(evs, ids):
+        # ref узла - его номер в выходе (R1), а ref реестра - поданный id не из реестра (ledger.md R9).
+        ev = {k: v for k, v in ev.items() if k != "ref"}
         if fid in state:
             rec = dict(state[fid])
-            rec.update({k: v for k, v in ev.items() if v not in ("", None)})
+            # Пустой premise - суждение ревью «посылка доказана», а не молчание узла (ledger.md R9).
+            rec.update({k: v for k, v in ev.items() if v not in ("", None, []) or k == "premise"})
+        elif fid in minted:
+            rec = dict(ev)
         else:
             # id не из реестра статус чужой записи не меняет (ledger.md R9): находка новая, поданный id - ссылкой.
             rec = dict(ev, ref=fid) if fid else dict(ev)
@@ -90,9 +98,10 @@ def run_section(data, state, changed):
     out += ["- " + text(e) for e in items(data, "trail")]
     # Раздел - разность реестра на конец прогона, а не находки этого прогона: молчание прогона о находке её не закрывает.
     out += ["", "### Открытые находки"]
-    out += [finding_line(r, text(r.get("text")) + (" (закрытие: %s)" % text(r["closure"]) if r.get("closure") else ""))
+    out += [finding_line(r, text(r.get("text")) + (" (закрытие: %s)" % text(r["closure"]) if r.get("closure") else "")
+                         + (" (также: %s)" % ", ".join(text(x) for x in r["places"]) if isinstance(r.get("places"), list) and r["places"] else ""))
             for r in state.values() if r.get("status") in dx.OPEN_FINDING]
-    out += ["- не опубликовано %s: %s" % (text(f.get("anchor")), text(f.get("reason")))
+    out += ["- не опубликовано %s %s: %s" % (text(f.get("id")), text(f.get("anchor")), text(f.get("reason")))
             for f in items(data, "unpublished")]
     out += ["", "### Снято в прогоне"]
     out += [finding_line(r, text(r.get("evidence"))) for r in changed if r["status"] not in dx.OPEN_FINDING]
@@ -161,7 +170,7 @@ def main(argv):
         number = 1
         with open(path, "w", encoding="utf-8") as fh:
             fh.write("# Трек: %s\n\ntrack=%s\nСтатус: %s\n" % (task, track, status))
-    state, changed = register(registry, state, events(data), number)
+    state, changed = register(registry, state, events(data), number, data.get("findings_top"))
     stamp = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
     with open(path, "a", encoding="utf-8") as fh:
         fh.write("\n## Прогон %s (%s, исход %s)\n\n" % (number, stamp, outcome))
@@ -175,6 +184,7 @@ def main(argv):
     else:
         dx.set_key(goal, "Исход", "blocked")
         dx.set_key(goal, "Нехватка", lack_of(data, lack))
+    dx.claim(task)
     print(path)
 
 

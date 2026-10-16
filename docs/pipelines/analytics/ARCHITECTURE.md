@@ -47,8 +47,8 @@
 | Скилл | Что даёт | Кто грузит |
 |---|---|---|
 | `node-contract` | форма стыка: статусы исхода, словарь полей, транспорт указателями, реакция на неполный вход, журнал решений | все |
-| `project-docs-map` | где корпус (`.docs_layout`), где `.req_counter`, что делать при отсутствии и недостижимости | все |
-| `unit-identity` | та же единица или новая; номера, дырки, конфликт счётчика | все |
+| `project-docs-map` | где корпус (`.docs_layout`), где `.req_counter`, выдача номеров, конфликт счётчика, что делать при отсутствии и недостижимости | все |
+| `unit-identity` | та же единица или новая; схема блока номеров, род изменения | все |
 | `docs-layout` | дерево корпуса, имена файлов классов, минимум обязательного, схема идентификаторов | команда `/feature` и все четыре составителя |
 | `artifact-naming` | границы применения конвенции к занятому корпусу, слаг прогона | команда `/feature` и все четыре составителя |
 | `decision-log` | форма журнала решений | только команда `/feature` - писать в него больше некому |
@@ -62,11 +62,11 @@
 | Узел | Класс-скилл | Норматив этапа/жанра | Дополнительно | Оракул |
 |---|---|---|---|---|
 | `business-requirements-analyst` | - | `business-analysis-29148` (pre-load) | `product-discovery`, `doc-standards`, `legacy-reconstruction` | `requirement-quality` |
-| `usecase-analyst` | `use-cases` | `use-cases-cockburn` (pre-load) | `legacy-reconstruction` | - |
+| `usecase-analyst` | - | `use-cases-cockburn` (pre-load) | `legacy-reconstruction` | `use-case-quality` (самоконтроль) |
 | `requirements-analyst` | `functional-requirements`, `nfr` | `system-requirements-29148` (pre-load) | `legacy-reconstruction` | `requirement-quality` |
-| `user-story-analyst` | `user-stories` | - | `test-design` - техники подбора примеров | `requirement-quality` |
-| команда `/feature` (как судья) | `use-cases`, `functional-requirements`, `nfr`, `user-stories` | `business-analysis-29148` (Phase 2), `use-cases-cockburn` (Phase 3), `system-requirements-29148` (Phase 4) | - | `requirement-quality`, `requirement-set-quality`, `use-case-quality` |
-| `requirements-reviewer` | все четыре класс-скилла | `business-analysis-29148`, `use-cases-cockburn`, `system-requirements-29148` - по предмету ревью | `fact-verification`, `review-evidence`, `codebase-conventions`, `ddd` | `requirement-quality`, `requirement-set-quality`; на наборе сценариев - `use-case-quality` **вместо** оракула набора |
+| `user-story-analyst` | `user-stories` | - | - | `requirement-quality` |
+| команда `/feature` (как судья) | `functional-requirements`, `nfr`, `user-stories` | `business-analysis-29148` (Phase 2), `use-cases-cockburn` (Phase 3), `system-requirements-29148` (Phase 4) | - | `requirement-quality`, `requirement-set-quality`, `use-case-quality` |
+| `requirements-reviewer` | класс-скиллы предмета ревью | `business-analysis-29148`, `use-cases-cockburn`, `system-requirements-29148` - по предмету ревью | `fact-verification`, `review-evidence`, `codebase-conventions`, `ddd` | `requirement-quality`, `requirement-set-quality`; на наборе сценариев - `use-case-quality` **вместо** оракула набора |
 
 Прочерк в любой колонке читается одинаково - артефакта этого рода у узла нет, и закрывается это
 записью `unverifiable` с названной причиной, а не подстановкой соседнего: ни норматив соседней фазы,
