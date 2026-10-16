@@ -13,10 +13,13 @@ import xml.etree.ElementTree as ET
 USAGE = "usage: verify.py HEX | --wait OUT   (HEX - hex от JSON {build, test, known, snap, hash_path})"
 AHEAD = 'git rev-list --count HEAD --not --exclude="$(git branch --show-current)" --branches'
 BUILD = "<build>"
+ABORTED = "<aborted>"
 TAIL = 60
 # Bash агента без поданного timeout обрывает команду на 2 минутах: ожидание короче, дальше --wait.
 WAIT = int(os.environ.get("DEX_AUTO_VERIFY_WAIT", "100"))
 LIMIT = int(os.environ.get("DEX_AUTO_VERIFY_LIMIT", "3600"))
+# Нестабильность точечна: массовое красное повтором не лечится, а повтор полного набора удваивает прогон.
+FLAKY_MAX = int(os.environ.get("DEX_AUTO_FLAKY_MAX", "3"))
 START = time.monotonic()
 
 
@@ -77,6 +80,10 @@ def parse_reports(root):
                         passed += 1
                     elif outcome in ("Failed", "Error", "Timeout", "Aborted"):
                         failed.append(el.get("testName", ""))
+                elif kind == "RunInfo" and "test run was aborted" in "".join(el.itertext()):
+                    # Тест-хост упал: его тесты в отчёт не попали, и падение без имени пряталось бы за унаследованными.
+                    seen = True
+                    failed.append(ABORTED)
     return (passed, failed) if seen else None
 
 
@@ -121,8 +128,8 @@ def verify(spec):
         elif test:
             code, out, rep = run_tests(test)
             fresh = [] if rep is None else sorted(set(rep[1]) - known)
-            # Красное только в первом прогоне - нестабильный тест, а не дефект правки: один повтор.
-            if fresh:
+            # Красное только в первом прогоне - нестабильный тест, а не дефект правки: один повтор, если новых красных не больше FLAKY_MAX.
+            if 0 < len(fresh) <= FLAKY_MAX:
                 first = set(rep[1])
                 code, out, rep = run_tests(test)
                 if rep is not None:
