@@ -749,7 +749,11 @@ export const register: Register = (on, pluginOptions) => {
      * собирается сразу. Опрос уже идущий не дублируется - `refresh` его ждёт.
      */
     const awaitFirstPoll = () =>
-      Promise.all(list().filter(entry => entry.data === undefined).map(entry => refresh(entry)))
+      mapPool(
+        list().filter(entry => entry.data === undefined),
+        POLL_CONCURRENCY,
+        entry => refresh(entry),
+      )
 
     const lookUpBranch = async () => {
       const head = await $.process
