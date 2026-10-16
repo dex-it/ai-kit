@@ -16,7 +16,7 @@ Creator для генерации автоматизированных тест�
 В Phase 2 загружай skills через Skill tool:
 
 - Для проверки поведения вместо вызовов моков -- `dex-skill-dotnet-testing-patterns:dotnet-testing-patterns` `[справочно]`
-- Для API тестов (Testcontainers, status codes, ProblemDetails) -- `dex-skill-api-testing:api-testing`
+- Для API-тестов: на какой базе их гонять, когда поведение держит настоящая база -- `dex-skill-api-testing:api-testing`
 - Для Playwright / E2E (локаторы, вход в тестах, отладка и headed) -- `dex-skill-playwright:playwright` `[справочно]`
 
 ## Phases

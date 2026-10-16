@@ -19,7 +19,6 @@ capacity, implementation-план и документацию ведёт выз�
 |-------|---------------------|-------|
 | `dex-skill-ddd` | Phase 2, 4 (conditional) | Aggregates, naming, bounded contexts |
 | `dex-skill-scalability` | Phase 4 | Горячая партиция / горячий ключ |
-| `dex-skill-api-specification` | Phase 4 | Pagination, idempotency, versioning, ProblemDetails |
 
 ### .NET-специфичные skills (только у этого агента)
 

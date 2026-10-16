@@ -215,7 +215,6 @@ implementation-план вызывающей стороны не на чем с�
 В этой фазе загружай императивно через Skill tool:
 
 - Всегда `dex-skill-scalability:scalability` - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
-- Всегда `dex-skill-api-specification:api-specification` - pagination, idempotency, versioning, ProblemDetails
 - Всегда `dex-skill-dotnet-api-development:dotnet-api-development` - тонкий контроллер, код ответа, маршруты и параметры
 - Всегда `dex-skill-dotnet-resilience:dotnet-resilience` - место политики, общий timeout, circuit breaker, промахи кэша
 - Если выбрано EF Core / SQL - `dex-skill-dotnet-ef-core:dotnet-ef-core`
