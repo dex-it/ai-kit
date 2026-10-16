@@ -48,7 +48,7 @@ Stop ход не держит. TRACK - `feature` | `bugfix` | `review` | `review
 `set TASK PR "не открыт - <reason либо отказ Workflow>"`; исход цели остаётся `complete`.
 
 **Прогон.** `Workflow` с `name` `dex-auto:dex-auto-<трек>`, трек - `feature`, `bugfix` либо `review` (и при `--delta`); `args`: feature - `{task, goal, done, boundary,
-mode, cwd, source, goal_path, resume, trail, open_findings, ctx}`; bugfix - то же, но вместо `goal` - `symptom, expected,
+mode, cwd, source, goal_path, scripts, resume, trail, open_findings, ctx}`, `scripts` - `${CLAUDE_PLUGIN_ROOT}/hooks/scripts`; bugfix - то же, но вместо `goal` - `symptom, expected,
 env`, и вместо `ctx` - `repro` (симптом - фраза цели, ожидаемое - из критерия, окружение - из `## Цель` и `## Граница`;
 `done` и `boundary` - из `## Критерий «готово»` и `## Граница`, и здесь; чего нет - пустая строка); review - `{task, mr, intent, mode, publish, last_review_sha, cwd, open_findings}`, `open_findings` - вывод `ledger.py findings TASK review` при каждом прогоне, не только на `продолжить`: статус прежней находки ревью выносит по её `id`. Узлы, петли и потолки - внутри скрипта; главный поток
 узлы не спавнит и ждёт возврат в том же ходе циклом `until` в `Bash` по файлу вывода задачи `<Task ID>.output` под `claude-<uid>` временного каталога (первый заданный из `CLAUDE_CODE_TMPDIR`, `TMPDIR`, `TMP`, `TEMP`, иначе `/tmp`), Task ID - из текста старта `Workflow`; готовность - файл непуст и разбирается как JSON, возврат трека - его поле
@@ -71,7 +71,7 @@ env`, и вместо `ctx` - `repro` (симптом - фраза цели, о�
   `resume` и его поля не подаются, прогон идёт как первый, и это строка в `### Решения` (`продолжить без трека: прогона по цели не было`).
 
 **Output:** `Исход:` цели первой строкой (`complete` | `blocked` | `partial`), затем `TASK`, путь ledger, ветка `auto/<TASK>`,
-судьба дерева (снято либо путь), исход сверки требований оракулом (`расхождений нет` либо перечень сторон), для feature / bugfix `goal_check` возврата (сборка, тесты, коммит, `head`),
+судьба дерева (снято либо путь), исход сверки требований оракулом (`расхождений нет` либо перечень сторон), для feature / bugfix `goal_check` возврата (сборка, тесты и унаследованные от базы падения, коммит, `head`),
 `review-verdict` саморевью и `prior` с `id`, при `--pr` - строка `PR:` цели, для bugfix ещё `repro.root_cause`; для ревью `review-verdict` скептика и рядом `reviewer_verdict` ревьюера,
 подтверждённые и снятые находки, `prior` дельты, покрытие, треды; счётчики петель, строки `degraded`, решения по открытым находкам, стоп-линии, на которые прогон
 вышел (push без `--pr`, деплой, миграция данных, необратимое удаление, запись в чужой MR без `--post`) - к оператору поимённо.
