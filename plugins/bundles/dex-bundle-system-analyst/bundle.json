@@ -34,6 +34,7 @@
     "dex-skill-docs-layout",
     "dex-skill-fact-verification",
     "dex-skill-functional-requirements",
+    "dex-skill-implementation-plan",
     "dex-skill-interface-definition-openapi",
     "dex-skill-legacy-reconstruction",
     "dex-skill-nfr",

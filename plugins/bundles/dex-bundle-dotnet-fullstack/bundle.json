@@ -71,6 +71,7 @@
     "dex-skill-exploratory-testing",
     "dex-skill-fact-verification",
     "dex-skill-gitlab-ci",
+    "dex-skill-implementation-plan",
     "dex-skill-integration-boundary",
     "dex-skill-interface-definition-openapi",
     "dex-skill-kafka",

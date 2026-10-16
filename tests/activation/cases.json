@@ -327,7 +327,28 @@
     "id": "plan-quality-in",
     "mode": "in-scope",
     "expect": "dex-skill-plan-quality:plan-quality",
-    "prompt": "Готовлю план реализации фичи по шагам. По каким признакам судить, что план годится и по нему можно начинать работу?"
+    "prompt": "Готовлю план реализации фичи по шагам. По каким признакам судить, что план годится и по нему можно начинать работу?",
+    "plugins": [
+      "dex-skill-implementation-plan"
+    ]
+  },
+  {
+    "id": "implementation-plan-in",
+    "mode": "in-scope",
+    "expect": "dex-skill-implementation-plan:implementation-plan",
+    "prompt": "Пишу план реализации миграции на шаги. Что записать у каждого шага и как решить, какие шаги можно вести параллельно?",
+    "plugins": [
+      "dex-skill-plan-quality"
+    ]
+  },
+  {
+    "id": "implementation-plan-near-review",
+    "mode": "near-miss",
+    "expect": "dex-skill-implementation-plan:implementation-plan",
+    "prompt": "Коллега прислал готовый план реализации на приёмку. По каким признакам его судить и что считать дефектом плана?",
+    "plugins": [
+      "dex-skill-plan-quality"
+    ]
   },
   {
     "id": "playwright-in",
