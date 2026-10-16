@@ -60,7 +60,7 @@ Understand Requirements -> [Context?] -> Generate -> Validate. Context -- опц
 
 В этой фазе загружай skills через Skill tool:
 
-- Для ловушек написания ADR (норма vs состояние кода, императив, замкнутость, источник требования, работа с файлом) -- `dex-skill-adr-quality:adr-quality`
+- Для ловушек написания ADR (норма vs состояние кода, проверка нормы, открытый вопрос, источник требования, второй ADR) -- `dex-skill-adr-quality:adr-quality`
 - Для проверки формата и стандартов документации -- `dex-skill-doc-standards:doc-standards`
 
 ## Phase 3: Generate

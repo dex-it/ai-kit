@@ -141,8 +141,10 @@ enumNamed(domain, /^const AXIS = \{[^}]*enum: \[([^\]]*)\]/m, 'AXIS', 'axes');
 enumNamed(domain, /^const AXIS_OUTCOME = \[([^\]]*)\]/m, 'AXIS_OUTCOME', 'axes');
 enumNamed(domain, /^const PRIOR_STATUS = \[([^\]]*)\]/m, 'PRIOR_STATUS', 'prior-status');
 enumNamed(domain, /^const ROOT_VERDICT = \[([^\]]*)\]/m, 'ROOT_VERDICT', 'roots');
-enumNamed(join(TRACKS, 'review.js'), /^const AXIS_CHECK = \[([^\]]*)\]/m, 'AXIS_CHECK', 'axes-check');
-enumNamed(join(TRACKS, 'review.js'), /^const ROOT_CHECK = \[([^\]]*)\]/m, 'ROOT_CHECK', 'roots-check');
+enumNamed(domain, /^const FACT_STATUS = \[([^\]]*)\]/m, 'FACT_STATUS', 'fact-check');
+enumNamed(join(SHARED, 'self-review.js'), /^const RED_STATUS = \[([^\]]*)\]/m, 'RED_STATUS', 'red-run');
+enumNamed(join(SHARED, 'falsify.js'), /^const AXIS_CHECK = \[([^\]]*)\]/m, 'AXIS_CHECK', 'axes-check');
+enumNamed(join(SHARED, 'falsify.js'), /^const ROOT_CHECK = \[([^\]]*)\]/m, 'ROOT_CHECK', 'roots-check');
 enumNamed(join(TRACKS, 'bugfix.js'), /'diagnosis-check': \{ type: 'string', enum: \[([^\]]*)\]/, 'diagnosis-check', 'diagnosis-acceptance');
 
 if (errors.length) {
@@ -155,7 +157,7 @@ if (checkOnly) {
     for (const s of stale) console.error(`ERROR ${s}; пересобрать: npm run sync:tracks`);
     process.exit(1);
   }
-  console.log(`sync-tracks: ${tracks.length} треков и узлов, блоков из ${used.size} источников - синхронно; словарь статусов находки совпадает с ledger и finish, enum STATUS, VERDICT, AXIS, AXIS_OUTCOME, PRIOR_STATUS, ROOT_VERDICT, AXIS_CHECK, ROOT_CHECK и diagnosis-check названы в словаре стыка`);
+  console.log(`sync-tracks: ${tracks.length} треков и узлов, блоков из ${used.size} источников - синхронно; словарь статусов находки совпадает с ledger и finish, enum STATUS, VERDICT, AXIS, AXIS_OUTCOME, PRIOR_STATUS, ROOT_VERDICT, FACT_STATUS, RED_STATUS, AXIS_CHECK, ROOT_CHECK и diagnosis-check названы в словаре стыка`);
   process.exit(0);
 }
 

@@ -64,7 +64,7 @@ constraints (команда, compliance, стек), `mode`, `quality-checks`. **
 
 **Output:** Матч с одним-двумя reference designs из каталога ниже + явный список адаптаций под FR/NFR и capacity из входа (что отличается, что повторяем).
 
-Каталог-индекс (полные описания паттернов и ловушки выбора Claude знает из training data + загружает `dex-skill-reference-architectures` в Phase 4 для проверки решения; здесь только триггеры для матча):
+Каталог-индекс (полные описания паттернов и ловушки выбора Claude знает из training data; здесь только триггеры для матча):
 
 **Consumer-scale:**
 
@@ -136,7 +136,7 @@ Skills называют известные грабли - используй и�
 - **Связь с constraints и FR/NFR из входа:** «выбран X, потому что DAU = N и команда = K»
 - **Связь с capacity-цифрами входа:** «при write QPS = M шардирование обязательно с первой версии»
 - **CAP позиция:** при partition выбираем consistency или availability + почему
-- **PACELC позиция:** в normal operation выбираем latency или consistency + почему (для типовых storage - defaults в `dex-skill-cap-consistency`)
+- **PACELC позиция:** в normal operation выбираем latency или consistency + почему
 - **Что отвергаем:** альтернативы из Phase 2 + почему не они
 - **Что теряем:** «принимаем eventual consistency для feed ради write throughput; означает что user может N секунд видеть устаревшие данные»
 
@@ -163,11 +163,6 @@ Skills называют известные грабли - используй и�
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool:
-
-- `dex-skill-cap-consistency:cap-consistency` - strong vs eventual, PACELC, per-operation choice, read-your-writes, quorum, split-brain, clock skew, saga compensation, **PACELC cheatsheet типовых storage**
-- `dex-skill-tech-evaluation:tech-evaluation` - hype-driven adoption, no PoC, vendor lock-in, deprecation risk, license traps, hidden cost, team expertise
-
 ## Phase 4: Deep Dive
 
 **Goal:** Детализировать выбранный вариант по всем критичным аспектам - без этого решение поверхностно и не передаётся дальше по контракту.
@@ -190,9 +185,7 @@ Skills называют известные грабли - используй и�
 
 В этой фазе загружай императивно через Skill tool:
 
-- Всегда `dex-skill-capacity-planning:capacity-planning` - read:write ratio, hot path, cache cost asymmetry
-- Всегда `dex-skill-scalability:scalability` - sharding key (hot partition, hash mod N, multi-tenant), stateless, cross-shard queries
-- Если рассматриваемое решение в области feed / chat / payment / search / notifications / rate-limiter - `dex-skill-reference-architectures:reference-architectures`
+- Всегда `dex-skill-scalability:scalability` - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
 - Если доменная сложность требует aggregates / bounded contexts - `dex-skill-ddd:ddd`
 
 **Output (handoff):** поля словаря `node-contract`, первым - `status`; смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: reference-match (Phase 1), дизайн-решение (выбранная альтернатива + отвергнутые + почему), CAP/PACELC trade-off, deep-dive (storage/API/caching/failure modes/security controls), `quality-checks` (сквозное поле, `node-contract` п.6-7: пришедшие записи переносятся как есть, своя запись не добавляется - этот узел не проверяет чужие входные артефакты), `self-check` по собственному дизайну (чем проверен, что устранено; вердикт по типу `design` ставит `design-reviewer` оракулом `design-quality` - автор своему артефакту метку не ставит), `fact-check` (если триггер сработал - см. `architect-dotnet` для .NET-варианта; этот агент стек-нейтрален, библиотек не называет), принятые инж-решения и допущения, путь к журналу решений (пришедший переносится как есть, заведённый тобой называется) и строки решений Phase 3 отдельным перечнем. Implementation-план, документацию (ADR/диаграммы/API-spec) и приёмку ведёт вызывающая сторона - этот узел их не производит. Код не пишем.

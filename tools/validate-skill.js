@@ -204,6 +204,7 @@ const PROCESS_SKILLS = new Set([
   'artifact-naming',
   'requirement-quality',
   'requirement-set-quality',
+  'implementation-plan',
 ]);
 
 // Имена, существующие только в фикстурах `tools/__fixtures__`. В продовые перечни не

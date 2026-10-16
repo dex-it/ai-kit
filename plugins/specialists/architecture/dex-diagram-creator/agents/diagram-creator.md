@@ -54,11 +54,6 @@ Understand Requirements -> [Context?] -> Generate -> Validate. Context -- опц
 
 **Skip_if:** Пользователь описал содержание диаграммы словесно и не нужно извлекать из кода.
 
-В этой фазе загружай skills через Skill tool:
-
-- Для диаграмм масштабирования, шардирования -- `dex-skill-scalability:scalability`
-- Для reference architectures (feed/chat/payment/search) -- `dex-skill-reference-architectures:reference-architectures`
-
 ## Phase 3: Generate
 
 **Goal:** Создать диаграмму в выбранном формате.

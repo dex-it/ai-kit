@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dexauto as dx
 
 USAGE = ("usage: ledger.py root|dir TASK|open TASK [MODE]|find|get TASK KEY|set TASK KEY VALUE|"
-         "close TASK OUTCOME|open-tracks TASK|ctx TASK TRACK|trail TASK TRACK|findings TASK TRACK")
+         "close TASK OUTCOME|open-tracks TASK|ctx TASK TRACK|trail TASK TRACK|findings TASK TRACK|top TASK TRACK")
 
 GOAL_TEMPLATE = ("# Цель: %s\n\nСтатус: открыт\nРежим: %s\nИсход: \nНехватка: \nОжидает: \n\n"
                  "## Цель\n\n## Критерий «готово»\n\n## Граница\n\n## Решения\n")
@@ -81,6 +81,11 @@ def main(argv):
             die("ledger.py findings: %s" % e, 5)
         if found:
             print(json.dumps(found, ensure_ascii=False, separators=(",", ":")))
+    elif cmd == "top":
+        try:
+            print(dx.findings_top(dx.findings_state(dx.findings_file(args[0], args[1]), dx.track_file(args[0], args[1]))))
+        except ValueError as e:
+            die("ledger.py top: %s" % e, 5)
     else:
         die(USAGE)
 

@@ -3,20 +3,20 @@
 // Вход через args: { task, symptom, expected, env, done, boundary, mode, cwd, source, goal_path, resume, trail, open_findings, repro }.
 export const meta = {
   name: 'dex-auto-bugfix',
-  description: 'Трек bugfix: подготовка дерева -> воспроизведение и первопричина (debugger) -> фикс кодером с верификацией (потолок 3) -> саморевью -> правка по находкам (потолок 1)',
+  description: 'Трек bugfix: подготовка дерева -> воспроизведение и первопричина (debugger) -> фикс кодером с верификацией (потолок 3) -> саморевью -> правка по находкам (потолок 2) с повторным ревью',
   phases: [
     { title: 'Context', detail: 'подготовка дерева по манифесту стека, команды сборки и тестов' },
     { title: 'Reproduce', detail: 'debugger: красный воспроизводящий тест либо прослеженный путь, первопричина, предложение фикса; продуктовый код не меняет' },
     { title: 'Fix', detail: 'кодер принимает диагноз и лечит первопричину x верификация внешним фактом, потолок 3; спор с диагнозом - к оператору, продолжение зовёт диагноста с уликой (фаза Reproduce); при возобновлении - сначала верификация' },
-    { title: 'Review', detail: 'саморевью, при блокирующих находках одна правка с верификацией и повторное ревью' },
+    { title: 'Review', detail: 'саморевью со скептиком; находки, держащие порог, - правка с верификацией и повторное ревью после каждой; потолки: правок 2, ревью 3' },
   ],
 }
 
 const A = args || {}
-const FIX_CEILING = 3, REVIEW_FIX_CEILING = 1
-// Дерево, стоп-линии и отсутствие оператора одинаковы для любого узла трека; симптом и критерий
+const FIX_CEILING = 3, REVIEW_FIX_CEILING = 2, REVIEW_CEILING = 3
+// Каталог, стоп-линии и отсутствие оператора одинаковы для любого узла трека; симптом и критерий
 // несёт только тот, кто их исполняет.
-const TREE = `Рабочий каталог - ${A.cwd}: отдельное git worktree трека на ветке auto/${A.task}, процесс уже в нём; чужой работы в нём нет - всё незакоммиченное в нём от этой работы. Дерево сессии, от которого оно заведено, не трогай. Стоп-линия: push, деплой, миграции данных, удаление вне дерева. Оператора нет: невыводимое не додумывай - status: blocked, нехватка в missing.\n`
+const TREE = `Рабочий каталог - ${A.cwd} на текущей ветке, процесс уже в нём; всё незакоммиченное в нём - от этой работы. Ветку не переключай. Стоп-линия: push, деплой, миграции данных, удаление вне рабочего каталога. Оператора нет: невыводимое не додумывай - status: blocked, нехватка в missing.\n`
 // >>> shared: goal-args
 // Главный поток может не подать done и boundary: узел берёт их из файла цели, пропуск - в degraded
 const blank = (v) => !String(v || '').trim()
@@ -28,7 +28,7 @@ const ownerSide = 'Пункт критерия «готово» или гран�
 const HEAD = `mode: ${A.mode || 'autonomous'}\nцель (${A.task}): починить баг - симптом: ${A.symptom}\nожидаемое: ${A.expected || 'не задано - реконструируй из тестов и корпуса, назови основание'}\nокружение: ${A.env || 'не задано'}\nкритерий «готово»: ${fromGoal(A.done, 'не подан', 'Критерий «готово»', 'не подан')}\nграница: ${fromGoal(A.boundary, 'не подана', 'Граница', 'не выходить за рабочий каталог')}\nфайл цели: ${A.goal_path || 'нет'}\ndecision-log: n/a (трек журнал решений не ведёт; решения - полем decisions)\n${TREE}`
 // Узел подготовки симптома не получает: прочитав его первой строкой, он чинит баг сам, и хвостовой
 // запрет его не держит (зонд P25). Предмет узла - дерево, и шапка несёт только его.
-const PREP_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): подготовить дерево трека к сборке и тестам и замерить их до правок - и только это: баг чинят следующие узлы.\n${TREE}`
+const PREP_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): подготовить рабочий каталог к сборке и тестам - и только это: баг чинят следующие узлы.\n${TREE}`
 // Возобновление - это «продолжить» плюс след прошлого прогона: без следа прогона не было, и возобновлять нечего.
 const resuming = !!(A.resume && A.trail)
 const DONE = resuming ? `\nВозобновление: шаги ниже уже сделаны (из ledger), не повторяй их, продолжай с незакрытого:\n${A.trail}\n` : ''
@@ -37,7 +37,7 @@ const DONE = resuming ? `\nВозобновление: шаги ниже уже 
 const STATUS = { type: 'string', enum: ['complete', 'blocked', 'partial'] }
 const VERDICT = { type: 'string', enum: ['APPROVE', 'REQUEST_CHANGES', 'NEEDS_DISCUSSION'] }
 const lack = (v, who) => !v ? `${who} не вернул выход` : v.missing || `${who} вернул blocked без нехватки`
-// Трек виден в списке / и зовётся без args: узлы с правом записи на пустом cwd работали бы в дереве сессии.
+// Трек виден в списке / и зовётся без args: узлы с правом записи работали бы без цели и каталога.
 const unfed = (A, fields) => fields.filter(f => !String(A[f] ?? '').trim())
 const why = (e) => String(e && e.message || e).slice(0, 300)
 // <<< shared: contract
@@ -50,6 +50,8 @@ const NODE = {
   reviewer: { agentType: 'dex-auto:reviewer', model: 'opus' },
   // без model - замера модели скептика нет (#289).
   skeptic: { agentType: 'dex-auto:skeptic' },
+  // opus - устройство по цене судится до кода, его реализует кодер на sonnet (P114).
+  designer: { agentType: 'dex-auto:designer', model: 'opus' },
   // sonnet - модель кодеров каталога: сверка P75 различает норму, а не модель.
   coder: { agentType: 'dex-auto:coder', model: 'sonnet' },
   // opus - модель контроля dex-debugger: сверка P91 различает норму, а не модель.
@@ -72,23 +74,31 @@ const axesGap = (axes, findings) => {
     ...a.filter(x => x.outcome === 'unverifiable').map(x => `ось не проверена: ${x.name} - ${x.checked || 'причина не названа'}`),
     ...(findings ? a.filter(x => (x.outcome === 'findings') !== count(x.name) > 0).map(x => `исход оси расходится с findings: ${x.name} - ${x.outcome}, находок оси ${count(x.name)}`) : [])].filter(Boolean).join('; ')
 }
-const ROOT_VERDICT = ['legitimate', 'illegitimate']
-const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence'] }, description: 'запись на каждое решение правки' }
+const ROOT_VERDICT = ['legitimate', 'illegitimate', 'none']
+// Исход сверки - enum: опровергнутое утверждение трек находит полем, а не словом в прозе.
+const FACT_STATUS = ['verified', 'unverifiable', 'contradicted']
+const FACT_CHECK = (subject) => ({ type: 'array', items: { type: 'object', properties: { claim: { type: 'string' }, status: { type: 'string', enum: FACT_STATUS }, source: { type: 'string', description: 'verified и contradicted - источник; unverifiable - где искал' } }, required: ['claim', 'status', 'source'] }, description: `запись на каждое утверждение предмета, взятое по памяти; предмет - ${subject}; таких утверждений нет - пустой перечень` })
+const ROOTS = { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string', description: 'место решения: file:line, file:from-to либо file' }, decision: { type: 'string' }, root: { type: 'string', description: 'проблема, требование или ограничение, которое решение закрывает, с источником' }, verdict: { type: 'string', enum: ROOT_VERDICT }, evidence: { type: 'string' }, finding: { type: 'string', description: 'у illegitimate - ref находки этого выхода либо id прежней, которой поднят дефект решения; иначе пусто' } }, required: ['anchor', 'decision', 'root', 'verdict', 'evidence', 'finding'] }, description: 'запись на каждое решение правки; место правки без решения - verdict none' }
 // Нелегитимное решение без открытой находки ушло бы из выхода вердиктом без дефекта, который можно закрыть; у находки ревьюера статуса нет.
 const stillOpen = (f) => !f.status || OPEN_FINDING.includes(f.status)
 // Узлы называют одно место строкой, диапазоном или файлом: строковое равенство якорей разводит их в разные места.
 const spot = (a) => { const s = String(a || '').trim().replace(/:$/, ''), m = /^(.+?):(\d+)(?:-(\d+))?(?::\d+)?$/.exec(s); return m ? [m[1], Math.min(+m[2], +(m[3] || m[2])), Math.max(+m[2], +(m[3] || m[2]))] : [s, 0, Infinity] }
 const sameSpot = (a, b) => { const [fa, a1, a2] = spot(a), [fb, b1, b2] = spot(b); return fa !== '' && fa === fb && a1 <= b2 && b1 <= a2 }
+const atFinding = (f, a) => [f.anchor, ...(f.places || [])].some(p => sameSpot(p, a))
+// Узлы сшиваются номером находки: якорь уезжает правкой, скептик переставляет его на место механизма; без номера - по месту.
+const sameFinding = (x, f) => x.ref && f.ref ? x.ref === f.ref : sameSpot(x.anchor, f.anchor)
+const hasFinding = (x, found) => (found || []).some(f => stillOpen(f) && (!!x.finding && [f.ref, f.id].includes(x.finding) || atFinding(f, x.anchor)))
 const rootsGap = (roots, found) => {
-  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !(found || []).some(f => sameSpot(f.anchor, x.anchor) && stillOpen(f))).map(x => x.anchor)
+  const bare = (roots || []).filter(x => x.verdict === 'illegitimate' && !hasFinding(x, found)).map(x => x.anchor)
   return bare.length ? `решение нелегитимно без находки: ${bare.join(', ')}` : ''
 }
 // Форма одна у всех ревьюеров: ledger хранит находку одной записью, и поле, которого нет у одного узла, из реестра выпадает молча.
 const FINDING = { type: 'object', properties: {
-  anchor: { type: 'string', description: 'file:line' }, severity: SEV, axis: AXIS,
+  ref: { type: 'string', description: 'номер находки в выходе: у ревьюера R1, R2...; у скептика в confirmed - ref подтверждаемой находки ревьюера, своя находка - пусто' },
+  anchor: { type: 'string', description: 'file:line' }, places: { type: 'array', items: { type: 'string' } }, severity: SEV, axis: AXIS,
   text: { type: 'string' }, closure: { type: 'string', description: 'критерий закрытия' }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка, которую не доказали ни код, ни прогон, и проба, которая её проверит; посылка доказана - пусто' },
-}, required: ['anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
+}, required: ['ref', 'anchor', 'places', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
 // Узел выносит статус из PRIOR_STATUS; unverified и dropped ставит только трек. Перечень реестра держат и dexauto.py с finish.py - сверяет sync-tracks --check.
 const PRIOR_STATUS = ['closed', 'partial', 'open', 'disputed', 'no-longer-applicable']
 const OPEN_FINDING = ['open', 'partial', 'unverified']
@@ -96,30 +106,48 @@ const FINDING_STATUS = [...OPEN_FINDING, 'closed', 'disputed', 'no-longer-applic
 // Прежняя находка опознаётся по id реестра ledger: без него finish.sh заводит её новой, и разность «открытые» двоится.
 const PRIOR = { type: 'object', properties: {
   id: { type: 'string', description: 'id находки из перечня; находки в перечне нет - её место в findings, не здесь' },
-  anchor: FINDING.properties.anchor, severity: SEV, axis: { type: 'string', description: 'ось из перечня; не названа - пусто' }, text: { type: 'string' },
+  anchor: FINDING.properties.anchor, places: FINDING.properties.places, severity: SEV, axis: { type: 'string', description: 'ось из перечня; не названа - пусто' }, text: { type: 'string' },
   status: { type: 'string', enum: PRIOR_STATUS }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка находки, всё ещё не доказанная, с пробой; доказана кодом, прогоном либо ответом оператора в цели - пусто' },
 }, required: ['id', 'anchor', 'severity', 'axis', 'text', 'status', 'evidence', 'premise'] }
 const isOpen = (f) => OPEN_FINDING.includes(f.status)
 const isBlocking = (f) => f.severity === 'P0' || f.severity === 'P1'
-const isFixable = (f) => isBlocking(f) || f.severity === 'P2'
+// Предикаты находки - docs/domain.md §2.
+// P2, внесённая правкой по находкам, - убыток самой правки: правится, пока идут круги; итог держат только P0/P1 (P115).
+const holds = (f) => isOpen(f) && (isBlocking(f) || !!f.introduced && f.severity === 'P2')
 // Исход такой находки решает проба оператора, а не правка: кодер по ней покупал круг за кругом на недостижимом пути.
 const awaitsProbe = (f) => !!String(f.premise || '').trim()
-const priorLine = (p) => `- ${p.id ? `${p.id} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
+// Правка сверх порога рискует достигнутым ради необязательного: правка по P2 о скорости перестроила механизм и внесла регрессию.
+const toFix = (f) => holds(f) && !awaitsProbe(f)
+const offered = (f) => isOpen(f) && !holds(f) && !awaitsProbe(f)
+const asks = (f) => isOpen(f) && !isBlocking(f) && (f.severity === 'P2' || awaitsProbe(f))
+// Дельта не получена - внесённой считается любая новая находка: молча отложить убыток правки дороже лишнего вопроса.
+const introducedAt = (delta) => (f) => !Array.isArray(delta) || delta.some(d => atFinding(f, d))
+const priorLine = (p) => `- ${p.id || p.ref ? `${p.id || p.ref} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${(p.places || []).length ? ` (также: ${p.places.join(', ')})` : ''}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
 const findingLine = (f) => `${priorLine(f)}${f.closure ? ` (закрытие: ${f.closure})` : ''}${f.evidence ? `\n  улика: ${f.evidence}` : ''}`
 // Опознание - по id (ledger.md R10): строка сдвигается правкой, а на одной строке бывают разные находки. Статус прежней - последний, вынесенный узлом; о которой узел промолчал, та остаётся непроверенной.
 // id записей, которые узел закрыл в своём выходе (статус не из открытых).
 const shutBy = (r) => (r.prior || []).filter(p => p.id && !isOpen(p)).map(p => p.id)
+// Номер реестра, от которого трек выдаёт id новым находкам (ledger.md R10); выход несёт его, и finish.sh принимает выданные id только при совпадении с реестром.
+const FINDINGS_TOP = /^\d+$/.test(String(args?.findings_top ?? '').trim()) ? Number(args.findings_top) : null
+const TOP_OUT = FINDINGS_TOP === null ? {} : { findings_top: FINDINGS_TOP }
 function registry(unsettled) {
   const list = []
+  // Закрытые в этом прогоне - в перечне ревью после правки: правка, вернувшая закрытое, иначе прошла бы молча.
+  const closedHere = new Set()
+  // Новой находке - постоянный F<n> с рождения: N<k> переводил бы finish.sh, а текст выхода с ним уже не сходится.
+  const top = FINDINGS_TOP
+  if (top === null) degraded.push(`findings_top не подан (${args?.findings_top ?? 'пусто'}): новые находки прогона - N<k>, в реестре finish.sh заведёт им F<n> с ref`)
   let minted = 0
+  const mint = () => top === null ? `N${++minted}` : `F${top + ++minted}`
   const at = (id) => id ? list.findIndex(q => q.id === id) : -1
   const seat = (p, status, evidence) => {
     const i = at(p.id)
     // Важность записи только растёт: повторное ревью, поднявшее P2 до P1, должно держать порог допуска.
-    const base = i < 0 ? { id: p.id || `N${++minted}`, anchor: p.anchor || '', severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '' }
-      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '' }
+    const base = i < 0 ? { id: p.id || mint(), anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '', ...(p.introduced ? { introduced: true } : {}) }
+      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [], ...(p.introduced ? { introduced: true } : {}) }
     const rec = { ...base, status: FINDING_STATUS.includes(status) ? status : 'unverified', evidence: FINDING_STATUS.includes(status) ? evidence : `статус вне словаря реестра (${status}): ${evidence}` }
+    if (rec.status === 'closed') closedHere.add(rec.id)
     if (i < 0) list.push(rec); else list[i] = rec
     return rec.id
   }
@@ -135,27 +163,28 @@ function registry(unsettled) {
     })
   }
   return {
-    seat, take, all: () => list.slice(), open: () => list.filter(isOpen),
-    blocking: () => list.filter(isOpen).filter(isBlocking),
-    fixable: () => list.filter(isOpen).filter(isFixable).filter(f => !awaitsProbe(f)),
-    probes: () => list.filter(isOpen).filter(isFixable).filter(awaitsProbe),
+    seat, take, mint, all: () => list.slice(), open: () => list.filter(isOpen),
+    holding: () => list.filter(holds), fixes: () => list.filter(toFix), offers: () => list.filter(offered), asking: () => list.filter(asks),
+    closed: () => list.filter(f => f.status === 'closed' && closedHere.has(f.id)),
+    listing: () => list.filter(f => isOpen(f) || closedHere.has(f.id)),
     doubt: (p) => seat(p, 'unverified', !p.evidence || p.evidence === unsettled ? unsettled : p.evidence.startsWith(`${unsettled}; `) ? p.evidence : `${unsettled}; ${p.evidence}`),
     // Опознание - только в перечне, поданном узлу; статус из blocked-выхода не принимается, но его новые находки не теряются.
-    apply: (r, who, listed = list.slice()) => {
+    // introducedAt - предикат «внесена правкой» ревью после правки по находкам; у прочих ревью его нет.
+    apply: (r, who, listed = list.slice(), introducedAt = null) => {
       if (!r) return
       const blocked = r.status === 'blocked'
       if (!blocked) for (const p of r.prior || []) {
         if (!p.id || !listed.some(q => q.id === p.id)) degraded.push(`${who}: запись prior ${p.id || 'без id'} (${p.anchor}) не из перечня - статус не принят`)
-        else seat(p, p.status, p.evidence)
+        else seat(introducedAt && closedHere.has(p.id) && ['open', 'partial'].includes(p.status) ? { ...p, introduced: true } : p, p.status, p.evidence)
       }
-      for (const { f, id } of take(r.findings, who, listed, blocked ? [] : shutBy(r))) if (!id) seat(f, 'open', f.evidence); else if (!blocked) seat({ ...f, id }, 'open', f.evidence)
+      for (const { f, id } of take(r.findings, who, listed, blocked ? [] : shutBy(r))) if (!id) seat(introducedAt && introducedAt(f) ? { ...f, introduced: true } : f, 'open', f.evidence); else if (!blocked) seat({ ...f, id, ...(introducedAt && closedHere.has(id) ? { introduced: true } : {}) }, 'open', f.evidence)
     },
   }
 }
 // Не-complete без места и нехватки оператору не действенен, а finish.sh пишет цели пустую нехватку: инвариант держит конструктор, не каждый выход.
 const outcome = (status, where, missing, extra) => status === 'complete'
-  ? { status, where: '', missing: '', loops, trail, degraded, ...extra }
-  : { status, where: where || 'место не названо', missing: missing || `${where || 'шаг не назван'}: нехватка не названа`, loops, trail, degraded, ...extra }
+  ? { status, where: '', missing: '', loops, trail, degraded, ...TOP_OUT, ...extra }
+  : { status, where: where || 'место не названо', missing: missing || `${where || 'шаг не назван'}: нехватка не названа`, loops, trail, degraded, ...TOP_OUT, ...extra }
 // Узел каталога может быть не установлен: тогда general-purpose с ролью в промпте, факт - в degraded (graceful degradation).
 async function node(role, prompt, opts, type) {
   if (type) {
@@ -186,24 +215,121 @@ const ledgerList = (v, lost) => {
   return list.filter(f => f && typeof f === 'object')
 }
 // <<< shared: domain
+// >>> shared: falsify
+const AXIS_CHECK = ['upheld', 'overturned']
+// Исход оси ревьюера - claim: ось clean/n/a без записи скептика ушла бы в выход чистой непроверенной.
+const axesCheckGap = (axes, check, confirmed) => {
+  const c = check || []
+  const unchecked = (axes || []).filter(a => ['clean', 'n/a'].includes(a.outcome) && !c.some(x => x.name === a.name)).map(a => a.name)
+  const bare = c.filter(x => x.verdict === 'overturned' && !(confirmed || []).some(f => f.axis === x.name && stillOpen(f))).map(x => x.name)
+  return [unchecked.length ? `исход оси не сверен скептиком: ${unchecked.join(', ')}` : '', bare.length ? `ось опровергнута без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
+}
+const ROOT_CHECK = ['upheld', 'overturned']
+// Вердикт по решению - claim в обе стороны, а overturned у legitimate и illegitimate значит противоположное: запись сверки - на одно решение.
+const rootsCheckGap = (roots, check, found) => {
+  const r = (roots || []).filter(x => x.verdict !== 'none')
+  // Решения ревьюера пересекаются между собой: запись с местом решения иначе задела бы и соседнее.
+  const exact = (y) => r.filter(x => String(spot(x.anchor)) === String(spot(y.anchor)))
+  const hits = (check || []).map(y => [y, exact(y).length ? exact(y) : r.filter(x => sameSpot(y.anchor, x.anchor))])
+  const wide = hits.filter(([, xs]) => xs.length > 1).map(([y]) => y.anchor)
+  const own = (x) => hits.filter(([, xs]) => xs.length === 1 && xs[0] === x).map(([y]) => y)
+  const unchecked = r.filter(x => !own(x).length).map(x => x.anchor)
+  const bare = r.filter(x => own(x).some(y => (x.verdict === 'legitimate') === (y.verdict === 'overturned')) && !hasFinding(x, found)).map(x => x.anchor)
+  return [wide.length ? `запись сверки покрывает несколько решений: ${wide.join(', ')}` : '', unchecked.length ? `решение не сверено скептиком: ${unchecked.join(', ')}` : '', bare.length ? `решение нелегитимно после сверки без находки: ${bare.join(', ')}` : ''].filter(Boolean).join('; ')
+}
+// Решение, которого ревьюер не назвал (и под none тоже), сверка его записей не видит - его называет скептик этим полем; запись на месте названного решения - спор о его вердикте, его судит roots-check.
+const rootsMissedGap = (missed, roots) => {
+  const bare = (missed || []).filter(x => !(roots || []).some(r => r.verdict !== 'none' && sameSpot(r.anchor, x.anchor)))
+  return bare.length ? `решение не перечислено ревьюером: ${bare.map(x => `${x.anchor} - ${x.decision}`).join('; ')}` : ''
+}
+// Находка ревьюера - claim: молчание скептика о ней убрало бы её из реестра без следа.
+const silentGap = (findings, fal) => {
+  const seen = [...(fal.confirmed || []), ...(fal.dropped || []), ...(fal.prior || [])]
+  const bare = (findings || []).filter(f => !seen.some(x => sameFinding(x, f))).map(f => f.anchor)
+  return bare.length ? `находка не сверена скептиком: ${bare.join(', ')}` : ''
+}
+const checkGap = (rev, fal) => {
+  const found = [...(fal.confirmed || []), ...(fal.prior || [])]
+  return [silentGap(rev.findings, fal), axesCheckGap(rev.axes, fal['axes-check'], found), rootsCheckGap(rev.roots, fal['roots-check'], found), rootsMissedGap(fal['roots-missed'], rev.roots)].filter(Boolean).join('; ')
+}
+// Места правки снимает не ревьюер: перечень, собранный тем, чью полноту он проверяет, ничего не проверяет.
+const hunkList = (hunks) => (hunks || []).length ? `\nМеста правки (без тестов) - каждое пересекает запись roots: решение либо none с причиной:\n${hunks.map(h => `- ${h}`).join('\n')}` : ''
+const hunkGap = (hunks, roots) => {
+  const bare = (hunks || []).filter(h => !(roots || []).some(x => sameSpot(h, x.anchor)))
+  return bare.length ? `место правки без записи roots: ${bare.join(', ')}` : ''
+}
+// Правила проекта ищет узел снимка, читает ревьюер: прочтение - поле выдачи, иначе непрочитанное правило неотличимо от соблюдённого.
+const CONVENTIONS = {
+  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы, которыми проект нормирует код и ревью; не нашёл - пусто' },
+  'conventions-searched': { type: 'string', description: 'где искал правила проекта' },
+}
+const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'пути из правил проекта во входе, прочитанные до суждения' }
+const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
+const conventionsOf = (x) => x && x.status !== 'blocked' ? x.conventions || [] : []
+// Прочитанное называется путём из поданного перечня: свободную строку разведка и ревьюер пишут разной формой, и прочитанное правило числится непрочитанным.
+const conventionsRead = (x) => conventionsOf(x).length ? { ...CONVENTIONS_READ, items: { type: 'string', enum: [...new Set(conventionsOf(x))] } } : CONVENTIONS_READ
+const conventionsText = (x) => !x || x.status === 'blocked' ? '' : conventionsOf(x).length
+  ? `\nПравила проекта - прочитай каждое до суждения: нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
+  : `\nПравил проекта не найдено (искали: ${x['conventions-searched'] || 'не названо'}).`
+const conventionsGap = (x, rev) => {
+  const path = (c) => String(c).trim().replace(/^\.\//, '')
+  const read = ((rev && rev['conventions-read']) || []).map(path)
+  const unread = conventionsOf(x).filter(c => !read.includes(path(c)))
+  return unread.length ? `правила проекта не прочитаны: ${unread.join(', ')}` : ''
+}
+const axesText = (axes) => (axes || []).map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'
+const rootsText = (roots) => (roots || []).map(x => `- ${x.anchor}: ${x.decision} - корень: ${x.root} - ${x.verdict}${x.finding ? ` (находка ${x.finding})` : ''}${x.evidence ? ` - ${x.evidence}` : ''}`).join('\n') || '- не названы'
+const FALSIFY = { type: 'object', properties: {
+  status: STATUS,
+  confirmed: { type: 'array', items: FINDING },
+  dropped: { type: 'array', items: { type: 'object', properties: { ref: { type: 'string', description: 'ref снимаемой находки ревьюера' }, anchor: { type: 'string' }, reason: { type: 'string' } }, required: ['ref', 'anchor', 'reason'] } },
+  coverage: { type: 'string', description: 'вердикт по покрытию изменённого поведения: непокрытые ветки поимённо либо "покрыто: <чем>"' },
+  'axes-check': { type: 'array', items: { type: 'object', properties: { name: AXIS, verdict: { type: 'string', enum: AXIS_CHECK }, evidence: { type: 'string' } }, required: ['name', 'verdict', 'evidence'] } },
+  'roots-check': { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, verdict: { type: 'string', enum: ROOT_CHECK }, evidence: { type: 'string' } }, required: ['anchor', 'verdict', 'evidence'] } },
+  'roots-missed': { type: 'array', items: { type: 'object', properties: { anchor: { type: 'string' }, decision: { type: 'string' } }, required: ['anchor', 'decision'] } },
+  'review-verdict': VERDICT,
+  prior: { type: 'array', items: PRIOR, description: 'сверенный с кодом статус каждой прежней находки перечня; прежних нет - пусто' },
+  missing: { type: 'string' },
+}, required: ['status', 'confirmed', 'dropped', 'coverage', 'axes-check', 'roots-check', 'roots-missed', 'review-verdict', 'prior', 'missing'] }
+// <<< shared: falsify
 // >>> shared: verify
 const VERIFY = { type: 'object', properties: {
   status: STATUS,
   exit_code: { type: 'integer' }, pass_count: { type: 'integer' }, fail_count: { type: 'integer' },
   failing: { type: 'array', items: { type: 'string' } },
+  flaky: { type: 'array', items: { type: 'string' }, description: 'упали в первом прогоне и прошли в повторе' },
   build_ok: { type: 'boolean' },
   head: { type: 'string', description: 'git log --oneline -3' },
+  head_sha: { type: 'string', description: 'git rev-parse HEAD' },
   dirty: { type: 'boolean', description: 'git status --porcelain непустой' },
   ahead: { type: 'integer', description: 'коммитов ветки трека, которых нет ни на одной другой ветке' },
+  delta: { type: ['array', 'null'], items: { type: 'string' }, description: 'места правки от delta_from до рабочего дерева: file:from-to, file:line, file; поля нет в JSON - null' },
   missing: { type: 'string', description: 'при blocked - почему прогон не выполнен; иначе пусто' },
-}, required: ['status', 'exit_code', 'pass_count', 'fail_count', 'failing', 'build_ok', 'head', 'dirty', 'ahead', 'missing'] }
+}, required: ['status', 'exit_code', 'pass_count', 'fail_count', 'failing', 'build_ok', 'head', 'head_sha', 'dirty', 'ahead', 'delta', 'missing'] }
 const AHEAD_CMD = 'git rev-list --count HEAD --not --exclude="$(git branch --show-current)" --branches'
-const VERIFY_CMDS = `git log --oneline -3, git status --porcelain и ${AHEAD_CMD} (это ahead)`
+const VERIFY_CMDS = `git log --oneline -3, git rev-parse HEAD (это head_sha), git status --porcelain и ${AHEAD_CMD} (это ahead)`
+// Команды едут скрипту hex-строкой: кавычки и $ в команде проекта шелл модели не портит.
+const hexOf = (s) => encodeURIComponent(s).replace(/%([0-9A-F]{2})|[^%]/g, (m, h) => h ? h.toLowerCase() : m.charCodeAt(0).toString(16).padStart(2, '0'))
+// Команды ведёт кодер: подготовка снимает их до правки, и раннер, заведённый правкой, иначе не гонялся бы никогда.
+const withCommands = (t, f) => {
+  const c = (f && f.commands) || {}, build = String(c.build_cmd || '').trim(), test = String(c.test_cmd || '').trim()
+  if (!t || (!build && !test)) return t
+  return { ...t, ...(build ? { build_cmd: build } : {}), ...(test && test !== t.test_cmd ? { test_cmd: test, report_cmd: String(c.report_cmd || '').trim() } : {}) }
+}
+const verifySpec = (t, known, extra) => ({ build: t.build_cmd || '', test: t.report_cmd || t.test_cmd || '', known: known || [], ...extra })
+const verifyRun = (scripts, spec) => `Выполни командой Bash с timeout 600000: python3 '${scripts}/verify.py' ${hexOf(JSON.stringify(spec))}
+stdout - JSON. status running - повтори python3 '${scripts}/verify.py' --wait <его out> тем же timeout, пока status не станет другим. Поля схемы перенеси из итогового JSON как есть; counts null - pass_count, fail_count и failing выведи из test_tail. Команда не вернула JSON - status blocked, в missing её вывод.`
 // Верификатор, не сумевший прогнать, по exit_code неотличим от красных тестов: без этой ветки трек проедает потолок правок вхолостую.
 const noRun = (v) => !v || v.status === 'blocked'
-// exit 0 при упавших тестах даёт конвейер в команде раннера; ноль прошедших при команде тестов - прогон, не бывший прогоном тестов.
-const isGreen = (v, testCmd) => !!v && v.exit_code === 0 && v.fail_count === 0 && v.build_ok && !v.dirty && !(testCmd && v.pass_count === 0)
-const redNote = (v) => `exit=${v.exit_code}, build_ok=${v.build_ok}, прошло тестов: ${v.pass_count}, падают: ${v.failing.join('; ') || 'нет'}, dirty=${v.dirty}`
+const freshFails = (v, known) => ((v && v.failing) || []).filter(f => !(known || []).includes(f))
+// Падение базы правке не вменяется, но безымянное падение (exit не 0 при пустом failing) унаследованным не считается.
+const isGreen = (v, testCmd, known) => !!v && v.build_ok && !v.dirty && !(testCmd && !(v.pass_count > 0)) && !freshFails(v, known).length
+  && ((v.exit_code === 0 && v.fail_count === 0) || (v.failing.length > 0 && v.fail_count <= v.failing.length))
+const inheritedFails = (v, known) => ((v && v.failing) || []).filter(f => (known || []).includes(f))
+const redNote = (v, known) => `exit=${v.exit_code}, build_ok=${v.build_ok}, прошло тестов: ${v.pass_count}, новые падения: ${freshFails(v, known).join('; ') || 'нет'}${inheritedFails(v, known).length ? `, унаследованы от базы: ${inheritedFails(v, known).join('; ')}` : ''}, dirty=${v.dirty}`
+const NO_SCRIPTS = 'каталог скриптов не подан (args.scripts): верификатор гоняет команды сам - без отчёта раннера и повтора нестабильных'
+// Полный набор кодер гонял сам и следом его же гонял верификатор: на больших наборах это удваивало каждую попытку.
+const COVER_ONLY = 'Гоняй тесты задетого правкой, полный набор не гоняй.'
 // <<< shared: verify
 // >>> shared: prep
 // Техконтекст выводится из манифеста, а не из цели: его отдаёт дешёвый узел подготовки, следующие узлы получают команды готовыми.
@@ -212,116 +338,132 @@ const PREP = { type: 'object', properties: {
   stack: { type: 'string', description: 'идентификатор стека по реестру (Skill dex-skill-stack-registry:stack-registry); вне реестра - "other"' },
   stack_basis: { type: 'string', description: 'манифест, из которого выведен стек (путь:строка); манифеста нет - чем определено иначе' },
   test_cmd: { type: 'string', description: 'команда прогона тестов; нет тестов - пустая строка' },
+  report_cmd: { type: 'string', description: 'test_cmd со встроенным флагом раннера, пишущим отчёт JUnit XML либо TRX в $DEX_AUTO_JUNIT_DIR; такой флаг не известен наверняка - пустая строка' },
   build_cmd: { type: 'string', description: 'команда сборки/типизации; нет - пустая строка' },
   prepare_cmd: { type: 'string', description: 'команда подготовки дерева до сборки; подготовка не нужна - пустая строка' },
   // Enum: «дерево готово» и «готовить нечего» ведут к разному промпту дальше, а провал установки пустой строкой неотличим от успеха до первой сборки.
   'prepare-status': { type: 'string', enum: ['done', 'not-needed', 'failed'], description: 'done - команда вернула 0; not-needed - prepare_cmd пуст; failed - команда вернула не 0 либо не запущена' },
   prepare_log: { type: 'string', description: 'при done - код возврата, чем подтверждено и возвращённые пути; при failed - команда и последние строки вывода; при not-needed - почему готовить нечего' },
-  // Без базы унаследованное падение судится внесённым правкой, и кодер лечит чужой дефект из потолка попыток.
-  'baseline-status': { type: 'string', enum: ['green', 'red', 'n/a'], description: 'сборка и тесты до правок трека: green - прошли; red - что-то упало; n/a - не прогонялись: в дереве уже есть правки трека, подготовка failed либо нет ни сборки, ни тестов' },
-  baseline_log: { type: 'string', description: 'при red - что упало: сборка с хвостом вывода, тесты поимённо; при green - сколько тестов прошло; при n/a - почему не прогонялись' },
   missing: { type: 'string', description: 'при blocked - чего не хватает и у кого это есть' },
-}, required: ['status', 'stack', 'stack_basis', 'test_cmd', 'build_cmd', 'prepare_cmd', 'prepare-status', 'prepare_log', 'baseline-status', 'baseline_log', 'missing'] }
-// Правки проверяются до установки: неигнорируемый артефакт установки иначе читался бы правкой трека.
-const PREP_STEPS = `1. Правки трека: git status --porcelain и ${AHEAD_CMD}. Вывод непуст либо число больше нуля - в дереве уже есть правки трека.
-2. Стек - идентификатор по реестру: вызови Skill dex-skill-stack-registry:stack-registry и сопоставь с манифестом дерева; вне реестра - "other". Манифест, из которого вывел, назови в stack_basis - догадка по именам файлов не принимается. По тому же манифесту назови команды сборки и тестов.
-3. Подготовка: дереву до сборки нужны зависимости, которых сборка сама не ставит, либо шаг подготовки, названный проектом, - назови команду и выполни её в дереве; не нужны - prepare_cmd пуст, prepare-status: not-needed. Строки git status --porcelain, которых до команды не было, верни: ?? - удали путь, прочие - git checkout -- путь. prepare-status: done - команда вернула 0, иначе failed.
-4. База: правки трека есть, prepare-status failed либо нет ни сборки, ни тестов - baseline-status: n/a с причиной. Иначе выполни сборку и тесты названными командами: всё прошло - green, что-то упало - red, упавшее в baseline_log.
-Код не правь и упавшее не чини: база - замер до правок, чинят следующие узлы.`
+}, required: ['status', 'stack', 'stack_basis', 'test_cmd', 'report_cmd', 'build_cmd', 'prepare_cmd', 'prepare-status', 'prepare_log', 'missing'] }
+const PREP_STEPS = `1. Стек - идентификатор по реестру: вызови Skill dex-skill-stack-registry:stack-registry и сопоставь с манифестом проекта; вне реестра - "other". Манифест, из которого вывел, назови в stack_basis - догадка по именам файлов не принимается. По тому же манифесту назови команды сборки и тестов.
+2. report_cmd - test_cmd, дополненная встроенным флагом раннера, который пишет отчёт JUnit XML либо TRX в каталог "$DEX_AUTO_JUNIT_DIR" (переменную задаёт верификатор), например: dotnet test - --logger trx --results-directory "$DEX_AUTO_JUNIT_DIR"; pytest - --junitxml="$DEX_AUTO_JUNIT_DIR/r.xml"; node --test - --test-reporter=junit --test-reporter-destination="$DEX_AUTO_JUNIT_DIR/r.xml"; vitest - --reporter=junit --outputFile="$DEX_AUTO_JUNIT_DIR/r.xml". Флаг не известен наверняка, требует пакета либо test_cmd - обёртка (npm test, make) без проброса аргументов - пусто.
+3. Подготовка: проекту до сборки нужны зависимости, которых сборка сама не ставит, либо шаг подготовки, названный проектом, - назови команду и выполни её в рабочем каталоге; не нужны - prepare_cmd пуст, prepare-status: not-needed. Строки git status --porcelain, которых до команды не было, верни: ?? - удали путь, прочие - git checkout -- путь. prepare-status: done - команда вернула 0, иначе failed.
+Код не правь, сборку и тесты не гоняй.`
 const steps = (t) => (Array.isArray(t) ? t : String(t || '').split('\n')).map(s => typeof s === 'string' ? fromLedger(s.replace(/^- /, '')) : s).filter(e => e && typeof e === 'object')
 // Первый замер green либо red из trail старше свежего: на возобновлении дерево несёт правки трека, а их опознание узлом не гарантия.
-function baselineOf(p, trail) {
+function baselineOf(fresh, trail) {
   const e = steps(trail).find(x => x.step === '1-tree' && ['green', 'red'].includes(x.baseline))
-  if (e) return { status: e.baseline, log: e.baseline_log || '', fresh: false }
-  if (p && ['green', 'red'].includes(p['baseline-status'])) return { status: p['baseline-status'], log: p.baseline_log || '', fresh: true }
+  if (e) return { status: e.baseline, log: e.baseline_log || '', failing: Array.isArray(e.baseline_failing) ? e.baseline_failing : [], fresh: false }
+  if (fresh && ['green', 'red'].includes(fresh.status)) return { ...fresh, fresh: true }
   return null
 }
+// Замер покупается только там, где он что-то меряет: база прошлого прогона в trail не перебивается свежей (T5a).
+const baseSkip = (p, trail) => !p || p.status === 'blocked' ? 'подготовка не отработала' : p['prepare-status'] === 'failed' ? 'подготовка дерева не удалась'
+  : p['prepare-status'] === 'skipped' ? 'каталог подготовлен прошлым прогоном' : !p.build_cmd && !p.test_cmd ? 'нет ни сборки, ни тестов'
+  : baselineOf(null, trail) ? 'база прошлого прогона в trail' : ''
+const baseFrom = (v) => noRun(v) ? { status: 'n/a', log: `верификация базы не прогнала: ${(v && v.missing) || 'выхода нет'}`, failing: [] }
+  : v.dirty || v.ahead > 0 ? { status: 'n/a', log: 'в дереве правки трека', failing: [] }
+  : v.build_ok && v.exit_code === 0 && !v.failing.length ? { status: 'green', log: `прошло тестов: ${v.pass_count}`, failing: [] }
+  : { status: 'red', log: redNote(v, []), failing: v.failing }
 const baselineNote = (b) => !b ? '' : b.status === 'red'
-  ? ` До правок трека сборка и тесты уже падали (${b.log || 'что упало, не названо'}): эти падения унаследованы, прочие внесены правками трека.`
+  ? ` До правок трека сборка и тесты уже падали (${b.failing.join('; ') || b.log || 'что упало, не названо'}): эти падения унаследованы, прочие внесены правками трека.`
   : ' До правок трека сборка и тесты были зелёными: любое падение внесено правками трека.'
 // Узел подготовки на возобновлении повторял установленное (T1a); опора - последний настоящий замер, пропуск ею не служит.
 function priorPrep(tc, trail) {
   const last = steps(trail).filter(e => e.step === '1-tree' && e.status !== 'skipped').pop()
   const fits = !!tc && typeof tc.stack === 'string' && !!tc.stack && !!(tc.build_cmd || tc.test_cmd)
     && !!last && ['complete', 'partial'].includes(last.status) && last.prepare !== 'failed'
-  return fits ? { status: 'complete', stack: tc.stack, build_cmd: tc.build_cmd || '', test_cmd: tc.test_cmd || '', prepare_cmd: tc.prepare_cmd || '', 'prepare-status': 'skipped' } : null
+  return fits ? { status: 'complete', stack: tc.stack, build_cmd: tc.build_cmd || '', test_cmd: tc.test_cmd || '', report_cmd: tc.report_cmd || '', prepare_cmd: tc.prepare_cmd || '', 'prepare-status': 'skipped' } : null
 }
 const TREE_SKIPPED = { step: '1-tree', doer: 'ledger (техконтекст прошлого прогона)', status: 'skipped' }
 // <<< shared: prep
 // >>> shared: self-review
+// Исход по тесту - enum: показанный красным трек передаёт следующей попытке как факт, а не ищет слово в прозе.
+const RED_STATUS = ['shown', 'unverifiable']
+const RED_RUN = (scope) => ({ type: 'array', items: { type: 'object', properties: { test: { type: 'string', description: 'имя или путь теста' }, status: { type: 'string', enum: RED_STATUS }, evidence: { type: 'string', description: 'shown - нарушение, на котором тест был красным (код до правки либо порча целевой ветки), и сверенная причина падения; unverifiable - чем пробовал' } }, required: ['test', 'status', 'evidence'] }, description: scope })
+const redLines = (rr) => (rr || []).length ? rr.map(r => `${r.test} ${r.status}: ${r.evidence}`).join('; ') : 'пусто'
 // Ключи - имена полей выдачи из файлов узлов буквально: трансляция - место тихого расхождения схемы и нормы узла.
 const FIX = { type: 'object', properties: {
   status: STATUS,
   plan: { type: 'array', items: { type: 'object', properties: { where: { type: 'string' }, change: { type: 'string' }, trace: { type: 'string' } }, required: ['where', 'change', 'trace'] }, description: 'план реализации в итоговой редакции: where - файл или символ, change - суть изменения, у отступления - с причиной, trace - требование, правило проекта с якорем, стандарт или практика' },
   'diff-scope': { type: 'array', items: { type: 'string' }, description: 'пути изменённых файлов и ветка, не тела' },
   commit: { type: 'string', description: 'sha локального коммита либо пусто' },
+  commands: { type: 'object', properties: { build_cmd: { type: 'string' }, test_cmd: { type: 'string' }, report_cmd: { type: 'string' } }, required: ['build_cmd', 'test_cmd', 'report_cmd'] },
   'run-status': { type: 'string', description: 'свой прогон сборки и тестов: команда и исход; проверка неприменима - n/a с причиной, запуск невозможен - unverifiable с тем, что пробовал, и тогда status partial; зелёность трек судит VERIFY-узлом, не этим полем' },
-  'red-run': { type: 'string', description: 'чем показано, что тест сторожит требование: нарушение (код до правки либо порча целевой ветки), на котором он был красным, и сверенная причина падения - на каждый новый и изменённый тест и на существующий, чью целевую ветку тронула правка (прежняя запись истекает с прежним поведением); подпадающих тестов нет - n/a с причиной; показать не вышло - unverifiable + чем пробовал' },
+  'red-run': RED_RUN('запись на каждый новый и изменённый тест и на существующий, чью целевую ветку тронула правка (прежняя запись истекает с прежним поведением); подпадающих тестов нет - пустой перечень'),
   // Признак замкнутости - enum: свободную строку модель отдаёт синонимами, а пустое значение неотличимо от невыясненного.
   'uncovered-status': { type: 'string', enum: ['none', 'some', 'unknown'], description: 'осталось ли непокрытое тестами: none - не осталось, some - перечень в uncovered, unknown - покрытие не выяснялось; догадка сюда не пишется' },
   uncovered: { type: 'array', items: { type: 'string' }, description: 'при some - непокрытое перечнем (ветка, случай, граница); иначе пустой' },
   'dependents-status': { type: 'string', enum: ['none', 'some', 'unknown'], description: 'видно ли правку за пределами diff-scope: вызывающий код, контракт на проводе, схема данных, публичный API. none - не видно, some - видно (перечень в dependents), unknown - не разобрался; догадка сюда не пишется' },
   dependents: { type: 'array', items: { type: 'string' }, description: 'при some - потребители перечнем file:line; иначе пустой' },
-  'fact-check': { type: 'string', description: 'триггер сверки - сигнатура или поведение стороннего API, взятые по памяти' },
+  'fact-check': FACT_CHECK('сигнатура или поведение стороннего API в правке'),
   decisions: { type: 'array', items: { type: 'string' }, description: 'первой строкой - вызванные скиллы либо почему ни один не подошёл; далее каждая закрытая узлом развилка: что выбрано, из чего, почему' },
   // Пометку пробы судит ревью: кодеру находку с ней не подают, и его запись её не трогает.
   prior: { type: 'array', items: { type: 'object', properties: { id: PRIOR.properties.id, anchor: PRIOR.properties.anchor, severity: SEV, axis: PRIOR.properties.axis, text: PRIOR.properties.text, status: PRIOR.properties.status, evidence: PRIOR.properties.evidence }, required: ['id', 'anchor', 'severity', 'axis', 'text', 'status', 'evidence'] }, description: 'по каждой находке задания - запись с её id: closed - закрыта правкой, disputed - закрывать не следует; находок в задании нет - пусто' },
   missing: { type: 'string' },
-}, required: ['status', 'plan', 'diff-scope', 'commit', 'run-status', 'red-run', 'uncovered-status', 'uncovered', 'dependents-status', 'dependents', 'fact-check', 'decisions', 'prior', 'missing'] }
+}, required: ['status', 'plan', 'diff-scope', 'commit', 'commands', 'run-status', 'red-run', 'uncovered-status', 'uncovered', 'dependents-status', 'dependents', 'fact-check', 'decisions', 'prior', 'missing'] }
 const REVIEW = { type: 'object', properties: {
   status: STATUS,
-  findings: { type: 'array', items: { type: 'object', properties: { anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text,
+  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text,
     closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise,
     continues: { type: 'string', description: 'id прежней находки из перечня, чьё решение находка продолжает новым путём; иначе пусто' } },
-  required: ['anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise', 'continues'] }, description: 'только находки, которых нет в перечне прежних' },
+  required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise', 'continues'] }, description: 'только находки, которых нет в перечне прежних' },
   axes: AXES,
   roots: ROOTS,
   'run-status': { type: 'string', description: 'прогон свой, не пересказ входа' },
-  'red-run': { type: 'string', description: 'вердикт по записям red-run кодера во входе: по каждому тесту дельты запись действует / отсутствует / истекла; записей не было - unverifiable + что искал; тестов в дельте нет - n/a' },
-  'fact-check': { type: 'string', description: 'предмет сверки - техутверждения находок' },
+  'red-run': { type: 'string', description: 'вердикт по записям red-run кодера во входе: по каждому тесту дельты запись действует / красным не показан (unverifiable кодера) / отсутствует / истекла; записей не было - unverifiable + что искал; тестов в дельте нет - n/a' },
+  'fact-check': FACT_CHECK('техутверждения находок о стороннем API'),
+  'conventions-read': CONVENTIONS_READ,
   intent: { type: 'string', description: 'сверка с источником намерения входа: соответствует / расхождения «корректно, но не то»; источника нет - n/a' },
   'intent-status': { type: 'string', enum: ['match', 'mismatch', 'n/a'], description: 'mismatch - сделано не то, чего требует источник намерения входа; подробности в intent' },
   prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня прежних - запись с её id, статус с уликой; перечня нет - пусто' },
   'review-verdict': { ...VERDICT, description: 'сигнал оператору, порог допуска трека его не читает' },
   missing: { type: 'string', description: 'при blocked - чего не хватило для ревью; иначе пусто' },
-}, required: ['status', 'findings', 'axes', 'roots', 'run-status', 'red-run', 'fact-check', 'intent', 'intent-status', 'prior', 'review-verdict', 'missing'] }
+}, required: ['status', 'findings', 'axes', 'roots', 'run-status', 'red-run', 'fact-check', 'conventions-read', 'intent', 'intent-status', 'prior', 'review-verdict', 'missing'] }
 const UNSETTLED = 'статус саморевью не сверен'
 const LISTED = 'Перечень находок: по каждой - запись в prior с её id, статус с уликой; находка перечня идёт только в prior, в findings - то, чего в перечне нет:'
 // fix перезаписывается каждой попыткой: решения и оспаривание прежней находки без переноса в decisions до выхода не доезжают.
 const said = (f) => [...(f.decisions || []), ...(f.prior || []).filter(p => p.status === 'disputed').map(p => `${p.id || p.anchor}: кодер оспорил закрытие - ${p.evidence}`)]
 // Записи red-run и uncovered кодера - вход саморевьюера: он судит red-run по записям входа, а uncovered адресован следующему узлу.
-const coderInput = (f) => f ? `\nВход от кодера - red-run: ${f['red-run']}\nuncovered: ${f['uncovered-status']}${(f.uncovered || []).length ? ' - ' + f.uncovered.join('; ') : ''}\ndependents: ${f['dependents-status']}${(f.dependents || []).length ? ' - ' + f.dependents.join('; ') : ''}` : ''
-// Повторное ревью правке, целиком проверенной прогоном и не видимой наружу, нового факта не даёт (ledger: окупалось в 5 из 23); unknown и перечень при none пропуск не дают.
-const sealed = (f) => f['uncovered-status'] === 'none' && (f.uncovered || []).length === 0 && f['dependents-status'] === 'none' && (f.dependents || []).length === 0
-// Отказ кодера и его молчание - не закрытие.
-const closedBy = (f, x) => ((f && f.prior) || []).some(p => p.id === x.id && p.status === 'closed')
-const SKIPPED = 'закрыта правкой, повторное саморевью не куплено - правка покрыта прогоном (uncovered-status: none), наружу не видна (dependents-status: none), верификация зелёная'
+const coderInput = (f) => f ? `\nВход от кодера - план:\n${(f.plan || []).map(p => `- ${p.where}: ${p.change}`).join('\n') || '- не подан'}\nred-run: ${redLines(f['red-run'])}\nuncovered: ${f['uncovered-status']}${(f.uncovered || []).length ? ' - ' + f.uncovered.join('; ') : ''}\ndependents: ${f['dependents-status']}${(f.dependents || []).length ? ' - ' + f.dependents.join('; ') : ''}` : ''
 // partial кодера и опровергнутая им сверка - исход автора: зелёная верификация и чистое ревью их не закрывают.
-const authorGap = (f) => !f ? '' : f.status === 'partial' ? `кодер вернул partial: ${f.missing || f['run-status'] || 'нехватка не названа'}` : /^contradicted/.test(f['fact-check'] || '') ? `fact-check кодера: ${f['fact-check']}` : ''
-const reviewGap = (r) => !r || r.status === 'blocked' ? '' : r.status === 'partial' ? `саморевью не завершено: ${r.missing || 'нехватка не названа'}` : r['intent-status'] === 'mismatch' ? `саморевью: реализовано не то: ${r.intent}` : axesGap(r.axes) ? `саморевью: ${axesGap(r.axes)}` : rootsGap(r.roots, [...(r.findings || []), ...(r.prior || [])]) ? `саморевью: ${rootsGap(r.roots, [...(r.findings || []), ...(r.prior || [])])}` : ''
+const authorGap = (f, offeredOnly = false) => !f ? '' : f.status === 'partial' && !offeredOnly ? `кодер вернул partial: ${f.missing || f['run-status'] || 'нехватка не названа'}` : (f['fact-check'] || []).some(c => c.status === 'contradicted') ? `fact-check кодера: contradicted - ${f['fact-check'].filter(c => c.status === 'contradicted').map(c => `${c.claim} (${c.source})`).join('; ')}` : ''
+// partial правки одних offered итога не держит: её находки порога не держат; partial реализации держит (domain.md §4).
+const coderGap = (fix, fix2, offeredOnly) => offeredOnly ? authorGap(fix) || authorGap(fix2, true) : authorGap(fix2 || fix)
+// Место находки, дописанное скептиком (places), есть только в реестре: без него решение на этом месте числится без находки.
+const reviewGap = (r, reg = []) => !r || r.status === 'blocked' ? '' : r.status === 'partial' ? `саморевью не завершено: ${r.missing || 'нехватка не названа'}` : r['intent-status'] === 'mismatch' ? `саморевью: реализовано не то: ${r.intent}` : axesGap(r.axes, r.findings) ? `саморевью: ${axesGap(r.axes, r.findings)}` : rootsGap(r.roots, [...(r.findings || []), ...(r.prior || []), ...reg]) ? `саморевью: ${rootsGap(r.roots, [...(r.findings || []), ...(r.prior || []), ...reg])}` : ''
 // Порог допуска: зелёная верификация и ноль открытых P0/P1 реестра прогона; review-verdict - сигнал оператору, порог его не читает.
+const stuckLine = (p) => `${p.id} ${p.status} - ${awaitsProbe(p) ? `нужна проба оператора: ${p.premise}` : p.evidence}`
 const admit = (green, rev, stuck, gaps) => !green ? 'верификация после правки по саморевью не прошла'
   : !rev ? 'саморевьюер не вернул выход'
   : rev.status === 'blocked' ? `саморевью не выполнено: ${lack(rev, 'саморевьюер')}`
-  : stuck.length ? `открытые P0/P1: ${stuck.map(p => `${p.id} ${p.status} - ${awaitsProbe(p) ? `нужна проба оператора: ${p.premise}` : p.evidence}`).join('; ')}` : gaps
-// Находка с пробой кодеру не подана: её P2 порога не держит, но вопрос оператору не теряется.
-const probeAsks = (r) => r.probes().filter(f => !isBlocking(f)).map(f => `${f.id} [${f.severity}] ${f.anchor}: нужна проба оператора - ${f.premise}`)
-const shaOf = (v) => String(v && v.head || '').trim().split(/\s/)[0]
+  : stuck.some(isBlocking) ? `открытые P0/P1: ${stuck.filter(isBlocking).map(stuckLine).join('; ')}` : gaps
+// Не правится в прогоне и порог не держит, но вопрос оператору не теряется: «продолжить» подаёт такую находку кодеру из ledger.
+// skip - id, закрытые кодером без повторного ревью: у них своя строка с его уликой.
+const askLines = (r, skip = []) => r.asking().filter(f => !skip.includes(f.id)).map(f => `${f.id} [${f.severity}] ${f.anchor}: ${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}порога не держит, решение за оператором - ${f.text}`}`)
+// Закрытая в прогоне находка в перечне - чтобы ревью сверило, не вернула ли её правка.
+const listedLine = (p) => `${priorLine(p)}${p.status === 'closed' ? ' (закрыта в этом прогоне: сверь, что правка её не вернула)' : ''}`
+// Ревизия - поле head_sha: head - текст git log, у модели-верификатора его первое слово не обязано быть sha.
+const shaOf = (v) => isSha(String(v && v.head_sha || '').trim()) ? String(v.head_sha).trim() : ''
 const isSha = (x) => /^[0-9a-f]{7,40}$/i.test(String(x || ''))
 // Ветку до head ревью complete уже прочли: повторное чтение всего диффа ветки - главная статья прогона дочистки.
+// Ревью с разрывом снимка либо скептика базой не служит: дельта от него унесла бы непроверенное из объёма.
 // Диагноз либо разведка, выведенные узлом, а не взятые из ledger, - новое намерение: ревью до них судили прежнее.
 const INTENT_STEPS = ['1-repro', '1-req']
 const priorBase = (trail) => {
   const all = steps(trail), from = all.reduce((k, e, i) => INTENT_STEPS.includes(e.step) && !/^ledger/.test(e.doer || '') ? i : k, -1)
-  return (all.slice(from + 1).filter(e => (e.step === 3 || e.step === '3-repeat') && e.status === 'complete' && isSha(e.head)).pop() || {}).head || ''
+  return (all.slice(from + 1).filter(e => (e.step === 3 || e.step === '3-repeat') && e.status === 'complete' && e.settled !== false && isSha(e.head)).pop() || {}).head || ''
 }
 const scope = (base) => base ? `дельта от ${base} - коммиты после него плюс рабочее дерево. Новые находки ищи в дельте, вне её - только сломанное правкой дельты; статус прежних находок перечня суди на текущем коде. ${base} не предок HEAD - ревью по всем коммитам цели.` : 'коммиты этой цели плюс рабочее дерево.'
 // Пара «новая - прежняя» - факт поля узла: какой механизм тот же, судит ревьюер, трек лишь сверяет id с поданным перечнем.
 // Находка с пробой с любой стороны пары кодеру не подаётся - размотать её ему нечем (I10).
-// Запись, склеенная take по якорю и оси, хранит прежний текст: id ищется по тем же критериям, что у take.
-const pairsOf = (reg, r, listed, degraded) => (r && r.status !== 'blocked' ? r.findings : []).filter(f => isFixable(f) && !awaitsProbe(f) && String(f.continues || '').trim()).map(f => {
+// В реестре - запись скептика, его текст и место могут отличаться от ревьюера: id ищется по пересечению места и оси.
+// Пара заводится только у находки, которая правится в прогоне: иначе кодеру задано размотать то, что ему не подано.
+const pairsOf = (reg, r, listed, degraded) => (r && r.status !== 'blocked' ? r.findings : []).filter(f => String(f.continues || '').trim()).map(f => {
   const of = String(f.continues).trim(), earlier = listed.find(q => q.id === of), shut = shutBy(r)
-  const at = reg.all().find(q => q.anchor === f.anchor && q.text === f.text) || listed.find(q => q.anchor === f.anchor && q.axis && q.axis === f.axis && !shut.includes(q.id))
+  const at = reg.all().find(q => !listed.some(l => l.id === q.id) && sameSpot(q.anchor, f.anchor) && (q.axis || '') === (f.axis || '')) || listed.find(q => q.anchor === f.anchor && q.axis && q.axis === f.axis && !shut.includes(q.id))
+  if (!toFix(at || { ...f, status: 'open' })) return null
   if (!earlier) { degraded.push(`саморевьюер: находка ${f.anchor} продолжает ${of} - id вне поданного перечня, пара не принята`); return null }
   if (awaitsProbe(earlier)) return null
   return { id: at ? at.id : f.anchor, of }
@@ -329,7 +471,126 @@ const pairsOf = (reg, r, listed, degraded) => (r && r.status !== 'blocked' ? r.f
 const unwindOf = (chain, listed) => chain.length ? `\nНовый путь прежнего механизма: ${chain.map(p => `${p.id} продолжает ${p.of}`).join('; ')}. Прежние:\n${listed.filter(q => chain.some(p => p.of === q.id)).map(findingLine).join('\n')}\nРазмотай решение по всем входам и состояниям, где оно ошибается, и закрой разом; пути - в evidence записи prior.` : ''
 const pairDecision = (p) => `${p.id} продолжает ${p.of}: правка по ${p.of} закрыла путь, а не механизм - кодеру задано размотать решение, повторное ревью куплено`
 const pairLeft = (p) => `${p.id} продолжает ${p.of}: механизм не размотан правкой по находкам`
+const HUNKS = { type: 'object', properties: {
+  status: STATUS,
+  hunks: { type: 'array', items: { type: 'string' }, description: 'путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file' },
+  conventions: CONVENTIONS.conventions, 'conventions-searched': CONVENTIONS['conventions-searched'],
+  missing: { type: 'string' },
+}, required: ['status', 'hunks', 'conventions', 'conventions-searched', 'missing'] }
+const OWN_COMMITS = 'git rev-list HEAD --not --exclude="$(git branch --show-current)" --branches'
+// Места правки считает скрипт: арифметику заголовков @@ модель путает на единицу; узлу остаётся отсев файлов тестов.
+// Сомнение, относится ли документ к правке, снимок выражал статусом partial - и тот покупал повторное ревью.
+const HUNKS_STATUS = 'Документ, о котором неясно, относится ли он к правке, включи в conventions. status - complete, когда места сняты; partial - только когда места сняты не целиком.'
+const hunksAsk = (base) => A.scripts ? `ТОЛЬКО перечень мест правки и правил проекта, код не менять. Выполни python3 '${A.scripts}/verify.py' --hunks${base ? ` ${base}` : ''}: hunks - поле hunks его вывода как есть, без файлов тестов; поле error в выводе либо вывод не JSON - status partial, error либо последние строки вывода в missing. ${conventionsAsk} ${HUNKS_STATUS}`
+  : `ТОЛЬКО перечень мест правки и правил проекта, код не менять. ${base ? `git diff -U0 ${base}; ${base} не предок HEAD (git merge-base --is-ancestor) - как без базы. ` : ''}Без базы - git diff -U0 "$(${OWN_COMMITS} | tail -1)^", своих коммитов нет - git diff -U0 HEAD. Место - путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file. Файлы тестов не включай. ${conventionsAsk} ${HUNKS_STATUS}`
+const hunksOf = (tag, base) => node('снимок правки', `${HEAD}Шаг 3 (${tag}): ${hunksAsk(base)}`, { label: `hunks:${tag}`, phase: 'Review', model: 'haiku', effort: 'low', schema: HUNKS })
+const spotsOf = (h) => h && h.status !== 'blocked' ? h.hunks : []
+const doubted = (rev, listed) => listed.map(p => { const c = (rev.prior || []).find(q => q.id === p.id); return `${priorLine(p)} - саморевьюер: ${c ? `${c.status} - ${c.evidence}` : 'статус не назван'}` }).join('\n')
+// Разрывы ревью - тот же перечень, что у итога: ревью без правки покупается ради них.
+const lapGaps = (rev, h, fal, reg) => [reviewGap(rev, reg), spotGap(rev, h), falsifyGap(rev, fal)].filter(Boolean).join('; ')
+const gapAsk = (g) => g ? `\nКод с прежнего ревью этой базы не менялся; оно оставило разрывы - закрой их, прочий объём суди штатно: ${g}` : ''
+const falsifyOf = (tag, rev, listed, base, h, gaps = '') => own('скептик', `${HEAD}Шаг 3 (${tag}): фальсификация находок, исходов осей, решений и статусов прежних из саморевью; вердикт по покрытию. Объём - ${scope(base)} Код не меняй.${conventionsText(h)}${gapAsk(gaps)}\nНаходки:\n${rev.findings.map(findingLine).join('\n') || '- находок нет: только вердикт по покрытию'}${listed.length ? `\nПрежние находки - статус саморевьюера:\n${doubted(rev, listed)}` : ''}\nОси саморевьюера:\n${axesText(rev.axes)}\nРешения саморевьюера:\n${rootsText(rev.roots)}`,
+  { label: `falsify:${tag}`, phase: 'Review', schema: FALSIFY }, NODE.skeptic)
+const judged = (fal) => !!fal && fal.status !== 'blocked' && !fal.skipped
+// Сверка стоит как само ревью, а без P0/P1 исход итога от неё не зависит (P115).
+const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(isBlocking)
+const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], prior: [] }
+// В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
+const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
+// Пара continues - поле ревьюера: держится, пока скептик подтвердил находку; место и ось - записи скептика, по ним её id в реестре.
+const kept = (rev, fal) => !rev || !judged(fal) ? rev : { ...rev, findings: rev.findings.flatMap(f => { const c = fal.confirmed.find(c => sameFinding(c, f) && (!!(c.ref && f.ref) || c.axis === f.axis)); return c ? [{ ...f, anchor: c.anchor, axis: c.axis }] : [] }) }
+const settledOf = (rev, h, fal) => !spotGap(rev, h) && !falsifyGap(rev, fal)
+const spotGap = (rev, h) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
+  : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : '', conventionsGap(h, rev) ? `саморевью: ${conventionsGap(h, rev)}` : ''].filter(Boolean).join('; ')
+const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal.skipped) ? '' : !judged(fal) ? `фальсификация саморевью не выполнена: ${lack(fal, 'скептик')}`
+  : [fal.status === 'partial' ? `фальсификация саморевью не завершена: ${fal.missing || 'нехватка не названа'}` : '', checkGap(rev, fal) ? `саморевью: ${checkGap(rev, fal)}` : ''].filter(Boolean).join('; ')
 // <<< shared: self-review
+// >>> shared: review-loop
+const KEEP = 'Инварианты правки - источник намерения ниже и закрытые в этом прогоне находки: правка их не нарушает и не сужает поведение допущением о входе или среде, которого в источнике нет; такое допущение находку не закрывает.'
+const keepText = (closed) => `\n${KEEP}${closed.length ? `\nЗакрытые в этом прогоне:\n${closed.map(f => `- ${f.id} ${f.anchor}: ${f.closure || f.text}`).join('\n')}` : ''}`
+const deltaOf = (v) => v && Array.isArray(v.delta) ? v.delta : null
+// Цикл - docs/domain.md §4; t несёт различия треков: review, coder, intent, run (команды прогона), verify, red (итог незелёной верификации либо ''), afterCoder (выход трека либо null), afterVerify, moved (необязательный: сменила ли правка то, что судит только ревью, - тест диагноста bugfix; true - пропуска ревью нет).
+const OFFERED = 'На твоё решение - порога не держат: правь, только если правка не выходит за места, которые уже меняет правка цели либо называет находка, и не меняет наблюдаемого поведения вне находки; иначе запись prior disputed с основанием.'
+async function reviewLoop(t) {
+  const { fix, ver, firstBase } = t
+  let fix2 = null, ver2 = null, deltaFrom = null, red = '', offeredOnly = false
+  let spots = await hunksOf('первое', firstBase)
+  let rev = await t.review('первое', fix, ver, LEDGER, firstBase, spots); loops.review = 1
+  const first = { step: 3, doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver), base: firstBase }
+  trail.push(first)
+  const dropped = []
+  // Ревью без правки, купленное разрывом сверки, без скептика закрыло бы разрыв молчанием.
+  const falsify = async (tag, r, listed, base, h, gaps, recheck = false) => {
+    if (!r || r.status === 'blocked') return null
+    const step = tag === 'первое' ? '3-falsify' : '3-repeat-falsify'
+    if (!recheck && !needsSkeptic(r, listed)) { trail.push({ step, doer: 'не куплен: P0/P1 нет', status: 'skipped' }); return SKIPPED }
+    const f = await falsifyOf(tag, r, listed, base, h, gaps)
+    trail.push({ step, doer: NODE.skeptic.agentType, status: f ? f.status : 'null', confirmed: f ? f.confirmed.length : -1, dropped: f ? f.dropped.length : -1 })
+    if (judged(f)) dropped.push(...f.dropped)
+    return f
+  }
+  let fal = await falsify('первое', rev, LEDGER, firstBase, spots)
+  const reg = registry(UNSETTLED)
+  LEDGER.forEach(reg.doubt)
+  reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик' : 'саморевьюер')
+  // Ревью со своим разрывом базой дельты не служит: повторное по дельте не перепроверило бы место разрыва.
+  first.settled = settledOf(rev, spots, fal) && !reviewGap(rev, reg.all())
+  const offeredHere = new Set(), coderClosed = []
+  let last = first, listed = LEDGER, chain = pairsOf(reg, kept(rev, fal), LEDGER, degraded), base = firstBase
+  const advance = () => { if (last.settled && rev && rev.status === 'complete') base = last.head }
+  // Вопрос оператору (domain.md §2) едет и в выходе из цикла: иначе P2 видна только записью prior.
+  const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, reg, spots, fix2, ver2, dropped, coderClosed, offeredOnly })
+  advance()
+  while (rev && rev.status !== 'blocked') {
+    const reviewLeft = loops.review < REVIEW_CEILING
+    let gaps = '', recheck = false
+    // Не держащая порог подаётся кодеру один раз: оспоренная им осталась бы открытой и гоняла круги до потолка.
+    const may = reg.offers().filter(f => !offeredHere.has(f.id))
+    if ((reg.fixes().length || may.length || red) && loops.review_fix < REVIEW_FIX_CEILING && reviewLeft) {
+      const k = ++loops.review_fix, must = reg.fixes().length > 0 || !!red
+      may.forEach(f => offeredHere.add(f.id))
+      if (deltaFrom === null) deltaFrom = shaOf(ver2 || ver)
+      decisions.push(...chain.map(pairDecision))
+      fix2 = await t.coder(`${HEAD}Шаг 2 (правка по находкам ${k} из ${REVIEW_FIX_CEILING}):${red ? ` верификация прошлой правки не прошла: ${red}.` : ''}${reg.fixes().length ? ` закрой находки:\n${reg.fixes().map(findingLine).join('\n')}` : ''}${may.length ? `\n${OFFERED}\n${may.map(findingLine).join('\n')}` : ''}${unwindOf(chain, listed)}${keepText(reg.closed())}\n${t.intent()}\n${t.run()}\nПосле правки коммит локально, push не делать. По каждой находке - запись в prior с её id: closed с уликой либо disputed с основанием, почему закрывать не следует.`)
+      if (fix2) decisions.push(...said(fix2))
+      const exit = fix2 && t.afterCoder(fix2, k, { review: rev, prior: reg.all() })
+      if (exit) return state(exit)
+      const prevVer = ver2 || ver
+      ver2 = !fix2 || fix2.status === 'blocked' ? null : await t.verify('после саморевью', deltaFrom)
+      t.afterVerify(ver2)
+      offeredOnly = !must
+      trail.push({ step: '2-after-review', attempt: k, doer: NODE.coder.agentType, status: fix2 ? fix2.status : 'null', passed: passed(ver2), 'red-run': fix2 ? fix2['red-run'] : null })
+      const openNow = { review: rev, falsify: fal, prior: reg.all(), dropped }
+      if (!fix2 || fix2.status === 'blocked') return state(bail('Review: правка по находкам', lack(fix2, 'узел-кодер'), openNow))
+      if (noRun(ver2)) return state(bail('Review: верификация после правки', lack(ver2, 'верификатор'), openNow))
+      // Зелёная правка одних offered ревью не покупает: их исход итога не держит (domain.md §4); сменивший тест диагноста круг пропуска не получает (t.moved).
+      if (!must && passed(ver2) && last.settled && !(t.moved && t.moved(prevVer, ver2))) {
+        const shut = (fix2.prior || []).filter(p => p.status === 'closed' && may.some(f => f.id === p.id))
+        coderClosed.push(...shut.map(p => p.id))
+        decisions.push(...shut.map(p => `${p.id}: закрыто кодером без повторного ревью - ${p.evidence}`))
+        trail.push({ step: '3-repeat', doer: 'не куплено: правка одних offered, верификация зелёная', status: 'skipped', closed: shut.length })
+        break
+      }
+      red = passed(ver2) ? '' : t.red(ver2)
+      if (!deltaOf(ver2)) degraded.push(`дельта правки по находкам ${k} не получена - новые находки ревью после неё считаются внесёнными правкой`)
+    } else if (last.settled || rev['intent-status'] === 'mismatch' || !reviewLeft) break
+    else { gaps = lapGaps(rev, spots, fal, reg.all()); recheck = !!falsifyGap(rev, fal) }
+    listed = loops.review_fix ? reg.listing() : reg.open()
+    spots = await hunksOf('повторное', base)
+    rev = await t.review('повторное', fix2 || fix, ver2 || ver, listed, base, spots, gaps); loops.review++
+    fal = await falsify('повторное', rev, listed, base, spots, gaps, recheck)
+    // Повторное без выхода или blocked статусов не выносит: реестр остаётся, каким его оставило прежнее.
+    if (rev && rev.status !== 'blocked') listed.forEach(reg.doubt)
+    reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик (повторное)' : 'саморевьюер (повторное)', listed, loops.review_fix ? introducedAt(deltaOf(ver2)) : null)
+    chain = pairsOf(reg, kept(rev, fal), listed, degraded)
+    last = { step: '3-repeat', doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver2 || ver), base, settled: settledOf(rev, spots, fal) && !reviewGap(rev, reg.all()) }
+    trail.push(last)
+    advance()
+  }
+  decisions.push(...chain.map(pairLeft))
+  return state(null)
+}
+// <<< shared: review-loop
 const REPRO = { type: 'object', properties: {
   status: STATUS,
   root_cause: { type: 'string', description: 'первопричина с привязкой файл:строка, не симптом; не установлена (гейт первопричины, нужен runtime) - пусто, почему - в missing' },
@@ -340,8 +601,8 @@ const REPRO = { type: 'object', properties: {
   'expected-basis': { type: 'string', description: 'откуда взято ожидаемое: вход, тест, корпус, реконструкция' },
   // Шаг без следа в выходе не наблюдаем: опровержение причины, не названное полем, пропускается молча.
   falsification: { type: 'array', items: { type: 'object', properties: { prediction: { type: 'string' }, observation: { type: 'string' }, outcome: { type: 'string', enum: ['held', 'refuted'] } }, required: ['prediction', 'observation', 'outcome'] }, description: 'попытки опровергнуть причину: prediction - что обязано наблюдаться, будь причина верна, observation - что видно, с файл:строка или выводом прогона, outcome - held: причина устояла, refuted: снята' },
-  'fact-check': { type: 'string', description: 'предмет сверки - утверждения о стороннем API в основе причины' },
-  fix_proposal: { type: 'string', description: 'минимальная правка словами: файл, что меняется' },
+  'fact-check': FACT_CHECK('утверждения о стороннем API в основе причины'),
+  fix_proposal: { type: 'string', description: 'решение исправления: неверное решение кода, все входы и места, где оно ошибается и повторено; исправленное решение и цена операций; граничные входы с исходом; поведения под тесты' },
   files: { type: 'array', items: { type: 'string' } },
   // Ожидаемое берётся из нескольких источников сразу, и они расходятся: вход цели против критерия
   // приёмки владельца в корпусе. Узел, выбравший сторону, чинит под неё и закрепляет тестом (зонд P23).
@@ -352,7 +613,6 @@ const REPRO = { type: 'object', properties: {
 // Приёмка диагноза - часть контракта кодера только в этом треке: общая схема правки расширяется, а не копируется.
 const BFIX = { type: 'object', properties: {
   ...FIX.properties,
-  'red-run': { type: 'string', description: 'чем показан красным тест на этот дефект и сверенная причина падения; плюс по каждому существующему тесту, чью целевую ветку тронула правка; подпадающих тестов нет вовсе (теста на дефект нет и чужих целевых веток не трогал) - n/a с этой причиной; показать не вышло - unverifiable + чем пробовал' },
   'diagnosis-check': { type: 'string', enum: ['accepted', 'harness-fixed', 'disputed-test', 'disputed-cause', 'disputed-expected', 'n/a'] },
   dispute: { type: 'string' },
 }, required: [...FIX.required, 'diagnosis-check', 'dispute'] }
@@ -377,12 +637,22 @@ const disputes = []
 const decisions = []
 const dec = () => decisions.slice()
 const bail = (where, missing, extra) => outcome('blocked', where, missing, { decisions: dec(), repro, fix, ...extra })
-const passed = (v) => isGreen(v, repro && repro.test_cmd)
+// Падения базы до правок: правке не вменяются.
+let known = []
+const passed = (v) => isGreen(v, repro && repro.test_cmd, known)
 
 // Вход собирает /auto; workflow, вызванный по имени, приходит без него - узлы без цели и каталога не запускаются (T0).
 const noInput = ['task', 'symptom', 'cwd'].filter(k => !String(A[k] || '').trim())
 if (noInput.length) return outcome('blocked', 'Context', `трек вызван без входа: нет ${noInput.join(', ')}`)
 phase('Context')
+const BASE_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): замерить сборку и тесты до правок трека - и только это.\n${TREE}`
+const legacyRun = (t) => `Выполни ${t.build_cmd ? `сборку: ${t.build_cmd}; ` : ''}${t.test_cmd ? `тесты: ${t.test_cmd}` : 'тестов нет - build_ok по сборке, счётчики 0'}; затем ${VERIFY_CMDS}`
+const verifyNode = async (head, tag, ph, schema, body) => {
+  const v = await node('верификатор', `${head}Верификация (${tag}): ТОЛЬКО прогон и отчёт, код не менять${body}`, { label: `verify:${tag}`, phase: ph, model: 'haiku', effort: 'low', schema })
+  if (v && Array.isArray(v.flaky) && v.flaky.length) decisions.push(`верификация (${tag}): нестабильные тесты - упали и прошли в повторе: ${v.flaky.join('; ')}`)
+  return v
+}
+if (!A.scripts) degraded.push(NO_SCRIPTS)
 // Поле возобновления кладёт главный поток из ledger, но подать он может что угодно: непроверенная
 // форма роняла соседний трек на первом же обращении к разведке (зонд P25). Непригодное поле трек не
 // останавливает - воспроизведение покупается узлом, а подмена названа оператору.
@@ -400,17 +670,22 @@ if (resuming && A.repro && !reproFormed) degraded.push('поле repro пода�
 const priorTree = priorPrep(reproResumed, resuming ? A.trail : null)
 // С диагностом не параллельно: воспроизведение идёт по подготовленному дереву, а два узла, ставящие
 // зависимости и гоняющие тесты в одном дереве, портят прогон друг другу.
-const prep = priorTree || await node('подготовка дерева', `${PREP_HEAD}Шаг 1 (техконтекст, подготовка и база):\n${PREP_STEPS}`, { label: 'ctx:tree', phase: 'Context', model: 'haiku', schema: PREP })
+const prep = priorTree || await node('подготовка дерева', `${PREP_HEAD}Шаг 1 (техконтекст и подготовка):\n${PREP_STEPS}`, { label: 'ctx:tree', phase: 'Context', model: 'haiku', schema: PREP })
+// База - до диагноста: его красный тест в дереве замер исказил бы.
+const skip = baseSkip(prep, resuming ? A.trail : null)
+const base = skip ? { status: 'n/a', log: skip, failing: [] }
+  : baseFrom(await verifyNode(BASE_HEAD, 'база', 'Context', VERIFY, `. ${A.scripts ? verifyRun(A.scripts, verifySpec(prep, [])) : `${legacyRun(prep)}. Числа - из вывода раннера как есть.`}`))
 trail.push(priorTree ? TREE_SKIPPED
-  : { step: '1-tree', doer: 'подготовка дерева', status: prep ? prep.status : 'null', prepare: prep ? prep['prepare-status'] : null, baseline: prep ? prep['baseline-status'] : null, baseline_log: prep ? prep.baseline_log : null })
+  : { step: '1-tree', doer: 'подготовка дерева', status: prep ? prep.status : 'null', prepare: prep ? prep['prepare-status'] : null, baseline: base.status, baseline_log: base.log, baseline_failing: base.failing })
 if (!prep || prep.status === 'blocked') return bail('Context: подготовка дерева', lack(prep, 'узел подготовки дерева'))
 if (prep.status === 'partial') degraded.push(`подготовка дерева partial: ${prep.missing || 'нехватка не названа'}`)
 // Провал подготовки - не стоп: дерево лечит следующий узел, но знать о провале он обязан, иначе
 // примет падение установки за падение продукта и назовёт первопричиной его.
 if (prep['prepare-status'] === 'failed') degraded.push(`подготовка дерева не удалась: ${prep.prepare_log || 'причина не названа'}`)
-const treeBase = baselineOf(prep, resuming ? A.trail : null)
+const treeBase = baselineOf(base, resuming ? A.trail : null)
 if (treeBase && treeBase.fresh && treeBase.status === 'red') degraded.push(`дерево красное до правок трека: ${treeBase.log || 'что упало, не названо'}`)
-const treeState = `${prep['prepare-status'] === 'done' ? ` Дерево подготовлено узлом контекста (${prep.prepare_cmd}) - установку не повторяй.` : prep['prepare-status'] === 'failed' ? ` Подготовка дерева узлом контекста не удалась (${prep.prepare_log || 'причина не названа'}) - до первого прогона выполни её сам: ${prep.prepare_cmd || 'команда не названа, выведи по манифесту'}. Падение установки первопричиной бага не называй.` : prep['prepare-status'] === 'skipped' ? ` Дерево подготовлено прошлым прогоном, подготовка не повторялась: сборка упала на зависимостях - выполни ${prep.prepare_cmd || 'подготовку по манифесту'} сам, падение установки первопричиной бага не называй.` : ''}${baselineNote(treeBase)}`
+known = treeBase ? treeBase.failing : []
+const treeState = `${prep['prepare-status'] === 'done' ? ` Каталог подготовлен узлом контекста (${prep.prepare_cmd}) - установку не повторяй.` : prep['prepare-status'] === 'failed' ? ` Подготовка узлом контекста не удалась (${prep.prepare_log || 'причина не названа'}) - до первого прогона выполни её сам: ${prep.prepare_cmd || 'команда не названа, выведи по манифесту'}. Падение установки первопричиной бага не называй.` : prep['prepare-status'] === 'skipped' ? ` Каталог подготовлен прошлым прогоном, подготовка не повторялась: сборка упала на зависимостях - выполни ${prep.prepare_cmd || 'подготовку по манифесту'} сам, падение установки первопричиной бага не называй.` : ''}${baselineNote(treeBase)}`
 
 phase('Reproduce')
 // Воспроизведение и первопричина - установленный факт прошлого прогона: при возобновлении правка
@@ -421,7 +696,7 @@ const diag = reproResumed || await own('диагност первопричин�
 trail.push({ step: '1-repro', doer: reproResumed ? 'ledger (воспроизведение прошлого прогона)' : NODE.debugger.agentType, status: diag ? diag.status : 'null' })
 // accepted - факт приёмки кодером, accepted_blob - ожидаемый хэш теста после неё, accepted_pending - снимок ещё не снят: живут в repro, чтобы пережить ledger;
 // новый диагноз их сбрасывает.
-const withCtx = (d) => ({ repro_test: '', ...d, repro_blob: d.repro_test ? String(d.repro_blob || '').trim() : '', dispute: '', accepted: d.accepted || '', accepted_blob: d.repro_test ? String(d.accepted_blob || '').trim() : '', accepted_pending: !!d.accepted_pending, stack: prep.stack, build_cmd: prep.build_cmd, test_cmd: prep.test_cmd, prepare_cmd: prep.prepare_cmd })
+const withCtx = (d) => ({ repro_test: '', ...d, repro_blob: d.repro_test ? String(d.repro_blob || '').trim() : '', dispute: '', accepted: d.accepted || '', accepted_blob: d.repro_test ? String(d.accepted_blob || '').trim() : '', accepted_pending: !!d.accepted_pending, stack: prep.stack, build_cmd: prep.build_cmd, test_cmd: prep.test_cmd, report_cmd: prep.report_cmd || '', prepare_cmd: prep.prepare_cmd })
 // Диагноз без причины на возобновлении: ledger отдаёт его непригодным, и следующий прогон зовёт диагноста заново.
 const RESET = { root_cause: '', files: [] }
 const testLeft = (d) => d && d.repro_test ? `; тест диагноста оставлен в дереве: ${d.repro_test}` : ''
@@ -443,7 +718,7 @@ if (!diag.root_cause) return noCause(diag, 'Reproduce: причина не ус�
 repro = withCtx(diag)
 if (!repro.repro_test && String(diag.repro_blob || '').trim()) degraded.push(`снимок теста диагноста ${String(diag.repro_blob).trim()} без пути (repro_test пуст): правка и удаление теста не сверяются`)
 if (repro.repro_test && !repro.repro_blob) degraded.push(`тест диагноста ${repro.repro_test} назван без снимка (repro_blob пуст): правка теста хэшем не сверяется, удаление сверяется`)
-const causeOf = (d) => `Первопричина: ${d.root_cause}\nВоспроизведение: ${d.reproduction}\nОснование ожидаемого: ${d['expected-basis']}\nПредложение фикса: ${d.fix_proposal}${d.repro_test ? `\nТест диагноста: ${d.repro_test}` : ''}`
+const causeOf = (d) => `Первопричина: ${d.root_cause}\nВоспроизведение: ${d.reproduction}\nОснование ожидаемого: ${d['expected-basis']}\nРешение исправления: ${d.fix_proposal}${d.repro_test ? `\nТест диагноста: ${d.repro_test}` : ''}`
 const causeText = causeOf(repro)
 // Правка теста диагноста ловится хэшем, а не отчётом кодера: проверку, подогнанную под свой фикс, отчёт не назовёт.
 // Сигнал ревьюеру идёт против теста диагноста и на каждом круге заново: замороженный до фазы Review, он молчал бы о подмене в правке по находкам.
@@ -480,17 +755,18 @@ const disputeExit = (dc, f, where, extra) => {
 
 phase('Fix')
 // -w: хэш прогона может стать снимком приёмки, а git show и git diff читают лишь записанный объект.
-const verifyText = (tag, snap) => `${HEAD}Верификация (${tag}): ТОЛЬКО прогон и отчёт, код не менять${snap ? ` и не коммитить. Сначала git show ${snap} > ${repro.repro_test}, git hash-object ${repro.repro_test} - в snap_hash` : ''}. Выполни ${repro.build_cmd ? `сборку: ${repro.build_cmd}; ` : ''}${repro.test_cmd ? `тесты: ${repro.test_cmd}` : 'тестов нет - build_ok по сборке, счётчики 0'}; затем ${snap ? `git checkout -- ${repro.repro_test} при любом исходе, blocked тоже, после него ` : ''}${VERIFY_CMDS}${repro.repro_test ? `; git hash-object -w ${repro.repro_test} - в repro_test_hash` : '; repro_test_hash пустой'}. Числа - из вывода раннера как есть.`
+const verifyText = (snap, from = '') => A.scripts ? `${snap ? ' и не коммитить' : ''}. ${verifyRun(A.scripts, verifySpec(repro, known, { hash_path: repro.repro_test || '', ...(from ? { delta_from: from } : {}), ...(snap ? { snap: { blob: snap, path: repro.repro_test } } : {}) }))}`
+  : `${snap ? ` и не коммитить. Сначала git show ${snap} > ${repro.repro_test}, git hash-object ${repro.repro_test} - в snap_hash` : ''}. Выполни ${repro.build_cmd ? `сборку: ${repro.build_cmd}; ` : ''}${repro.test_cmd ? `тесты: ${repro.test_cmd}` : 'тестов нет - build_ok по сборке, счётчики 0'}; затем ${snap ? `git checkout -- ${repro.repro_test} при любом исходе, blocked тоже, после него ` : ''}${VERIFY_CMDS}${repro.repro_test ? `; git hash-object -w ${repro.repro_test} - в repro_test_hash` : '; repro_test_hash пустой'}. Числа - из вывода раннера как есть.`
 // Фаза параметром: verify зовётся и из Review, а фаза берётся из opts, не из phase().
-const verifyOnce = (tag, ph = 'Fix') => node('верификатор', verifyText(tag, ''), { label: `verify:${tag}`, phase: ph, model: 'haiku', schema: BVERIFY })
+const verifyOnce = (tag, ph = 'Fix') => verifyNode(HEAD, tag, ph, BVERIFY, verifyText(''))
 // Зелёная верификация на цели без прошлого прогона значит «работа не покрыта тестами», а не «сделана»: молча пропустить правку по ней нельзя.
 if (A.resume && !resuming) {
   log('«продолжить» без следа прошлого прогона в ledger: трек идёт как первый, фаза правки не пропускается')
   decisions.push('«продолжить» подано без trail: прогона по этой цели в ledger нет, возобновление не применено - трек отработал как первый')
 }
-// Возобновление начинается с верификации: зелёное дерево с коммитами не переделывается (ledger.md, «продолжить»).
+// Возобновление начинается с верификации: зелёное дерево с коммитами трека не переделывается, прежние находки несёт ревью (P115).
 // Кодер, вызываемый при любом исходе верификации, гоняет тесты сам; снимок приёмки (I4) ждёт именно её (T7a).
-const coderAnyway = resuming && (ASK.length > 0 || !reproResumed) && !repro.accepted_pending
+const coderAnyway = resuming && !reproResumed && !repro.accepted_pending
 if (coderAnyway) trail.push({ step: 'resume', doer: 'не куплено: кодер вызывается при любом исходе', status: 'skipped' })
 else if (resuming) {
   ver = await verifyOnce('возобновление')
@@ -498,15 +774,16 @@ else if (resuming) {
   if (noRun(ver)) return bail('Fix: верификация при возобновлении', lack(ver, 'верификатор'))
   settle(ver)
 }
-// Зелёное дерево не выпускает трек мимо правки, если есть незакрытые находки прошлого прогона либо диагноз поставлен в этом прогоне: его ещё никто не правил.
-// Без коммитов трека - тоже: прошлый прогон встал до правки, и зелёные базовые тесты работу не подтверждают.
-let pending = coderAnyway || ASK.length > 0 || (resuming && (!reproResumed || !ver.ahead))
+// Диагноз этого прогона ещё никто не правил; без коммитов трека прошлый прогон встал до правки, и зелёные базовые тесты работу не подтверждают.
+const ahead = !!(ver && ver.ahead)
+let pending = coderAnyway || (resuming && !reproResumed) || (!ahead && (ASK.length > 0 || resuming))
 for (let k = 1; k <= FIX_CEILING && (!passed(ver) || pending); k++) {
   loops.fix = k; pending = false
   // red-run прошлой попытки - установленный факт: без него следующая попытка показывает тот же тест красным заново, проедая потолок.
-  const priorRed = fix && fix['red-run'] && !/^(n\/a|unverifiable)/.test(fix['red-run']) ? `\nКрасный прогон уже показан прошлой попыткой и перепроверке не подлежит: ${fix['red-run']}` : ''
-  const prev = ver && !passed(ver) ? `\n${k === 1 ? 'Верификация при возобновлении' : `Попытка ${k - 1}`} не прошла: ${redNote(ver)}.${priorRed}` : ''
-  fix = await own('кодер', `${HEAD}${DONE}${OPEN}Шаг 2, попытка ${k} из ${FIX_CEILING}: лечи первопричину, не симптом; один баг - один фикс, попутного рефакторинга нет.\n${causeText}\nФайлы: ${repro.files.join(', ')}. Тесты: ${repro.test_cmd || 'нет'}. Сборка: ${repro.build_cmd || 'нет'}.${treeState}${prev}\n${acceptance()} Red-run: тест диагноста - твоя проба, в коммит; теста нет - пишешь свой. По завершении: коммит локально (сообщение по симптому).`,
+  const shown = (fix && fix['red-run'] || []).filter(r => r.status === 'shown')
+  const priorRed = shown.length ? `\nКрасный прогон уже показан прошлой попыткой и перепроверке не подлежит: ${redLines(shown)}` : ''
+  const prev = ver && !passed(ver) ? `\n${k === 1 ? 'Верификация при возобновлении' : `Попытка ${k - 1}`} не прошла: ${redNote(ver, known)}.${priorRed}` : ''
+  fix = await own('кодер', `${HEAD}${DONE}${OPEN}Шаг 2, попытка ${k} из ${FIX_CEILING}: лечи первопричину, не симптом; один баг - один фикс, попутного рефакторинга нет.\n${causeText}\nФайлы: ${repro.files.join(', ')}. Тесты: ${repro.test_cmd || 'нет'}. Сборка: ${repro.build_cmd || 'нет'}. ${COVER_ONLY}${treeState}${prev}\n${acceptance()} Red-run: тест диагноста - твоя проба, в коммит; теста нет - пишешь свой. По завершении: коммит локально (сообщение по симптому).`,
     { label: `fix:${k}`, phase: 'Fix', schema: BFIX }, NODE.coder)
   trail.push({ step: 2, attempt: k, doer: NODE.coder.agentType, status: fix ? fix.status : 'null', 'red-run': fix ? fix['red-run'] : null, 'diagnosis-check': fix ? fix['diagnosis-check'] : null })
   if (fix) decisions.push(...said(fix))
@@ -517,79 +794,48 @@ for (let k = 1; k <= FIX_CEILING && (!passed(ver) || pending); k++) {
     return disputeExit(dc, fix, `Fix#${k}`)
   }
   if (!fix || fix.status === 'blocked') return bail(`Fix#${k}`, lack(fix, 'узел-кодер'))
+  repro = withCommands(repro, fix)
   ver = await verifyOnce(`после попытки ${k}`)
   settle(ver)
   trail.push({ step: '2-exit', attempt: k, doer: 'general-purpose', passed: passed(ver) })
   if (noRun(ver)) return bail(`Fix#${k}: верификация`, lack(ver, 'верификатор'))
   if (!passed(ver)) log(`попытка ${k}: exit=${ver && ver.exit_code}, build_ok=${ver && ver.build_ok}, fail=${ver && ver.fail_count}, dirty=${ver && ver.dirty}`)
 }
-if (!passed(ver)) return outcome('partial', `Fix: потолок ${FIX_CEILING} исчерпан`, `дерево не зелёное после ${FIX_CEILING} попыток: ${redNote(ver)}`, { ver, repro, fix, decisions: dec() })
+if (!passed(ver)) return outcome('partial', `Fix: потолок ${FIX_CEILING} исчерпан`, `дерево не зелёное после ${FIX_CEILING} попыток: ${redNote(ver, known)}`, { ver, repro, fix, decisions: dec() })
 phase('Review')
 // Диагноз этого прогона - другое намерение: коммиты до прежней базы судились против опровергнутой причины.
 const firstBase = priorBase(reproResumed ? A.trail : null)
-const review = (tag, f, v, priors, base) => own('саморевьюер', `${HEAD}Шаг 3 (${tag}): pre-push саморевью локальной ветки - ${scope(base)}${touchedOrig(v) ? `\nТест диагноста ${repro.repro_test} изменён кодером: исходник - git show ${repro.repro_blob}. Изменена проверка - вход, вызываемый путь или ожидаемое - находка P1.` : ''}${coderInput(f)} Источник намерения:\n${causeText}${priors.length ? `\n${LISTED}\n${priors.map(priorLine).join('\n')}` : ''}\nПрогон build/test реальный, итог - в run-status, не в findings. Код не меняй.`,
-  { label: `self-review:${tag}`, phase: 'Review', schema: REVIEW }, NODE.reviewer)
-let rev = await review('первое', fix, ver, LEDGER, firstBase); loops.review = 1
-trail.push({ step: 3, doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver), base: firstBase })
-const reg = registry(UNSETTLED)
-LEDGER.forEach(reg.doubt)
-reg.apply(rev, 'саморевьюер')
-const chain = pairsOf(reg, rev, LEDGER, degraded)
-decisions.push(...chain.map(pairDecision))
-const unwind = unwindOf(chain, LEDGER)
-if (rev && rev.status !== 'blocked' && reg.fixable().length) {
-  loops.review_fix = REVIEW_FIX_CEILING
-  fix2 = await own('кодер', `${HEAD}Шаг 2 (повтор после саморевью, потолок ${REVIEW_FIX_CEILING}): закрой находки:\n${reg.fixable().map(findingLine).join('\n')}${unwind}\n${causeText}\n${acceptance()}\nПосле правки коммит локально, push не делать. По каждой находке - запись в prior с её id: closed с уликой либо disputed с основанием, почему закрывать не следует.`,
-    { label: 'fix:after-review', phase: 'Review', schema: BFIX }, NODE.coder)
-  const dc2 = noteCheck(fix2)
-  if (fix2) decisions.push(...said(fix2))
-  if (/^disputed-/.test(dc2)) {
-    trail.push({ step: '2-after-review', doer: NODE.coder.agentType, status: fix2.status, 'diagnosis-check': dc2 })
-    disputes.push(`${dc2} (правка по находкам): ${fix2.dispute || 'улика не названа'}`)
-    return disputeExit(dc2, fix2, 'Review: правка по находкам', { fix_after_review: fix2, review: rev, prior: reg.all() })
-  }
-  ver2 = !fix2 || fix2.status === 'blocked' ? null : await verifyOnce('после саморевью', 'Review')
-  settle(ver2)
-  trail.push({ step: '2-after-review', doer: NODE.coder.agentType, status: fix2 ? fix2.status : 'null', passed: passed(ver2), 'red-run': fix2 ? fix2['red-run'] : null })
-  const openNow = { review: rev, prior: reg.all() }
-  if (!fix2 || fix2.status === 'blocked') return bail('Review: правка по находкам', lack(fix2, 'узел-кодер'), openNow)
-  if (noRun(ver2)) return bail('Review: верификация после правки', lack(ver2, 'верификатор'), openNow)
-  // Правку теста после harness-fixed гейт отдаёт ревью: сменивший хэш круг повторное ревью не пропускает.
-  if (passed(ver2) && sealed(fix2) && hashOf(ver2) === hashOf(ver) && reg.blocking().filter(f => !awaitsProbe(f)).every(f => closedBy(fix2, f)) && !chain.length) {
-    // Находка без своей строки решения - шаг не выполнен: снятая правкой идёт в decisions поимённо.
-    // P2, не закрытая кодером, порога не держит и круга не покупает - остаётся открытой в реестре.
-    const shut = reg.fixable().filter(f => closedBy(fix2, f))
-    shut.forEach(f => {
-      decisions.push(`${f.id} ${f.anchor}: ${SKIPPED}${f.closure ? `; критерий закрытия: ${f.closure}` : ''}`)
-      reg.seat(f, 'closed', SKIPPED)
-    })
-    trail.push({ step: '3-repeat', doer: 'не куплено: правка замкнута и проверена прогоном', status: 'skipped', closed: shut.length })
-  } else {
-    const listed = reg.open()
-    const firstDone = rev && rev.status === 'complete'
-    const repeatBase = firstDone ? shaOf(ver) : firstBase
-    rev = await review('повторное', fix2, ver2, listed, repeatBase); loops.review = 2
-    // Повторное без выхода или blocked статусов не выносит: реестр остаётся, каким его оставило первое.
-    if (rev && rev.status !== 'blocked') listed.forEach(reg.doubt)
-    reg.apply(rev, 'саморевьюер (повторное)', listed)
-    decisions.push(...pairsOf(reg, rev, listed, degraded).map(pairLeft))
-    trail.push({ step: '3-repeat', doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver2), base: repeatBase })
-  }
+const review = (tag, f, v, priors, base, h, gaps = '') => own('саморевьюер', `${HEAD}Шаг 3 (${tag}): pre-push саморевью локальной ветки - ${scope(base)}${hunkList(spotsOf(h))}${conventionsText(h)}${gapAsk(gaps)}${touchedOrig(v) ? `\nТест диагноста ${repro.repro_test} изменён кодером: исходник - git show ${repro.repro_blob}. Изменена проверка - вход, вызываемый путь или ожидаемое - находка P1.` : ''}${coderInput(f)} Источник намерения:\n${causeText}${priors.length ? `\n${LISTED}\n${priors.map(listedLine).join('\n')}` : ''}\nПрогон build/test реальный, итог - в run-status, не в findings. Код не меняй.`,
+  { label: `self-review:${tag}`, phase: 'Review', schema: { type: 'object', properties: { ...REVIEW.properties, 'conventions-read': conventionsRead(h) }, required: [...REVIEW.required] } }, NODE.reviewer)
+// Спор с диагнозом в правке по находкам - тот же выход, что в попытке Fix.
+const disputed = (f, k, open) => {
+  const dc = noteCheck(f)
+  if (!/^disputed-/.test(dc)) return null
+  trail.push({ step: '2-after-review', attempt: k, doer: NODE.coder.agentType, status: f.status, 'diagnosis-check': dc })
+  disputes.push(`${dc} (правка по находкам ${k}): ${f.dispute || 'улика не названа'}`)
+  return disputeExit(dc, f, 'Review: правка по находкам', { fix_after_review: f, ...open })
 }
+const loop = await reviewLoop({ fix, ver, firstBase, review, coder: async (p) => { const f = await own('кодер', p, { label: 'fix:after-review', phase: 'Review', schema: BFIX }, NODE.coder); repro = withCommands(repro, f); return f }, intent: () => `${causeText}\n${acceptance()}`,
+  verify: (tag, from) => verifyNode(HEAD, tag, 'Review', BVERIFY, verifyText('', from)), afterCoder: disputed, afterVerify: settle, moved: (a, b) => hashOf(a) !== hashOf(b),
+  run: () => `Тесты: ${repro.test_cmd || 'нет'}. Сборка: ${repro.build_cmd || 'нет'}. ${COVER_ONLY}`, red: (v) => redNote(v, known) })
+if (loop.exit) return loop.exit
+const { rev, fal, reg, spots, dropped, coderClosed } = loop
+fix2 = loop.fix2; ver2 = loop.ver2
 const finalVer = ver2 || ver
 const green = passed(finalVer)
-// Снимок - когда исход не решили кодер, ревью, P0/P1; его blocked - стоп, как у верификатора круга.
-const wantSnap = !admit(green, rev, reg.blocking(), '') && !authorGap(fix2 || fix) && !!repro.test_cmd && !testMissing(finalVer) && !!expected() && hashOf(finalVer) !== expected()
-const snap = wantSnap ? await node('верификатор', verifyText('снимок', expected()), { label: 'verify:снимок', phase: 'Review', model: 'haiku', schema: BSNAP }) : null
+if (green && inheritedFails(finalVer, known).length) degraded.push(`падения базы не исправлены и правке не вменены: ${inheritedFails(finalVer, known).join('; ')}`)
+// Снимок - когда исход не решили кодер, ревью, находки порога; его blocked - стоп, как у верификатора круга.
+const wantSnap = !admit(green, rev, reg.holding(), '') && !coderGap(fix, fix2, loop.offeredOnly) && !!repro.test_cmd && !testMissing(finalVer) && !!expected() && hashOf(finalVer) !== expected()
+const snap = wantSnap ? await verifyNode(HEAD, 'снимок', 'Review', BSNAP, verifyText(expected())) : null
 const placed = !!snap && String(snap.snap_hash || '').trim() === expected()
 const back = !!snap && !snap.dirty && hashOf(snap) === hashOf(finalVer) && snap.ahead === finalVer.ahead
-const sha = String(finalVer.head || '').trim().split(/\s/)[0]
+const sha = shaOf(finalVer)
 // --soft: коммит верификатора, если он был, уходит в индекс и виден в git status, а не теряется.
-const restore = (A.cwd ? `cd ${A.cwd} && ` : '') + (/^[0-9a-f]+$/i.test(sha) ? `git reset --soft ${sha} && git checkout ${sha} -- ${repro.repro_test}` : `git show ${hashOf(finalVer)} > ${repro.repro_test}`)
+const restore = (A.cwd ? `cd ${A.cwd} && ` : '') + (sha ? `git reset --soft ${sha} && git checkout ${sha} -- ${repro.repro_test}` : `git show ${hashOf(finalVer)} > ${repro.repro_test}`)
 if (wantSnap) trail.push({ step: 'snapshot', doer: 'general-purpose', status: snap ? snap.status : 'null', placed, passed: passed(snap), returned: back })
-if (wantSnap && noRun(snap)) return bail('Review: прогон снимка', `${lack(snap, 'верификатор')}; ${repro.repro_test} мог остаться снимком, вернуть: ${restore}`, { fix_after_review: fix2, review: rev, prior: reg.all() })
+if (wantSnap && noRun(snap)) return bail('Review: прогон снимка', `${lack(snap, 'верификатор')}; ${repro.repro_test} мог остаться снимком, вернуть: ${restore}`, { fix_after_review: fix2, review: rev, prior: reg.all(), decisions: [...dec(), ...askLines(reg)] })
 const snapNote = !repro.test_cmd ? '; снимок не прогнан: команды тестов нет' : !wantSnap ? ''
-  : (!placed ? `; снимок ${expected()} не поставлен: snap_hash ${snap.snap_hash || 'пусто'}` : !passed(snap) ? `; снимок ${expected()} на итоговом коде не зелёный: ${redNote(snap)}` : '')
+  : (!placed ? `; снимок ${expected()} не поставлен: snap_hash ${snap.snap_hash || 'пусто'}` : !passed(snap) ? `; снимок ${expected()} на итоговом коде не зелёный: ${redNote(snap, known)}` : '')
     + (!back ? `; файл теста после прогона снимка ${expected()} не возвращён: repro_test_hash ${hashOf(snap) || 'пусто'} при итоговом ${hashOf(finalVer)}, ahead ${snap.ahead} при итоговом ${finalVer.ahead}, dirty=${snap.dirty}, вернуть: ${restore}` : '')
 // Удалённый тест - разрыв при любой приёмке и без снимка: путь верификатору назван треком. Правка теста - против ожидания,
 // а не вердикта: суждение «обвязка или проверка» ревью несёт на круге приёмки, дальше тест держится снимком.
@@ -597,11 +843,11 @@ const snapNote = !repro.test_cmd ? '; снимок не прогнан: кома
 const testGap = testMissing(finalVer) ? `тест диагноста ${repro.repro_test} удалён (repro_test_hash: ${hashOf(finalVer) || 'пусто'})`
   : !!expected() && hashOf(finalVer) !== expected() && !(placed && back && passed(snap)) ? `тест диагноста ${repro.repro_test} изменён при diagnosis-check: ${((fix2 || fix) || {})['diagnosis-check'] || repro.accepted || 'не назван'}${snapNote}`
   : fix && repro.repro_test && !repro.accepted ? `приёмка диагноза не проведена: diagnosis-check ${(fix2 || fix)['diagnosis-check'] || 'не назван'} при тесте диагноста ${repro.repro_test}` : ''
-const gap = [ledgerUnread ? LEDGER_UNREAD : '', authorGap(fix2 || fix) || testGap || (repro.status === 'partial' ? `воспроизведение partial: ${repro.missing || `эталон - ${repro['expected-basis']}`}` : ''),
-  !repro.build_cmd && !repro.test_cmd ? 'внешнего факта нет: ни сборки, ни тестов' : '', !finalVer.ahead ? 'коммитов трека нет' : '', reviewGap(rev)].filter(Boolean).join('; ')
-const where = admit(green, rev, reg.blocking(), gap)
+const gap = [ledgerUnread ? LEDGER_UNREAD : '', coderGap(fix, fix2, loop.offeredOnly) || testGap || (repro.status === 'partial' ? `воспроизведение partial: ${repro.missing || `эталон - ${repro['expected-basis']}`}` : ''),
+  !repro.build_cmd && !repro.test_cmd ? 'внешнего факта нет: ни сборки, ни тестов' : '', !finalVer.ahead ? 'коммитов трека нет' : '', reviewGap(rev, reg.all()), spotGap(rev, spots), falsifyGap(rev, fal)].filter(Boolean).join('; ')
+const where = admit(green, rev, reg.holding(), gap)
 return outcome(where ? 'partial' : 'complete', where, where, {
-  goal_check: { build_ok: finalVer.build_ok, tests_green: finalVer.exit_code === 0 && finalVer.fail_count === 0, committed: !finalVer.dirty && finalVer.ahead > 0, head: finalVer.head },
-  repro, fix, fix_after_review: fix2, review: rev, prior: reg.all(), disputes,
-  decisions: [...dec(), ...probeAsks(reg)],
+  goal_check: { build_ok: finalVer.build_ok, tests_green: finalVer.exit_code === 0 && finalVer.fail_count === 0, inherited: inheritedFails(finalVer, known), committed: !finalVer.dirty && finalVer.ahead > 0, head: finalVer.head },
+  repro, fix, fix_after_review: fix2, review: rev, falsify: fal, prior: reg.all(), dropped, disputes,
+  decisions: [...dec(), ...askLines(reg, coderClosed)],
 })

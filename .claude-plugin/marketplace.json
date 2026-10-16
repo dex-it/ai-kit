@@ -1,6 +1,6 @@
 {
   "name": "dex-claude-marketplace",
-  "version": "6.16.0",
+  "version": "6.18.0",
   "description": "Маркетплейс AI-агентов для разработчиков. Атомарные плагины с узкой специализацией: Skills (знания), Specialists (агенты), Bundles (наборы).",
   "owner": {
     "name": "Dex Team",
@@ -12,7 +12,7 @@
       "name": "dex-adr-writer",
       "source": "./plugins/specialists/architecture/dex-adr-writer",
       "description": "Автор ADR: пишет Architecture Decision Records в формате MADR - драйверы решения, альтернативы, trade-off.",
-      "version": "3.7.0",
+      "version": "3.7.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -41,14 +41,14 @@
       "name": "dex-architect",
       "source": "./plugins/specialists/architecture/dex-architect",
       "description": "System design узел зоны дизайна (дизайн-решение): reference architecture match, альтернативы, решение с CAP/PACELC, deep dive. Требования/capacity/implementation-план ведёт вызывающая команда /design. Стек-нейтральный.",
-      "version": "4.8.0",
+      "version": "4.10.0",
       "category": "specialist",
       "keywords": [
         "specialist",
         "architect",
         "system-design",
         "interview",
-        "capacity-planning",
+        "scalability",
         "reference-architecture",
         "clean-architecture",
         "ddd",
@@ -59,7 +59,7 @@
       "name": "dex-architect-dotnet",
       "source": "./plugins/specialists/architecture/dex-architect-dotnet",
       "description": "Узел зоны дизайна (дизайн-решение) для .NET: reference architecture match, альтернативы с ASP.NET Core / EF Core / MassTransit / Polly / Serilog, решение с CAP/PACELC, deep dive, fact-check библиотек. Требования/capacity/implementation-план ведёт вызывающая команда /design.",
-      "version": "3.8.0",
+      "version": "3.9.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -76,7 +76,7 @@
       "name": "dex-auto",
       "source": "./plugins/auto/dex-auto",
       "description": "Автономные треки под открытую цель - feature и bugfix (до локальных коммитов) и ревью чужого MR/PR (read-only, треды по санкции): ledger вне рабочего дерева, Workflow-скрипт на трек с потолками петель и схемами выхода узлов, сдача исхода скриптом finish.sh, сторожа SessionStart (возобновление по открытой цели) и Stop (терминал цели). Команды /goal (подготовка цели из тикета, спеки или симптома; для feature - проба черновика на домыслы) и /auto (прогон трека, возобновление с верификации).",
-      "version": "8.6.0",
+      "version": "9.0.0",
       "category": "specialist",
       "keywords": [
         "autonomous",
@@ -149,7 +149,7 @@
       "name": "dex-bug-fixer",
       "source": "./plugins/specialists/delivery/dex-bug-fixer",
       "description": "Пакетная ремедиация найденных тестировщиком багов после мерджа: интейк находок, триаж и приоритет, подтверждение причины по одному, фикс на источнике через follow-up MR, верификация red->green на стенде, регрессия соседей; финиш на локальных коммитах без push.",
-      "version": "1.12.0",
+      "version": "1.13.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -179,7 +179,7 @@
       "name": "dex-bundle-architect",
       "source": "./plugins/bundles/dex-bundle-architect",
       "description": "Бандл для архитектора: интерактивный system design, ADR, диаграммы, проектирование API, анализ кодовой базы, безопасность, наблюдаемость.",
-      "version": "1.29.0",
+      "version": "1.31.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -194,7 +194,7 @@
       "name": "dex-bundle-bug-lifecycle",
       "source": "./plugins/bundles/dex-bundle-bug-lifecycle",
       "description": "Bundle жизненного цикла бага: активный поиск, оформление, расследование корневой причины на общем стенде и фикс на источнике, плюс skills методологии RCA и поиска багов и CLI для чтения стенда и трекера.",
-      "version": "1.31.0",
+      "version": "1.32.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -223,7 +223,7 @@
       "name": "dex-bundle-code-review",
       "source": "./plugins/bundles/dex-bundle-code-review",
       "description": "Бандл жизненного цикла кода: языко-агностичное ревью MR/PR, повторное ревью после правок, план правок, реализация фичи, подтягивание базовой ветки с разрешением конфликтов, саморевью перед push, приёмка слитой фичи на стенде с ремедиацией, расследование инцидента, плюс скиллы дисциплины ревью.",
-      "version": "1.43.0",
+      "version": "1.44.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -251,7 +251,7 @@
       "name": "dex-bundle-dotnet-developer",
       "source": "./plugins/bundles/dex-bundle-dotnet-developer",
       "description": "Бандл для .NET-разработчика: написание кода, отладка, тесты, code review, EF Core, производительность, интерактивный дизайн .NET-архитектуры.",
-      "version": "2.40.0",
+      "version": "2.42.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -263,7 +263,7 @@
       "name": "dex-bundle-dotnet-fullstack",
       "source": "./plugins/bundles/dex-bundle-dotnet-fullstack",
       "description": "Полный бандл для .NET fullstack: разработка, базы данных, брокеры сообщений, контейнеры, CI/CD, мониторинг, интерактивный дизайн архитектуры.",
-      "version": "2.41.0",
+      "version": "2.43.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -330,7 +330,7 @@
       "name": "dex-bundle-qa-engineer",
       "source": "./plugins/bundles/dex-bundle-qa-engineer",
       "description": "Бандл для QA-инженера: тест-анализ, автоматизация (включая E2E на Playwright), активный поиск багов, баг-репорты.",
-      "version": "1.23.0",
+      "version": "1.24.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -359,7 +359,7 @@
       "name": "dex-bundle-system-analyst",
       "source": "./plugins/bundles/dex-bundle-system-analyst",
       "description": "Бандл для системного аналитика: требования, user stories, BPMN, спецификации API, документация, оценка реализуемости.",
-      "version": "1.27.0",
+      "version": "1.29.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -373,7 +373,7 @@
       "name": "dex-bundle-ts-fullstack",
       "source": "./plugins/bundles/dex-bundle-ts-fullstack",
       "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, Docker, E2E на Playwright.",
-      "version": "1.38.0",
+      "version": "1.40.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -454,7 +454,7 @@
       "name": "dex-code-discovery",
       "source": "./plugins/specialists/architecture/dex-code-discovery",
       "description": "Обзорное ревью существующего кода вширь: инвентаризация проблем по топикам, severity с калибровкой под масштаб, результат в docs/discover/. Точка входа - команда /discover, едет в этом же плагине.",
-      "version": "2.9.0",
+      "version": "2.10.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -512,7 +512,7 @@
       "name": "dex-design-reviewer",
       "source": "./plugins/specialists/architecture/dex-design-reviewer",
       "description": "Ревью и согласование чужого дизайн-документа (спека, ADR, диаграммы) до написания кода: полнота NFR, дефекты требований, качество ADR-решений, консистентность и слои, полнота и непротиворечивость набора артефактов работы, фальсификация находок, severity. Не архитектура реализованного кода - её ревьюит /review-arch.",
-      "version": "2.12.2",
+      "version": "2.13.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -529,7 +529,7 @@
       "name": "dex-diagram-creator",
       "source": "./plugins/specialists/architecture/dex-diagram-creator",
       "description": "Автор архитектурных диаграмм: C4, sequence, ER, state, flowchart в Mermaid, PlantUML, Structurizr DSL, D2.",
-      "version": "1.6.1",
+      "version": "1.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -756,7 +756,7 @@
       "name": "dex-implement",
       "source": "./plugins/specialists/delivery/dex-implement",
       "description": "Команда /implement: реализация фичи полным циклом - требования, план правок, код, тесты, саморевью. Стек определяется по манифесту репозитория, написание делегируется кодеру и тестописателю своего стека.",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "category": "utility",
       "keywords": [
         "command",
@@ -783,7 +783,7 @@
       "name": "dex-incident-investigator",
       "source": "./plugins/specialists/delivery/dex-incident-investigator",
       "description": "Узел расследования инцидента и поиска корневой причины на общем стенде до фикса на источнике: спецификация IS/IS-NOT, параллельный сбор улик, причинно-следственная цепочка, фальсификация причины, фикс под gate. Делегирует сбор со стенда инфра-плагинам. Точка входа - команда /investigate, едет в этом же плагине.",
-      "version": "2.6.1",
+      "version": "2.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1212,7 +1212,7 @@
       "name": "dex-review-planner",
       "source": "./plugins/specialists/delivery/dex-review-planner",
       "description": "Узел планирования правок по комментариям ревью: сбор тредов и коммитов, классификация замечаний, верификация чтением кода, план P0..P3 с blast radius, черновики ответов в треды. Точка входа - команда /review-plan, едет в этом же плагине.",
-      "version": "2.6.0",
+      "version": "2.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1289,8 +1289,8 @@
     {
       "name": "dex-skill-adr-quality",
       "source": "./plugins/skills/dex-skill-adr-quality",
-      "description": "Оракул ADR: норма против описания текущего кода, императивность правил, замкнутость, источники требований, работа с файлом решения.",
-      "version": "2.4.0",
+      "description": "Оракул ADR: норма против состояния кода, проверка пункта нормы, опора нормы, дефолт открытого вопроса, источник требования, правка существующего ADR или новый.",
+      "version": "2.5.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1497,41 +1497,6 @@
       ]
     },
     {
-      "name": "dex-skill-cap-consistency",
-      "source": "./plugins/skills/dex-skill-cap-consistency",
-      "description": "CAP и согласованность: strong против eventual, PACELC, выбор на уровне операции, распределённые транзакции, saga, outbox, дефолты типовых хранилищ.",
-      "version": "1.1.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "cap-theorem",
-        "pacelc",
-        "consistency",
-        "strong-consistency",
-        "eventual-consistency",
-        "saga",
-        "outbox",
-        "split-brain",
-        "quorum"
-      ]
-    },
-    {
-      "name": "dex-skill-capacity-planning",
-      "source": "./plugins/skills/dex-skill-capacity-planning",
-      "description": "Оценка нагрузки: пик против среднего, write amplification, прикидка на салфетке, соотношение чтения к записи, цена кэша, горячий путь.",
-      "version": "1.0.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "capacity-planning",
-        "back-of-envelope",
-        "read-write-ratio",
-        "hot-path",
-        "write-amplification",
-        "cache"
-      ]
-    },
-    {
       "name": "dex-skill-change-correlation",
       "source": "./plugins/skills/dex-skill-change-correlation",
       "description": "Корреляция симптома с изменениями: окно вокруг момента начала, код по sha на стенде, отсев кандидатов по таймингу и зоне симптома, подтверждение виновника на пути исполнения, git bisect first-parent.",
@@ -1565,7 +1530,7 @@
       "name": "dex-skill-codebase-conventions",
       "source": "./plugins/skills/dex-skill-codebase-conventions",
       "description": "Конвенции проекта: на каком источнике стоит решение (сосед, свод правил, ADR, записанное допущение), их старшинство и ADR поверх соседского кода.",
-      "version": "1.11.0",
+      "version": "1.12.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1672,16 +1637,15 @@
     {
       "name": "dex-skill-design-quality",
       "source": "./plugins/skills/dex-skill-design-quality",
-      "description": "Оракул дизайн-документа: покрытие входного набора требований, открытые развилки с названной ценой, проверяемость, режимы отказа, измеримость NFR.",
-      "version": "1.1.2",
+      "description": "Оракул дизайн-документа: обратимость решения с длинным следом - формат хранения, внешняя зависимость, контракт наружу.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
         "design",
         "review",
         "architecture",
-        "requirements",
-        "plan",
+        "reversibility",
         "quality"
       ]
     },
@@ -1689,7 +1653,7 @@
       "name": "dex-skill-doc-standards",
       "source": "./plugins/skills/dex-skill-doc-standards",
       "description": "Стандарты и шаблоны документов: BRD/PRD, ADR, user stories, техспека, спецификация API, процессные документы. Общий skill для PM, аналитика и любой документации.",
-      "version": "1.7.0",
+      "version": "1.7.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2285,10 +2249,24 @@
       ]
     },
     {
+      "name": "dex-skill-implementation-plan",
+      "source": "./plugins/skills/dex-skill-implementation-plan",
+      "description": "Форма плана реализации для автора: поля шага (требования, предмет правки, исход, проверка, зависимость) и параллельность шагов по предмету правки.",
+      "version": "1.0.0",
+      "category": "skill",
+      "keywords": [
+        "skill",
+        "plan",
+        "architecture",
+        "requirements",
+        "implementation"
+      ]
+    },
+    {
       "name": "dex-skill-plan-quality",
       "source": "./plugins/skills/dex-skill-plan-quality",
-      "description": "Оракул плана реализации: связь шагов с требованиями в обе стороны, порядок и зависимости, проверяемость исхода шага, контракты границ, откат необратимого.",
-      "version": "1.0.1",
+      "description": "Оракул плана реализации: связь шагов с требованиями в обе стороны, первый работающий срез раньше последнего шага.",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2522,25 +2500,6 @@
       ]
     },
     {
-      "name": "dex-skill-reference-architectures",
-      "source": "./plugins/skills/dex-skill-reference-architectures",
-      "description": "Подбор референсной архитектуры: лента (push против pull), чат (WebSocket/SSE/long-poll), платежи (идемпотентность, outbox, saga), поиск, уведомления, rate limiter.",
-      "version": "1.0.2",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "reference-architecture",
-        "fan-out",
-        "feed",
-        "chat",
-        "payment",
-        "search",
-        "rate-limiter",
-        "websocket",
-        "sse"
-      ]
-    },
-    {
       "name": "dex-skill-requirement-quality",
       "source": "./plugins/skills/dex-skill-requirement-quality",
       "description": "Оракул единицы требований: противоречие с другой единицей, критерием готовности, принятым ADR или инвариантом кода; метод проверки, не наблюдающий результат.",
@@ -2649,18 +2608,15 @@
     {
       "name": "dex-skill-scalability",
       "source": "./plugins/skills/dex-skill-scalability",
-      "description": "Масштабируемость: преждевременное горизонтальное масштабирование, stateful-сервисы, разделяемое изменяемое состояние, выбор ключа шардирования и горячие партиции.",
-      "version": "1.0.1",
+      "description": "Масштабируемость в дизайне: горячая партиция или горячий ключ под нагрузкой с длинным хвостом.",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
         "scalability",
-        "horizontal-scaling",
-        "stateless",
         "sharding",
-        "consistent-hashing",
         "hot-partition",
-        "multi-tenant"
+        "hot-key"
       ]
     },
     {
@@ -2784,23 +2740,6 @@
         "tech-audit",
         "risk",
         "due-diligence"
-      ]
-    },
-    {
-      "name": "dex-skill-tech-evaluation",
-      "source": "./plugins/skills/dex-skill-tech-evaluation",
-      "description": "Выбор технологии: CV-driven development, внедрение без PoC, забытая эксплуатационная цена (мониторинг, бэкап, найм, дежурства), vendor lock-in и лицензии.",
-      "version": "1.0.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "technology-evaluation",
-        "tech-stack",
-        "poc",
-        "operational-cost",
-        "vendor-lock-in",
-        "license",
-        "build-vs-buy"
       ]
     },
     {
