@@ -32,6 +32,8 @@ check "$("$L" get BUG-1 Исход)" "complete" "finish: complete закрыва
 check "$("$L" find)" "" "finish: цель исчезла из find"
 check "$("$L" trail BUG-1 feature | grep -c '')" "2" "trail: строки исполнителей"
 check "$("$L" trail BUG-1 review)" "" "trail: файла трека нет -> пусто"
+check "$("$L" decisions BUG-1 feature | grep -c '^- R3: выбран split по дефису$')" "1" "decisions: строки Решений файла трека"
+check "$("$L" decisions BUG-1 review)" "" "decisions: файла трека нет -> пусто"
 
 "$L" open PR-7 >/dev/null
 # без кавычек намеренно: это та форма, которую читает модель в usage и в auto.md
@@ -59,6 +61,9 @@ check "$(grep -c '^- F2 closed \[P1\] src/b.ts:3: проверка добавл�
 "$F" P-1 bugfix partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"N1","severity":"P1","anchor":"src/s.ts:4","text":"кадр не проброшен","status":"open","evidence":"e","premise":"проба на песочнице"}]}' >/dev/null
 "$F" P-1 bugfix partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"F1","status":"open","evidence":"оператор: кадр проброшен","premise":"","text":""}]}' >/dev/null
 check "$("$L" findings P-1 bugfix | python3 -c 'import json,sys; r=json.load(sys.stdin)[0]; print(repr(r["premise"])+"|"+r["text"])')" "''|кадр не проброшен" "реестр: пустой premise снимает пометку пробы, прочие пустые поля запись не перезаписывают"
+"$L" set P-1 Нехватка "старая нехватка" >/dev/null
+"$F" P-1 bugfix partial <<< '{"status":"partial","trail":[{"step":3}]}' >/dev/null
+check "$("$L" get P-1 Нехватка)" "" "finish: partial снимает нехватку прошлого blocked (prior_missing не залипает)"
 
 "$L" open P-2 >/dev/null
 "$F" P-2 review partial <<< '{"status":"partial","trail":[{"step":3}],"confirmed":[{"severity":"P2","anchor":"src/s.ts:4","places":["src/t.ts:9-12"],"text":"флаг не сброшен","closure":"сброшен везде"}]}' >/dev/null
