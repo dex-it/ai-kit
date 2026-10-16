@@ -16,6 +16,8 @@ export type Action =
   | { kind: 'repo'; text: string }
   /** `/mr open | week | branch` - какие MR мод берёт под наблюдение сам. */
   | { kind: 'scope'; scope: Scope }
+  /** `/mr next`, `/mr prev` - соседний MR в порядке списка, детали открываются на нём. */
+  | { kind: 'step'; delta: 1 | -1 }
   /** `/mr review [123]` - отдать MR на ревью: выбранный либо названный номером. */
   | { kind: 'review'; iid: number | null }
   /**
@@ -42,6 +44,8 @@ const WORDS: Record<string, Action> = {
   open: { kind: 'scope', scope: 'open' },
   week: { kind: 'scope', scope: 'week' },
   branch: { kind: 'scope', scope: 'branch' },
+  next: { kind: 'step', delta: 1 },
+  prev: { kind: 'step', delta: -1 },
   review: { kind: 'review', iid: null },
   fix: { kind: 'fix', target: 'all' },
   threads: { kind: 'threads' },
@@ -99,7 +103,8 @@ export function parseArgs(raw: string): Action {
 
 export const HELP_TEXT = [
   '`/mr` - открыть или закрыть панель: общий список, когда MR несколько, иначе детали.',
-  '`/mr list` - общий список наблюдения с итогом.',
+  '`/mr list` - общий список наблюдения с итогом; из деталей `/mr` без слова возвращает к списку, из списка закрывает панель.',
+  '`/mr next`, `/mr prev` - соседний MR в порядке списка.',
   '`/mr open` - наблюдать все открытые MR проекта; `/mr week` - все, что двигались за неделю; `/mr branch` - только MR текущей ветки.',
   '`/mr 123` или `/mr <ссылка>` - добавить MR к отслеживанию и показать его.',
   '`/mr review [123]` - отдать MR на ревью (выбранный либо названный номером).',

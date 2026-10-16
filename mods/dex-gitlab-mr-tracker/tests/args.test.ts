@@ -91,3 +91,10 @@ describe('parseArgs: охват, ревью, фиксер', () => {
     assert.deepEqual(parseArgs('fix everything'), { kind: 'help' })
   })
 })
+
+describe('parseArgs: навигация', () => {
+  test('next and prev step through the list', () => {
+    assert.deepEqual(parseArgs('next'), { kind: 'step', delta: 1 })
+    assert.deepEqual(parseArgs('PREV'), { kind: 'step', delta: -1 })
+  })
+})

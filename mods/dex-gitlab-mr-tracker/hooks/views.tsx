@@ -16,6 +16,8 @@ import type {
 import type { FixTarget } from './dispatch.ts'
 import type { CiLevel, MergeLevel, MrData, Thread } from './gitlab.ts'
 import { approvalsGiven, mergeLevel, pipelineLevel, shortenPath, threadTally } from './gitlab.ts'
+import type { Scope } from './scope.ts'
+import { SCOPES } from './scope.ts'
 import type { Attention, Overview, Row } from './overview.ts'
 import { ATTENTION_MANY, reasonOf } from './overview.ts'
 import type { Watched } from './watched.ts'
@@ -38,6 +40,12 @@ export type Actions = {
   select: (key: string) => void
   /** Вернуться к общему списку наблюдения. */
   openList: () => void
+  /** Соседний MR в порядке списка: детали открываются на нём. */
+  step: (delta: 1 | -1) => void
+  /** Сменить охват наблюдения и показать список. */
+  setScope: (scope: Scope) => void
+  /** Опросить все наблюдаемые MR сейчас. */
+  refreshNow: () => void
   openUrl: (url: string) => void
   /** Arms the MR's open threads to ride the next prompt as context. */
   ask: (key: string) => void
@@ -70,6 +78,7 @@ export type PaneModel = {
   fixingKeys: ReadonlySet<string>
   /** Охват словами: что именно мод берёт под наблюдение сам. */
   scopeWord: string
+  scope: Scope
   /** Commits drawn in the pane; the rest are counted, not listed. */
   commitLimit: number
 }
@@ -141,7 +150,7 @@ const clock = (ms: number) => (ms === 0 ? '-' : new Date(ms).toTimeString().slic
 
 // --- The row above the prompt -------------------------------------------
 
-function row(ui: Ui, actions: Actions, watched: Watched): RenderElement {
+function row(ui: Ui, actions: Actions, watched: Watched, withList: boolean): RenderElement {
   const { Box, Text, Button, Link } = ui
   const data = watched.data
 
@@ -209,6 +218,11 @@ function row(ui: Ui, actions: Actions, watched: Watched): RenderElement {
           dimColor
           onPress={() => actions.select(watched.key)}
         />
+        {withList ? (
+          <Button key={`band-list:${watched.key}`} label="список" dimColor onPress={() => actions.openList()} />
+        ) : (
+          <Box />
+        )}
         <Button
           key={`stop:${watched.key}`}
           label="×"
@@ -284,7 +298,7 @@ export function bandView(
     <Box flexDirection="column">
       {band.list.length > band.maxRows
         ? summaryRow(ui, actions, band.overview)
-        : band.list.map(watched => row(ui, actions, watched))}
+        : band.list.map(watched => row(ui, actions, watched, band.list.length > 1))}
       {beneath}
     </Box>
   )
@@ -335,6 +349,30 @@ function listRow(ui: Ui, actions: Actions, entry: Row, withHost: boolean): Rende
 }
 
 /** Итог списка: сколько всего и сколько чего ждёт. */
+const SCOPE_BUTTON: Record<Scope, string> = { branch: 'ветка', open: 'открытые', week: 'неделя' }
+
+/** Охват и обновление: управление списком живёт в самом списке. */
+function listControls(ui: Ui, actions: Actions, model: PaneModel): RenderElement {
+  const { Box, Text, Button } = ui
+
+  return (
+    <Box flexDirection="row" flexWrap="wrap">
+      <Text dimColor>{'Охват: '}</Text>
+      {SCOPES.map(scope => (
+        <Box key={`scope:${scope}`} flexDirection="row">
+          <Button
+            label={scope === model.scope ? `[${SCOPE_BUTTON[scope]}]` : SCOPE_BUTTON[scope]}
+            dimColor={scope !== model.scope}
+            onPress={() => actions.setScope(scope)}
+          />
+          <Text>{' '}</Text>
+        </Box>
+      ))}
+      <Button key="list-refresh" label="обновить" dimColor onPress={() => actions.refreshNow()} />
+    </Box>
+  )
+}
+
 function listHead(ui: Ui, overview: Overview, scopeWord: string): RenderElement {
   const { Box, Text } = ui
 
@@ -381,12 +419,18 @@ export function listView(ui: Ui, actions: Actions, model: PaneModel): RenderElem
   const overview = model.overview
 
   if (overview.total === 0) {
-    return <Text dimColor>Ни один merge request не отслеживается.</Text>
+    return (
+      <Box flexDirection="column">
+        {listControls(ui, actions, model)}
+        <Text dimColor>Ни один merge request не отслеживается.</Text>
+      </Box>
+    )
   }
 
   return (
     <Box flexDirection="column">
       {listHead(ui, overview, model.scopeWord)}
+      {listControls(ui, actions, model)}
       {gap(ui, 'gap:list-head')}
       {overview.rows.map(entry => listRow(ui, actions, entry, overview.hosts > 1))}
       {gap(ui, 'gap:list-rows')}
@@ -399,22 +443,45 @@ export function listView(ui: Ui, actions: Actions, model: PaneModel): RenderElem
 
 // --- The pane -----------------------------------------------------------
 
+/** Больше этого числа MR вкладки не рисуются: их заменяют «‹ ›» и номер. */
+const MAX_TABS = 6
+
+/**
+ * Навигация деталей: назад к списку, соседние MR по порядку списка и номер
+ * текущего. Вкладки по именам остаются, пока MR немного.
+ */
 function tabs(ui: Ui, actions: Actions, model: PaneModel): RenderElement {
   const { Box, Text, Button } = ui
 
   if (model.list.length < 2) return <Box />
 
+  const keys = model.overview.rows.map(entry => entry.key)
+  const place = Math.max(0, keys.indexOf(model.selectedKey ?? ''))
+
   return (
-    <Box flexDirection="row" flexWrap="wrap">
-      <Text dimColor>{'MR: '}</Text>
-      {model.list.map(watched => (
-        <Button
-          key={`tab:${watched.key}`}
-          label={watched.key === model.selectedKey ? `[${watched.label}]` : watched.label}
-          dimColor={watched.key !== model.selectedKey}
-          onPress={() => actions.select(watched.key)}
-        />
-      ))}
+    <Box flexDirection="column">
+      <Box flexDirection="row" flexWrap="wrap">
+        <Button key="nav-list" label="‹ список" onPress={() => actions.openList()} />
+        <Text>{'  '}</Text>
+        <Button key="nav-prev" label="‹" onPress={() => actions.step(-1)} />
+        <Text dimColor>{` ${place + 1}/${keys.length} `}</Text>
+        <Button key="nav-next" label="›" onPress={() => actions.step(1)} />
+      </Box>
+      {model.list.length > MAX_TABS ? (
+        <Box />
+      ) : (
+        <Box flexDirection="row" flexWrap="wrap">
+          <Text dimColor>{'MR: '}</Text>
+          {model.list.map(watched => (
+            <Button
+              key={`tab:${watched.key}`}
+              label={watched.key === model.selectedKey ? `[${watched.label}]` : watched.label}
+              dimColor={watched.key !== model.selectedKey}
+              onPress={() => actions.select(watched.key)}
+            />
+          ))}
+        </Box>
+      )}
     </Box>
   )
 }
@@ -640,14 +707,6 @@ function detailsView(ui: Ui, actions: Actions, model: PaneModel): RenderElement 
           dimColor
           onPress={() => actions.stop(watched.key)}
         />
-        {model.list.length < 2 ? (
-          <Box />
-        ) : (
-          <Box flexDirection="row">
-            <Text>{' '}</Text>
-            <Button key="pane-list" label="к списку" onPress={() => actions.openList()} />
-          </Box>
-        )}
       </Box>
       {gap(ui, 'gap:actions')}
 

@@ -73,7 +73,7 @@ const PANE_CHECKS = 6
  */
 const BAND_MAX_ROWS = 3
 /** Строки списка над и под перечнем: шапка, итог, пустая, подсказка. */
-const LIST_CHROME_ROWS = 5
+const LIST_CHROME_ROWS = 6
 /** Заголовок панели в виде списка: один на все PR, метки у него нет. */
 const LIST_TITLE = 'Мониторинг PR'
 /**
@@ -85,7 +85,7 @@ const DEFAULT_HOST = 'github.com'
 /** Ширина панели до первой отрисовки: ею меряется адрес треда. */
 const PANE_FALLBACK_COLUMNS = 60
 /** Строки над и под списком тредов: шапка, факты, кнопки, подвал. */
-const PANE_CHROME_ROWS = 9
+const PANE_CHROME_ROWS = 11
 /** Больше половины экрана панель над вводом не просит. */
 const PANE_MAX_SCREEN_SHARE = 2
 const TOAST_MS = 8000
@@ -262,6 +262,7 @@ export const register: Register = (on, pluginOptions) => {
     armedKey,
     fixingKeys: fixingKeys(),
     scopeWord: SCOPE_WORD[scopeMode],
+    scope: scopeMode,
     commitLimit: PANE_COMMITS,
     checkLimit: PANE_CHECKS,
   })
@@ -536,6 +537,39 @@ export const register: Register = (on, pluginOptions) => {
     return found.truncated
       ? `Охват держит ${settings.scopeLimit} самых свежих PR, остальные не взяты (настройка scopeLimit).`
       : ''
+  }
+
+  /** Сменить охват: снятые руками забываются, найденное опрашивается. */
+  async function applyScope(scope: Scope): Promise<string> {
+    scopeMode = scope
+    dismissed.clear()
+
+    const note = await syncScope()
+
+    await refreshAll()
+
+    return note
+  }
+
+  /** Соседний PR в порядке списка (по вниманию), с обходом по кругу. */
+  function stepSelection(delta: 1 | -1): void {
+    const keys = overviewOf(list()).rows.map(item => item.key)
+
+    if (keys.length === 0) return
+
+    const place = Math.max(0, keys.indexOf(selected()?.key ?? ''))
+    const key = keys[(place + delta + keys.length) % keys.length]
+
+    if (key === undefined) return
+
+    selectedKey = key
+    paneMode = 'details'
+
+    const entry = watched.get(key)
+
+    if (entry) void bound?.openPane(entry.label)
+
+    bound?.invalidate()
   }
 
   /** PR, чьи треды сейчас правит фиксер. */
@@ -883,13 +917,16 @@ export const register: Register = (on, pluginOptions) => {
         return { text: overviewText(list()) }
       }
 
+      case 'step': {
+        if (watched.size === 0) return { text: noPrText }
+
+        stepSelection(action.delta)
+
+        return {}
+      }
+
       case 'scope': {
-        scopeMode = action.scope
-        dismissed.clear()
-
-        const note = await syncScope()
-
-        await awaitFirstPoll()
+        const note = await applyScope(action.scope)
 
         if (scopeMode === 'branch') await lookUpBranch()
         if (watched.size === 0) return { text: `${SCOPE_WORD[scopeMode]}: ${noPrText}` }
@@ -1009,6 +1046,17 @@ export const register: Register = (on, pluginOptions) => {
         if (!entry) return { text: noPrText }
 
         if (isPaneOpen) {
+          // Из деталей `/pr` ведёт к списку, если их несколько: список и есть
+          // то, куда возвращаются. Закрывает панель только из списка либо
+          // когда PR один.
+          if (paneMode === 'details' && watched.size > 1) {
+            paneMode = 'list'
+            await bound.openPane(LIST_TITLE)
+            bound.invalidate()
+
+            return {}
+          }
+
           await bound.closePane()
 
           return { text: 'Панель закрыта.' }
@@ -1152,6 +1200,17 @@ export const register: Register = (on, pluginOptions) => {
         if (entry) void bound?.openPane(entry.label)
 
         bound?.invalidate()
+      },
+      step: delta => stepSelection(delta),
+      setScope: scope => {
+        paneMode = 'list'
+        void applyScope(scope).then(note => {
+          if (note !== '') bound?.log(note)
+        })
+        bound?.invalidate()
+      },
+      refreshNow: () => {
+        void refreshAll()
       },
       openList: () => {
         paneMode = 'list'
