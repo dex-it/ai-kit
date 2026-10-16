@@ -86,6 +86,6 @@
 | [removed/use-cases](removed/use-cases/README.md) | `dex-skill-use-cases` 1.0.2 | w3, r3 | снят; пункт - в `use-case-quality`, реконструкция - `usecase-analyst` |
 | [removed/problem-specification](removed/problem-specification/README.md) | `dex-skill-problem-specification` 1.0.0 | инцидент по тикету QA (K5, `_projects/shipping`) | снят; норма - Phase 1 `incident-investigator` |
 | [removed/api-specification](removed/api-specification/README.md) | `dex-skill-api-specification` 1.1.1 | контракт под требования (G-S); общий заход группы 4.2 | снят; S1, S4, S11 - вердикт двойников #327 |
-| [api-spec-quality](api-spec-quality/README.md) | `dex-skill-api-spec-quality` 1.0.0 | ревью MR контракта (RV-Q), автор контракта (G-S), ничего не менять (N-Q3) | 13 ловушек -> вводная и 5 названий; Q11 - дом норматив этапа |
+| [api-spec-quality](api-spec-quality/README.md) | `dex-skill-api-spec-quality` 1.0.0 | ревью MR контракта (RV-Q), автор контракта (G-S), ничего не менять (N-Q, N-Q2, N-Q3 - не чисты) | 13 ловушек -> вводная и 5 названий; Q11 - дом норматив этапа |
 | [api-testing](api-testing/README.md) | `dex-skill-api-testing` 1.1.1 | тесты по контракту (G-T), ничего не менять в `src/` (N-T) | 11 ловушек и чек-лист -> 1 название (тестовая база) |
 | [api-documentation](api-documentation/README.md) | `dex-skill-api-documentation` 1.1.2 | Swagger к передаче (G-D), правка вне предмета (N0) | 9 ловушек и чек-лист -> 3 названия; A5, A8 - `unverifiable` |
