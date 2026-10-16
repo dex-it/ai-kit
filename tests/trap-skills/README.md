@@ -68,7 +68,8 @@
 | [scalability](scalability/README.md) | `dex-skill-scalability` 1.0.1 | проектирование (D5, D6, D7; SC7 в D1, SC3, SC5 в D3); мини-проект `postline`, общий заход группы 4.1 | 10 ловушек -> 1 название |
 | [adr-quality](adr-quality/README.md) | `dex-skill-adr-quality` 2.4.0 | письмо ADR (W1-W5), ревью (R1, R0A3) | 14 ловушек -> 6 названий; AQ8 - название, форма выше не найдена (ступени 3-4) |
 | [design-quality](design-quality/README.md) | `dex-skill-design-quality` 1.1.2 | ревью дизайна (R2), автор дизайна (D1-D5) | 9 ловушек -> 1 название; DQ3 - открыто |
-| [plan-quality](plan-quality/README.md) | `dex-skill-plan-quality` 1.0.1 | автор плана (P1), ревью плана (R3, R0P3) | 12 ловушек -> 2 названия; PQ6 - форма не найдена (ступени 1-4) |
+| [plan-quality](plan-quality/README.md) | `dex-skill-plan-quality` 1.0.1 | автор плана (P1), ревью плана (R3, R0P3) | 12 ловушек -> 2 названия; PQ6 - в оракуле форма не найдена (ступени 1-4), закрыт формой автора `implementation-plan` |
+| [implementation-plan](plan-quality/README.md#форма-автора-dex-skill-implementation-plan-100-pq6-вне-оракула) | `dex-skill-implementation-plan` 1.0.0 (тело - редакция 1.0.3) | автор плана (P1; P2 - «ничего не менять» для формы); живёт в протоколе `plan-quality` | новый process-skill: поля шага и параллельность по предмету правки; 4 редакции, принята 1.0.3 (PQ6 4/4 против 1/2 контроля) |
 | [removed/cap-consistency](removed/cap-consistency/README.md) | `dex-skill-cap-consistency` 1.1.1 | проектирование (D2, D1), ревью дизайна (R2) | снят |
 | [removed/capacity-planning](removed/capacity-planning/README.md) | `dex-skill-capacity-planning` 1.0.1 | ёмкость (C1), проектирование (D1, D4, D5) | снят |
 | [removed/reference-architectures](removed/reference-architectures/README.md) | `dex-skill-reference-architectures` 1.0.2 | проектирование (D1-D4) | снят |
