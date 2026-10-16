@@ -67,3 +67,34 @@ describe('parseArgs', () => {
     assert.deepEqual(parseArgs('https://gl.corp/a/b/-/issues/9'), { kind: 'help' })
   })
 })
+
+describe('parseArgs: охват, ревью, фиксер', () => {
+  test('open, week and branch pick the scope', () => {
+    assert.deepEqual(parseArgs('open'), { kind: 'scope', scope: 'open' })
+    assert.deepEqual(parseArgs('WEEK'), { kind: 'scope', scope: 'week' })
+    assert.deepEqual(parseArgs('branch'), { kind: 'scope', scope: 'branch' })
+  })
+
+  test('review takes the shown MR or a number', () => {
+    assert.deepEqual(parseArgs('review'), { kind: 'review', iid: null })
+    assert.deepEqual(parseArgs('review 12'), { kind: 'review', iid: 12 })
+    assert.deepEqual(parseArgs('review !12'), { kind: 'review', iid: 12 })
+  })
+
+  test('fix takes all the open threads or one by its number', () => {
+    assert.deepEqual(parseArgs('fix'), { kind: 'fix', target: 'all' })
+    assert.deepEqual(parseArgs('fix all'), { kind: 'fix', target: 'all' })
+    assert.deepEqual(parseArgs('fix 3'), { kind: 'fix', target: 3 })
+  })
+
+  test('a fix with a word that is none of the targets is help, not a guess', () => {
+    assert.deepEqual(parseArgs('fix everything'), { kind: 'help' })
+  })
+})
+
+describe('parseArgs: навигация', () => {
+  test('next and prev step through the list', () => {
+    assert.deepEqual(parseArgs('next'), { kind: 'step', delta: 1 })
+    assert.deepEqual(parseArgs('PREV'), { kind: 'step', delta: -1 })
+  })
+})
