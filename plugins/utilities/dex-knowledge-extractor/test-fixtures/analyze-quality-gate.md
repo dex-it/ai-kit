@@ -35,19 +35,19 @@
 
 - Командный глагол как имя метода, возвращающего bool
 
-### dex-skill-api-specification: Страница выборки без детерминированного порядка
+### dex-skill-dotnet-api-development: Страница выборки без детерминированного порядка
 
-**Целевой skill:** dex-skill-api-specification (переназначен Axis fit с dex-skill-performance-review)
-**H2-секция:** Pagination
+**Целевой skill:** dex-skill-dotnet-api-development (переназначен Axis fit с dex-skill-performance-review)
+**H2-секция:** список чек-листа (skill без H2)
 
 **Critical assessment:**
 - Generalization confidence: high -- правило про порядок страниц не зависит от домена
 - Systemic vs incidental: systemic
 - False positive risk: low
 - FP counter-examples: выборка целиком без `Skip`/`Take` -- порядок на состав ответа не влияет; правило про постраничный обход
-- Already covered elsewhere: no -- H2 Pagination судит выбор cursor против offset и наличие пагинации, не порядок страниц
+- Already covered elsewhere: no -- пункт чек-листа «Фильтры и пагинация в path вместо query» судит расположение параметров пагинации, не порядок страниц
 - Non-obviousness: medium -- на малой тестовой выборке БД отдаёт строки в порядке вставки, и дефект не виден
-- Axis fit: dex-skill-performance-review | reassign -> dex-skill-api-specification (Pagination) -- исходный mapping предложил performance-review, потому что в коде запрос страницы; темы его чек-листа без H2 (наличие через счёт, запись в цикле, копия буфера, sync-over-async) ловушку про корректность контракта не вмещают, верная ось -- H2 Pagination
+- Axis fit: dex-skill-performance-review | reassign -> dex-skill-dotnet-api-development -- исходный mapping предложил performance-review, потому что в коде запрос страницы; темы его чек-листа без H2 (наличие через счёт, запись в цикле, копия буфера, sync-over-async) ловушку про корректность контракта не вмещают, верная ось -- чек-лист ASP.NET Core Web API, где пагинация именована пунктом
 - Fact check: verified (docs) -- SQL без `ORDER BY` порядок строк не гарантирует
 
 **Основание:**
@@ -87,7 +87,7 @@
 **Ожидаемое поведение Quality gate:**
 
 1. **Non-obviousness** (banal-or-lint-caught) -- «несуществующий метод» отсеян: вызов несуществующего члена ловит компилятор. В `Dropped` с reason code, не в output как ловушка.
-2. **Axis fit** (роутер, не вышибала) -- «Страница без детерминированного порядка» -- корректность, не perf. Ось определена по реальным темам skill (у чек-листа без H2 - темы пунктов): чек-лист performance-review (наличие через счёт / запись в цикле / копия буфера / sync-over-async) ловушку не вмещает -> `reassign` в `dex-skill-api-specification` (H2 «Pagination»). Находка **остаётся в Applied** под верным домом, в `Dropped` не уходит -- промах оси это адрес, не качество.
+2. **Axis fit** (роутер, не вышибала) -- «Страница без детерминированного порядка» -- корректность, не perf. Ось определена по реальным темам skill (у чек-листа без H2 - темы пунктов): чек-лист performance-review (наличие через счёт / запись в цикле / копия буфера / sync-over-async) ловушку не вмещает -> `reassign` в `dex-skill-dotnet-api-development` (чек-лист без H2, пагинация именована пунктом). Находка **остаётся в Applied** под верным домом, в `Dropped` не уходит -- промах оси это адрес, не качество.
 3. **FP counter-examples** -- ловушка про bool-имя активно проверена против `Try*`-семейства; найдено ложное срабатывание -> в «Правильно» добавлено исключение; `False positive risk` выставлен `low` ПО ИТОГУ проверки, не на глаз.
 4. **Label correctness** -- ярлык «нарушение CQS» сверён в Fact verification, признан мимо сути (CQS -- про мутацию+возврат, не про имя), снят до записи; в `Critical assessment` это `mislabeled -> снят ярлык`.
 5. **Root not surface** (surface-not-root) -- «Два имени для одного значения»: исходный корень (один результат под двумя доменными смыслами) при обобщении потерян, осталась поверхность-лозунг; переписать через корень без проектной конкретики нельзя -> `Dropped` `surface-not-root`. Отличие от `banal-or-lint-caught`: корень БЫЛ и утерян, а не отсутствовал (поверхность поэтому не относится к Non-obviousness).

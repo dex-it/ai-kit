@@ -181,6 +181,8 @@ def main(argv):
         dx.set_key(goal, "Статус", "закрыт")
     elif outcome == "partial":
         dx.set_key(goal, "Исход", "partial")
+        # Нехватка прошлого blocked-прогона закрыта этим: иначе «продолжить» вечно подавало бы её как prior_missing.
+        dx.set_key(goal, "Нехватка", "")
     else:
         dx.set_key(goal, "Исход", "blocked")
         dx.set_key(goal, "Нехватка", lack_of(data, lack))

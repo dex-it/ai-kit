@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dexauto as dx
 
 USAGE = ("usage: ledger.py root|dir TASK|open TASK [MODE]|find|get TASK KEY|set TASK KEY VALUE|"
-         "close TASK OUTCOME|open-tracks TASK|ctx TASK TRACK|trail TASK TRACK|findings TASK TRACK|top TASK TRACK")
+         "close TASK OUTCOME|open-tracks TASK|ctx TASK TRACK|trail TASK TRACK|decisions TASK TRACK|findings TASK TRACK|top TASK TRACK")
 
 GOAL_TEMPLATE = ("# Цель: %s\n\nСтатус: открыт\nРежим: %s\nИсход: \nНехватка: \nОжидает: \n\n"
                  "## Цель\n\n## Критерий «готово»\n\n## Граница\n\n## Решения\n")
@@ -73,6 +73,9 @@ def main(argv):
             print(line)
     elif cmd == "trail":
         for line in dx.section(dx.track_file(args[0], args[1]), "### Исполнители"):
+            print(line)
+    elif cmd == "decisions":
+        for line in dx.section(dx.track_file(args[0], args[1]), "### Решения"):
             print(line)
     elif cmd == "findings":
         try:

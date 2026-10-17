@@ -26,7 +26,7 @@
       "name": "dex-api-designer",
       "source": "./plugins/specialists/architecture/dex-api-designer",
       "description": "Проектировщик API: REST, GraphQL, gRPC, OpenAPI, AsyncAPI, контракты, версионирование, формат ошибки.",
-      "version": "3.6.1",
+      "version": "3.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -41,7 +41,7 @@
       "name": "dex-architect",
       "source": "./plugins/specialists/architecture/dex-architect",
       "description": "System design узел зоны дизайна (дизайн-решение): reference architecture match, альтернативы, решение с CAP/PACELC, deep dive. Требования/capacity/implementation-план ведёт вызывающая команда /design. Стек-нейтральный.",
-      "version": "4.9.0",
+      "version": "4.10.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -59,7 +59,7 @@
       "name": "dex-architect-dotnet",
       "source": "./plugins/specialists/architecture/dex-architect-dotnet",
       "description": "Узел зоны дизайна (дизайн-решение) для .NET: reference architecture match, альтернативы с ASP.NET Core / EF Core / MassTransit / Polly / Serilog, решение с CAP/PACELC, deep dive, fact-check библиотек. Требования/capacity/implementation-план ведёт вызывающая команда /design.",
-      "version": "3.8.0",
+      "version": "3.9.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -76,7 +76,7 @@
       "name": "dex-auto",
       "source": "./plugins/auto/dex-auto",
       "description": "Автономные треки под открытую цель - feature и bugfix (до локальных коммитов) и ревью чужого MR/PR (read-only, треды по санкции): ledger вне рабочего дерева, Workflow-скрипт на трек с потолками петель и схемами выхода узлов, сдача исхода скриптом finish.sh, сторожа SessionStart (возобновление по открытой цели) и Stop (терминал цели). Команды /goal (подготовка цели из тикета, спеки или симптома; для feature - проба черновика на домыслы) и /auto (прогон трека, возобновление с верификации).",
-      "version": "9.0.0",
+      "version": "9.1.0",
       "category": "specialist",
       "keywords": [
         "autonomous",
@@ -179,7 +179,7 @@
       "name": "dex-bundle-architect",
       "source": "./plugins/bundles/dex-bundle-architect",
       "description": "Бандл для архитектора: интерактивный system design, ADR, диаграммы, проектирование API, анализ кодовой базы, безопасность, наблюдаемость.",
-      "version": "1.30.0",
+      "version": "1.31.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -251,7 +251,7 @@
       "name": "dex-bundle-dotnet-developer",
       "source": "./plugins/bundles/dex-bundle-dotnet-developer",
       "description": "Бандл для .NET-разработчика: написание кода, отладка, тесты, code review, EF Core, производительность, интерактивный дизайн .NET-архитектуры.",
-      "version": "2.41.0",
+      "version": "2.42.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -263,7 +263,7 @@
       "name": "dex-bundle-dotnet-fullstack",
       "source": "./plugins/bundles/dex-bundle-dotnet-fullstack",
       "description": "Полный бандл для .NET fullstack: разработка, базы данных, брокеры сообщений, контейнеры, CI/CD, мониторинг, интерактивный дизайн архитектуры.",
-      "version": "2.42.0",
+      "version": "2.43.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -359,7 +359,7 @@
       "name": "dex-bundle-system-analyst",
       "source": "./plugins/bundles/dex-bundle-system-analyst",
       "description": "Бандл для системного аналитика: требования, user stories, BPMN, спецификации API, документация, оценка реализуемости.",
-      "version": "1.28.0",
+      "version": "1.29.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -373,7 +373,7 @@
       "name": "dex-bundle-ts-fullstack",
       "source": "./plugins/bundles/dex-bundle-ts-fullstack",
       "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, Docker, E2E на Playwright.",
-      "version": "1.39.0",
+      "version": "1.40.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -454,7 +454,7 @@
       "name": "dex-code-discovery",
       "source": "./plugins/specialists/architecture/dex-code-discovery",
       "description": "Обзорное ревью существующего кода вширь: инвентаризация проблем по топикам, severity с калибровкой под масштаб, результат в docs/discover/. Точка входа - команда /discover, едет в этом же плагине.",
-      "version": "2.9.0",
+      "version": "2.10.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -512,7 +512,7 @@
       "name": "dex-design-reviewer",
       "source": "./plugins/specialists/architecture/dex-design-reviewer",
       "description": "Ревью и согласование чужого дизайн-документа (спека, ADR, диаграммы) до написания кода: полнота NFR, дефекты требований, качество ADR-решений, консистентность и слои, полнота и непротиворечивость набора артефактов работы, фальсификация находок, severity. Не архитектура реализованного кода - её ревьюит /review-arch.",
-      "version": "2.13.0",
+      "version": "2.13.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -558,7 +558,7 @@
       "name": "dex-doc-writer",
       "source": "./plugins/specialists/product/dex-doc-writer",
       "description": "Технический писатель: спеки, руководства, README, release notes, описания архитектуры и API.",
-      "version": "1.6.0",
+      "version": "1.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -705,8 +705,8 @@
     {
       "name": "dex-github-pr-tracker",
       "source": "./mods/dex-github-pr-tracker",
-      "description": "Мод на function hooks: следит за pull request GitHub проекта, открытого в сессии. Строка над вводом и панель /pr несут состояние PR, merge state status, исход обязательных проверок, вердикт ревью и апрувы, открытые и решённые треды с числом комментариев, коммиты и объём изменений; смена статуса, новый тред, новый комментарий и новые коммиты приходят тостом и строкой в транскрипт. Команды /pr threads и /pr checks отдают открытые треды и упавшие проверки текстом - модель читает их как вход для правок. Наблюдать можно несколько PR сразу: /pr list сводит их в общий список с итогом и порядком по тому, что ждёт вас, а вход в строку открывает детали. /pr repo называет репозиторий руками, когда сессия открыта не в клоне.",
-      "version": "1.1.0",
+      "description": "Мод на function hooks: следит за pull request GitHub проекта, открытого в сессии. Строка над вводом и панель /pr несут состояние PR, merge state status, исход обязательных проверок, вердикт ревью и апрувы, открытые и решённые треды с числом комментариев, коммиты и объём изменений; смена статуса, новый тред, новый комментарий и новые коммиты приходят тостом и строкой в транскрипт. Команды /pr threads и /pr checks отдают открытые треды и упавшие проверки текстом - модель читает их как вход для правок. Наблюдать можно несколько PR сразу: /pr list сводит их в общий список с итогом и порядком по тому, что ждёт вас, а вход в строку открывает детали. /pr repo называет репозиторий руками, когда сессия открыта не в клоне. Охват наблюдения задаётся командой: /pr open берёт все открытые PR репозитория, /pr week - всё, что двигалось за неделю. Кнопка «ревью» отдаёт PR командой ревью в сессию, «поправить» отдаёт открытые треды (все либо один) фоновому агенту-фиксеру с готовым поручением; те же действия доступны командами /pr review и /pr fix.",
+      "version": "1.2.0",
       "category": "mod",
       "keywords": [
         "utility",
@@ -737,8 +737,8 @@
     {
       "name": "dex-gitlab-mr-tracker",
       "source": "./mods/dex-gitlab-mr-tracker",
-      "description": "Мод на function hooks: следит за merge request GitLab проекта, открытого в сессии. Строка над вводом и панель /mr несут состояние MR, detailed merge status, пайплайн, апрувы, открытые и решённые треды с числом комментариев, коммиты и объём изменений; смена статуса, новый тред, новый комментарий и новые коммиты приходят тостом и строкой в транскрипт. Команда /mr threads отдаёт открытые треды текстом - модель читает их как вход для правок. Наблюдать можно несколько MR сразу: /mr list сводит их в общий список с итогом и порядком по тому, что ждёт вас, а вход в строку открывает детали. /mr repo называет проект руками, когда сессия открыта не в клоне.",
-      "version": "1.1.0",
+      "description": "Мод на function hooks: следит за merge request GitLab проекта, открытого в сессии. Строка над вводом и панель /mr несут состояние MR, detailed merge status, пайплайн, апрувы, открытые и решённые треды с числом комментариев, коммиты и объём изменений; смена статуса, новый тред, новый комментарий и новые коммиты приходят тостом и строкой в транскрипт. Команда /mr threads отдаёт открытые треды текстом - модель читает их как вход для правок. Наблюдать можно несколько MR сразу: /mr list сводит их в общий список с итогом и порядком по тому, что ждёт вас, а вход в строку открывает детали. /mr repo называет проект руками, когда сессия открыта не в клоне. Охват наблюдения задаётся командой /mr open (все открытые MR проекта) и /mr week (двигавшиеся за неделю) либо настройкой scope. Кнопка и команда /mr review отдают MR на ревью, кнопки и команда /mr fix отдают открытые треды (все или один) фоновому агенту-фиксеру с готовым поручением; пуш в ветку MR по умолчанию закрыт.",
+      "version": "1.2.0",
       "category": "mod",
       "keywords": [
         "utility",
@@ -858,7 +858,7 @@
       "name": "dex-knowledge-extractor",
       "source": "./plugins/utilities/dex-knowledge-extractor",
       "description": "Авторский плагин: работает в клоне репозитория маркетплейса. Pipeline извлечения уроков из чужих MR/PR в маркетплейс: /mr-collect собирает review-комментарии, /mr-analyze обобщает в предложения для skills/agents, /mr-apply применяет с self-review и валидацией.",
-      "version": "3.7.1",
+      "version": "3.7.2",
       "category": "utility",
       "keywords": [
         "utility",
@@ -1320,8 +1320,8 @@
     {
       "name": "dex-skill-api-documentation",
       "source": "./plugins/skills/dex-skill-api-documentation",
-      "description": "Документация API: OpenAPI/Swagger, XML-комментарии, примеры, генерация клиентов, расхождение спеки с кодом.",
-      "version": "1.1.3",
+      "description": "Документация API в Swagger/OpenAPI: примеры в схемах запросов, пересоздание сгенерированного клиента, документ на версию API.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1334,8 +1334,8 @@
     {
       "name": "dex-skill-api-spec-quality",
       "source": "./plugins/skills/dex-skill-api-spec-quality",
-      "description": "Оракул контракта интерфейса - дефекты схем, ошибок, совместимости, версионирования и примеров в OpenAPI, AsyncAPI и gRPC IDL",
-      "version": "1.0.0",
+      "description": "Оракул контракта интерфейса (OpenAPI, AsyncAPI, gRPC IDL) - повтор неидемпотентной операции, миграция ломающего изменения, устаревание, пример ошибки и требование у операции",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1348,31 +1348,17 @@
       ]
     },
     {
-      "name": "dex-skill-api-specification",
-      "source": "./plugins/skills/dex-skill-api-specification",
-      "description": "Проектирование API: контракты, именование, версионирование, пагинация, идемпотентность, breaking change.",
-      "version": "1.1.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "api-spec",
-        "openapi",
-        "swagger",
-        "contracts"
-      ]
-    },
-    {
       "name": "dex-skill-api-testing",
       "source": "./plugins/skills/dex-skill-api-testing",
-      "description": "Тестирование API: сценарии, коды ответов, проверка контракта, интеграционные тесты, автоматизация.",
-      "version": "1.1.1",
+      "description": "Интеграционные тесты HTTP API: на какой базе их гонять, когда поведение держит настоящая база.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
         "api-testing",
-        "rest",
-        "postman",
-        "automation"
+        "integration-test",
+        "testcontainers",
+        "database"
       ]
     },
     {
@@ -1967,7 +1953,7 @@
       "name": "dex-skill-interface-definition-openapi",
       "source": "./plugins/skills/dex-skill-interface-definition-openapi",
       "description": "Норматив этапа определения интерфейсов - состав машиночитаемого контракта (OpenAPI, AsyncAPI, gRPC IDL), дом контракта рядом с кодом, правила совместимости и версионирования, целевая стадия, вход и выход",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2970,7 +2956,7 @@
       "name": "dex-test-analyst",
       "source": "./plugins/specialists/qa/dex-test-analyst",
       "description": "Тест-аналитик: разбор требований, тест-дизайн, тест-кейсы и сценарии, анализ покрытия.",
-      "version": "1.7.0",
+      "version": "1.7.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2983,7 +2969,7 @@
       "name": "dex-test-automator",
       "source": "./plugins/specialists/qa/dex-test-automator",
       "description": "Автоматизатор тестов: UI, API, интеграционные и unit-тесты, Selenium и Playwright, фреймворки автоматизации.",
-      "version": "2.4.1",
+      "version": "2.4.2",
       "category": "specialist",
       "keywords": [
         "specialist",

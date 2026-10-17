@@ -199,7 +199,7 @@ describe('threadsText', () => {
     const text = threadsText(entryOf())
 
     assert.ok(text.startsWith(`**Открытые треды proj!7** - 1 из 1\n${WEB}\n`))
-    assert.ok(text.includes('- **src/queue.ts:42**'))
+    assert.ok(text.includes('- [1] **src/queue.ts:42**'))
     assert.ok(text.includes('  reviewer, комментариев 2, последний от author'))
     assert.ok(text.includes('  Здесь гонка'))
     assert.ok(text.includes(`  ${WEB}#note_11`))
@@ -213,7 +213,7 @@ describe('threadsText', () => {
       ),
     )
 
-    assert.ok(text.includes('- **обсуждение MR**'))
+    assert.ok(text.includes('- [1] **обсуждение MR**'))
   })
 
   test('no open threads is said, and the closed ones are counted', () => {
@@ -250,8 +250,8 @@ describe('threadsText', () => {
     const cut = threadsText(entry, 400)
 
     assert.ok(cut.includes(`- ... ещё 4 тредов, см. ${WEB}`))
-    assert.ok(cut.includes('- **src/queue.ts:1**'))
-    assert.equal(cut.includes('- **src/queue.ts:5**'), false)
+    assert.ok(cut.includes('- [1] **src/queue.ts:1**'))
+    assert.equal(cut.includes('- [5] **src/queue.ts:5**'), false)
   })
 
   test('with no data at all the label and the reason are the whole answer', () => {

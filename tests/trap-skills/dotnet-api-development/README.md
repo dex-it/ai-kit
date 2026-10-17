@@ -121,9 +121,11 @@ D14 0/4: исполнитель шёл по названным пунктам м
   включен». Его «Почему» исправлено этим PR (#327) по зонду: `IncludeXmlComments` без файла - 500,
   `FileNotFoundException` ([факты ключа](../_projects/pricing/README.md#факты-на-которые-опирается-ключ)).
   Пункт снят в #330 (группа 4.2, A3, контроль G-D 2/2): при сведении с #330 тело `api-documentation`
-  берётся из #330 (1.2.0), строка 28 `SKILL.md` («Почему» A3) уходит вместе с A3.
-- Фикстура `dex-knowledge-extractor/test-fixtures/analyze-quality-gate.md` целится в H2 «Pagination»
-  `api-specification` и описывает его содержание; после сжатия скилла в #303 сверить секцию и описание.
+  взято из #330 (1.2.0), строка 28 `SKILL.md` («Почему» A3) ушла вместе с A3 - закрыто.
+- Фикстура `dex-knowledge-extractor/test-fixtures/analyze-quality-gate.md` целилась в H2 «Pagination»
+  `api-specification`; скилл снят в #303, при сведении с #330 фикстура переназначена на
+  `dex-skill-dotnet-api-development` (чек-лист без H2, пункт «Фильтры и пагинация в path вместо query») -
+  закрыто.
 
 ## Бюджет правки
 

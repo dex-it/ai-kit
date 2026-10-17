@@ -36,6 +36,19 @@ const MAX_PAGES = 5
 
 const PER_PAGE = 100
 
+/**
+ * Причина отказа `glab` одной строкой. Он начинает вывод строкой `ERROR` и
+ * пишет суть ниже; первая строка как есть оставляла на экране одно слово.
+ */
+export const reasonLine = (message: string): string => {
+  const lines = message
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line !== '' && !/^error:?$/i.test(line))
+
+  return (lines.slice(0, 2).join(' ') || message.trim()).slice(0, 300)
+}
+
 const isMissing = (text: string) => /\b(404|403)\b/.test(text)
 
 const parse = (text: string): unknown => {
@@ -68,7 +81,7 @@ function glabApi(host: Host, hostname: string, cwd: string): Api {
 
         if (isMissing(message)) return null
 
-        throw new Error(message.split('\n')[0] ?? message)
+        throw new Error(reasonLine(message))
       }
 
       return parse(stdout)

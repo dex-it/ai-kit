@@ -21,7 +21,6 @@ security controls / observability. Требования, capacity, implementatio
 |-------|---------------------|-------|
 | `dex-skill-ddd` | Phase 2, 4 (conditional) | Aggregates, naming, bounded contexts |
 | `dex-skill-scalability` | Phase 4 | Горячая партиция / горячий ключ под нагрузкой с длинным хвостом |
-| `dex-skill-api-specification` | Phase 4 | Pagination, idempotency, versioning, ProblemDetails |
 
 **Установка одной командой:**
 
