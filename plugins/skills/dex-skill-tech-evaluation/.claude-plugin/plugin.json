@@ -1,9 +1,0 @@
-{
-  "name": "dex-skill-tech-evaluation",
-  "version": "1.0.1",
-  "description": "Выбор технологии: CV-driven development, внедрение без PoC, забытая эксплуатационная цена (мониторинг, бэкап, найм, дежурства), vendor lock-in и лицензии.",
-  "author": { "name": "Dex Team", "email": "mmx@dex-it.ru" },
-  "keywords": ["skill", "technology-evaluation", "tech-stack-selection", "poc", "operational-cost", "vendor-evaluation"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
-  "license": "GPL-3.0"
-}

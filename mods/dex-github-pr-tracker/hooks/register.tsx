@@ -12,6 +12,13 @@
 //   turn.complete   a PR URL in Claude's answer is watched too, and the end
 //                   of a turn polls what the timer has not refreshed lately.
 //
+//   scope           `/pr open`, `/pr week` or the `scope` setting make the mod
+//                   find the repository's pull requests itself, not only the
+//                   branch's; the set is re-read on every tick.
+//   review / fix    buttons and `/pr review`, `/pr fix`: review goes to the main
+//                   loop as the catalog's command, the open threads go to a
+//                   background agent with a ready-made brief.
+//
 // Everything the mod knows lives in this module's own variables: a hot
 // reload or a new session starts from the branch again, which is cheap.
 
@@ -32,8 +39,19 @@ import {
   remoteOf,
   repoRefOf,
 } from './github.ts'
+import { fixPrompt, pickThreads, reviewPrompt } from './dispatch.ts'
+import type { FixTarget } from './dispatch.ts'
 import { overviewOf } from './overview.ts'
 import { pollRaw, prOfBranch } from './poll.ts'
+import {
+  DEFAULT_SCOPE_LIMIT,
+  SCOPE_WORD,
+  WEEK_MS,
+  mapPool,
+  scopeNumbers,
+  scopeOf,
+} from './scope.ts'
+import type { Scope } from './scope.ts'
 import { checksText, noPrText, overviewText, statusText, threadsText } from './text.ts'
 import type { Actions, PaneModel, PaneView, Ui } from './views.tsx'
 import { bandView, paneView } from './views.tsx'
@@ -43,6 +61,9 @@ import { openThreadsOf, watchedOf } from './watched.ts'
 const COMMAND = 'pr'
 const PANE_ID = 'github-pr'
 const MIN_POLL_MS = 15_000
+/** Одновременных опросов PR: охват в десятки PR не поднимает десятки `gh` разом. */
+const POLL_CONCURRENCY = 4
+const REVIEW_COMMAND = 'mr-review'
 const PANE_COMMITS = 8
 const PANE_CHECKS = 6
 /**
@@ -52,7 +73,7 @@ const PANE_CHECKS = 6
  */
 const BAND_MAX_ROWS = 3
 /** Строки списка над и под перечнем: шапка, итог, пустая, подсказка. */
-const LIST_CHROME_ROWS = 5
+const LIST_CHROME_ROWS = 6
 /** Заголовок панели в виде списка: один на все PR, метки у него нет. */
 const LIST_TITLE = 'Мониторинг PR'
 /**
@@ -64,7 +85,7 @@ const DEFAULT_HOST = 'github.com'
 /** Ширина панели до первой отрисовки: ею меряется адрес треда. */
 const PANE_FALLBACK_COLUMNS = 60
 /** Строки над и под списком тредов: шапка, факты, кнопки, подвал. */
-const PANE_CHROME_ROWS = 9
+const PANE_CHROME_ROWS = 11
 /** Больше половины экрана панель над вводом не просит. */
 const PANE_MAX_SCREEN_SHARE = 2
 const TOAST_MS = 8000
@@ -95,6 +116,12 @@ type Settings = {
   token: string
   notify: string
   sound: boolean
+  scope: Scope
+  scopeLimit: number
+  reviewCommand: string
+  /** Агент для правки тредов; пусто - агент по умолчанию. */
+  fixerAgent: string
+  fixerPush: boolean
 }
 
 const optString = (options: PluginOptions, key: string, fallback: string) => {
@@ -134,6 +161,11 @@ export const register: Register = (on, pluginOptions) => {
     token: optString(pluginOptions, 'token', ''),
     notify: optString(pluginOptions, 'notify', 'all'),
     sound: optBool(pluginOptions, 'sound', false),
+    scope: scopeOf(optString(pluginOptions, 'scope', 'branch'), 'branch'),
+    scopeLimit: Math.max(1, optNumber(pluginOptions, 'scopeLimit', DEFAULT_SCOPE_LIMIT)),
+    reviewCommand: optString(pluginOptions, 'reviewCommand', REVIEW_COMMAND),
+    fixerAgent: optString(pluginOptions, 'fixerAgent', ''),
+    fixerPush: optBool(pluginOptions, 'fixerPush', false),
   }
 
   const watched = new Map<string, Watched>()
@@ -149,6 +181,14 @@ export const register: Register = (on, pluginOptions) => {
   let showResolved = false
   let isPaneOpen = false
   let pollMs = settings.pollMs
+  /** Какие PR мод находит сам: ветка, все открытые или двигавшиеся за неделю. */
+  let scopeMode: Scope = settings.scope
+  /** Снятые руками из охвата: охват их не возвращает, пока не сменится или не очистится. */
+  const dismissed = new Set<string>()
+  /** Фиксеры в работе: агент -> PR, которому он правит треды. */
+  const fixers = new Map<string, { key: string; label: string }>()
+  /** PR, для которых фиксер уже заказан, но агент ещё не стартовал. */
+  const fixStarting = new Set<string>()
   /** Какой вид панели показан: общий список или один PR подробно. */
   let paneMode: PaneView = 'details'
   /** Откуда взялся выбранный репозиторий - это и есть ответ `/pr repo`. */
@@ -174,6 +214,8 @@ export const register: Register = (on, pluginOptions) => {
     play: (sound: string) => void
     now: () => Promise<number>
     after: (ms: number, run: () => void) => void
+    submit: (text: string) => Promise<void>
+    spawn: (prompt: string, description: string) => Promise<string | null>
   } | null = null
 
   const list = () => [...watched.values()]
@@ -218,6 +260,9 @@ export const register: Register = (on, pluginOptions) => {
     selectedKey: selected()?.key ?? null,
     showResolved,
     armedKey,
+    fixingKeys: fixingKeys(),
+    scopeWord: SCOPE_WORD[scopeMode],
+    scope: scopeMode,
     commitLimit: PANE_COMMITS,
     checkLimit: PANE_CHECKS,
   })
@@ -286,7 +331,7 @@ export const register: Register = (on, pluginOptions) => {
     }
   }
 
-  const refreshAll = () => Promise.all(list().map(entry => refresh(entry)))
+  const refreshAll = () => mapPool(list(), POLL_CONCURRENCY, entry => refresh(entry))
 
   /**
    * Опрос по поводу: ход закончился, или в Bash прошла команда, меняющая PR.
@@ -299,7 +344,7 @@ export const register: Register = (on, pluginOptions) => {
     const nowMs = await bound.now()
     const stale = list().filter(entry => nowMs - entry.updatedMs > REFRESH_MIN_AGE_MS)
 
-    await Promise.all(stale.map(entry => refresh(entry)))
+    await mapPool(stale, POLL_CONCURRENCY, entry => refresh(entry))
   }
 
   function announce(entry: Watched, next: PrData): void {
@@ -335,21 +380,37 @@ export const register: Register = (on, pluginOptions) => {
 
   // --- Watching ---------------------------------------------------------
 
-  function watch(ref: PrRef, auto: boolean): Watched {
-    const entry = watchedOf(ref, auto)
+  function watch(ref: PrRef, auto: boolean, scoped = false): Watched {
+    const entry = watchedOf(ref, auto, scoped)
     const known = watched.get(entry.key)
 
-    if (known) return known
+    if (known) {
+      // Названный руками PR, уже взятый охватом, больше охвату не принадлежит:
+      // смена охвата его не снимет.
+      if (!scoped) {
+        known.scoped = false
+        dismissed.delete(known.key)
+      }
+
+      return known
+    }
 
     watched.set(entry.key, entry)
     selectedKey ??= entry.key
-    void refresh(entry)
+
+    // Охват опрашивает найденное пачкой с потолком одновременных вызовов
+    // (`refreshAll`), а не по вызову на каждый PR в момент добавления.
+    if (!scoped) void refresh(entry)
+
     bound?.invalidate()
 
     return entry
   }
 
   function stop(key: string): void {
+    // Снятый из охвата не возвращается следующим тиком.
+    if (watched.get(key)?.scoped === true) dismissed.add(key)
+
     watched.delete(key)
 
     if (autoKey === key) autoKey = null
@@ -416,6 +477,149 @@ export const register: Register = (on, pluginOptions) => {
     selectedKey ??= entry.key
   }
 
+  /**
+   * Привести наблюдаемое к охвату: добавить найденные PR, снять взятые охватом,
+   * которых в охвате больше нет (закрылся, ушёл за границу недели). Названные
+   * руками и PR текущей ветки охват не трогает.
+   */
+  async function syncScope(): Promise<string> {
+    if (!api || !remote || !bound) return ''
+
+    if (scopeMode === 'branch') {
+      for (const entry of list()) if (entry.scoped) watched.delete(entry.key)
+
+      bound.invalidate()
+
+      return ''
+    }
+
+    const nowMs = await bound.now()
+    const found = await scopeNumbers(api, {
+      owner: remote.owner,
+      repo: remote.repo,
+      scope: scopeMode,
+      sinceMs: nowMs - WEEK_MS,
+      limit: settings.scopeLimit,
+    }).catch((error: unknown) => {
+      if (error instanceof ApiAuthError) {
+        pollTimer?.cancel()
+        pollTimer = undefined
+      }
+
+      return messageOf(error)
+    })
+
+    if (typeof found === 'string') return found
+
+    const keep = new Set<string>()
+
+    for (const number of found.numbers) {
+      const ref: PrRef = { host: remote.host, owner: remote.owner, repo: remote.repo, number }
+      const key = keyOf(ref)
+
+      keep.add(key)
+
+      if (!dismissed.has(key)) watch(ref, false, true)
+    }
+
+    for (const entry of list()) {
+      if (entry.scoped && !keep.has(entry.key)) {
+        watched.delete(entry.key)
+
+        if (selectedKey === entry.key) selectedKey = null
+      }
+    }
+
+    if (watched.size === 0 && isPaneOpen) void bound.closePane()
+
+    bound.invalidate()
+
+    return found.truncated
+      ? `Охват держит ${settings.scopeLimit} самых свежих PR, остальные не взяты (настройка scopeLimit).`
+      : ''
+  }
+
+  /** Сменить охват: снятые руками забываются, найденное опрашивается. */
+  async function applyScope(scope: Scope): Promise<string> {
+    scopeMode = scope
+    dismissed.clear()
+
+    const note = await syncScope()
+
+    await refreshAll()
+
+    return note
+  }
+
+  /** Соседний PR в порядке списка (по вниманию), с обходом по кругу. */
+  function stepSelection(delta: 1 | -1): void {
+    const keys = overviewOf(list()).rows.map(item => item.key)
+
+    if (keys.length === 0) return
+
+    const place = Math.max(0, keys.indexOf(selected()?.key ?? ''))
+    const key = keys[(place + delta + keys.length) % keys.length]
+
+    if (key === undefined) return
+
+    selectedKey = key
+    paneMode = 'details'
+
+    const entry = watched.get(key)
+
+    if (entry) void bound?.openPane(entry.label)
+
+    bound?.invalidate()
+  }
+
+  /** PR, чьи треды сейчас правит фиксер. */
+  const fixingKeys = (): ReadonlySet<string> =>
+    new Set([...fixers.values()].map(item => item.key).concat([...fixStarting]))
+
+  /**
+   * Ревью - команда каталога в основной цикл: публикует находки в PR только по
+   * команде оператора, а канал к оператору есть у главного цикла.
+   */
+  async function startReview(entry: Watched): Promise<string> {
+    if (!bound) return 'мод ещё не готов'
+
+    const prompt = reviewPrompt(settings.reviewCommand, entry)
+
+    if (prompt === null) return `${entry.label}: данных ещё нет, ревью не отдать`
+
+    await bound.submit(prompt)
+
+    return `Ревью ${entry.label} ушло в сессию: ${prompt}`
+  }
+
+  /** Фиксер - фоновый агент с готовым поручением; на один PR не больше одного. */
+  async function startFix(entry: Watched, target: FixTarget): Promise<string> {
+    if (!bound) return 'мод ещё не готов'
+
+    if (fixingKeys().has(entry.key)) return `${entry.label}: фиксер уже работает над этим PR`
+
+    const pick = pickThreads(entry, target)
+
+    if (!pick.ok) return pick.reason
+
+    fixStarting.add(entry.key)
+    bound.invalidate()
+
+    try {
+      const prompt = fixPrompt(entry, pick.threads, { push: settings.fixerPush })
+      const agentId = await bound.spawn(prompt, `Правка тредов ${entry.label}`)
+
+      if (agentId === null) return `${entry.label}: фиксер не запущен`
+
+      fixers.set(agentId, { key: entry.key, label: entry.label })
+
+      return `Фиксер взял ${pick.threads.length} ${pick.threads.length === 1 ? 'тред' : 'тредов'} ${entry.label}; итог придёт тостом и строкой в транскрипт.`
+    } finally {
+      fixStarting.delete(entry.key)
+      bound.invalidate()
+    }
+  }
+
   // --- Hooks ------------------------------------------------------------
 
   on('session.start', async ($, e, next) => {
@@ -457,13 +661,26 @@ export const register: Register = (on, pluginOptions) => {
       after: (ms, run) => {
         $.clock.after(ms, run)
       },
+      submit: async text => {
+        await $.prompt.submit({ text })
+      },
+      spawn: async (prompt, description) => {
+        const started = await $.agent.spawn({
+          prompt,
+          description,
+          ...(settings.fixerAgent === '' ? {} : { subagentType: settings.fixerAgent }),
+        })
+
+        return 'deny' in started && started.deny !== undefined ? null : (started.agentId ?? null)
+      },
     }
 
     await $.command
       .register({
         name: COMMAND,
         description: 'Pull request GitHub: панель, открытые треды, проверки, состояние.',
-        argumentHint: '[123 | ссылка | threads | status | checks | refresh | drop]',
+        argumentHint:
+          '[123 | ссылка | open | week | branch | review | fix | threads | status | checks | refresh | drop]',
       })
       .catch((error: unknown) => {
         $.ui.log(`github-pr: команда /${COMMAND} не занята мной: ${messageOf(error)}`)
@@ -552,11 +769,13 @@ export const register: Register = (on, pluginOptions) => {
 
     if (!e.isInteractive) return result
 
+    void syncScope().then(() => refreshAll())
+
     startTimer = () => {
       pollTimer?.cancel()
       pollTimer = $.clock.every(pollMs, () => {
         void headOf().then(head => syncBranch(head))
-        void refreshAll()
+        void syncScope().then(() => refreshAll())
       })
     }
 
@@ -610,7 +829,11 @@ export const register: Register = (on, pluginOptions) => {
      * собирается сразу. Опрос уже идущий не дублируется - `refresh` его ждёт.
      */
     const awaitFirstPoll = () =>
-      Promise.all(list().filter(entry => entry.data === undefined).map(entry => refresh(entry)))
+      mapPool(
+        list().filter(entry => entry.data === undefined),
+        POLL_CONCURRENCY,
+        entry => refresh(entry),
+      )
 
     const lookUpBranch = async () => {
       const head = await $.process
@@ -692,6 +915,51 @@ export const register: Register = (on, pluginOptions) => {
         await bound.openPane(LIST_TITLE)
 
         return { text: overviewText(list()) }
+      }
+
+      case 'step': {
+        if (watched.size === 0) return { text: noPrText }
+
+        stepSelection(action.delta)
+
+        return {}
+      }
+
+      case 'scope': {
+        const note = await applyScope(action.scope)
+
+        if (scopeMode === 'branch') await lookUpBranch()
+        if (watched.size === 0) return { text: `${SCOPE_WORD[scopeMode]}: ${noPrText}` }
+
+        paneMode = 'list'
+        await bound.openPane(LIST_TITLE)
+
+        return {
+          text: [`Охват: ${SCOPE_WORD[scopeMode]}.`, note, overviewText(list())]
+            .filter(part => part !== '')
+            .join('\n\n'),
+        }
+      }
+
+      case 'review': {
+        const entry =
+          action.number === null
+            ? selected()
+            : list().find(item => item.ref.number === action.number)
+
+        if (!entry) return { text: action.number === null ? noPrText : `PR #${action.number} не наблюдается: сначала \`/${COMMAND} ${action.number}\`.` }
+        if (!entry.data) await refresh(entry)
+
+        return { text: await startReview(entry) }
+      }
+
+      case 'fix': {
+        const entry = selected()
+
+        if (!entry) return { text: noPrText }
+        if (!entry.data) await refresh(entry)
+
+        return { text: await startFix(entry, action.target) }
       }
 
       case 'watch': {
@@ -778,6 +1046,17 @@ export const register: Register = (on, pluginOptions) => {
         if (!entry) return { text: noPrText }
 
         if (isPaneOpen) {
+          // Из деталей `/pr` ведёт к списку, если их несколько: список и есть
+          // то, куда возвращаются. Закрывает панель только из списка либо
+          // когда PR один.
+          if (paneMode === 'details' && watched.size > 1) {
+            paneMode = 'list'
+            await bound.openPane(LIST_TITLE)
+            bound.invalidate()
+
+            return {}
+          }
+
           await bound.closePane()
 
           return { text: 'Панель закрыта.' }
@@ -807,6 +1086,7 @@ export const register: Register = (on, pluginOptions) => {
 
     for (const entry of list()) watched.delete(entry.key)
 
+    dismissed.clear()
     autoKey = null
     selectedKey = null
     armedKey = null
@@ -882,6 +1162,24 @@ export const register: Register = (on, pluginOptions) => {
       for (const ref of prRefsOf(e.answer)) watch(ref, true)
     }
 
+    // Фиксер закончил: итог - в транскрипт и тостом, PR опрашивается сразу -
+    // если агент запушил, треды и коммиты уже изменились.
+    const fixer = e.agentId === undefined ? undefined : fixers.get(e.agentId)
+
+    if (e.agentId !== undefined && fixer) {
+      fixers.delete(e.agentId)
+      const report = typeof e.answer === 'string' ? e.answer.trim().slice(0, 1500) : ''
+
+      bound?.log(`${fixer.label}: фиксер закончил (${e.reason})${report === '' ? '' : `\n${report}`}`)
+      bound?.toast(`${fixer.label}: фиксер закончил - отчёт в транскрипте`)
+
+      const entry = watched.get(fixer.key)
+
+      if (entry) void refresh(entry)
+
+      bound?.invalidate()
+    }
+
     // Ход закончился - человек снова смотрит на строку над вводом, и она
     // должна нести то, что в GitHub сейчас, а не то, что было на тике.
     if (e.agentId === undefined) void refreshStale()
@@ -902,6 +1200,17 @@ export const register: Register = (on, pluginOptions) => {
         if (entry) void bound?.openPane(entry.label)
 
         bound?.invalidate()
+      },
+      step: delta => stepSelection(delta),
+      setScope: scope => {
+        paneMode = 'list'
+        void applyScope(scope).then(note => {
+          if (note !== '') bound?.log(note)
+        })
+        bound?.invalidate()
+      },
+      refreshNow: () => {
+        void refreshAll()
       },
       openList: () => {
         paneMode = 'list'
@@ -928,6 +1237,20 @@ export const register: Register = (on, pluginOptions) => {
         }
 
         bound?.invalidate()
+      },
+      review: key => {
+        const entry = watched.get(key)
+
+        if (!entry) return
+
+        void startReview(entry).then(text => bound?.log(text))
+      },
+      fix: (key, target) => {
+        const entry = watched.get(key)
+
+        if (!entry) return
+
+        void startFix(entry, target).then(text => bound?.log(text))
       },
       stop,
       toggleResolved: () => {

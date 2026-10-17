@@ -176,7 +176,7 @@ describe('threadsText', () => {
 
     assert.ok(text.startsWith('**Открытые треды marketplace#7** - 1 из 1'))
     assert.ok(text.includes(URL_7))
-    assert.ok(text.includes('- **src/queue.ts:42**'))
+    assert.ok(text.includes('- [1] **src/queue.ts:42**'))
     assert.ok(text.includes('  reviewer, комментариев 2, последний от author'))
     assert.ok(text.includes('  Здесь гонка'))
     assert.ok(text.includes(`  ${URL_7}#discussion_r1`))
@@ -193,7 +193,7 @@ describe('threadsText', () => {
       }),
     )
 
-    assert.ok(text.includes('- **src/queue.ts:40** (строка уехала в новых коммитах)'))
+    assert.ok(text.includes('- [1] **src/queue.ts:40** (строка уехала в новых коммитах)'))
   })
 
   test('a thread on the file as a whole is named as discussion of the code', () => {
@@ -207,7 +207,7 @@ describe('threadsText', () => {
       }),
     )
 
-    assert.ok(text.includes('- **обсуждение кода**'))
+    assert.ok(text.includes('- [1] **обсуждение кода**'))
   })
 
   test('no open threads is said, and the closed ones are counted', () => {

@@ -35,7 +35,7 @@ python3 -I gen.py <каталог>/wave && python3 -I gen.py <каталог>/si
 python3 -I wave.py plan <каталог>/wave/repo --task TASK.md --out <каталог>/plan.json
 DEX_AUTO_DIR=<плагин dex-auto> python3 -I wave.py run <каталог>/wave/repo --plan <каталог>/plan.json \
     --out <каталог>/wave-out --final-review
-python3 -I single.py <каталог>/single/repo --out <каталог>/single.json
+python3 -I single.py <каталог>/single/repo --out <каталог>/single.json [--effort medium] [--skill]
 python3 -I grade.py <каталог>/wave/repo --branch integration
 python3 -I grade.py <каталог>/single/repo
 python3 -I probe_race.py 8 25          # без модели: гонки worktree.py и ledger.py, дерево от базы
@@ -87,3 +87,21 @@ Claude Code 2.1.296, `dex-auto` 8.6.0 (снимок `develop` `ca7356fc`), 2026-
 - Малая фикстура, один прогон на плечо, одна версия платформы; главный поток `/auto` - `sonnet` (зонд P16:
   дешевле `fable`); `opus` в этой роли не проверялся.
 
+### Скилл `subagent-dispatch` в одной сессии, 2026-10-15
+
+Claude Code 2.1.300, скилл 1.0.0 редакция 3b (см. [`../dispatch/`](../dispatch/README.md)), `opus`
+`medium`, `single.py --effort medium` против `single.py --effort medium --skill`, по два прогона.
+
+| Прогон | Цена, $ | Время, с | Раздача | Оракул | `npm test` |
+|---|---|---|---|---|---|
+| одна сессия 1 / 2 | 0.75 / 0.82 | 166 / 168 | нет | 31 из 31 | 27 |
+| со скиллом 1 | 1.07 (`opus` 0.81, `sonnet` 0.24, `haiku` 0.02) | 210 | F1, F2 `haiku` `medium`; F3 `sonnet` `medium`; F4 сам | 31 из 31 | 57 |
+| со скиллом 2 | 0.79 | 191 | нет | 31 из 31 | 25 |
+
+- **Исход не пострадал, цена в среднем +19%.** Раздача прогона 1 сократила вывод `opus` с 14 до 11.8
+  тыс. токенов, а число ходов выросло с 7 до 15, и чтение кеша `opus` - с 318 до 590 тыс.: сэкономленное
+  на письме съели ходы оркестратора, исполнитель `sonnet` на один модуль стоил 0.24 $.
+- **Вся работа - около 14 тыс. токенов вывода, около 3.5 тыс. на добавление,** меньше стартовой цены
+  исполнителя (около 27 тыс.): по условию скилла верный выбор - сам, прогон 2 так и сделал.
+- Работа, на которой раздача обязана выиграть (кусков много, каждый намного больше старта исполнителя,
+  у каждого своя проверка), набором не покрыта.

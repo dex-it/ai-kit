@@ -67,8 +67,7 @@ halt + возврат оркестратору. `mode` не передан -> `a
 **Output:** Матч с одним-двумя reference designs из каталога ниже + список адаптаций под FR/NFR и
 capacity из входа.
 
-Каталог-индекс (детали и ловушки выбора Claude знает из training data + загружает
-`dex-skill-reference-architectures` в Phase 4 для проверки решения):
+Каталог-индекс (детали и ловушки выбора Claude знает из training data):
 
 **Consumer-scale:** news feed / timeline, chat / messaging, ride-share / matching, payment /
 ledger, search / autocomplete, URL shortener / KV, rate limiter, notification / fan-out,
@@ -136,8 +135,7 @@ Read/Grep; полный обзор репо ведёт вызывающая ст
 - Связь с constraints и FR/NFR из входа (включая .NET-specific)
 - Связь с capacity-цифрами входа
 - **CAP позиция:** при partition выбираем consistency или availability + почему
-- **PACELC позиция:** в normal operation выбираем latency или consistency + почему (для типовых
-  .NET-storage - defaults в `dex-skill-cap-consistency` cheatsheet)
+- **PACELC позиция:** в normal operation выбираем latency или consistency + почему
 - Что отвергаем + почему
 - Что теряем («принимаем eventual consistency для feed ради write throughput через MassTransit +
   outbox»)
@@ -177,15 +175,6 @@ Read/Grep; полный обзор репо ведёт вызывающая ст
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool:
-
-- `dex-skill-cap-consistency:cap-consistency` - strong vs eventual, PACELC, per-operation choice,
-  read-your-writes, quorum, split-brain, clock skew, saga compensation, **PACELC cheatsheet типовых
-  storage**
-- `dex-skill-tech-evaluation:tech-evaluation` - hype-driven adoption, no PoC, vendor lock-in
-  (Cosmos DB / Azure-specific), deprecation risk, license traps, hidden cost (egress), team
-  expertise
-
 ## Phase 4: Deep Dive
 
 **Goal:** Детализировать выбранное решение под .NET-стек - без этого решение не реализуемо и
@@ -223,20 +212,16 @@ implementation-план вызывающей стороны не на чем с�
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool - кроме общих skills из `dex-architect`,
-дополнительно .NET-skills:
+В этой фазе загружай императивно через Skill tool:
 
-- Всегда `dex-skill-capacity-planning:capacity-planning` - read:write ratio, hot path, cache cost asymmetry
-- Всегда `dex-skill-scalability:scalability` - sharding key, stateless, cross-shard queries
-- Всегда `dex-skill-api-specification:api-specification` - pagination, idempotency, versioning, ProblemDetails
-- Всегда `dex-skill-dotnet-api-development:dotnet-api-development` - controllers, DTO, pagination, FluentValidation
-- Всегда `dex-skill-dotnet-resilience:dotnet-resilience` - Polly, retry с idempotency / jitter, circuit breaker, timeout
-- Если в области feed / chat / payment / search / notifications / rate-limiter - `dex-skill-reference-architectures:reference-architectures`
+- Всегда `dex-skill-scalability:scalability` - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
+- Всегда `dex-skill-dotnet-api-development:dotnet-api-development` - тонкий контроллер, код ответа, маршруты и параметры
+- Всегда `dex-skill-dotnet-resilience:dotnet-resilience` - место политики, общий timeout, circuit breaker, промахи кэша
 - Если выбрано EF Core / SQL - `dex-skill-dotnet-ef-core:dotnet-ef-core`
-- Если присутствует concurrency / async - `dex-skill-dotnet-async-patterns:dotnet-async-patterns`
+- Если присутствует async-код - `dex-skill-dotnet-async-patterns:dotnet-async-patterns`
 - Если значимое логирование - `dex-skill-dotnet-logging:dotnet-logging`
 - Для project structure / `.csproj` / Directory.Build.props - `dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene`
-- Для гигиены качества (Roslyn analyzers, warning-профиль, NuGet audit) - `dex-skill-dotnet-code-quality:dotnet-code-quality`
+- Для гигиены качества (AnalysisMode, NuGet audit) - `dex-skill-dotnet-code-quality:dotnet-code-quality`
 - Если план предполагает создание нового проекта / сервиса - `dex-skill-project-baseline:project-baseline` (новый solution -> baseline по дефолту; проект в существующем solution -> наследовать его правила, недостающий гейт назвать и предложить, а завести после согласия владельца)
 - Для соответствия конвенциям проекта - `dex-skill-codebase-conventions:codebase-conventions`
 - Если доменная сложность требует aggregates / bounded contexts - `dex-skill-ddd:ddd`
@@ -262,8 +247,7 @@ Phase 3 отдельным перечнем. Implementation-план,
   документацию вызывающей стороны).
 - **.NET-specific:**
   - Не предлагать Service Locator / Singleton DbContext / async void / `.Result` - это
-    .NET-anti-patterns, для них есть `dex-skill-dotnet-async-patterns` /
-    `dex-skill-dotnet-resources`
+    .NET-anti-patterns
   - Не выбирать ORM, отличный от EF Core, без явного обоснования через capacity-цифры входа
     (Dapper для read-heavy hot paths оправдан, NHibernate в greenfield - нет)
   - Не предлагать .NET Framework 4.x для greenfield - только .NET 8 LTS или новее

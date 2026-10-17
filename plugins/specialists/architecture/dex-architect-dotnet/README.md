@@ -18,24 +18,19 @@ capacity, implementation-план и документацию ведёт выз�
 | Skill | Используется в фазах | Зачем |
 |-------|---------------------|-------|
 | `dex-skill-ddd` | Phase 2, 4 (conditional) | Aggregates, naming, bounded contexts |
-| `dex-skill-cap-consistency` | Phase 3 | CAP/PACELC + cheatsheet |
-| `dex-skill-tech-evaluation` | Phase 3 | Vendor lock-in, license, hidden cost |
-| `dex-skill-capacity-planning` | Phase 4 | Capacity, read:write ratio, hot path |
-| `dex-skill-scalability` | Phase 4 | Sharding, stateless |
-| `dex-skill-api-specification` | Phase 4 | Pagination, idempotency, versioning, ProblemDetails |
-| `dex-skill-reference-architectures` | Phase 4 (conditional) | Feed/chat/payment/search/notifications/rate-limiter anti-patterns |
+| `dex-skill-scalability` | Phase 4 | Горячая партиция / горячий ключ |
 
 ### .NET-специфичные skills (только у этого агента)
 
 | Skill | Используется в фазах | Зачем |
 |-------|---------------------|-------|
-| `dex-skill-dotnet-api-development` | Phase 4 | ASP.NET Core controllers, DTO, FluentValidation, pagination |
-| `dex-skill-dotnet-resilience` | Phase 4 | Polly: retry с idempotency / jitter, circuit breaker, timeout |
+| `dex-skill-dotnet-api-development` | Phase 4 | Тонкий контроллер, код ответа, маршруты и параметры |
+| `dex-skill-dotnet-resilience` | Phase 4 | Место политики, общий timeout, circuit breaker, промахи кэша |
 | `dex-skill-dotnet-ef-core` | Phase 4 (conditional) | EF Core: queries, tracking, migrations, owned-types |
-| `dex-skill-dotnet-async-patterns` | Phase 4 (conditional) | Async/await, cancellation, ValueTask |
-| `dex-skill-dotnet-logging` | Phase 4 (conditional) | Serilog, ILogger, structured logging |
-| `dex-skill-dotnet-csproj-hygiene` | Phase 4 (conditional) | CPM, ProjectReference, Directory.Build.props |
-| `dex-skill-dotnet-code-quality` | Phase 4 (conditional) | Roslyn analyzers, warning-профиль, NuGet audit |
+| `dex-skill-dotnet-async-patterns` | Phase 4 (conditional) | `Task.Run` над синхронным вызовом |
+| `dex-skill-dotnet-logging` | Phase 4 (conditional) | Уровень записи, контекст через scope |
+| `dex-skill-dotnet-csproj-hygiene` | Phase 4 (conditional) | Directory.Build.props, LangVersion, TargetFramework, ProjectReference |
+| `dex-skill-dotnet-code-quality` | Phase 4 (conditional) | AnalysisMode, NuGet audit |
 | `dex-skill-project-baseline` | Phase 4 (conditional) | Baseline нового проекта: наследовать solution / закладка с нуля |
 | `dex-skill-codebase-conventions` | Phase 2, 4 (conditional) | Соответствие конвенциям существующего проекта |
 | `dex-skill-fact-verification` | Phase 2, 4 (conditional) | Fact-check имени пакета / API против манифеста проекта |

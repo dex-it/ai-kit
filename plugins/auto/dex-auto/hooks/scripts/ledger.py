@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dexauto as dx
 
 USAGE = ("usage: ledger.py root|dir TASK|open TASK [MODE]|find|get TASK KEY|set TASK KEY VALUE|"
-         "close TASK OUTCOME|open-tracks TASK|ctx TASK TRACK|trail TASK TRACK|findings TASK TRACK")
+         "close TASK OUTCOME|open-tracks TASK|ctx TASK TRACK|trail TASK TRACK|decisions TASK TRACK|findings TASK TRACK|top TASK TRACK")
 
 GOAL_TEMPLATE = ("# Цель: %s\n\nСтатус: открыт\nРежим: %s\nИсход: \nНехватка: \nОжидает: \n\n"
                  "## Цель\n\n## Критерий «готово»\n\n## Граница\n\n## Решения\n")
@@ -46,6 +46,7 @@ def main(argv):
         if not os.path.isfile(path):
             with open(path, "w", encoding="utf-8") as fh:
                 fh.write(GOAL_TEMPLATE % (task, mode))
+        dx.claim(task)
         print(path)
     elif cmd == "find":
         for task, directory in dx.find_open():
@@ -54,6 +55,7 @@ def main(argv):
         print(dx.get_key(need_goal(args[0]), args[1]))
     elif cmd == "set":
         dx.set_key(need_goal(args[0]), args[1], args[2])
+        dx.claim(args[0])
     elif cmd == "close":
         # Дефолта у исхода нет намеренно: подсказка «закрой цель» без него писала недоведённой цели complete (issue #250).
         path = need_goal(args[0])
@@ -62,6 +64,7 @@ def main(argv):
             die("ledger.py close: нужен исход - complete|partial|blocked")
         dx.set_key(path, "Исход", outcome)
         dx.set_key(path, "Статус", "закрыт")
+        dx.claim(args[0])
     elif cmd == "open-tracks":
         for name in dx.open_tracks(args[0]):
             print(name)
@@ -71,6 +74,9 @@ def main(argv):
     elif cmd == "trail":
         for line in dx.section(dx.track_file(args[0], args[1]), "### Исполнители"):
             print(line)
+    elif cmd == "decisions":
+        for line in dx.section(dx.track_file(args[0], args[1]), "### Решения"):
+            print(line)
     elif cmd == "findings":
         try:
             found = dx.open_findings(dx.findings_file(args[0], args[1]), dx.track_file(args[0], args[1]))
@@ -78,6 +84,11 @@ def main(argv):
             die("ledger.py findings: %s" % e, 5)
         if found:
             print(json.dumps(found, ensure_ascii=False, separators=(",", ":")))
+    elif cmd == "top":
+        try:
+            print(dx.findings_top(dx.findings_state(dx.findings_file(args[0], args[1]), dx.track_file(args[0], args[1]))))
+        except ValueError as e:
+            die("ledger.py top: %s" % e, 5)
     else:
         die(USAGE)
 

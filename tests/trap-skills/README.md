@@ -16,7 +16,7 @@
 
 `<набор>/sources.md` - основания пунктов, пришедших из `/mr-apply`: MR, триада, самооценка анализатора. По ним строится кейс, когда пункт идёт в заход сжатия.
 
-`_projects/` - общие мини-проекты нескольких наборов: `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
+`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `loyalty` - группа 3.2, корпус требований, `rooms` - группа 3.1, требования фичи, `bookings` - группа 4.2, ASP.NET Core и контракт OpenAPI): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
 
 `removed/` - наборы снятых скиллов: скилла в каталоге нет, набор хранит свидетельство снятия и не
 перезапускается.
@@ -33,7 +33,7 @@
 | [dotnet-ef-core](dotnet-ef-core/README.md) | `dex-skill-dotnet-ef-core` 2.6.2 | поручения на код, ревью | 28 ловушек -> 5 -> чек-лист; 3.1.0 - два пункта шагом 3 |
 | [removed/dotnet-linq-optimization](removed/dotnet-linq-optimization/README.md) | `dex-skill-dotnet-linq-optimization` 2.3.1 | поручения на код, ревью | снят |
 | [removed/dotnet-config-hygiene](removed/dotnet-config-hygiene/README.md) | `dex-skill-dotnet-config-hygiene` 1.3.1 | ревью | снят |
-| [removed/dotnet-di](removed/dotnet-di/README.md) | `dex-skill-dotnet-di` 1.1.1 | поручение на код (K1) | снят; keyed-сервисы -> `dotnet-api-development` |
+| [removed/dotnet-di](removed/dotnet-di/README.md) | `dex-skill-dotnet-di` 1.1.1 | поручение на код (K1) | снят; keyed-сервисы -> `dotnet-api-development` 2.6.0, сняты в 2.7.0: K1 перемерен, контроль 2/2 |
 | [removed/owasp-security](removed/owasp-security/README.md) | `dex-skill-owasp-security` 1.3.2 | ревью (S1, S2) | снят; multi-tenancy задним числом - названием в оси Security агентов ревью |
 | [removed/no-loose-ends](removed/no-loose-ends/README.md) | `dex-skill-no-loose-ends` 1.0.0 | ревью (S1, S2, S3), автор (F1) | снят; TODO без тикета, отключённый тест, debug-вывод - названиями в осях агентов ревью |
 | [removed/output-hygiene](removed/output-hygiene/README.md) | `dex-skill-output-hygiene` 1.2.0 | текст для человека: ревью (H1), ответ в тред (H2) | снят; длинное тире вне набора и «ответ не с результата» - открыто |
@@ -43,3 +43,49 @@
 | [removed/microservices](removed/microservices/README.md) | `dex-skill-microservices` 1.2.1 | ревью (A3), проектирование (D1, D2, D3) | снят |
 | [removed/distributed-resilience](removed/distributed-resilience/README.md) | `dex-skill-distributed-resilience` 1.0.1 | ревью (A3), проектирование (D2) | снят; R-f - названием в Phase 4 `architect`, `architect-dotnet` |
 | [removed/git-workflow](removed/git-workflow/README.md) | `dex-skill-git-workflow` 1.2.1 | автор: коммит и push (W); повторное ревью (C, CB) | снят; конвенции - в свод правил проекта |
+| [dotnet-async-patterns](dotnet-async-patterns/README.md) | `dex-skill-dotnet-async-patterns` 2.2.1 | код (G0, G1, G2), ревью (RV-A); общий заход группы 2.1 | 18 ловушек и чек-лист -> 1 название; A5 удалена |
+| [dotnet-validation](dotnet-validation/README.md) | `dex-skill-dotnet-validation` 1.2.1 | код (G3), ревью (RV-V, RV0) | 19 ловушек и чек-лист -> 3 названия; V14 снята |
+| [dotnet-logging](dotnet-logging/README.md) | `dex-skill-dotnet-logging` 2.4.1 | ревью (RV-L1, RV-L2) | 20 ловушек и чек-лист -> 4 названия |
+| [removed/dotnet-resources](removed/dotnet-resources/README.md) | `dex-skill-dotnet-resources` 1.0.1 | ревью (RV-R) | снят |
+| [dotnet-code-quality](dotnet-code-quality/README.md) | `dex-skill-dotnet-code-quality` 1.1.1 | код (G4), ревью (RV-Q) | 15 ловушек и чек-лист -> 2 названия; Q4, Q11, Q13 сняты по вреду |
+| [dotnet-testing-patterns](dotnet-testing-patterns/README.md) | `dex-skill-dotnet-testing-patterns` 2.0.1 | код (G-T, G0), ревью (RV-T, RV0) | 7 ловушек -> 2 названия |
+| [dotnet-api-development](dotnet-api-development/README.md) | `dex-skill-dotnet-api-development` 2.6.1 | код (G-A), ревью (RV-A, RV0) | 20 ловушек и чек-лист -> 9 названий; D10, D14 возвращены |
+| [dotnet-csproj-hygiene](dotnet-csproj-hygiene/README.md) | `dex-skill-dotnet-csproj-hygiene` 1.3.2 | код (G-P), ревью (RV-C) | 14 ловушек и чек-лист -> 5 названий; NU1603 снят по вреду |
+| [dotnet-resilience](dotnet-resilience/README.md) | `dex-skill-dotnet-resilience` 1.1.1 | код (G-R), ревью (RV-S); общий заход группы 2.2 | 12 ловушек и чек-лист -> 6 названий и H1; S11 снят по вреду |
+| [removed/dotnet-caching](removed/dotnet-caching/README.md) | `dex-skill-dotnet-caching` 1.0.2 | код (G-H), ревью (RV-H) | снят; H1 - в `dotnet-resilience` |
+| [ts-nodejs-api](ts-nodejs-api/README.md) | `dex-skill-ts-nodejs-api` 2.0.1 | поручение на код (K1), ревью (R1); общий заход группы 2.3 | 15 ловушек и чек-лист -> 1 пункт-название (env при старте) |
+| [react](react/README.md) | `dex-skill-react` 1.1.1 | поручение на код (K2), ревью (R2) | 16 ловушек и чек-лист -> 2 пункта-названия |
+| [playwright](playwright/README.md) | `dex-skill-playwright` 1.0.1 | e2e по коду и конфигу (K4, K5) | 17 ловушек и чек-лист -> 2 пункта-названия и 2 H3 как написаны (W12, W13) |
+| [ts-vitest-jest](ts-vitest-jest/README.md) | `dex-skill-ts-vitest-jest` 2.0.1 | unit-тесты (K3) | 10 ловушек и чек-лист -> 4 H3 как написаны (V1, граница #299) |
+| [removed/ts-patterns](removed/ts-patterns/README.md) | `dex-skill-ts-patterns` 2.0.1 | кейсы соседей (K0-K3, R1, R2) | снят; внешние данные через `as` без проверки - закрыты строкой Boundaries `ts-fullstack-assistant` («`unknown` + type guard») |
+| [removed/test-design](removed/test-design/README.md) | `dex-skill-test-design` 1.6.0 | тестописатель с нормой показа красным и без (TW, TW0), ревью записей red-run (TR), баг (BR); мини-проект `parcel` | снят; порог «Negative >= 50%» - шаг 0 |
+| [integration-boundary](integration-boundary/README.md) | `dex-skill-integration-boundary` 1.0.0 | автор: подключение перевозчика (IB), поиск на SQLite (IBF) | 7 ловушек и чек-лист -> 3 названия; слой сборки - открыто |
+| [bug-reproduction](bug-reproduction/README.md) | `dex-skill-bug-reproduction` 1.0.0 | воспроизведение и фикс (BR) | 8 ловушек и чек-лист -> 1 название (heisenbug, открыто) |
+| [removed/contract-drift](removed/contract-drift/README.md) | `dex-skill-contract-drift` 1.1.0 | QA на стенде (CD, CDT) | снят; cd-schema - открыто, #303 |
+| [root-cause-analysis](root-cause-analysis/README.md) | `dex-skill-root-cause-analysis` 1.0.0 | причина 500 и исправление (K1), ничего не менять (K0), инцидент и баги QA (K2, K4); общий заход группы 2.4b | 8 ловушек и чек-лист -> process-skill 2.0.0: порядок из трёх шагов |
+| [change-correlation](change-correlation/README.md) | `dex-skill-change-correlation` 1.0.1 | инцидент на общем стенде (K2), регрессия между релизом и develop (K3) | 8 ловушек и чек-лист -> process-skill 2.0.0: порядок; образ на стенде - фраза по провалу n1 |
+| [post-merge-remediation](post-merge-remediation/README.md) | `dex-skill-post-merge-remediation` 1.0.1 | баги QA после мерджа, общий стенд, оператор по ходам (K4) | 6 ловушек -> process-skill 2.0.0: порядок и гейты; гейт выката по свидетельству |
+| [scalability](scalability/README.md) | `dex-skill-scalability` 1.0.1 | проектирование (D5, D6, D7; SC7 в D1, SC3, SC5 в D3); мини-проект `postline`, общий заход группы 4.1 | 10 ловушек -> 1 название |
+| [adr-quality](adr-quality/README.md) | `dex-skill-adr-quality` 2.4.0 | письмо ADR (W1-W5), ревью (R1, R0A3) | 14 ловушек -> 6 названий; AQ8 - название, форма выше не найдена (ступени 3-4) |
+| [design-quality](design-quality/README.md) | `dex-skill-design-quality` 1.1.2 | ревью дизайна (R2), автор дизайна (D1-D5) | 9 ловушек -> 1 название; DQ3 - открыто |
+| [plan-quality](plan-quality/README.md) | `dex-skill-plan-quality` 1.0.1 | автор плана (P1), ревью плана (R3, R0P3) | 12 ловушек -> 2 названия; PQ6 - в оракуле форма не найдена (ступени 1-4), закрыт формой автора `implementation-plan` |
+| [implementation-plan](plan-quality/README.md#форма-автора-dex-skill-implementation-plan-100-pq6-вне-оракула) | `dex-skill-implementation-plan` 1.0.0 (тело - редакция 1.0.3) | автор плана (P1; P2 - «ничего не менять» для формы); живёт в протоколе `plan-quality` | новый process-skill: поля шага и параллельность по предмету правки; 4 редакции, принята 1.0.3 (PQ6 4/4 против 1/2 контроля) |
+| [removed/cap-consistency](removed/cap-consistency/README.md) | `dex-skill-cap-consistency` 1.1.1 | проектирование (D2, D1), ревью дизайна (R2) | снят |
+| [removed/capacity-planning](removed/capacity-planning/README.md) | `dex-skill-capacity-planning` 1.0.1 | ёмкость (C1), проектирование (D1, D4, D5) | снят |
+| [removed/reference-architectures](removed/reference-architectures/README.md) | `dex-skill-reference-architectures` 1.0.2 | проектирование (D1-D4) | снят |
+| [removed/tech-evaluation](removed/tech-evaluation/README.md) | `dex-skill-tech-evaluation` 1.0.1 | выбор технологии (T1-T3) | снят |
+| [decision-log](decision-log/README.md) | `dex-skill-decision-log` 1.6.1 | поручения аналитику требований (K0-K6, N1, N2); общий заход группы 3.2 | 18 ловушек -> process-skill 2.0.0: процедура владельца, запись, утрата |
+| [unit-identity](unit-identity/README.md) | `dex-skill-unit-identity` 2.1.2 | K1, K3, K4, K5, N1 | 16 ловушек -> process-skill 3.0.0: ключ и дубль, номера указателем, правка |
+| [artifact-naming](artifact-naming/README.md) | `dex-skill-artifact-naming` 1.3.2 | N1, N2, K2 | 10 ловушек -> process-skill 2.0.0: граница конвенции и норма имени |
+| [requirement-quality](requirement-quality/README.md) | `dex-skill-requirement-quality` 1.3.1 | w1-w4, r1-r5, c0, g1 (общий набор группы 3.1, `_projects/rooms`) | 10 ловушек -> process-skill 2.0.0: «Противоречие», вводная оракула, один пункт |
+| [requirement-set-quality](requirement-set-quality/README.md) | `dex-skill-requirement-set-quality` 1.7.0 | r2, r5, c0 | 20 ловушек -> process-skill 2.0.0: рамка пунктом, 3 ловушки как написаны, «Готовность набора» |
+| [nfr](nfr/README.md) | `dex-skill-nfr` 1.2.0 | w2, w2n, r1, r2 | 15 ловушек -> 3 пункта |
+| [functional-requirements](functional-requirements/README.md) | `dex-skill-functional-requirements` 1.2.0 | w2, w2n, r1, c0 | 12 ловушек -> 1 пункт с исходом |
+| [use-case-quality](use-case-quality/README.md) | `dex-skill-use-case-quality` 1.0.0 | w3, r3 | 14 ловушек -> 8 пунктов-названий; принят пункт из `use-cases` |
+| [user-stories](user-stories/README.md) | `dex-skill-user-stories` 1.2.1 | w4, r4 | 18 ловушек и чек-лист -> 4 пункта |
+| [removed/use-cases](removed/use-cases/README.md) | `dex-skill-use-cases` 1.0.2 | w3, r3 | снят; пункт - в `use-case-quality`, реконструкция - `usecase-analyst` |
+| [removed/problem-specification](removed/problem-specification/README.md) | `dex-skill-problem-specification` 1.0.0 | инцидент по тикету QA (K5, `_projects/shipping`) | снят; норма - Phase 1 `incident-investigator` |
+| [removed/api-specification](removed/api-specification/README.md) | `dex-skill-api-specification` 1.1.1 | контракт под требования (G-S); общий заход группы 4.2 | снят; S1, S4, S11 - вердикт двойников #327 |
+| [api-spec-quality](api-spec-quality/README.md) | `dex-skill-api-spec-quality` 1.0.0 | ревью MR контракта (RV-Q), автор контракта (G-S), ничего не менять (N-Q, N-Q2, N-Q3 - не чисты) | 13 ловушек -> вводная и 5 названий; Q11 - дом норматив этапа |
+| [api-testing](api-testing/README.md) | `dex-skill-api-testing` 1.1.1 | тесты по контракту (G-T), ничего не менять в `src/` (N-T) | 11 ловушек и чек-лист -> 1 название (тестовая база) |
+| [api-documentation](api-documentation/README.md) | `dex-skill-api-documentation` 1.1.2 | Swagger к передаче (G-D), правка вне предмета (N0) | 9 ловушек и чек-лист -> 3 названия; A5, A8 - `unverifiable` |

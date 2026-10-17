@@ -6,6 +6,8 @@ const NODE = {
   reviewer: { agentType: 'dex-auto:reviewer', model: 'opus' },
   // без model - замера модели скептика нет (#289).
   skeptic: { agentType: 'dex-auto:skeptic' },
+  // opus - устройство по цене судится до кода, его реализует кодер на sonnet (P114).
+  designer: { agentType: 'dex-auto:designer', model: 'opus' },
   // sonnet - модель кодеров каталога: сверка P75 различает норму, а не модель.
   coder: { agentType: 'dex-auto:coder', model: 'sonnet' },
   // opus - модель контроля dex-debugger: сверка P91 различает норму, а не модель.

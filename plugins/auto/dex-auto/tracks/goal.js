@@ -14,7 +14,7 @@ const degraded = []
 const STATUS = { type: 'string', enum: ['complete', 'blocked', 'partial'] }
 const VERDICT = { type: 'string', enum: ['APPROVE', 'REQUEST_CHANGES', 'NEEDS_DISCUSSION'] }
 const lack = (v, who) => !v ? `${who} не вернул выход` : v.missing || `${who} вернул blocked без нехватки`
-// Трек виден в списке / и зовётся без args: узлы с правом записи на пустом cwd работали бы в дереве сессии.
+// Трек виден в списке / и зовётся без args: узлы с правом записи работали бы без цели и каталога.
 const unfed = (A, fields) => fields.filter(f => !String(A[f] ?? '').trim())
 const why = (e) => String(e && e.message || e).slice(0, 300)
 // <<< shared: contract
@@ -27,6 +27,8 @@ const NODE = {
   reviewer: { agentType: 'dex-auto:reviewer', model: 'opus' },
   // без model - замера модели скептика нет (#289).
   skeptic: { agentType: 'dex-auto:skeptic' },
+  // opus - устройство по цене судится до кода, его реализует кодер на sonnet (P114).
+  designer: { agentType: 'dex-auto:designer', model: 'opus' },
   // sonnet - модель кодеров каталога: сверка P75 различает норму, а не модель.
   coder: { agentType: 'dex-auto:coder', model: 'sonnet' },
   // opus - модель контроля dex-debugger: сверка P91 различает норму, а не модель.
@@ -40,8 +42,8 @@ const NODE = {
 const STR = { type: 'string' }
 const LIST = { type: 'array', items: STR }
 const NUMS = { type: 'array', items: { type: 'integer' } }
-const TRACE = { type: 'object', properties: { where: STR, delivery: STR, diff: STR, kind: { type: 'string', enum: ['breaks', 'refines'] } },
-  required: ['where', 'delivery', 'diff', 'kind'] }
+const TRACE = { type: 'object', properties: { where: STR, delivery: STR, differs: { type: 'boolean' }, diff: STR, kind: { type: 'string', enum: ['breaks', 'refines'] } },
+  required: ['where', 'delivery', 'differs', 'diff', 'kind'] }
 const GAP = { type: 'object', properties: { where: STR, gap: STR }, required: ['where', 'gap'] }
 const GUESS = { type: 'object', properties: { where: STR, decision: STR, cost: STR, covers: NUMS, traces: NUMS },
   required: ['where', 'decision', 'cost', 'covers', 'traces'] }
@@ -68,8 +70,8 @@ if (!p) return done('unverifiable', 'узел пробы не вернул вы�
 if (p.status === 'blocked') return done('unverifiable', lack(p, 'узел пробы'))
 const isObj = (v) => v && typeof v === 'object'
 const gaps = (p.gaps || []).filter(isObj)
-// Строка трассы без различия - пустой diff либо «нет»: модель пишет его вместо пустой строки.
-const trace = (p.trace || []).filter(isObj).map(t => ({ ...t, diff: /^\s*(нет|-)?\s*$/i.test(String(t.diff || '')) ? '' : String(t.diff) }))
+// Различие судится полем differs: текст diff модель заполняет и там, где различия нет («нет», «-», пересказ).
+const trace = (p.trace || []).filter(isObj).map(t => ({ ...t, diff: t.differs === true ? String(t.diff || '').trim() || 'расхождение не описано' : '' }))
 const strayG = new Set(), strayT = new Set(), coveredG = new Set(), coveredT = new Set()
 const pick = (nums, ok, used, stray) => [...new Set(Array.isArray(nums) ? nums : [])].filter(n => {
   const v = Number.isInteger(n) && ok(n)

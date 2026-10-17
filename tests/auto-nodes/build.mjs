@@ -16,9 +16,9 @@ for (const d of readdirSync(join(here, nodeName)).sort()) {
 const PHASE = { reviewer: 'Review', coder: 'Implement', debugger: 'Reproduce', skeptic: 'Falsify' }
 const meta = `export const meta = {\n  name: 'auto-node-${nodeName}',\n  description: 'Прогон узла ${nodeName} на кейсе tests/auto-nodes',\n  phases: [{ title: '${PHASE[nodeName] || 'Review'}' }],\n}\n`
 const src = (f) => `// >>> ${f}\n${readFileSync(join(shared, f), 'utf8')}\n`
-// Схемы диагноста и скептика живут в треке, не в tracks-shared: берутся из bugfix.js и review.js как есть.
+// Схема диагноста живёт в треке, не в tracks-shared: берётся из bugfix.js как есть.
 const fromTrack = (track, name) => readFileSync(join(here, '../../plugins/auto/dex-auto/tracks', track), 'utf8').match(new RegExp(`^const ${name} = [\\s\\S]*?^\\}, required: .*$`, 'm'))[0] + '\n'
-const repro = nodeName === 'debugger' ? fromTrack('bugfix.js', 'REPRO') : nodeName === 'skeptic' ? fromTrack('review.js', 'FALSIFY') : ''
+const repro = nodeName === 'debugger' ? fromTrack('bugfix.js', 'REPRO') : ''
 // Промпт узла - тот же, что в треке: хвост шага кодера сверяется с feature.js, расхождение - отказ сборки (молча разъехавшийся
 // промпт делает меру стенда мерой не того узла, который едет в треке).
 if (nodeName === 'coder') {
@@ -28,6 +28,6 @@ if (nodeName === 'coder') {
   if (!track || track !== bench) { console.error(`промпт кодера стенда разошёлся с feature.js: ${bench} против ${track}`); process.exit(1) }
 }
 
-writeFileSync(out, meta + src('contract.js') + src('nodes.js') + src('domain.js') + src('self-review.js') + repro
+writeFileSync(out, meta + src('contract.js') + src('nodes.js') + src('domain.js') + src('falsify.js') + src('self-review.js') + repro
   + `const CASES = ${JSON.stringify(cases, null, 2)}\n` + readFileSync(join(here, nodeName, 'node.js'), 'utf8'))
 console.log(out)

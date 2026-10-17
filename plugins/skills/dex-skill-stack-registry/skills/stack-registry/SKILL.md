@@ -40,7 +40,7 @@ description: Реестр стеков и правило загрузки про
 него**. Грузить весь `dex-skill-<стек>-*` запрещено - только релевантное теме.
 
 - **Плохо:** определил стек `dotnet` -> загрузил всё семейство `dex-skill-dotnet-*`.
-- **Правильно:** стек `dotnet` + тема «N+1 / медленный запрос» -> `dex-skill-dotnet-ef-core`; тема «дедлок async» -> `dex-skill-dotnet-async-patterns`.
+- **Правильно:** стек `dotnet` + тема «N+1 / медленный запрос» -> `dex-skill-dotnet-ef-core`; тема «фальшивый async» -> `dex-skill-dotnet-async-patterns`.
 - **Почему:** нерелевантные skills раздувают контекст и зашумляют чек-лист находками не по теме. Отбор = пересечение двух осей, а не одна ось «весь стек».
 
 **Как конструировать имена.** Из видимого списка available-skills отфильтруй по
@@ -65,7 +65,7 @@ skill видны агенту **до** загрузки (тело SKILL.md - н�
 Часть skills не привязана к языку backend и грузится **по теме**, в дополнение к
 стековым, независимо от детектированного стека:
 
-- архитектура/принципы - `dex-skill-solid`, `dex-skill-testability`, `dex-skill-nfr`;
+- архитектура/принципы - `dex-skill-solid`, `dex-skill-testability`;
 - инфраструктура - `dex-skill-docker`, `dex-skill-kubernetes`, `dex-skill-observability`;
 - CI - `dex-skill-ci-gates` (минимум гейтов, платформо-агностично) плюс skill своей платформы (`dex-skill-github-actions`, `dex-skill-gitlab-ci`, `dex-skill-jenkins`, `dex-skill-teamcity`);
 - frontend/E2E - `dex-skill-react`, `dex-skill-playwright` (по теме «фронт/SPA/E2E», не по backend-стеку).

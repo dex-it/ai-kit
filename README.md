@@ -232,6 +232,7 @@ claude plugins uninstall dex-dotnet-coder
 | dex-incident-investigator | `/investigate` | расследование инцидента на общем стенде |
 | dex-debugger | `/root-cause` | поиск корневой причины бага по коду |
 | dex-doc-writer | `/documentation` | документирование по жанру и стандарту |
+| dex-skill-subagent-dispatch | `/do` | задача сам или цепочкой исполнителей по правилам скилла раздачи (экспериментально) |
 
 ## Skills (Level 1)
 
@@ -240,15 +241,15 @@ claude plugins uninstall dex-dotnet-coder
 | Категория | Skills |
 |-----------|--------|
 | **Контракт и адресация артефактов** | `node-contract`, `docs-layout`, `project-docs-map`, `issue-tracking`, `artifact-naming`, `unit-identity`, `decision-log`, `stack-registry` |
-| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `agile`, `epic-planning`, `prioritization`, `user-stories`, `use-cases`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `bpmn`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
+| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `agile`, `epic-planning`, `prioritization`, `user-stories`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `bpmn`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
 | **Оракулы качества артефактов** | `requirement-quality`, `requirement-set-quality`, `use-case-quality`, `adr-quality`, `design-quality`, `plan-quality`, `api-spec-quality`, `completeness-mapping`, `fact-verification`, `legacy-reconstruction`, `verification-planning-29119`, `bdd-gherkin` |
-| **Архитектура и дизайн** | `ddd`, `solid`, `scalability`, `cap-consistency`, `capacity-planning`, `reference-architectures`, `tech-evaluation`, `api-specification`, `architecture-definition-42010`, `interface-definition-openapi` |
+| **Архитектура и дизайн** | `ddd`, `solid`, `scalability`, `architecture-definition-42010`, `interface-definition-openapi`, `implementation-plan` |
 | **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `karpathy-guidelines`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
 | **Раздача работы исполнителям (экспериментально)** | `subagent-dispatch` |
-| **QA и тестирование** | `test-design`, `api-testing`, `test-coverage`, `testability`, `integration-boundary`, `exploratory-testing`, `bug-reproduction`, `contract-drift`, `deep-audit`, `tech-audit`, `playwright`, `stand-verification` |
-| **Инциденты и RCA** | `problem-specification`, `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
-| **.NET** | `dotnet-api-development`, `dotnet-async-patterns`, `dotnet-caching`, `dotnet-code-quality`, `dotnet-csproj-hygiene`, `dotnet-ef-core`, `dotnet-logging`, `dotnet-resilience`, `dotnet-resources`, `dotnet-testing-patterns`, `dotnet-validation`, `api-documentation` |
-| **Frontend и TypeScript** | `react`, `ts-patterns`, `ts-nodejs-api`, `ts-vitest-jest` |
+| **QA и тестирование** | `api-testing`, `test-coverage`, `testability`, `integration-boundary`, `exploratory-testing`, `bug-reproduction`, `deep-audit`, `tech-audit`, `playwright`, `stand-verification` |
+| **Инциденты и RCA** | `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
+| **.NET** | `dotnet-api-development`, `dotnet-async-patterns`, `dotnet-code-quality`, `dotnet-csproj-hygiene`, `dotnet-ef-core`, `dotnet-logging`, `dotnet-resilience`, `dotnet-testing-patterns`, `dotnet-validation`, `api-documentation` |
+| **Frontend и TypeScript** | `react`, `ts-nodejs-api`, `ts-vitest-jest` |
 | **Инфраструктура** | `docker`, `kubernetes`, `rabbitmq`, `kafka`, `elasticsearch`, `redis`, `mongodb`, `gitlab-ci`, `github-actions`, `jenkins`, `teamcity`, `observability` |
 | **ML и Python** | `python-pytorch`, `python-tensorflow`, `python-classical-ml`, `python-nlp-transformers`, `python-computer-vision`, `python-ml-optimization`, `python-project-hygiene` |
 
@@ -335,7 +336,7 @@ Windows: `install-bundle\install-cli-tools.ps1` (winget / scoop / choco).
 
 | Мод | Команда | Описание |
 |-----|---------|----------|
-| dex-github-pr-tracker | `/pr` | Pull request GitHub репозитория из папки сессии: состояние, merge state status, исход обязательных проверок, вердикт ревью и апрувы, открытые и решённые треды с комментариями, коммиты - строкой над вводом и панелью; изменения приходят тостом и строкой в транскрипт, `/pr threads` и `/pr checks` отдают треды и упавшие проверки текстом для модели. Нескольких PR сразу сводит `/pr list` - общий список с итогом и входом в детали; `/pr repo` называет репозиторий, когда сессия открыта не в клоне |
+| dex-github-pr-tracker | `/pr` | Pull request GitHub репозитория из папки сессии: состояние, merge state status, исход обязательных проверок, вердикт ревью и апрувы, открытые и решённые треды с комментариями, коммиты - строкой над вводом и панелью; изменения приходят тостом и строкой в транскрипт, `/pr threads` и `/pr checks` отдают треды и упавшие проверки текстом для модели. Нескольких PR сразу сводит `/pr list` - общий список с итогом и входом в детали; `/pr open` и `/pr week` берут под наблюдение все открытые PR либо все за неделю; кнопки «ревью» и «поправить» отдают PR на ревью, а открытые треды - фоновому агенту; `/pr repo` называет репозиторий, когда сессия открыта не в клоне |
 | dex-gitlab-mr-tracker | `/mr` | Merge request GitLab проекта из папки сессии: состояние, merge status, пайплайн, апрувы, открытые и решённые треды с комментариями, коммиты - строкой над вводом и панелью; изменения приходят тостом и строкой в транскрипт, `/mr threads` отдаёт треды текстом для модели. Нескольких MR сразу сводит `/mr list` - общий список с итогом и входом в детали; `/mr repo` называет проект, когда сессия открыта не в клоне |
 
 Два трекера одной формы: строка, панель, общий список наблюдения, команды и настройки у них совпадают, различия идут от хостингов и названы в README каждого.
@@ -477,4 +478,4 @@ GPL v3.0 - см. [LICENSE](./LICENSE)
 
 ---
 
-**DEX Team** - Version 6.11.0
+**DEX Team** - Version 6.19.0

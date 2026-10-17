@@ -3,7 +3,7 @@
 // they carry the address of every thread (file, line, author, link) and no
 // decoration the model would have to parse past.
 
-import type { MrData } from './gitlab.ts'
+import type { MrData, Thread } from './gitlab.ts'
 import { ATTENTION_MANY, ATTENTION_ONE, overviewOf, reasonOf } from './overview.ts'
 import { approvalsGiven, threadTally } from './gitlab.ts'
 import type { Watched } from './watched.ts'
@@ -70,24 +70,19 @@ export function statusText(watched: Watched): string {
 }
 
 /**
- * The open threads as a task list: one entry per thread, addressed by file
- * and line so the reader can open it without another call.
+ * Треды списком задач: по блоку на тред, адрес - файл и строка, чтобы читатель
+ * открыл тред без лишнего вызова. Номер в скобках - тот, по которому
+ * `/mr fix N` отдаёт тред фиксеру; нумерация идёт по порядку `openThreadsOf`.
  */
-export function threadsText(watched: Watched, max = THREADS_TEXT_MAX_CHARS): string {
-  const data = watched.data
-
-  if (!data) return `${watched.label}: данных ещё нет`
-
-  const open = openThreadsOf(data)
-
-  if (open.length === 0) {
-    const resolved = resolvedThreadsOf(data).length
-
-    return `${watched.label}: открытых тредов нет${resolved > 0 ? ` (закрыто ${resolved})` : ''}`
-  }
-
+export function threadsListText(
+  watched: Watched,
+  data: MrData,
+  threads: readonly Thread[],
+  title: string,
+  max = THREADS_TEXT_MAX_CHARS,
+): string {
   const head = [
-    `**Открытые треды ${watched.label}** - ${open.length} из ${threadTally(data.threads).resolvable}`,
+    `**${title} ${watched.label}** - ${threads.length} из ${threadTally(data.threads).resolvable}`,
     data.webUrl,
     '',
   ].join('\n')
@@ -96,7 +91,7 @@ export function threadsText(watched: Watched, max = THREADS_TEXT_MAX_CHARS): str
   let length = head.length
   let shown = 0
 
-  for (const thread of open) {
+  for (const [index, thread] of threads.entries()) {
     const where =
       thread.file === null
         ? 'обсуждение MR'
@@ -105,7 +100,7 @@ export function threadsText(watched: Watched, max = THREADS_TEXT_MAX_CHARS): str
     // Каждый тред - свой блок с пустой строкой после: адрес, кто и сколько,
     // само замечание, ссылка. Сплошной список слипается и глазом, и в разборе.
     const entry = [
-      `- **${where}**`,
+      `- [${index + 1}] **${where}**`,
       `  ${thread.author}, комментариев ${thread.notes}, последний от ${thread.lastAuthor}`,
       `  ${thread.body}`,
       `  ${thread.url}`,
@@ -119,9 +114,26 @@ export function threadsText(watched: Watched, max = THREADS_TEXT_MAX_CHARS): str
     shown += 1
   }
 
-  if (shown < open.length) lines.push(`- ... ещё ${open.length - shown} тредов, см. ${data.webUrl}`)
+  if (shown < threads.length) lines.push(`- ... ещё ${threads.length - shown} тредов, см. ${data.webUrl}`)
 
   return lines.join('\n')
+}
+
+/** Открытые треды MR текстом: то, что `/mr threads` печатает и что едет в промпт. */
+export function threadsText(watched: Watched, max = THREADS_TEXT_MAX_CHARS): string {
+  const data = watched.data
+
+  if (!data) return `${watched.label}: данных ещё нет`
+
+  const open = openThreadsOf(data)
+
+  if (open.length === 0) {
+    const resolved = resolvedThreadsOf(data).length
+
+    return `${watched.label}: открытых тредов нет${resolved > 0 ? ` (закрыто ${resolved})` : ''}`
+  }
+
+  return threadsListText(watched, data, open, 'Открытые треды', max)
 }
 
 /** The one-line answer `/mr` prints when it has nothing to draw a pane for. */

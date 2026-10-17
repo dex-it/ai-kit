@@ -36,18 +36,6 @@
     "prompt": "Нужно выровнять карточки в сетке по высоте, чтобы кнопка всегда прижималась к низу. Как это сделать на CSS grid?"
   },
   {
-    "id": "capacity-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-capacity-planning:capacity-planning",
-    "prompt": "Сколько железа заложить под сервис, если ждём 2 млн событий в сутки и пик втрое выше среднего? Прикинь на салфетке."
-  },
-  {
-    "id": "test-design-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-test-design:test-design",
-    "prompt": "Есть форма с полем «возраст» от 18 до 65 и скидкой по трём условиям. Какие тесты писать, чтобы не гонять все комбинации подряд?"
-  },
-  {
     "id": "docker-in",
     "mode": "in-scope",
     "expect": "dex-skill-docker:docker",
@@ -81,19 +69,19 @@
     "id": "api-documentation-in",
     "mode": "in-scope",
     "expect": "dex-skill-api-documentation:api-documentation",
-    "prompt": "Swagger показывает 200 на всех методах, хотя половина отдаёт 404 и 409. Как привести схему в порядок и не забыть про генерацию клиента?"
+    "prompt": "Отдаём мобильной команде Swagger нашего ASP.NET Core API: в схемах запросов вместо примеров \"string\" и 0, клиент они генерируют из swagger.json. Что поправить в документации?"
   },
   {
-    "id": "api-specification-in",
+    "id": "api-spec-quality-in",
     "mode": "in-scope",
-    "expect": "dex-skill-api-specification:api-specification",
-    "prompt": "Проектирую эндпоинты для списка платежей: как назвать, как отдавать страницы и что делать, когда потребуется поменять формат ответа?"
+    "expect": "dex-skill-api-spec-quality:api-spec-quality",
+    "prompt": "Прими MR нашей OpenAPI-спеки перед согласованием: добавили операцию продления брони и сделали новое поле запроса обязательным, назвав версию совместимой. Вынеси вердикт по контракту."
   },
   {
     "id": "api-testing-in",
     "mode": "in-scope",
     "expect": "dex-skill-api-testing:api-testing",
-    "prompt": "Пишу интеграционные тесты на наш HTTP-слой. Какие сценарии обязательно закрыть кроме успешного?"
+    "prompt": "Пишу интеграционные тесты на наш HTTP API на ASP.NET Core через WebApplicationFactory. Пересечение броней у нас ловит ограничение в Postgres. Какую базу поднимать в тестах?"
   },
   {
     "id": "artifact-naming-in",
@@ -117,13 +105,7 @@
     "id": "bug-reproduction-in",
     "mode": "in-scope",
     "expect": "dex-skill-bug-reproduction:bug-reproduction",
-    "prompt": "Тестировщик пишет «иногда не сохраняется». Как довести это до повторяемого случая, который можно отдать разработчику?"
-  },
-  {
-    "id": "cap-consistency-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-cap-consistency:cap-consistency",
-    "prompt": "Баланс пользователя читается из реплики и иногда отстаёт от списания. Насколько это нормально и когда так делать нельзя?"
+    "prompt": "Баг с двойным списанием воспроизводится на стенде, но стоит добавить логирование вокруг оплаты или поставить брейкпоинт - и он пропадает. Как его поймать?"
   },
   {
     "id": "change-correlation-in",
@@ -136,12 +118,6 @@
     "mode": "in-scope",
     "expect": "dex-skill-ci-gates:ci-gates",
     "prompt": "Пайплайн зелёный, а в main приезжает нерабочий код. Какие проверки должны стоять перед мержем?"
-  },
-  {
-    "id": "contract-drift-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-contract-drift:contract-drift",
-    "prompt": "Мобилка падает после нашего релиза: у нас поле стало необязательным, а они его читают. Как это ловить заранее?"
   },
   {
     "id": "core-dumps-in",
@@ -177,31 +153,25 @@
     "id": "dotnet-api-dev-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-api-development:dotnet-api-development",
-    "prompt": "Делаю контроллер выдачи заказов на ASP.NET Core: как разложить DTO, маршруты и постраничную выдачу?"
+    "prompt": "В контроллере ASP.NET Core создание заказа отвечает 200, идентификатор заказа приходит в query, а маршруты не похожи на соседние контроллеры. Как привести эндпоинты в порядок?"
   },
   {
     "id": "dotnet-async-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-async-patterns:dotnet-async-patterns",
-    "prompt": "В C# сервисе висит запрос: внутри синхронно ждём результат асинхронного метода. Как правильно переписать и как отменять по таймауту?"
-  },
-  {
-    "id": "dotnet-caching-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-dotnet-caching:dotnet-caching",
-    "prompt": "В .NET сервисе хочу закэшировать справочник в памяти и корректно сбрасывать его при обновлении. Что использовать?"
+    "prompt": "В C# сервисе метод помечен async, но внутри Task.Run оборачивает синхронное чтение файла, хотя у этого API есть асинхронная версия. Как переписать?"
   },
   {
     "id": "dotnet-code-quality-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-code-quality:dotnet-code-quality",
-    "prompt": "Билд .NET проекта сыпет предупреждениями, их все игнорируют. Как включить контроль и не утонуть в подавлениях?"
+    "prompt": "В .NET решении включили категории анализаторов в .editorconfig, а правила безопасности так и не стали ошибками сборки; NuGet-аудит молчит про транзитивные уязвимости. Что не так с настройкой?"
   },
   {
     "id": "dotnet-csproj-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene",
-    "prompt": "В решении на C# у каждого проекта своя версия одного пакета, и транзитивные зависимости тянутся куда попало. Как это причесать?"
+    "prompt": "Новый проект в C# решении повторил в csproj TargetFramework и Nullable из Directory.Build.props, а в библиотеке включён CopyLocalLockFileAssemblies. Что поправить в csproj?"
   },
   {
     "id": "dotnet-logging-in",
@@ -213,25 +183,19 @@
     "id": "dotnet-resilience-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-resilience:dotnet-resilience",
-    "prompt": "Наш HttpClient в C# валится, когда соседний сервис моргает. Хочу повторы и защиту, но боюсь задублировать платежи."
-  },
-  {
-    "id": "dotnet-resources-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-dotnet-resources:dotnet-resources",
-    "prompt": "В .NET сервисе память растёт весь день и не отдаётся после сборки мусора, а исходящие HTTP-запросы со временем начинают падать. Что не освобождается?"
+    "prompt": "Повторы к поставщику в C# стоят в сервисе, который вызывает клиент, общего таймаута нет, а на промахе кэша все запросы разом идут к поставщику. Как защитить вызов?"
   },
   {
     "id": "dotnet-testing-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-testing-patterns:dotnet-testing-patterns",
-    "prompt": "Пишу тесты на C# сервис, половина падает через раз в зависимости от порядка запуска. Как правильно оформить и как разложить проверки?"
+    "prompt": "Unit-тесты C# сервиса на Moq проверяют только Verify вызовов, а моки возвращают другие моки. Как переписать тесты, чтобы проверялось поведение?"
   },
   {
     "id": "dotnet-validation-in",
     "mode": "in-scope",
     "expect": "dex-skill-dotnet-validation:dotnet-validation",
-    "prompt": "В .NET API прилетает DTO с пустыми полями и отрицательной суммой, падает уже в базе. Где и как проверять вход, и что отдавать клиенту?"
+    "prompt": "В .NET API у входного DTO строки без ограничения длины, а список правил принимается любого размера и без проверки самих правил. Как навести порядок в FluentValidation?"
   },
   {
     "id": "elasticsearch-in",
@@ -261,7 +225,7 @@
     "id": "functional-requirements-in",
     "mode": "in-scope",
     "expect": "dex-skill-functional-requirements:functional-requirements",
-    "prompt": "Из сценария оформления заказа надо получить требования. Как их формулировать, чтобы каждое можно было проверить?"
+    "prompt": "Пишу правила FR по фиче: часть вывожу прямо из бизнес-требований BR, хотя сценарии на эти цели уже разобраны. Так можно, или правило надо брать из шага сценария?"
   },
   {
     "id": "github-actions-in",
@@ -339,7 +303,7 @@
     "id": "nfr-in",
     "mode": "in-scope",
     "expect": "dex-skill-nfr:nfr",
-    "prompt": "Заказчик говорит «должно быть быстро и надёжно». Как превратить это в требование, которое можно проверить?"
+    "prompt": "Заказчик хочет доступность 99,9%. Записать это как аптайм серверов? И откуда вообще брать число для такой меры?"
   },
   {
     "id": "observability-in",
@@ -363,13 +327,34 @@
     "id": "plan-quality-in",
     "mode": "in-scope",
     "expect": "dex-skill-plan-quality:plan-quality",
-    "prompt": "Готовлю план реализации фичи по шагам. По каким признакам судить, что план годится и по нему можно начинать работу?"
+    "prompt": "Готовлю план реализации фичи по шагам. По каким признакам судить, что план годится и по нему можно начинать работу?",
+    "plugins": [
+      "dex-skill-implementation-plan"
+    ]
+  },
+  {
+    "id": "implementation-plan-in",
+    "mode": "in-scope",
+    "expect": "dex-skill-implementation-plan:implementation-plan",
+    "prompt": "Пишу план реализации миграции на шаги. Что записать у каждого шага и как решить, какие шаги можно вести параллельно?",
+    "plugins": [
+      "dex-skill-plan-quality"
+    ]
+  },
+  {
+    "id": "implementation-plan-near-review",
+    "mode": "near-miss",
+    "expect": "dex-skill-implementation-plan:implementation-plan",
+    "prompt": "Коллега прислал готовый план реализации на приёмку. По каким признакам его судить и что считать дефектом плана?",
+    "plugins": [
+      "dex-skill-plan-quality"
+    ]
   },
   {
     "id": "playwright-in",
     "mode": "in-scope",
     "expect": "dex-skill-playwright:playwright",
-    "prompt": "E2E-тесты в браузере то проходят, то нет: то элемент не успел появиться, то предыдущий тест оставил состояние. Как писать правильно?"
+    "prompt": "В e2e на Playwright каждый тест сам проходит форму логина, а локаторы завязаны на CSS-классы - после редизайна упал весь набор. Как писать правильно?"
   },
   {
     "id": "post-merge-in",
@@ -382,12 +367,6 @@
     "mode": "in-scope",
     "expect": "dex-skill-prioritization:prioritization",
     "prompt": "В бэклоге сорок задач, все «важные». Как расставить порядок так, чтобы это можно было объяснить заказчику?"
-  },
-  {
-    "id": "problem-spec-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-problem-specification:problem-specification",
-    "prompt": "Прежде чем искать причину сбоя, хочу чётко описать саму проблему: где проявляется, а где нет. Как это правильно сделать?"
   },
   {
     "id": "product-discovery-in",
@@ -447,19 +426,13 @@
     "id": "react-in",
     "mode": "in-scope",
     "expect": "dex-skill-react:react",
-    "prompt": "Компонент перерисовывается на каждый ввод символа, а запрос в эффекте уходит дважды. Как это чинится?"
-  },
-  {
-    "id": "reference-arch-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-reference-architectures:reference-architectures",
-    "prompt": "Начинаем ленту постов с подписками с нуля. Какие есть типовые схемы доставки постов подписчикам и по какому признаку между ними выбирать?"
+    "prompt": "Поиск в React-компоненте шлёт запрос на сервер на каждый введённый символ, а строки списка в memo всё равно перерисовываются. Как это чинится?"
   },
   {
     "id": "requirement-quality-in",
     "mode": "in-scope",
     "expect": "dex-skill-requirement-quality:requirement-quality",
-    "prompt": "Вот формулировка: «Система должна быстро обрабатывать запросы пользователей». Что с ней не так как с требованием?"
+    "prompt": "Вот требование: «Бронь подтверждается не позже 2 с после оплаты. Проверка: пример на данных», а принятый ADR говорит, что результат оплаты приходит вебхуком до 60 с. Что с этим требованием не так?"
   },
   {
     "id": "requirement-set-quality-in",
@@ -495,7 +468,7 @@
     "id": "scalability-in",
     "mode": "in-scope",
     "expect": "dex-skill-scalability:scalability",
-    "prompt": "Сервис держит сессию в памяти инстанса, из-за чего второй инстанс не помогает. Плюс шардирование по остатку от деления упирается в один горячий шард. Что делать?"
+    "prompt": "Шардируем события аналитики по author_id, а один крупный автор даёт почти десятую часть всего потока - его узел перегружен. Как разложить данные?"
   },
   {
     "id": "shared-stand-in",
@@ -528,12 +501,6 @@
     "prompt": "Команда прислала RFC на новый сервис уведомлений. Проведи аудит предложения: что будет, если не делать, какие альтернативы не рассмотрены и что оно ломает у потребителей."
   },
   {
-    "id": "tech-evaluation-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-tech-evaluation:tech-evaluation",
-    "prompt": "Выбираем между managed-сервисом и своим развёртыванием. Как сравнить честно, а не по популярности?"
-  },
-  {
     "id": "testability-in",
     "mode": "in-scope",
     "expect": "dex-skill-testability:testability",
@@ -543,25 +510,13 @@
     "id": "ts-nodejs-api-in",
     "mode": "in-scope",
     "expect": "dex-skill-ts-nodejs-api:ts-nodejs-api",
-    "prompt": "На Node.js сервере ошибка в асинхронном обработчике не доходит до middleware и роняет процесс. Как правильно обрабатывать?"
-  },
-  {
-    "id": "ts-patterns-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-ts-patterns:ts-patterns",
-    "prompt": "В TypeScript тип говорит, что поле есть, а в рантайме приходит undefined из внешнего ответа. Как это правильно закрыть?"
+    "prompt": "Express-сервис стартует без PAYMENT_URL в окружении и падает только на первом платеже через полчаса после выкатки. Как это должно быть устроено?"
   },
   {
     "id": "unit-identity-in",
     "mode": "in-scope",
     "expect": "dex-skill-unit-identity:unit-identity",
     "prompt": "Переформулировали принятое требование. Это правка старого номера или новая единица? И что делать с задвоенным по смыслу?"
-  },
-  {
-    "id": "use-cases-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-use-cases:use-cases",
-    "prompt": "Как описать сценарий возврата товара: кто действует, что идёт по шагам и куда девать ветку «денег не хватило»?"
   },
   {
     "id": "user-stories-in",
