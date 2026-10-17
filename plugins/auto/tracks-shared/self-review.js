@@ -25,9 +25,8 @@ const FIX = { type: 'object', properties: {
 const REVIEW = { type: 'object', properties: {
   status: STATUS,
   findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text,
-    closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise,
-    continues: { type: 'string', description: 'id прежней находки из перечня, чьё решение находка продолжает новым путём; иначе пусто' } },
-  required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise', 'continues'] }, description: 'только находки, которых нет в перечне прежних' },
+    closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
+  required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }, description: 'только находки, которых нет в перечне прежних' },
   axes: AXES,
   roots: ROOTS,
   'run-status': { type: 'string', description: 'прогон свой, не пересказ входа' },
@@ -35,7 +34,7 @@ const REVIEW = { type: 'object', properties: {
   'fact-check': FACT_CHECK('техутверждения находок о стороннем API'),
   'conventions-read': CONVENTIONS_READ,
   intent: { type: 'string', description: 'сверка с источником намерения входа: соответствует / расхождения «корректно, но не то»; источника нет - n/a' },
-  'intent-status': { type: 'string', enum: ['match', 'mismatch', 'n/a'], description: 'mismatch - сделано не то, чего требует источник намерения входа; подробности в intent' },
+  'intent-status': { type: 'string', enum: ['match', 'mismatch', 'n/a'], description: 'mismatch - сделано не то, чего требует источник намерения входа: подробности в intent, каждое расхождение - ещё и находка P0/P1: новая - в findings, из перечня - открытой записью prior' },
   prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня прежних - запись с её id, статус с уликой; перечня нет - пусто' },
   'review-verdict': { ...VERDICT, description: 'сигнал оператору, порог допуска трека его не читает' },
   missing: { type: 'string', description: 'при blocked - чего не хватило для ревью; иначе пусто' },
@@ -50,8 +49,6 @@ const coderInput = (f) => f ? `\nВход от кодера - план:\n${(f.pl
 const authorGap = (f, offeredOnly = false) => !f ? '' : f.status === 'partial' && !offeredOnly ? `кодер вернул partial: ${f.missing || f['run-status'] || 'нехватка не названа'}` : (f['fact-check'] || []).some(c => c.status === 'contradicted') ? `fact-check кодера: contradicted - ${f['fact-check'].filter(c => c.status === 'contradicted').map(c => `${c.claim} (${c.source})`).join('; ')}` : ''
 // partial правки одних offered итога не держит: её находки порога не держат; partial реализации держит (domain.md §4).
 const coderGap = (fix, fix2, offeredOnly) => offeredOnly ? authorGap(fix) || authorGap(fix2, true) : authorGap(fix2 || fix)
-// Место находки, дописанное скептиком (places), есть только в реестре: без него решение на этом месте числится без находки.
-const reviewGap = (r, reg = []) => !r || r.status === 'blocked' ? '' : r.status === 'partial' ? `саморевью не завершено: ${r.missing || 'нехватка не названа'}` : r['intent-status'] === 'mismatch' ? `саморевью: реализовано не то: ${r.intent}` : axesGap(r.axes, r.findings) ? `саморевью: ${axesGap(r.axes, r.findings)}` : rootsGap(r.roots, [...(r.findings || []), ...(r.prior || []), ...reg]) ? `саморевью: ${rootsGap(r.roots, [...(r.findings || []), ...(r.prior || []), ...reg])}` : ''
 // Порог допуска: зелёная верификация и ноль открытых P0/P1 реестра прогона; review-verdict - сигнал оператору, порог его не читает.
 const stuckLine = (p) => `${p.id} ${p.status} - ${awaitsProbe(p) ? `нужна проба оператора: ${p.premise}` : p.evidence}`
 const admit = (green, rev, stuck, gaps) => !green ? 'верификация после правки по саморевью не прошла'
@@ -65,49 +62,31 @@ const listedLine = (p) => `${priorLine(p)}${p.status === 'closed' ? ' (закр�
 // Ревизия - поле head_sha: head - текст git log, у модели-верификатора его первое слово не обязано быть sha.
 const shaOf = (v) => isSha(String(v && v.head_sha || '').trim()) ? String(v.head_sha).trim() : ''
 const isSha = (x) => /^[0-9a-f]{7,40}$/i.test(String(x || ''))
-// Ветку до head ревью complete уже прочли: повторное чтение всего диффа ветки - главная статья прогона дочистки.
-// Ревью с разрывом снимка либо скептика базой не служит: дельта от него унесла бы непроверенное из объёма.
+// Ветку до head ревью либо сверки complete уже прочли: повторное чтение всего диффа ветки - главная статья прогона дочистки.
 // Диагноз либо разведка, выведенные узлом, а не взятые из ledger, - новое намерение: ревью до них судили прежнее.
 const INTENT_STEPS = ['1-repro', '1-req']
+// Шаг 3-repeat пишут прогоны до 9.2.0 - их trail ещё читается из ledger.
 const priorBase = (trail) => {
   const all = steps(trail), from = all.reduce((k, e, i) => INTENT_STEPS.includes(e.step) && !/^ledger/.test(e.doer || '') ? i : k, -1)
-  return (all.slice(from + 1).filter(e => (e.step === 3 || e.step === '3-repeat') && e.status === 'complete' && e.settled !== false && isSha(e.head)).pop() || {}).head || ''
+  return (all.slice(from + 1).filter(e => [3, '3-check', '3-repeat'].includes(e.step) && e.status === 'complete' && e.settled !== false && isSha(e.head)).pop() || {}).head || ''
 }
 const scope = (base) => base ? `дельта от ${base} - коммиты после него плюс рабочее дерево. Новые находки ищи в дельте, вне её - только сломанное правкой дельты; статус прежних находок перечня суди на текущем коде. ${base} не предок HEAD - ревью по всем коммитам цели.` : 'коммиты этой цели плюс рабочее дерево.'
-// Пара «новая - прежняя» - факт поля узла: какой механизм тот же, судит ревьюер, трек лишь сверяет id с поданным перечнем.
-// Находка с пробой с любой стороны пары кодеру не подаётся - размотать её ему нечем (I10).
-// В реестре - запись скептика, его текст и место могут отличаться от ревьюера: id ищется по пересечению места и оси.
-// Пара заводится только у находки, которая правится в прогоне: иначе кодеру задано размотать то, что ему не подано.
-const pairsOf = (reg, r, listed, degraded) => (r && r.status !== 'blocked' ? r.findings : []).filter(f => String(f.continues || '').trim()).map(f => {
-  const of = String(f.continues).trim(), earlier = listed.find(q => q.id === of), shut = shutBy(r)
-  const at = reg.all().find(q => !listed.some(l => l.id === q.id) && sameSpot(q.anchor, f.anchor) && (q.axis || '') === (f.axis || '')) || listed.find(q => q.anchor === f.anchor && q.axis && q.axis === f.axis && !shut.includes(q.id))
-  if (!toFix(at || { ...f, status: 'open' })) return null
-  if (!earlier) { degraded.push(`саморевьюер: находка ${f.anchor} продолжает ${of} - id вне поданного перечня, пара не принята`); return null }
-  if (awaitsProbe(earlier)) return null
-  return { id: at ? at.id : f.anchor, of }
-}).filter(Boolean)
-const unwindOf = (chain, listed) => chain.length ? `\nНовый путь прежнего механизма: ${chain.map(p => `${p.id} продолжает ${p.of}`).join('; ')}. Прежние:\n${listed.filter(q => chain.some(p => p.of === q.id)).map(findingLine).join('\n')}\nРазмотай решение по всем входам и состояниям, где оно ошибается, и закрой разом; пути - в evidence записи prior.` : ''
-const pairDecision = (p) => `${p.id} продолжает ${p.of}: правка по ${p.of} закрыла путь, а не механизм - кодеру задано размотать решение, повторное ревью куплено`
-const pairLeft = (p) => `${p.id} продолжает ${p.of}: механизм не размотан правкой по находкам`
 const HUNKS = { type: 'object', properties: {
   status: STATUS,
-  hunks: { type: 'array', items: { type: 'string' }, description: 'путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file' },
+  hunks: { type: 'array', items: { type: 'string' }, description: 'путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file; переименованный - ещё и старый путь, как удалённый' },
   conventions: CONVENTIONS.conventions, 'conventions-searched': CONVENTIONS['conventions-searched'],
   missing: { type: 'string' },
 }, required: ['status', 'hunks', 'conventions', 'conventions-searched', 'missing'] }
 const OWN_COMMITS = 'git rev-list HEAD --not --exclude="$(git branch --show-current)" --branches'
 // Места правки считает скрипт: арифметику заголовков @@ модель путает на единицу; узлу остаётся отсев файлов тестов.
-// Сомнение, относится ли документ к правке, снимок выражал статусом partial - и тот покупал повторное ревью.
+// Сомнение, относится ли документ к правке, - не неполнота снимка: partial снимка - строка degraded.
 const HUNKS_STATUS = 'Документ, о котором неясно, относится ли он к правке, включи в conventions. status - complete, когда места сняты; partial - только когда места сняты не целиком.'
 const hunksAsk = (base) => A.scripts ? `ТОЛЬКО перечень мест правки и правил проекта, код не менять. Выполни python3 '${A.scripts}/verify.py' --hunks${base ? ` ${base}` : ''}: hunks - поле hunks его вывода как есть, без файлов тестов; поле error в выводе либо вывод не JSON - status partial, error либо последние строки вывода в missing. ${conventionsAsk} ${HUNKS_STATUS}`
-  : `ТОЛЬКО перечень мест правки и правил проекта, код не менять. ${base ? `git diff -U0 ${base}; ${base} не предок HEAD (git merge-base --is-ancestor) - как без базы. ` : ''}Без базы - git diff -U0 "$(${OWN_COMMITS} | tail -1)^", своих коммитов нет - git diff -U0 HEAD. Место - путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file. Файлы тестов не включай. ${conventionsAsk} ${HUNKS_STATUS}`
+  : `ТОЛЬКО перечень мест правки и правил проекта, код не менять. ${base ? `git diff -U0 ${base}; ${base} не предок HEAD (git merge-base --is-ancestor) - как без базы. ` : ''}Без базы - git diff -U0 "$(${OWN_COMMITS} | tail -1)^", своих коммитов нет - git diff -U0 HEAD. Место - путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file; переименованный - ещё и старый путь, как удалённый. Файлы тестов не включай. ${conventionsAsk} ${HUNKS_STATUS}`
 const hunksOf = (tag, base) => node('снимок правки', `${HEAD}Шаг 3 (${tag}): ${hunksAsk(base)}`, { label: `hunks:${tag}`, phase: 'Review', model: 'haiku', effort: 'low', schema: HUNKS })
 const spotsOf = (h) => h && h.status !== 'blocked' ? h.hunks : []
 const doubted = (rev, listed) => listed.map(p => { const c = (rev.prior || []).find(q => q.id === p.id); return `${priorLine(p)} - саморевьюер: ${c ? `${c.status} - ${c.evidence}` : 'статус не назван'}` }).join('\n')
-// Разрывы ревью - тот же перечень, что у итога: ревью без правки покупается ради них.
-const lapGaps = (rev, h, fal, reg) => [reviewGap(rev, reg), spotGap(rev, h), falsifyGap(rev, fal)].filter(Boolean).join('; ')
-const gapAsk = (g) => g ? `\nКод с прежнего ревью этой базы не менялся; оно оставило разрывы - закрой их, прочий объём суди штатно: ${g}` : ''
-const falsifyOf = (tag, rev, listed, base, h, gaps = '') => own('скептик', `${HEAD}Шаг 3 (${tag}): фальсификация находок, исходов осей, решений и статусов прежних из саморевью; вердикт по покрытию. Объём - ${scope(base)} Код не меняй.${conventionsText(h)}${gapAsk(gaps)}\nНаходки:\n${rev.findings.map(findingLine).join('\n') || '- находок нет: только вердикт по покрытию'}${listed.length ? `\nПрежние находки - статус саморевьюера:\n${doubted(rev, listed)}` : ''}\nОси саморевьюера:\n${axesText(rev.axes)}\nРешения саморевьюера:\n${rootsText(rev.roots)}`,
+const falsifyOf = (tag, rev, listed, base, h) => own('скептик', `${HEAD}Шаг 3 (${tag}): фальсификация находок, исходов осей, решений и статусов прежних из саморевью; вердикт по покрытию. Объём - ${scope(base)} Код не меняй.${conventionsText(h)}\nНаходки:\n${rev.findings.map(findingLine).join('\n') || '- находок нет: только вердикт по покрытию'}${listed.length ? `\nПрежние находки - статус саморевьюера:\n${doubted(rev, listed)}` : ''}\nОси саморевьюера:\n${axesText(rev.axes)}\nРешения саморевьюера:\n${rootsText(rev.roots)}`,
   { label: `falsify:${tag}`, phase: 'Review', schema: FALSIFY }, NODE.skeptic)
 const judged = (fal) => !!fal && fal.status !== 'blocked' && !fal.skipped
 // Сверка стоит как само ревью, а без P0/P1 исход итога от неё не зависит (P115).
@@ -115,10 +94,28 @@ const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(isBlocki
 const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], prior: [] }
 // В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
 const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
-// Пара continues - поле ревьюера: держится, пока скептик подтвердил находку; место и ось - записи скептика, по ним её id в реестре.
-const kept = (rev, fal) => !rev || !judged(fal) ? rev : { ...rev, findings: rev.findings.flatMap(f => { const c = fal.confirmed.find(c => sameFinding(c, f) && (!!(c.ref && f.ref) || c.axis === f.axis)); return c ? [{ ...f, anchor: c.anchor, axis: c.axis }] : [] }) }
-const settledOf = (rev, h, fal) => !spotGap(rev, h) && !falsifyGap(rev, fal)
 const spotGap = (rev, h) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
   : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : '', conventionsGap(h, rev) ? `саморевью: ${conventionsGap(h, rev)}` : ''].filter(Boolean).join('; ')
 const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal.skipped) ? '' : !judged(fal) ? `фальсификация саморевью не выполнена: ${lack(fal, 'скептик')}`
-  : [fal.status === 'partial' ? `фальсификация саморевью не завершена: ${fal.missing || 'нехватка не названа'}` : '', checkGap(rev, fal) ? `саморевью: ${checkGap(rev, fal)}` : ''].filter(Boolean).join('; ')
+  : [fal.status === 'partial' ? `фальсификация саморевью не завершена: ${fal.missing || 'нехватка не названа'}` : '', silentGap(rev.findings, fal) ? `саморевью: ${silentGap(rev.findings, fal)}` : ''].filter(Boolean).join('; ')
+// Разрыв итога - вердикт не вынесен; разрыв учёта (traceGap) - строка degraded, итог не держит (domain.md §4). chk undefined - сверки не было.
+const intentGap = (r, fal) => r['intent-status'] === 'mismatch' && ![...(verdictOf(r, fal).findings || []), ...(verdictOf(r, fal).prior || [])].some(f => isBlocking(f) && stillOpen(f)) ? `саморевью: реализовано не то, а находки P0/P1 нет: ${r.intent}` : ''
+const fixCheckGap = (c) => c === undefined ? '' : !c || c.status === 'blocked' ? `сверка правки не выполнена: ${lack(c, 'саморевьюер')}` : c.status === 'partial' ? `сверка правки не завершена: ${c.missing || 'нехватка не названа'}` : ''
+const reviewGap = (r, fal, chk) => !r || r.status === 'blocked' ? '' : [r.status === 'partial' ? `саморевью не завершено: ${r.missing || 'нехватка не названа'}` : '', intentGap(r, fal), falsifyGap(r, fal), fixCheckGap(chk)].filter(Boolean).join('; ')
+// Место находки, дописанное скептиком (places), есть только в реестре: без него решение на этом месте числится без находки.
+const traceGap = (r, h, fal, reg = []) => {
+  if (!r || r.status === 'blocked') return ''
+  const found = judged(fal) ? [...(fal.confirmed || []), ...(fal.prior || [])] : []
+  const parts = [axesGap(r.axes, r.findings), rootsGap(r.roots, [...(r.findings || []), ...(r.prior || []), ...reg]), ...(judged(fal) ? [axesCheckGap(r.axes, fal['axes-check'], found), rootsCheckGap(r.roots, fal['roots-check'], found), rootsMissedGap(fal['roots-missed'], r.roots)] : [])]
+  return [spotGap(r, h), ...parts.filter(Boolean).map(g => `саморевью: ${g}`)].filter(Boolean).join('; ')
+}
+const CHECK = { type: 'object', properties: {
+  status: STATUS,
+  prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня - запись с её id, статус с уликой из кода ревизии' },
+  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text, closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
+    required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }, description: 'только дефекты, внесённые дельтой правки: место пересекает дельту, находки нет в перечне' },
+  missing: { type: 'string', description: 'при blocked либо partial - чего не хватило для сверки; иначе пусто' },
+}, required: ['status', 'prior', 'findings', 'missing'] }
+// Сверка - не ревью (domain.md §1): решения, оси и правила проекта судило ревью, полный прогон дала верификация.
+const checkOf = (k, base, listed, f, note) => own('саморевьюер', `${HEAD}Шаг 3 (сверка правки ${k}): не ревью. Объём - ${base ? `дельта от ${base}: коммиты после него плюс рабочее дерево; ${base} не предок HEAD - коммиты правок по находкам этого прогона` : 'коммиты правок по находкам этого прогона плюс рабочее дерево'}. По каждой находке перечня - запись в prior с её id, статус на текущем коде с уликой; правка закрыла путь, а не механизм, - partial либо open, незакрытые пути в evidence. В findings - только дефект, внесённый дельтой: его место пересекает дельту. Решения правки, оси и правила проекта не суди. Сборку и тесты целиком прогнала верификация, она зелёная: запускай только то, что нужно улике.${coderInput(f)}${note}\nПеречень:\n${listed.map(listedLine).join('\n')}\nКод не меняй.`,
+  { label: 'check:правки', phase: 'Review', schema: CHECK }, NODE.reviewer)

@@ -80,7 +80,7 @@ function registry(unsettled) {
   const at = (id) => id ? list.findIndex(q => q.id === id) : -1
   const seat = (p, status, evidence) => {
     const i = at(p.id)
-    // Важность записи только растёт: повторное ревью, поднявшее P2 до P1, должно держать порог допуска.
+    // Важность записи только растёт: P2, поднятая узлом до P1, держит порог допуска.
     const base = i < 0 ? { id: p.id || mint(), anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '', ...(p.introduced ? { introduced: true } : {}) }
       : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [], ...(p.introduced ? { introduced: true } : {}) }
     const rec = { ...base, status: FINDING_STATUS.includes(status) ? status : 'unverified', evidence: FINDING_STATUS.includes(status) ? evidence : `статус вне словаря реестра (${status}): ${evidence}` }

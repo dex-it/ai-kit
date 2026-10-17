@@ -143,7 +143,7 @@ git -C "$H" checkout -q main; printf 'z\n' >> "$H/x.txt"
 check "$(hk | field hunks)/$(hk | field base)" '["x.txt:4-4"]/HEAD' "--hunks: своих коммитов нет - незакоммиченное от HEAD"
 printf '\000\001' > "$H/b.bin"; printf 'y\n' > "$H/y.txt"; git -C "$H" add b.bin y.txt; git -C "$H" commit -qm bin; git -C "$H" branch bin-seen
 printf '\000\002' > "$H/b.bin"; git -C "$H" mv y.txt z.txt
-check "$(hk | field hunks)" '["x.txt:4-4", "b.bin", "z.txt"]' "--hunks: бинарный файл и чистое переименование - место правки целиком"
+check "$(hk | field hunks)" '["x.txt:4-4", "y.txt", "b.bin", "z.txt"]' "--hunks: бинарный файл и чистое переименование - место правки целиком, старый путь - как удалённый файл"
 
 mkdir -p "$T/keep"; echo '{"status": "complete"}' > "$T/keep/out.json"
 "$V" --wait "$T/keep/out.json" >/dev/null
