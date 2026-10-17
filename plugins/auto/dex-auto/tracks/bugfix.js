@@ -258,8 +258,9 @@ const checkGap = (rev, fal) => {
 }
 // Места правки снимает не ревьюер: перечень, собранный тем, чью полноту он проверяет, ничего не проверяет.
 const hunkList = (hunks) => (hunks || []).length ? `\nМеста правки (без тестов) - каждое пересекает запись roots: решение либо none с причиной:\n${hunks.map(h => `- ${h}`).join('\n')}` : ''
+const bareHunks = (hunks, roots) => (hunks || []).filter(h => !(roots || []).some(x => sameSpot(h, x.anchor)))
 const hunkGap = (hunks, roots) => {
-  const bare = (hunks || []).filter(h => !(roots || []).some(x => sameSpot(h, x.anchor)))
+  const bare = bareHunks(hunks, roots)
   return bare.length ? `место правки без записи roots: ${bare.join(', ')}` : ''
 }
 // Правила проекта ищет узел снимка, читает ревьюер: прочтение - поле выдачи, иначе непрочитанное правило неотличимо от соблюдённого.
@@ -464,7 +465,9 @@ const priorBase = (trail) => {
   const all = steps(trail), from = all.reduce((k, e, i) => INTENT_STEPS.includes(e.step) && !/^ledger/.test(e.doer || '') ? i : k, -1)
   return (all.slice(from + 1).filter(e => (e.step === 3 || e.step === '3-repeat') && e.status === 'complete' && e.settled !== false && isSha(e.head)).pop() || {}).head || ''
 }
-const scope = (base) => base ? `дельта от ${base} - коммиты после него плюс рабочее дерево. Новые находки ищи в дельте, вне её - только сломанное правкой дельты; статус прежних находок перечня суди на текущем коде. ${base} не предок HEAD - ревью по всем коммитам цели.` : 'коммиты этой цели плюс рабочее дерево.'
+const scope = (base, h) => base ? `дельта от ${base} - коммиты после него плюс рабочее дерево. Новые находки ищи в дельте, вне её - только сломанное правкой дельты; статус прежних находок перечня суди на текущем коде. ${base} не предок HEAD - ревью по всем коммитам цели.${carriedText(h)}` : 'коммиты этой цели плюс рабочее дерево.'
+// Перенесённое место прежнее ревью оставило без записи roots: в дельте его нет, а судить его некому, кроме этого ревью.
+const carriedText = (h) => `${h && (h.carried || []).length ? ` Места ${h.carried.join(', ')} прежнее ревью оставило без записи roots - суди их как дельту.` : ''}${h && h.whole ? ' Прежнее ревью вынесло intent-status mismatch - соответствие цели суди по всей цели, не по дельте.' : ''}`
 // Пара «новая - прежняя» - факт поля узла: какой механизм тот же, судит ревьюер, трек лишь сверяет id с поданным перечнем.
 // Находка с пробой с любой стороны пары кодеру не подаётся - размотать её ему нечем (I10).
 // В реестре - запись скептика, его текст и место могут отличаться от ревьюера: id ищется по пересечению места и оси.
@@ -482,7 +485,7 @@ const pairDecision = (p) => `${p.id} продолжает ${p.of}: правка 
 const pairLeft = (p) => `${p.id} продолжает ${p.of}: механизм не размотан правкой по находкам`
 const HUNKS = { type: 'object', properties: {
   status: STATUS,
-  hunks: { type: 'array', items: { type: 'string' }, description: 'путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file' },
+  hunks: { type: 'array', items: { type: 'string' }, description: 'путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file; переименованный - ещё и старый путь, как удалённый' },
   conventions: CONVENTIONS.conventions, 'conventions-searched': CONVENTIONS['conventions-searched'],
   missing: { type: 'string' },
 }, required: ['status', 'hunks', 'conventions', 'conventions-searched', 'missing'] }
@@ -491,14 +494,14 @@ const OWN_COMMITS = 'git rev-list HEAD --not --exclude="$(git branch --show-curr
 // Сомнение, относится ли документ к правке, снимок выражал статусом partial - и тот покупал повторное ревью.
 const HUNKS_STATUS = 'Документ, о котором неясно, относится ли он к правке, включи в conventions. status - complete, когда места сняты; partial - только когда места сняты не целиком.'
 const hunksAsk = (base) => A.scripts ? `ТОЛЬКО перечень мест правки и правил проекта, код не менять. Выполни python3 '${A.scripts}/verify.py' --hunks${base ? ` ${base}` : ''}: hunks - поле hunks его вывода как есть, без файлов тестов; поле error в выводе либо вывод не JSON - status partial, error либо последние строки вывода в missing. ${conventionsAsk} ${HUNKS_STATUS}`
-  : `ТОЛЬКО перечень мест правки и правил проекта, код не менять. ${base ? `git diff -U0 ${base}; ${base} не предок HEAD (git merge-base --is-ancestor) - как без базы. ` : ''}Без базы - git diff -U0 "$(${OWN_COMMITS} | tail -1)^", своих коммитов нет - git diff -U0 HEAD. Место - путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file. Файлы тестов не включай. ${conventionsAsk} ${HUNKS_STATUS}`
+  : `ТОЛЬКО перечень мест правки и правил проекта, код не менять. ${base ? `git diff -U0 ${base}; ${base} не предок HEAD (git merge-base --is-ancestor) - как без базы. ` : ''}Без базы - git diff -U0 "$(${OWN_COMMITS} | tail -1)^", своих коммитов нет - git diff -U0 HEAD. Место - путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file; переименованный - ещё и старый путь, как удалённый. Файлы тестов не включай. ${conventionsAsk} ${HUNKS_STATUS}`
 const hunksOf = (tag, base) => node('снимок правки', `${HEAD}Шаг 3 (${tag}): ${hunksAsk(base)}`, { label: `hunks:${tag}`, phase: 'Review', model: 'haiku', effort: 'low', schema: HUNKS })
 const spotsOf = (h) => h && h.status !== 'blocked' ? h.hunks : []
 const doubted = (rev, listed) => listed.map(p => { const c = (rev.prior || []).find(q => q.id === p.id); return `${priorLine(p)} - саморевьюер: ${c ? `${c.status} - ${c.evidence}` : 'статус не назван'}` }).join('\n')
 // Разрывы ревью - тот же перечень, что у итога: ревью без правки покупается ради них.
 const lapGaps = (rev, h, fal, reg) => [reviewGap(rev, reg), spotGap(rev, h), falsifyGap(rev, fal)].filter(Boolean).join('; ')
 const gapAsk = (g) => g ? `\nКод с прежнего ревью этой базы не менялся; оно оставило разрывы - закрой их, прочий объём суди штатно: ${g}` : ''
-const falsifyOf = (tag, rev, listed, base, h, gaps = '') => own('скептик', `${HEAD}Шаг 3 (${tag}): фальсификация находок, исходов осей, решений и статусов прежних из саморевью; вердикт по покрытию. Объём - ${scope(base)} Код не меняй.${conventionsText(h)}${gapAsk(gaps)}\nНаходки:\n${rev.findings.map(findingLine).join('\n') || '- находок нет: только вердикт по покрытию'}${listed.length ? `\nПрежние находки - статус саморевьюера:\n${doubted(rev, listed)}` : ''}\nОси саморевьюера:\n${axesText(rev.axes)}\nРешения саморевьюера:\n${rootsText(rev.roots)}`,
+const falsifyOf = (tag, rev, listed, base, h, gaps = '') => own('скептик', `${HEAD}Шаг 3 (${tag}): фальсификация находок, исходов осей, решений и статусов прежних из саморевью; вердикт по покрытию. Объём - ${scope(base, h)} Код не меняй.${conventionsText(h)}${gapAsk(gaps)}\nНаходки:\n${rev.findings.map(findingLine).join('\n') || '- находок нет: только вердикт по покрытию'}${listed.length ? `\nПрежние находки - статус саморевьюера:\n${doubted(rev, listed)}` : ''}\nОси саморевьюера:\n${axesText(rev.axes)}\nРешения саморевьюера:\n${rootsText(rev.roots)}`,
   { label: `falsify:${tag}`, phase: 'Review', schema: FALSIFY }, NODE.skeptic)
 const judged = (fal) => !!fal && fal.status !== 'blocked' && !fal.skipped
 // Сверка стоит как само ревью, а без P0/P1 исход итога от неё не зависит (P115).
@@ -508,9 +511,9 @@ const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], 
 const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
 // Пара continues - поле ревьюера: держится, пока скептик подтвердил находку; место и ось - записи скептика, по ним её id в реестре.
 const kept = (rev, fal) => !rev || !judged(fal) ? rev : { ...rev, findings: rev.findings.flatMap(f => { const c = fal.confirmed.find(c => sameFinding(c, f) && (!!(c.ref && f.ref) || c.axis === f.axis)); return c ? [{ ...f, anchor: c.anchor, axis: c.axis }] : [] }) }
-const settledOf = (rev, h, fal) => !spotGap(rev, h) && !falsifyGap(rev, fal)
-const spotGap = (rev, h) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
-  : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : '', conventionsGap(h, rev) ? `саморевью: ${conventionsGap(h, rev)}` : ''].filter(Boolean).join('; ')
+const settledOf = (rev, h, fal, bare = true) => !spotGap(rev, h, bare) && !falsifyGap(rev, fal)
+const spotGap = (rev, h, bare = true) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
+  : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', bare && hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : '', conventionsGap(h, rev) ? `саморевью: ${conventionsGap(h, rev)}` : ''].filter(Boolean).join('; ')
 const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal.skipped) ? '' : !judged(fal) ? `фальсификация саморевью не выполнена: ${lack(fal, 'скептик')}`
   : [fal.status === 'partial' ? `фальсификация саморевью не завершена: ${fal.missing || 'нехватка не названа'}` : '', checkGap(rev, fal) ? `саморевью: ${checkGap(rev, fal)}` : ''].filter(Boolean).join('; ')
 // <<< shared: self-review
@@ -543,10 +546,18 @@ async function reviewLoop(t) {
   LEDGER.forEach(reg.doubt)
   reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик' : 'саморевьюер')
   // Ревью со своим разрывом базой дельты не служит: повторное по дельте не перепроверило бы место разрыва.
+  // Место без записи roots - разрыв с адресом: оно едет в дельту поимённо (domain.md §1), проверенное не перечитывается.
   first.settled = settledOf(rev, spots, fal) && !reviewGap(rev, reg.all())
   const offeredHere = new Set()
-  let last = first, listed = LEDGER, chain = pairsOf(reg, kept(rev, fal), LEDGER, degraded), base = firstBase
-  const advance = () => { if (last.settled && rev && rev.status === 'complete') base = last.head }
+  let last = first, listed = LEDGER, chain = pairsOf(reg, kept(rev, fal), LEDGER, degraded), base = firstBase, clean = firstBase, carried = [], whole = false
+  const advance = () => {
+    if (!rev || rev.status !== 'complete') return
+    if (last.settled) { base = clean = last.head; carried = []; whole = false; return }
+    // mismatch выносится по всей цели, и следующее ревью выносит его заново: базу он не держит.
+    const rest = settledOf(rev, spots, fal, false) && !reviewGap({ ...rev, 'intent-status': 'match' }, reg.all())
+    const bare = rest ? bareHunks(spots.hunks, rev.roots) : [], mismatch = rest && rev['intent-status'] === 'mismatch'
+    if ((bare.length || mismatch) && isSha(last.head)) { base = last.head; carried = bare; whole = mismatch }
+  }
   // Вопрос оператору (domain.md §2) едет и в выходе из цикла: иначе P2 видна только записью prior.
   const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, reg, spots, fix2, ver2, dropped, offeredOnly })
   advance()
@@ -586,13 +597,17 @@ async function reviewLoop(t) {
     else { gaps = lapGaps(rev, spots, fal, reg.all()); recheck = !!falsifyGap(rev, fal) }
     listed = loops.review_fix ? reg.listing() : reg.open()
     spots = await hunksOf('повторное', base)
+    // Файл перенесённого места менялся после base - строки могли сместиться, адрес их не держит: ревью от последней опорной базы.
+    if (carried.length && (!spots || spots.status !== 'complete' || carried.some(c => spots.hunks.some(d => spot(d)[0] === spot(c)[0])))) { base = clean; carried = []; spots = await hunksOf('повторное', base) }
+    if (carried.length || whole) spots = spots && spots.status !== 'blocked' ? { ...spots, hunks: [...spots.hunks, ...carried.filter(c => !spots.hunks.some(x => sameSpot(x, c)))], carried, whole }
+      : { ...(spots || { status: 'blocked', missing: lack(spots, 'снимок правки') }), carried, whole }
     rev = await t.review('повторное', fix2 || fix, ver2 || ver, listed, base, spots, gaps); loops.review++
     fal = await falsify('повторное', rev, listed, base, spots, gaps, recheck)
     // Повторное без выхода или blocked статусов не выносит: реестр остаётся, каким его оставило прежнее.
     if (rev && rev.status !== 'blocked') listed.forEach(reg.doubt)
     reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик (повторное)' : 'саморевьюер (повторное)', listed, loops.review_fix ? introducedAt(deltaOf(ver2)) : null)
     chain = pairsOf(reg, kept(rev, fal), listed, degraded)
-    last = { step: '3-repeat', doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver2 || ver), base, settled: settledOf(rev, spots, fal) && !reviewGap(rev, reg.all()) }
+    last = { step: '3-repeat', doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver2 || ver), base, ...(carried.length ? { carried } : {}), settled: settledOf(rev, spots, fal) && !reviewGap(rev, reg.all()) }
     trail.push(last)
     advance()
   }
@@ -815,7 +830,7 @@ if (!passed(ver)) return outcome('partial', `Fix: потолок ${FIX_CEILING} 
 phase('Review')
 // Диагноз этого прогона - другое намерение: коммиты до прежней базы судились против опровергнутой причины.
 const firstBase = priorBase(reproResumed ? A.trail : null)
-const review = (tag, f, v, priors, base, h, gaps = '') => own('саморевьюер', `${HEAD}Шаг 3 (${tag}): pre-push саморевью локальной ветки - ${scope(base)}${hunkList(spotsOf(h))}${conventionsText(h)}${gapAsk(gaps)}${swapText(cmds0, repro)}${touchedOrig(v) ? `\nТест диагноста ${repro.repro_test} изменён кодером: исходник - git show ${repro.repro_blob}. Изменена проверка - вход, вызываемый путь или ожидаемое - находка P1.` : ''}${coderInput(f)} Источник намерения:\n${causeText}${priors.length ? `\n${LISTED}\n${priors.map(listedLine).join('\n')}` : ''}${RESUMED}\nПрогон build/test реальный, итог - в run-status, не в findings. Код не меняй.`,
+const review = (tag, f, v, priors, base, h, gaps = '') => own('саморевьюер', `${HEAD}Шаг 3 (${tag}): pre-push саморевью локальной ветки - ${scope(base, h)}${hunkList(spotsOf(h))}${conventionsText(h)}${gapAsk(gaps)}${swapText(cmds0, repro)}${touchedOrig(v) ? `\nТест диагноста ${repro.repro_test} изменён кодером: исходник - git show ${repro.repro_blob}. Изменена проверка - вход, вызываемый путь или ожидаемое - находка P1.` : ''}${coderInput(f)} Источник намерения:\n${causeText}${priors.length ? `\n${LISTED}\n${priors.map(listedLine).join('\n')}` : ''}${RESUMED}\nПрогон build/test реальный, итог - в run-status, не в findings. Код не меняй.`,
   { label: `self-review:${tag}`, phase: 'Review', schema: { type: 'object', properties: { ...REVIEW.properties, 'conventions-read': conventionsRead(h) }, required: [...REVIEW.required] } }, NODE.reviewer)
 // Спор с диагнозом в правке по находкам - тот же выход, что в попытке Fix.
 const disputed = (f, k, open) => {
