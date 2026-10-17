@@ -232,6 +232,7 @@ claude plugins uninstall dex-dotnet-coder
 | dex-incident-investigator | `/investigate` | расследование инцидента на общем стенде |
 | dex-debugger | `/root-cause` | поиск корневой причины бага по коду |
 | dex-doc-writer | `/documentation` | документирование по жанру и стандарту |
+| dex-skill-subagent-dispatch | `/do` | задача сам или цепочкой исполнителей по правилам скилла раздачи (экспериментально) |
 
 ## Skills (Level 1)
 
