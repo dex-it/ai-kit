@@ -232,6 +232,7 @@ claude plugins uninstall dex-dotnet-coder
 | dex-incident-investigator | `/investigate` | расследование инцидента на общем стенде |
 | dex-debugger | `/root-cause` | поиск корневой причины бага по коду |
 | dex-doc-writer | `/documentation` | документирование по жанру и стандарту |
+| dex-skill-subagent-dispatch | `/do` | задача сам или цепочкой исполнителей по правилам скилла раздачи (экспериментально) |
 
 ## Skills (Level 1)
 
@@ -244,6 +245,7 @@ claude plugins uninstall dex-dotnet-coder
 | **Оракулы качества артефактов** | `requirement-quality`, `requirement-set-quality`, `use-case-quality`, `adr-quality`, `design-quality`, `plan-quality`, `api-spec-quality`, `completeness-mapping`, `fact-verification`, `legacy-reconstruction`, `verification-planning-29119`, `bdd-gherkin` |
 | **Архитектура и дизайн** | `ddd`, `solid`, `scalability`, `architecture-definition-42010`, `interface-definition-openapi`, `implementation-plan` |
 | **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `karpathy-guidelines`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
+| **Раздача работы исполнителям (экспериментально)** | `subagent-dispatch` |
 | **QA и тестирование** | `api-testing`, `test-coverage`, `testability`, `integration-boundary`, `exploratory-testing`, `bug-reproduction`, `deep-audit`, `tech-audit`, `playwright`, `stand-verification` |
 | **Инциденты и RCA** | `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
 | **.NET** | `dotnet-api-development`, `dotnet-async-patterns`, `dotnet-code-quality`, `dotnet-csproj-hygiene`, `dotnet-ef-core`, `dotnet-logging`, `dotnet-resilience`, `dotnet-testing-patterns`, `dotnet-validation`, `api-documentation` |
@@ -476,4 +478,4 @@ GPL v3.0 - см. [LICENSE](./LICENSE)
 
 ---
 
-**DEX Team** - Version 6.18.0
+**DEX Team** - Version 6.19.0
