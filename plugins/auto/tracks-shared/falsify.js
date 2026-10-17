@@ -30,10 +30,6 @@ const silentGap = (findings, fal) => {
   const bare = (findings || []).filter(f => !seen.some(x => sameFinding(x, f))).map(f => f.anchor)
   return bare.length ? `находка не сверена скептиком: ${bare.join(', ')}` : ''
 }
-const checkGap = (rev, fal) => {
-  const found = [...(fal.confirmed || []), ...(fal.prior || [])]
-  return [silentGap(rev.findings, fal), axesCheckGap(rev.axes, fal['axes-check'], found), rootsCheckGap(rev.roots, fal['roots-check'], found), rootsMissedGap(fal['roots-missed'], rev.roots)].filter(Boolean).join('; ')
-}
 // Места правки снимает не ревьюер: перечень, собранный тем, чью полноту он проверяет, ничего не проверяет.
 const hunkList = (hunks) => (hunks || []).length ? `\nМеста правки (без тестов) - каждое пересекает запись roots: решение либо none с причиной:\n${hunks.map(h => `- ${h}`).join('\n')}` : ''
 const bareHunks = (hunks, roots) => (hunks || []).filter(h => !(roots || []).some(x => sameSpot(h, x.anchor)))
