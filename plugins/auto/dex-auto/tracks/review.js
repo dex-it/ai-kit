@@ -237,8 +237,9 @@ const checkGap = (rev, fal) => {
 }
 // Места правки снимает не ревьюер: перечень, собранный тем, чью полноту он проверяет, ничего не проверяет.
 const hunkList = (hunks) => (hunks || []).length ? `\nМеста правки (без тестов) - каждое пересекает запись roots: решение либо none с причиной:\n${hunks.map(h => `- ${h}`).join('\n')}` : ''
+const bareHunks = (hunks, roots) => (hunks || []).filter(h => !(roots || []).some(x => sameSpot(h, x.anchor)))
 const hunkGap = (hunks, roots) => {
-  const bare = (hunks || []).filter(h => !(roots || []).some(x => sameSpot(h, x.anchor)))
+  const bare = bareHunks(hunks, roots)
   return bare.length ? `место правки без записи roots: ${bare.join(', ')}` : ''
 }
 // Правила проекта ищет узел снимка, читает ревьюер: прочтение - поле выдачи, иначе непрочитанное правило неотличимо от соблюдённого.

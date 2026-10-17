@@ -2923,12 +2923,13 @@ const SCENARIOS = [
     const base = { ...head, 'fix:1': fixOk, 'verify:после попытки 1': green, ...declined }
     const slow = { severity: 'P3', anchor: 'src/A.cs:76-81', axis: 'performance', text: 'обход всего кэша на каждой вставке', closure: 'вытеснение за O(1)', evidence: 'A.cs:76', premise: '', places: [] }
     return [
-      { name: `${nIntent} ${track}: первое ревью «реализовано не то», правка замкнута -> повторное ревью куплено по всем коммитам цели, итог по его вердикту`, track, args,
+      { name: `${nIntent} ${track}: первое ревью «реализовано не то», правка замкнута -> повторное ревью по дельте, соответствие цели - по всей цели, итог по его вердикту`, track, args,
         responses: { ...base, 'verify:после попытки 1': { ...green, head: '5555555 fix', head_sha: '5555555' }, 'self-review:первое': { ...revP1, intent: 'вытесняет живой ключ', 'intent-status': 'mismatch' },
           'fix:after-review': fixSealed, 'verify:после саморевью': green, 'self-review:повторное': revRecheck },
         expect: ({ result, calls }) => [
           ['повторное саморевью вызвано', labelsOf(calls).includes('self-review:повторное')],
-          ['ревью с разрывом базой дельты не служит', promptOf(calls, 'self-review:повторное').includes('коммиты этой цели плюс рабочее дерево') && !promptOf(calls, 'self-review:повторное').includes('дельта от')],
+          ['mismatch базу не держит: дельта от head первого', promptOf(calls, 'self-review:повторное').includes('дельта от 5555555') && promptOf(calls, 'hunks:повторное').includes('--hunks 5555555')],
+          ['соответствие цели - по всей цели', promptOf(calls, 'self-review:повторное').includes('соответствие цели суди по всей цели')],
           ['устаревший вердикт итог не держит', result.status === 'complete' && !String(result.where || '').includes('реализовано не то')],
         ] },
       { name: `${nPlaces} ${track}: решение illegitimate на месте, которое скептик дописал находке в places, -> не разрыв`, track, args,
@@ -4068,6 +4069,98 @@ const SCENARIOS = [
           'falsify:первое': falWith({ confirmed: [{ ...revP1ax.findings[0], anchor: 'src/A.cs:7-9', text: 'повтор не различает отказ и таймаут', evidence: 'e' }] }),
           'fix:after-review': fixOk, 'verify:после саморевью': green, 'self-review:повторное': revRecheck },
         expect: ({ calls }) => [['пара под id', /F21 продолжает F2/.test(promptOf(calls, 'fix:after-review'))]] },
+    ]
+  }),
+  ...[['feature', { 'ctx:R-I': ctxOk }, ['F208', 'F209', 'F210', 'F211', 'F212', 'F213', 'F214', 'F215']], ['bugfix', { reproduce: reproOk }, ['B255', 'B256', 'B257', 'B258', 'B259', 'B260', 'B261', 'B262']]].flatMap(([track, head, [nCarry, nMoved, nLap, nIntent, nGap, nTwo, nPart, nNull]]) => {
+    const args = track === 'feature' ? featureArgs : bugfixArgs
+    const side = track === 'feature' ? 'саморевью feature' : 'саморевью bugfix'
+    const bareB5 = { 'hunks:первое': hunksAt('src/A.cs:20-22', 'src/B.cs:5'), 'hunks:повторное': hunksAt() }
+    const firstRoots = [{ ...rootOk, anchor: 'src/A.cs:21' }]
+    const noneB5 = [{ anchor: 'src/B.cs:5', decision: '', root: '', verdict: 'none', evidence: 'переименование' }]
+    const fixed = (delta) => ({ ...head, 'fix:1': fixOk, 'verify:после попытки 1': green, ...bareB5, 'self-review:первое': { ...revP1, roots: firstRoots },
+      'fix:after-review': fixOk, 'verify:после саморевью': { ...green, delta } })
+    const delta = (calls) => promptOf(calls, 'hunks:повторное').includes('--hunks abc1234') && promptOf(calls, 'self-review:повторное').includes('дельта от abc1234')
+    return [
+      { name: `${nCarry} ${side}: единственный разрыв первого ревью - место без записи roots -> повторное по дельте с перенесённым местом`, track, args,
+        responses: { ...fixed(['src/A.cs:8-9']), 'self-review:повторное': { ...revRecheck, roots: noneB5 } },
+        expect: async ({ result, calls }) => {
+          const bare = (await runTrack(track, args, { ...DEFAULT_REVIEW, ...DEFAULT_BASE, 'ctx:tree': DEFAULT_TREE[track], ...fixed(['src/A.cs:8-9']), 'self-review:повторное': revRecheck })).result
+          return [
+            ['повторное - по дельте от head первого', delta(calls)],
+            ['перенесённое место - в промпте ревьюера', /Места src\/B\.cs:5 прежнее ревью оставило без записи roots/.test(promptOf(calls, 'self-review:повторное')) && promptOf(calls, 'self-review:повторное').includes('- src/B.cs:5')],
+            ['перенос в trail, первое базой не помечено', stepOf(result.trail, '3-repeat').includes('"carried":["src/B.cs:5"]') && /"settled":false/.test(stepOf(result.trail, 3))],
+            ['запись на перенесённом месте закрывает разрыв', result.status === 'complete'],
+            ['без записи - разрыв с местом', bare.status === 'partial' && bare.where.includes('саморевью: место правки без записи roots: src/B.cs:5')],
+          ]
+        } },
+      { name: `${nMoved} ${side}: снимок от head переносящего ревью задел файл перенесённого места -> повторное по всей цели`, track, args,
+        responses: { ...fixed(['src/A.cs:8-9', 'src/B.cs:3-4']), 'hunks:повторное': (n, prompt) => prompt.includes('--hunks abc1234') ? hunksAt('src/A.cs:8-9', 'src/B.cs:3-4') : hunksAt(), 'self-review:повторное': revRecheck },
+        expect: ({ result, calls }) => [
+          ['повторное - не по дельте', !promptOf(calls, 'self-review:повторное').includes('дельта от') && !calls.filter(c => c.label === 'hunks:повторное').at(-1).prompt.includes('--hunks abc1234')],
+          ['перенос снят', !stepOf(result.trail, '3-repeat').includes('carried')],
+        ] },
+      { name: `${nLap} ${side}: ревью без находок, единственный разрыв - место без записи roots -> ревью без правки по дельте с перенесённым местом`, track, args,
+        responses: { ...head, 'fix:1': fixOk, 'verify:после попытки 1': green, ...bareB5, 'self-review:первое': { ...revClean, roots: firstRoots }, 'self-review:повторное': { ...revClean, roots: noneB5 } },
+        expect: ({ result, calls }) => [
+          ['правки нет', !labelsOf(calls).includes('fix:after-review')],
+          ['ревью без правки - по дельте от head первого', delta(calls) && promptOf(calls, 'self-review:повторное').includes('- src/B.cs:5')],
+          ['разрыв закрыт', result.status === 'complete'],
+        ] },
+      { name: `${nIntent} ${side}: разрывы первого ревью - место без записи roots и «реализовано не то» -> повторное по дельте с местом, цель - по всей цели`, track, args,
+        responses: { ...fixed(['src/A.cs:8-9']), 'self-review:первое': { ...revP1, roots: firstRoots, intent: 'пункт готово не выполнен', 'intent-status': 'mismatch' }, 'self-review:повторное': { ...revRecheck, roots: noneB5 } },
+        expect: ({ result, calls }) => [
+          ['повторное - по дельте от head первого', delta(calls)],
+          ['место и цель - в промпте ревьюера', /Места src\/B\.cs:5 прежнее ревью оставило без записи roots/.test(promptOf(calls, 'self-review:повторное')) && promptOf(calls, 'self-review:повторное').includes('соответствие цели суди по всей цели')],
+          ['и скептика', promptOf(calls, 'falsify:повторное').includes('соответствие цели суди по всей цели')],
+          ['первое базой не помечено, итог по повторному', /"settled":false/.test(stepOf(result.trail, 3)) && result.status === 'complete'],
+        ] },
+      { name: `${nGap} ${side}: место без записи roots и второй разрыв (ось, правила проекта, скептик, head не SHA) -> повторное от прежней базы, переноса нет`, track, args,
+        responses: { ...fixed(['src/A.cs:8-9']), 'self-review:повторное': revRecheck },
+        expect: async () => {
+          const run = async (over) => (await runTrack(track, args, { ...DEFAULT_REVIEW, ...DEFAULT_BASE, 'ctx:tree': DEFAULT_TREE[track], ...fixed(['src/A.cs:8-9']), 'self-review:повторное': revRecheck, ...over }))
+          const prior = (r) => !promptOf(r.calls, 'hunks:повторное').includes('--hunks abc1234') && !promptOf(r.calls, 'self-review:повторное').includes('без записи roots') && !stepOf(r.result.trail, '3-repeat').includes('carried')
+          return [
+            ['ось не вынесена', prior(await run({ 'self-review:первое': { ...revP1, roots: firstRoots, axes: axesOk.filter(a => a.name !== 'security') } }))],
+            ['правила проекта не прочитаны', prior(await run({ 'hunks:первое': { ...hunksAt('src/A.cs:20-22', 'src/B.cs:5'), conventions: ['CLAUDE.md'] } }))],
+            ['скептик не вернул выход', prior(await run({ 'falsify:первое': null }))],
+            ['head первого ревью не SHA', prior(await run({ 'verify:после попытки 1': { ...green, head_sha: '' } }))],
+          ]
+        } },
+      ...[true, false].map(bare2 => {
+        const prompts = (calls, label) => calls.filter(c => c.label === label).map(c => c.prompt)
+        const fresh = { severity: 'P1', anchor: 'src/D.cs:3', text: 'соединение не закрыто', closure: 'закрыто тестом' }
+        return { name: `${nTwo}${bare2 ? 'a' : 'b'} ${side}: две правки, ${bare2 ? 'второе ревью оставило место правки без записи roots, третья правка его файл не задела -> третье по дельте от head второго с перенесённым местом' : 'второе ревью опорное -> третье по дельте от его head, прежний перенос снят'}`, track, args,
+          responses: { ...head, 'fix:1': fixOk, 'verify:после попытки 1': green, 'hunks:первое': hunksAt('src/A.cs:20-22', 'src/B.cs:5'), 'self-review:первое': { ...revP1, roots: firstRoots },
+            'fix:after-review': fixOk,
+            'verify:после саморевью': (n) => n === 1 ? { ...green, head_sha: 'bbb2222', delta: ['src/A.cs:8-9'] } : { ...green, head_sha: 'ccc3333', delta: ['src/A.cs:8-9', 'src/C.cs:1'] },
+            'hunks:повторное': (n, prompt) => prompt.includes('--hunks abc1234') ? hunksAt('src/A.cs:8-9') : prompt.includes('--hunks bbb2222') ? hunksAt('src/C.cs:1') : hunksAt('src/A.cs:8-9', 'src/B.cs:5', 'src/C.cs:1'),
+            'self-review:повторное': (n) => n === 1 ? { ...revP1, findings: [fresh], prior: [closedA8], roots: bare2 ? noneB5 : [...noneB5, { ...rootOk, anchor: 'src/A.cs:8-9' }, { ...rootOk, anchor: 'src/D.cs:3' }] }
+              : { ...revRecheck, roots: [{ ...rootOk, anchor: 'src/A.cs:8-9' }, { ...rootOk, anchor: 'src/C.cs:1' }] } },
+          expect: ({ calls }) => {
+            const third = prompts(calls, 'self-review:повторное')[1] || ''
+            return [
+              ['третье ревью состоялось', !!third],
+              ['третье - по дельте от head второго', third.includes('дельта от bbb2222') && prompts(calls, 'hunks:повторное').some(x => x.includes('--hunks bbb2222'))],
+              [bare2 ? 'место второго ревью - перенесённым' : 'перенос первого не тянется', bare2 ? /Места src\/A\.cs:8-9 прежнее ревью оставило без записи roots/.test(third) : !third.includes('без записи roots')],
+            ]
+          } }
+      }),
+      { name: `${nPart} ${side}: снимок от head переносящего ревью не complete -> перенос снят, снимок и ревью от последней опорной базы`, track, args,
+        responses: { ...fixed(['src/A.cs:8-9']), 'hunks:повторное': (n, prompt) => prompt.includes('--hunks abc1234') ? { ...hunksAt(), status: 'partial', missing: 'вывод не JSON' } : hunksAt('src/A.cs:8-9', 'src/B.cs:5'),
+          'self-review:повторное': { ...revRecheck, roots: [...noneB5, { ...rootOk, anchor: 'src/A.cs:8-9' }] } },
+        expect: ({ result, calls }) => [
+          ['снимок снят дважды, второй - не от head первого', calls.filter(c => c.label === 'hunks:повторное').length === 2 && !calls.filter(c => c.label === 'hunks:повторное')[1].prompt.includes('--hunks abc1234')],
+          ['повторное - не по дельте', !promptOf(calls, 'self-review:повторное').includes('дельта от')],
+          ['перенос снят', !stepOf(result.trail, '3-repeat').includes('carried')],
+        ] },
+      { name: `${nNull} ${side}: «реализовано не то», снимок повторного не получен -> ревьюер и скептик всё равно судят цель по всей цели`, track, args,
+        responses: { ...fixed(['src/A.cs:8-9']), 'hunks:первое': hunksAt('src/A.cs:20-22'), 'self-review:первое': { ...revP1, roots: firstRoots, intent: 'пункт готово не выполнен', 'intent-status': 'mismatch' },
+          'hunks:повторное': null, 'self-review:повторное': revRecheck },
+        expect: ({ result, calls }) => [
+          ['ревьюер - по дельте, цель - по всей цели', promptOf(calls, 'self-review:повторное').includes('дельта от abc1234') && promptOf(calls, 'self-review:повторное').includes('соответствие цели суди по всей цели')],
+          ['скептик - тоже', promptOf(calls, 'falsify:повторное').includes('соответствие цели суди по всей цели')],
+          ['разрыв снимка назван прежним текстом', result.status === 'partial' && String(result.where).includes('места правки не сняты: снимок правки не вернул выход')],
+        ] },
     ]
   }),
   { name: 'R79 решения ревьюера пересекаются: запись сверки с местом решения засчитана ему, широкая - нет', track: 'review', args: reviewArgs,

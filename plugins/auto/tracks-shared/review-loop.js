@@ -26,10 +26,18 @@ async function reviewLoop(t) {
   LEDGER.forEach(reg.doubt)
   reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик' : 'саморевьюер')
   // Ревью со своим разрывом базой дельты не служит: повторное по дельте не перепроверило бы место разрыва.
+  // Место без записи roots - разрыв с адресом: оно едет в дельту поимённо (domain.md §1), проверенное не перечитывается.
   first.settled = settledOf(rev, spots, fal) && !reviewGap(rev, reg.all())
   const offeredHere = new Set()
-  let last = first, listed = LEDGER, chain = pairsOf(reg, kept(rev, fal), LEDGER, degraded), base = firstBase
-  const advance = () => { if (last.settled && rev && rev.status === 'complete') base = last.head }
+  let last = first, listed = LEDGER, chain = pairsOf(reg, kept(rev, fal), LEDGER, degraded), base = firstBase, clean = firstBase, carried = [], whole = false
+  const advance = () => {
+    if (!rev || rev.status !== 'complete') return
+    if (last.settled) { base = clean = last.head; carried = []; whole = false; return }
+    // mismatch выносится по всей цели, и следующее ревью выносит его заново: базу он не держит.
+    const rest = settledOf(rev, spots, fal, false) && !reviewGap({ ...rev, 'intent-status': 'match' }, reg.all())
+    const bare = rest ? bareHunks(spots.hunks, rev.roots) : [], mismatch = rest && rev['intent-status'] === 'mismatch'
+    if ((bare.length || mismatch) && isSha(last.head)) { base = last.head; carried = bare; whole = mismatch }
+  }
   // Вопрос оператору (domain.md §2) едет и в выходе из цикла: иначе P2 видна только записью prior.
   const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, reg, spots, fix2, ver2, dropped, offeredOnly })
   advance()
@@ -69,13 +77,17 @@ async function reviewLoop(t) {
     else { gaps = lapGaps(rev, spots, fal, reg.all()); recheck = !!falsifyGap(rev, fal) }
     listed = loops.review_fix ? reg.listing() : reg.open()
     spots = await hunksOf('повторное', base)
+    // Файл перенесённого места менялся после base - строки могли сместиться, адрес их не держит: ревью от последней опорной базы.
+    if (carried.length && (!spots || spots.status !== 'complete' || carried.some(c => spots.hunks.some(d => spot(d)[0] === spot(c)[0])))) { base = clean; carried = []; spots = await hunksOf('повторное', base) }
+    if (carried.length || whole) spots = spots && spots.status !== 'blocked' ? { ...spots, hunks: [...spots.hunks, ...carried.filter(c => !spots.hunks.some(x => sameSpot(x, c)))], carried, whole }
+      : { ...(spots || { status: 'blocked', missing: lack(spots, 'снимок правки') }), carried, whole }
     rev = await t.review('повторное', fix2 || fix, ver2 || ver, listed, base, spots, gaps); loops.review++
     fal = await falsify('повторное', rev, listed, base, spots, gaps, recheck)
     // Повторное без выхода или blocked статусов не выносит: реестр остаётся, каким его оставило прежнее.
     if (rev && rev.status !== 'blocked') listed.forEach(reg.doubt)
     reg.apply(verdictOf(rev, fal), judged(fal) ? 'скептик (повторное)' : 'саморевьюер (повторное)', listed, loops.review_fix ? introducedAt(deltaOf(ver2)) : null)
     chain = pairsOf(reg, kept(rev, fal), listed, degraded)
-    last = { step: '3-repeat', doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver2 || ver), base, settled: settledOf(rev, spots, fal) && !reviewGap(rev, reg.all()) }
+    last = { step: '3-repeat', doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1, verdict: rev ? rev['review-verdict'] : null, head: shaOf(ver2 || ver), base, ...(carried.length ? { carried } : {}), settled: settledOf(rev, spots, fal) && !reviewGap(rev, reg.all()) }
     trail.push(last)
     advance()
   }
