@@ -106,7 +106,7 @@ npm run validate:agents       # только агенты
 
 ## validate-skill.js
 
-Валидатор skills, проверяющий соответствие [Skill Framework](../docs/SKILL_FRAMEWORK.md).
+Валидатор skills, проверяющий соответствие [Skill Framework](../docs/SKILL_FRAMEWORK.md). `SKILL.md`, чей `<plugin>:<name>` внесён в `COMMAND_SKILLS` (`command-skills.js`), - команда в форме скилла: здесь не судится, его судит `validate-command.js`.
 
 ### Что проверяет
 
@@ -156,7 +156,7 @@ npm run validate:skills       # только skills
 
 ## validate-command.js
 
-Валидатор команд, проверяющий соответствие [Command Framework](../docs/COMMAND_FRAMEWORK.md).
+Валидатор команд, проверяющий соответствие [Command Framework](../docs/COMMAND_FRAMEWORK.md). Команда - `commands/*.md` и `SKILL.md` с `<plugin>:<name>` из `COMMAND_SKILLS` (`command-skills.js`); когда команда лежит скиллом - COMMAND_FRAMEWORK, «Путь в репозитории».
 
 ### Что проверяет
 
