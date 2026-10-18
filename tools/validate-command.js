@@ -22,6 +22,7 @@ import matter from 'gray-matter';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import { visit } from 'unist-util-visit';
+import { isCommandSkillFile, commandName } from './command-skills.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -200,6 +201,8 @@ function findAllCommandFiles() {
       const stat = statPlain(full);
       if (stat.isDirectory()) walk(full);
       else if (entry.endsWith('.md') && full.includes('/commands/')) {
+        result.push(full);
+      } else if (entry === 'SKILL.md' && isCommandSkillFile(full)) {
         result.push(full);
       }
     }
@@ -547,7 +550,7 @@ function validateFile(filepath) {
   }
 
   validateFrontmatter(parsed, findings);
-  validateSize(raw, findings, PIPELINE_COMMANDS.has(basename(filepath, '.md')));
+  validateSize(raw, findings, PIPELINE_COMMANDS.has(commandName(filepath)));
   validateNoProcedural(parsed.content, findings);
   validateCodeFences(parsed.content, findings);
   validateNoBashScripts(parsed.content, findings);

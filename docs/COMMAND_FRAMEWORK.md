@@ -2,13 +2,13 @@
 
 Методичка для создания команд (slash-commands) в Claude Code marketplace. Используется человеком или Claude при работе над плагинами.
 
-Команда - **точечное действие**, вызываемое пользователем через `/command-name`. В отличие от агента (многофазный workflow) и skill (справочник ловушек), команда решает **одну задачу за один вызов** в текущем контексте разговора.
+Команда - **точечное действие**, вызываемое пользователем слэш-командой (`/<plugin-name>:<command-name>`, форма вызова - «Путь в репозитории»). В отличие от агента (многофазный workflow) и skill (справочник ловушек), команда решает **одну задачу за один вызов** в текущем контексте разговора.
 
 ## Когда нужна команда, а когда агент
 
 | Признак | Команда | Агент |
 | ------- | ------- | ----- |
-| Вызывается | Пользователем явно: `/name` | Claude Code автоматически по semantic match |
+| Вызывается | Пользователем явно: `/<plugin-name>:<name>` | Claude Code автоматически по semantic match |
 | Контекст | Текущий разговор | Отдельный sub-agent |
 | Масштаб | Одно действие или короткий сценарий | Многофазный workflow с gate'ами |
 | Состояние | Не держит между вызовами | Живёт пока работает |
@@ -58,11 +58,11 @@ Claude сам найдёт sln/csproj, выберет конфигурацию, 
 
 ```text
 plugins/specialists/<category>/<plugin-name>/
-└── commands/
-    └── <command-name>.md
+├── commands/<command-name>.md          # /<plugin-name>:<command-name>
+└── skills/<command-name>/SKILL.md      # то же + голое /<command-name>
 ```
 
-Пользователь вызывает: `/command-name` или `/command-name аргументы`.
+Команда из `commands/` вызывается только полной формой `/<plugin-name>:<command-name> [аргументы]`; голое имя платформа даёт скиллу плагина, пока его не заняла другая команда («The bare `/fancy` also invokes the skill unless another command already uses that name», [skills](https://code.claude.com/docs/en/skills), сверено 18.10.2026; зонд того же дня через `claude -p --plugin-dir`: голое имя команды не найдено, скилла - вызван, аргументы дошли без `$ARGUMENTS`; в интерактивной сессии голое имя установленной команды плагина тоже не вызывалось). Дефолт - `commands/`. Команде, которую нужно звать голым именем, файл кладётся в `skills/<command-name>/SKILL.md` с `name: <command-name>`, тело и frontmatter те же, а `<plugin-name>:<command-name>` вносится в `COMMAND_SKILLS` (`tools/command-skills.js`): без записи `validate-skill.js` судит файл как trap-skill, с ней - `validate-command.js` как команду.
 
 ### Frontmatter
 
