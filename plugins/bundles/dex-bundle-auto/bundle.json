@@ -8,8 +8,13 @@
     "dex-skill-user-stories"
   ],
   "dependencies": [
+    "dex-rulebook-miner",
     "dex-skill-artifact-naming",
+    "dex-skill-ci-gates",
     "dex-skill-docs-layout",
+    "dex-skill-fact-verification",
+    "dex-skill-github-actions",
+    "dex-skill-gitlab-ci",
     "dex-skill-legacy-reconstruction",
     "dex-skill-node-contract",
     "dex-skill-project-baseline",

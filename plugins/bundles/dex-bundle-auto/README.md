@@ -32,17 +32,21 @@
 Полный состав - `bundle.json`: `includes[]` (профиль) плюс `dependencies[]` (подтянутое замыканием).
 
 ### Команды
-- `/dex-auto:onboard` - вход проекта: корпус документации, BRD продукта и ADR решений устройства со статусом `review`, порядок работы и гейты в `CLAUDE.md`
+- `/dex-auto:onboard` - вход проекта: скелет пустого проекта, корпус документации, BRD продукта и ADR решений устройства со статусом `review`, в `CLAUDE.md` порядок работы, гейты, карта, правила и запреты, перечень готовности репозитория
 - `/dex-auto:goal` - цель из тикета, спеки или симптома
 - `/dex-auto:auto` - прогон трека по цели, возобновление, сдача в PR/MR (`--pr`)
 
 ### Skills
 - `dex-skill-project-docs-map`, `dex-skill-docs-layout` - корпус документации проекта и его раскладка
 - `dex-skill-legacy-reconstruction` - реконструкция уровня 0 по коду
-- `dex-skill-project-baseline` - гейты проекта: сборка, тесты, линт
+- `dex-skill-project-baseline` - гейты проекта: сборка, тесты, линт; закладка скелета пустого проекта
+- `dex-skill-ci-gates`, `dex-skill-github-actions`, `dex-skill-gitlab-ci` - CI скелета пустого проекта
 - `dex-skill-requirement-quality` - оракул требований цели
 - `dex-skill-stack-registry` - стек проекта по манифесту
 - `dex-skill-business-analysis-29148`, `dex-skill-adr-quality`, `dex-skill-functional-requirements`, `dex-skill-nfr`, `dex-skill-user-stories` - нормы письма единиц корпуса (BR, ADR, FR, NFR, AC): по ним узлы входа и фиксации пишут единицу своего вида
+
+### Специалисты
+- `dex-rulebook-miner` - свод правил проекта из истории ревью MR (`/dex-rulebook-miner:rulebook`): `/onboard` предлагает его, когда свода нет
 
 ## Note
 
