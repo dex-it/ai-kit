@@ -118,6 +118,10 @@ def delta(base):
         # При -U0 добавленная строка «++ b/x» читается как «+++ b/x»: заголовок файла - только до первого хунка.
         if line.startswith("diff --git "):
             head, old, path = True, None, None
+        # Переименованный файл под старым путём - удалённый: место по старому адресу правка тоже задела.
+        elif head and line.startswith("rename from ") and line[12:] not in seen:
+            spots.append(line[12:])
+            seen.add(line[12:])
         elif head and line.startswith("--- "):
             old = line[6:].rstrip("\t") if line.startswith("--- a/") else None
         elif head and line.startswith("+++ "):

@@ -24,6 +24,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import { visit } from 'unist-util-visit';
+import { isCommandSkillFile } from './command-skills.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -119,7 +120,7 @@ function findAllSkillFiles() {
       const full = join(dir, entry);
       const stat = statPlain(full);
       if (stat.isDirectory()) walk(full);
-      else if (entry === 'SKILL.md') result.push(full);
+      else if (entry === 'SKILL.md' && !isCommandSkillFile(full)) result.push(full);
     }
   }
   walk(SKILLS_DIR);
@@ -889,6 +890,10 @@ function main() {
     const abs = resolve(target);
     if (!existsSync(abs)) {
       console.error(`File not found: ${target}`);
+      process.exit(1);
+    }
+    if (isCommandSkillFile(abs)) {
+      console.error(`${target} is a command in skill form (COMMAND_SKILLS) - validate it with tools/validate-command.js`);
       process.exit(1);
     }
     files = [abs];

@@ -1,4 +1,5 @@
 ---
+name: do
 description: Выполнить задачу с качеством не ниже одной сессии и как можно дешевле - сам или цепочкой исполнителей по правилам скилла subagent-dispatch
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Skill, Agent
 argument-hint: "<задача>"
