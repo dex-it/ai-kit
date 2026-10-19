@@ -10,14 +10,22 @@ public class OutboxDispatcher(IOutboxQueue queue, IHttpClientFactory http, IConf
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var batch = await queue.TakeBatchAsync(50, stoppingToken);
+            IReadOnlyList<OutboxMessage> batch;
+            try { batch = await queue.TakeBatchAsync(50, stoppingToken); }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { return; }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Take batch failed");
+                try { await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken); } catch (OperationCanceledException) { return; }
+                continue;
+            }
             foreach (var m in batch)
             {
                 try { await PublishAsync(m, stoppingToken); }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { return; }
                 catch (Exception ex) { log.LogWarning(ex, "Publish failed {Id}", m.Id); }
             }
-            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+            try { await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken); } catch (OperationCanceledException) { return; }
         }
     }
 
