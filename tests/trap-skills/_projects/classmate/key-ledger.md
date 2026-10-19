@@ -246,3 +246,31 @@ sha256 редакций: epic-planning s9 0ee1db39..., rule-mining s11 c2cb0714.
 Набор l (rule-mining s11): RM-41b по строгой строке ключа 4/4 (контроль и s10: 0 из 18, судья без пересчёта), RM-47, O1, O2, RM-45c 4/4, нулей нет. Правило l выполнено, s11 принимается.
 Набор m: `rbl m1-m4` и `wpr m1-m4` на epic-planning s9 + prioritization s12. Правило до прогонов: PR8 4/4, BL29 4/4, прочие клетки не ниже набора k (BL1, BL2, BL6 4/4). Не выполнено - пункт остаётся с записью «не доказан добором», разбор причины в протоколе prioritization.
 sha256 редакции prioritization s12: see inputs/SKILL-s12.md.
+
+## Итог правки по ревью #365 и состояние на коммит - 2026-10-19
+Набор m: rbl m1-m4 и wpr m1-m4 на epic-planning s9 + prioritization s12 - PR8 4/4, BL29 4/4, BL1, BL2, BL6 4/4; правило m выполнено, s12 принимается. Итог: epic-planning s9, prioritization s12, rule-mining s11 (набор l, строгая строка RM-41b 4/4) вошли в SKILL.md. Прогоны k, l, m - 24 запуска, судья `judge-blind.sh` без ручных пересчётов.
+Итоговые sha256 (команда: `sha256sum <файл>` из каталога мини-проекта; для входов `branches/` и `stages/` - `git ls-tree -r HEAD -- <каталог> | sha256sum`, при необходимости от корня репозитория). README.md хешировался только в блоках 1-2 (fa7a516e...), с тех пор правился (описание базы плеч, перечень #364); прежний хеш недействителен, записаны текущие значения.
+687f48fff8d3b6d583c18429f2b17d855b9f1cd5671e7fd57ea521a0a73ab066  key/K0.md
+a13930a7a97431f8074feed73dab96f21378472897937345971792cffca86f96  key/K1.md
+15d074298b93d3724f2ca6f139a22581e4c764fbfa70e6b10a34c53e37f22ed0  key/K2.md
+4d07f25c711717eafb66ec164b5f18c620fe3e0c72ce8f743b937a9d0694f2ac  key/R-BL.md
+c90253397bc1838545a867ae944729d7afac8b4bf1d0d9eb5cbbf17f2f8ce2da  key/R-BP.md
+21271eabd05aeecb5d779f37be755f80021627c69faf94c1e9b0f73f59de0bd9  key/R-DS.md
+026597db20dbeee3858bcbc53dfd736585e5a822a159cca06fcc27fa5345705b  key/R-PD.md
+cf6081be15c380e1bd1e7de6bd79602006b7109bb983f9bdba0492877c6642ae  key/R0B.md
+979d1e037e2edbfe98a4c89573bf376c4142d0d5bd3448fef700c1abc5b39e35  key/R0P.md
+766f44eef892e206ade69fba8ac3dd6061708570915fd76b5729209d00d7203a  key/RM1.md
+7a3eeb7d96c6ede6d312b64ba616441af63c1f27161f5c25d7d58f3efa3b2de1  key/RQ0.md
+054883b504d89f3d2b794cbe01b41229505e08b1ce6505924c15e935774ae37a  key/RQ1.md
+aec37ddfb4e6c949bd639d615b97b2ea7ea10c132bbd07a4853cc93aba550dd2  key/RQ2.md
+a9ea84731feb8d33a5bd39c8a0a41c960b56b913806c59b276d4185c291e2614  key/W-BP.md
+ed655d607599924febd5ddea697270009129c3e30c91b0b5f61d7d23af482a0b  key/W-DS.md
+7a00c3bf93e4f030c45d991b5dbb3f884237818b34ff7774c5c3417e776f43c8  key/W-EP.md
+1220b6e7a101e667bc15cc130ae9f53af26a302585f5cc7614ba586df752585b  key/W-PD.md
+09133b368d3ed52af8202c220e0e15f465ca16f7f9d2cd8c7b18156084c000ee  key/W-PR.md
+1864a55f145f9b6b1a4de82c55d68c05388eec47d1097b4a0bac4c937304d2cc  README.md
+081df1efac344a395e82fbc201dce6e40194f276f84c4a93cd4a698f3bacf568  run-group-4-8.sh
+25f820e8c172d8531bd92f314c3724fc892eae3663796a1342b617ec9259171b  judge-blind.sh
+8087920aaf115bdcc8097aefc5a3762709073092eb7de02081253f375b3dab47  setup.sh
+1742c13cfdc4f970e5fbad6baf339a9ee58eba102164a7e2fef3f2d92dd9592c  git ls-tree -r HEAD branches
+ed73f2c1f77522fbe6d3716c67f84bb0cffdc946784e3f3278041930807ac60c  git ls-tree -r HEAD stages
