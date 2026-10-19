@@ -1,0 +1,304 @@
+# Мини-проект Shelfwatch: вход наборов группы 4.5
+
+Аналитика полок розничной сети на Python 3.12 (`pyproject.toml`, все версии закреплены `==`): фото полок
+(PyTorch, ResNet), SKU (Keras), отток магазинов (sklearn, XGBoost), отзывы (HF, LoRA), подбор параметров
+(Optuna). Вход наборов [python-project-hygiene](../../python-project-hygiene/README.md),
+[python-pytorch](../../python-pytorch/README.md), [python-tensorflow](../../python-tensorflow/README.md),
+[python-classical-ml](../../python-classical-ml/README.md), [python-computer-vision](../../python-computer-vision/README.md),
+[python-nlp-transformers](../../python-nlp-transformers/README.md), [python-ml-optimization](../../python-ml-optimization/README.md)
+(эпик #291, группа 4.5, #306). Файл - ключ для судьи, исполнителю не подаётся: `setup.sh` его в каталог
+прогона не копирует, как и раннер.
+
+```
+setup.sh <dest> [ветка]   git-репозиторий прогона: stages/* - коммиты main, branches/<имя>/<n>-* - ветка feature/<имя>
+stages/                   1 каркас: pyproject (закреплённые версии), метрики, docs/data.md - описание данных
+branches/                 по кейсу, таблица ниже
+run-group-4-5.sh          раннер: промпты кейсов дословно, флаги исполнителя, выход в runs/ протокола
+```
+
+## Среда прогона
+
+`claude -p --model claude-sonnet-5-5 --effort medium --restricted --strict-mcp-config --no-session-persistence
+--disable-slash-commands --permission-mode acceptEdits --max-budget-usd 3`, инструменты Read, Write, Edit,
+Glob, Grep, Bash; разрешён только `Bash(git *)`. Скилл подаётся копией в `<work>/discipline/<скилл>.md` через
+`--add-dir` и строкой промпта «Перед работой прочитай <путь> - дисциплина, принятая в команде»; `Skill` tool
+запрещён промптом, слэш-команды выключены. Каталог прогона - `$G45_WORK/w/<id>/shelfwatch` вне репозитория;
+раннер отказывается стартовать, если на пути есть `CLAUDE.md` или есть `~/.claude/CLAUDE.md`.
+
+Окружения Python у исполнителя нет (в промпте сказано прямо): код не запускается, ни `pytest`, ни `ruff`, ни
+`mypy`. Это замысел кейсов: все единицы судятся на уровне кода. Единица, чей вердикт держится на поведении,
+видном только при запуске (GPU, дедлок, время, сходимость), судится по тому, что исполнитель назвал в коде и
+какое последствие указал; величина эффекта не мерится - строка протокола об этом пишет прямо. Версии библиотек
+сверялись отдельно, на установленном окружении 3.12 с теми же закреплёнными версиями (`uv pip install` из
+`uv pip compile pyproject.toml`; раздел протокола каждого скилла).
+
+Секреты в кейсах - только `FAKE-test-only-not-a-key`.
+
+## Кейсы
+
+Ревью: ветка `feature/<имя>` против `main`, находки - `REVIEW.md`, по строке на находку, severity
+blocker/major/minor. Код: поручение `docs/tasks/<N>.md`, выход - `DIFF.patch`, коммитить нельзя.
+
+| Кейс | Ветка | Что | Скиллы |
+|---|---|---|---|
+| RV-PT | `torch-train` | ревью: цикл обучения ResNet-18, чекпоинт, планировщик, экспорт | python-pytorch |
+| RV-DDP | `torch-ddp` | ревью: DDP, смешанная точность, оценка на rank 0 | python-pytorch, python-ml-optimization (дубль, шаг 0) |
+| RV-TF | `keras-train` | ревью: Keras, tf.data, сохранение, смешанная точность | python-tensorflow |
+| RV-ML | `churn-baseline` | ревью: бейзлайн оттока, утечки, метрика, XGBoost | python-classical-ml |
+| RV-CV | `shelf-vision` | ревью: преобразования, дообучение, детекция, сегментация | python-computer-vision |
+| RV-NLP | `review-sentiment` | ревью: BERT, NER, QLoRA, инференс | python-nlp-transformers |
+| RV-OPT | `optuna-tune` | ревью: Optuna, сетка, профилировщик, `torch.compile` | python-ml-optimization |
+| RV-HYG | `tooling-pr` | ревью: настройки ruff, mypy, pytest и CI | python-project-hygiene |
+| N0 | `clean-diff` | ревью чистого MR (ML-код написан верно): верно - ничего по предметам скиллов | все семь |
+| K-HYG | `quality-gates` | код: SW-260, настроить ruff, mypy, pytest и джобы CI | python-project-hygiene |
+| K-NLP | `task-sentiment` | код: SW-261, дообучение BERT, `classify`, адаптер для сводчика | python-nlp-transformers |
+| K-ML | `task-churn` | код: SW-262, модель оттока и `predict_next_month` | python-classical-ml |
+| N0K | `task-metrics` | код: SW-263, две функции метрик; верно - ничего по предметам скиллов | все семь |
+
+## Ключ
+
+Записан до первого прогона. Единица засчитана, если в `REVIEW.md` (или в коде `DIFF.patch`) есть
+находка, которая (а) указывает место - файл и функцию или строку, (б) называет, что неверно, (в) называет
+последствие. Слова без места («проверьте DataLoader») не засчитываются. Серьёзность единицы не судится, кроме
+приманок. Находка по месту, названному верно, но с последствием, которого здесь нет, не засчитывается.
+
+**Пограничные случаи (правило до прогонов).** Одна находка, которая называет несколько единиц разом (например,
+«предобработка до разбиения»), засчитывается каждой единице, чьё место и признак в ней названы; общая фраза без
+перечисления - только тем, на чьё место она указывает явно. Находка по двойнику одной и той же строки
+засчитывается один раз. Исправление, которое исполнитель предлагает вместо описания дефекта, засчитывается,
+если из него дефект выводится.
+
+**Приманка** - место, где код верен или решение допустимо. Находка по приманке с severity blocker или major -
+провал по приманке; minor - записывается, не провал. «Дефект вне скилла» - засеян для проверки охвата: находка
+по нему со скиллом не должна пропасть относительно контроля.
+
+### RV-PT (`torch_train.py`)
+
+| Код | Единица | Место |
+|---|---|---|
+| T1 | `evaluate` без `model.eval()`: после `train_epoch` модель остаётся в режиме train | `evaluate` |
+| T2 | в `train_epoch` нет `optimizer.zero_grad()`: градиенты копятся | `train_epoch` |
+| T3 | `predict` без `no_grad`/`inference_mode` (при `eval()`) | `predict` |
+| T4 | `loss.item()` на каждом батче | `train_epoch` |
+| T5 | возобновление грузит только веса: оптимизатор, планировщик, номер эпохи потеряны | `load_checkpoint`, `fit` |
+| T6 | `torch.save(model, path)` целого объекта | `export` |
+| T7 | `OneCycleLR` шагает раз в эпоху вместо раза в батч | `fit` |
+| T8 | `ReduceLROnPlateau.step()` без метрики (`TypeError`, проверено на torch 2.14.1) | `fit` |
+| T9 | `shuffle=True` вместе с `sampler` (`ValueError` при построении, проверено) | `build_loaders` |
+
+Приманки: PB1 `num_workers=4, pin_memory=True` без `persistent_workers` (пункт скилла «num_workers без
+persistent_workers»); PB2 `torch.load(weights_only=True)`; PB3 взвешенный сэмплер против дисбаланса классов.
+Вне скилла: X1 токен-литерал `UPLOAD_TOKEN` в коде; X2 `except Exception: pass` вокруг загрузки модели.
+
+### RV-DDP (`ddp_train.py`)
+
+| Код | Единица | Место | Дом |
+|---|---|---|---|
+| D1 | `DistributedSampler` без `sampler.set_epoch(epoch)` | `worker` | pytorch |
+| D2 | `BASE_LR` подобран для батча 32 на одной GPU, эффективный батч растёт в N раз, LR не масштабирован (и нет прогрева) | `worker` | ml-optimization |
+| D3 | `scaler.scale(loss).backward()` внутри `autocast` | `worker` | pytorch |
+| D4 | чекпоинт `model.state_dict()` у обёрнутой DDP модели: ключи `module.` | `worker` | pytorch |
+| D5 | оценка только на rank 0 через обёрнутую DDP модель: forward синхронизирует буферы, остальные ранги уходят в `backward` - зависание | `worker` | pytorch |
+| D6 | `refine`: загрузчик без `DistributedSampler`, каждый ранг гоняет весь `shelf/hard` | `refine` | ml-optimization |
+| D7 | `print` и `torch.save` на всех рангах (дублирование логов, N записей в один файл) | `worker` | ml-optimization |
+
+Приманки: DB1 `estimate_class_prior` читает весь train на каждом ранге (нужна глобальная доля классов);
+DB2 финальный `model.module.state_dict()` на rank 0 после `barrier`. Вне скилла: X1 `MASTER_ADDR` IP-литерал;
+X2 `weight=1.0/prior` делит на ноль, если класса нет.
+
+### RV-TF (`keras_train.py`)
+
+| Код | Единица | Место |
+|---|---|---|
+| F2 | `from_logits=True` при `softmax` в выходном слое | `build_model`, `train` |
+| F3 | `EarlyStopping` без `restore_best_weights` | `train` |
+| F4 | `monitor="val_loss"` без `validation_data` в `fit` | `train` |
+| F5 | `.batch(...).shuffle(...)`: перемешиваются батчи | `make_dataset` |
+| F6 | `shuffle(buffer_size=16)` на 120 000 строк для «случайной» выборки | `probe_sample` |
+| F7 | `.map(augment)` без `num_parallel_calls` | `train` |
+| F8 | нет `prefetch` у обучающего набора | `make_dataset` |
+| F9 | `model.save(...h5)` | `train` |
+| F10 | `ResidualBlock` без `get_config` | `ResidualBlock` |
+| F11 | `SkuNet` (наследник `keras.Model`) без `get_config`, сохраняется целиком | `SkuNet`, `train` |
+| F12 | `mixed_float16` и выходной `Dense(softmax)` без `dtype="float32"` | `SkuNet`, начало модуля |
+| F14 | модель собрана вне `strategy.scope()` | `train` |
+| F15 | `print` и Python-`if len(x)` внутри `@tf.function` | `standardize` |
+
+Приманки: FB1 `model(batch)` без `training=` (в Keras вне `fit` режим инференса по умолчанию); FB2 нет ручной
+`LossScaleOptimizer` (`compile` при `mixed_float16` оборачивает сам, проверено на keras 3.15.1: `LossScaleOptimizer`).
+Вне скилла: X1 абсолютный путь `/home/dmitry/...`; X2 `assert` как проверка входных данных; X3 `compile` дважды.
+
+### RV-ML (`baseline.py`)
+
+| Код | Единица | Место |
+|---|---|---|
+| C1 | `StandardScaler.fit_transform` по всем данным до разбиения | `features` |
+| C2 | `SMOTE.fit_resample` до `cross_val_score` | `cv_with_smote` |
+| C3 | `SelectKBest.fit` по всем данным до разбиения | `features` |
+| C4 | `TargetEncoder.fit_transform` по всем данным до разбиения | `features` |
+| C5 | `train_test_split` перемешивает месячные срезы | `split_and_fit` |
+| C7 | `KFold(shuffle=True)` на упорядоченных по времени срезах | `cv_with_smote` |
+| C8 | `accuracy_score` при 5% положительных | `split_and_fit` |
+| C9 | `RandomForestClassifier` без `class_weight` при 5% | `split_and_fit` |
+| C10 | `n_estimators=10000` и `eval_set` без `early_stopping_rounds` | `fit_xgb` |
+| C11 | `max_depth=20` при `learning_rate=0.3` | `fit_xgb` |
+| C12 | `OneHotEncoder(sparse_output=False)` на около 1 200 магазинов | `one_hot_stores` |
+| C14 | `dropna()` при 18% пропусков в `n_tickets`, пропуск информативен | `load` |
+
+Приманки: CB1 `sku_cv`: `cross_val_score(cv=5)` у классификатора - стратифицированные фолды по умолчанию
+(проверено на scikit-learn 1.9.1: `StratifiedKFold`); CB2 `StandardScaler` перед лесом в `scaled_forest`
+(лишний, но безвреден); CB3 сетка 2x2 в `tune_forest`. Вне скилла: X1 `print(df.head())`; X2 импорт внутри функции.
+
+### RV-CV (`vision_data.py`, `detect.py`, `segment.py`)
+
+| Код | Единица | Место |
+|---|---|---|
+| V1 | `cv2.imread` (BGR) без `COLOR_BGR2RGB`, дальше нормализация ImageNet | `ShelfDataset.__getitem__` |
+| V2 | предобученный ResNet-50 получает `ToTensor` без нормализации | `embed_shelf` |
+| V3 | `Resize(224)` на кадрах 640x480: 298x224, не квадрат | `train_tf` |
+| V4 | проверочная выборка получает `train_tf` с аугментациями | `loaders` |
+| V5 | `RandomVerticalFlip`, `RandomRotation(180)` на фото полок | `train_tf` |
+| V6 | `A.Compose` без `bbox_params`, рамки возвращаются прежними | `augmented` |
+| V7 | `AdamW(lr=1e-3)` на всех весах предобученной сети | `fit_classifier` |
+| V8 | сеть не заморожена на 600 снимках: полное дообучение сразу | `fit_classifier` |
+| V9 | `nms(iou_threshold=0.9)` | `postprocess` |
+| V10 | метки YOLO в пикселях, не нормированные | `write_yolo_label` |
+| V11 | AP при одном пороге уверенности | `average_precision` |
+| V12 | `CrossEntropyLoss` без Dice при 3% положительных пикселей | `criterion` в `segment.py` |
+| V13 | тест кормит U-Net 4 уровня входом 100x100 | `test_segment.py` |
+
+Приманки: VB1 `build_detector`: частичная заморозка и разные LR - верно; VB2 `merge_tiles` NMS 0.5;
+VB3 `RandomHorizontalFlip`, `ColorJitter` на обучении; VB4 `embed_shelf` конвертирует BGR в RGB.
+Вне скилла: X1 `os.system(f"cp {path} ...")`; X2 `embed_shelf` собирает ResNet заново при каждом вызове.
+
+### RV-NLP (`finetune.py`)
+
+| Код | Единица | Место |
+|---|---|---|
+| N1 | токенизация отзывов по одному в цикле | `tokenize_reviews` |
+| N2 | `max_length=256` без `truncation=True` | `tokenize_reviews` |
+| N3 | `padding="max_length"` на инференсе | `classify_batch` |
+| N4 | токенайзер с добавленными токенами не сохранён; сервис грузит базовый | `train_sentiment`, `classify_batch` |
+| N5 | `learning_rate=1e-3` для BERT (NER) | `train_ner` |
+| N6 | обучение тональности без прогрева | `train_sentiment` |
+| N8 | `base_model` заморожен целиком при задаче «дообучение» | `build_sentiment` |
+| N9 | метка слова копируется на каждое подслово | `align_labels`, `encode_for_ner` |
+| N10 | `tokenizer(words)` без `is_split_into_words=True` | `encode_for_ner` |
+| N11 | `LoraConfig(r=4, target_modules=["q_proj"])` | `build_summarizer` |
+| N12 | `BitsAndBytesConfig(load_in_4bit=True)`: вычисления в float32 (проверено на transformers 5.20.1: `torch.float32`, квантизация `fp4`) | `build_summarizer` |
+| N13 | сводчик сохраняется адаптером, сервис без `peft` | `export_summarizer` |
+| N14 | сводки по одному отзыву | `summarize` |
+| N15 | модель на CPU в float32 при p95 50 мс | `load_for_serving` |
+| N16 | жадное `generate(max_length=1000, do_sample=False)` | `summarize` |
+
+Приманки: NB1 `num_train_epochs=20` при `eval_strategy="epoch"` и `load_best_model_at_end=True`; NB2 `warmup_steps=0.1`
+в NER (в 5.20.1 поля `warmup_ratio` нет, `warmup_steps` принимает долю). Вне скилла: X1 `HF_TOKEN` литерал;
+X2 `classify_batch` грузит модель и токенайзер на каждый вызов.
+
+### RV-OPT (`tune.py`)
+
+| Код | Единица | Место |
+|---|---|---|
+| O1 | `GridSearchCV` по шести параметрам: 729 комбинаций на 3 фолда | `tune_xgb` |
+| O2 | 50 эпох без `trial.report` и `trial.should_prune` | `objective` |
+| O3 | `lr` без `log=True` | `objective` |
+| O4 | `hidden_dim` целым 10..1000 | `objective` |
+| O5 | цель - `train_acc`, `val` не используется | `objective` |
+| O9 | профиль 100 эпох | `profile_training` |
+| O10 | «GPU загружена на 99%, значит узких мест нет» | docstring `profile_training` |
+| O11 | компилируют модель, хотя 60% шага в `DataLoader` (`num_workers=0`) | `compile_for_training`, `make_loader` |
+| O12 | накопление по 4 шага без деления потерь | `run_epoch` |
+| O13 | `torch.compile` модели с ветвлением по данным | `RoutedNet`, `compile_router` |
+| O14 | `max-autotune` для коротких пакетных прогонов | `compile_for_inference` |
+
+Приманки: OB1 `weight_decay` с `log=True`, `batch_size` категориями; OB2 `@torch.no_grad()` и `eval()` в `accuracy`.
+Вне скилла: X1 `except Exception: return 1.0` (сбой выглядит лучшим результатом при `maximize`); X2 SQLite по
+абсолютному домашнему пути.
+
+### RV-HYG (`pyproject.toml`, `pytest.ini`, `.gitlab-ci.yml`, `legacy_features.py`)
+
+| Код | Единица | Место |
+|---|---|---|
+| H2 | `W` в `select` при `indent-style = "tab"`: W191 против форматтера | `pyproject.toml` |
+| H3 | mypy без `check_untyped_defs`: `total + " руб."` в нетипизированной функции не видно | `[tool.mypy]`, `legacy_features.py` |
+| H4 | `ignore_missing_imports = true` глобально | `[tool.mypy]` |
+| H5 | `mypy src` в CI перекрывает `files`: тесты вне проверки | `.gitlab-ci.yml` |
+| H6 | `pytest.ini` рядом с `[tool.pytest.ini_options]`: pyproject не читается, `addopts` с `--cov` не действует | `pytest.ini` |
+| H7 | `pytest .` перекрывает `testpaths` | `.gitlab-ci.yml` |
+| H8 | нет `--strict-markers`; `@pytest.mark.slwo` проходит | `tests/test_legacy_features.py` |
+| H9 | `--cov` без `--cov-fail-under` | `pyproject.toml` |
+| H10 | предупреждения не эскалируются (`filterwarnings`) | `pyproject.toml`, `pytest.ini` |
+| H11 | в CI нет аудита зависимостей | `.gitlab-ci.yml` |
+
+Приманки: HB1 `line-length = 100`, `target-version`; HB2 `markers` объявлены; HB3 `ignore = ["D100", "D104"]`.
+Вне скилла: X1 `PYPI_TOKEN` литерал в CI; X2 `pip install -U ruff mypy pytest` без версий при закреплённых dev;
+X3 `ruff format .` пишет файлы в CI вместо `--check`.
+
+### N0 (`clean_train.py`)
+
+Верно написано всё по предметам скиллов: `zero_grad`, `eval`, `no_grad`, планировщик по батчам, полный чекпоинт,
+`loss.detach()` без синхронизации, `Pipeline` с импьютером, `class_weight`, `TimeSeriesSplit`, `average_precision`.
+Верный исход - ни одной находки по этим предметам. Находка major/blocker по ним - провал; minor - записывается.
+
+### K-HYG (`quality-gates`, выход - `pyproject.toml`, `.gitlab-ci.yml`, описание MR)
+
+| Код | Единица, засчитывается в DIFF.patch |
+|---|---|
+| H1 | `[tool.ruff.lint] select` расширен сверх дефолта (минимум одна из `I`, `B`, `UP`, `SIM`) |
+| H2 | в `select` нет правил, спорящих с форматтером (W191, E111, E114, E117, D206, D300, Q000-Q004, COM812, ISC001), либо они в `ignore` |
+| H3 | `check_untyped_defs = true` или `strict = true` |
+| H4 | нет глобального `ignore_missing_imports`; допустимы `[[tool.mypy.overrides]]` |
+| H5 | `files` в конфиге и в CI `mypy` без путей, либо пути перечисляют и `src`, и `tests` |
+| H6 | один конфиг pytest: нет `pytest.ini`, `tox.ini`, `setup.cfg` с секцией pytest |
+| H7 | CI зовёт `pytest` без пути, либо путь равен `tests`, `testpaths` задан |
+| H8 | `--strict-markers` в `addopts` |
+| H9 | если `--cov` есть - `--cov-fail-under`; без покрытия - n/a |
+| H10 | `filterwarnings` с `error` |
+| H11 | в CI шаг аудита зависимостей (`pip-audit` или `uv audit`), валящий джоб |
+
+### K-NLP (`task-sentiment`, выход - `sentiment_train.py`, тесты)
+
+| Код | Единица |
+|---|---|
+| N1 | токенизация пачкой одним вызовом (при `Dataset.map(batched=True)` или списком), не в цикле по одному |
+| N2 | `truncation=True` при `max_length` (тексты до 600 токенов) |
+| N3 | на инференсе динамическое `padding=True`, не `max_length` |
+| N4 | токенайзер сохраняется в тот же каталог, что модель (`artifacts/sentiment/`), и `classify` грузит оттуда |
+| N5 | `learning_rate` не выше 1e-4 |
+| N6 | прогрев (`warmup_steps` или график с прогревом) |
+| N7 | эпох не больше 5 либо ранняя остановка с `load_best_model_at_end` |
+| N8 | `requires_grad` не отключён у всего `base_model` |
+| N11 | `target_modules` шире одного `q_proj` (при Qwen: минимум `q_proj` и `v_proj`) |
+| N12 | `bnb_4bit_compute_dtype` задан (float16/bfloat16) |
+| N13 | перед отдачей сервису адаптер сливается (`merge_and_unload`), сохраняется модель без зависимости от `peft` |
+| N14 | `classify` и `summarize` обрабатывают пачку, не по одному |
+| N16 | `summarize` не жадное без ограничения повторов: задан `max_new_tokens` и `num_beams > 1`, либо `repetition_penalty`/`no_repeat_ngram_size`, либо сэмплирование |
+
+N9, N10, N15 в кейсе неприменимы (n/a).
+
+### K-ML (`task-churn`, выход - `churn_model.py`, тесты)
+
+| Код | Единица |
+|---|---|
+| C1 | масштабирование и импьютер внутри `Pipeline`/`ColumnTransformer`, `fit` только на обучающей части |
+| C4 | кодирование `store_id` не обучается на всех данных до разбиения (внутри `Pipeline` либо вообще нет) |
+| C5, C7 | отложенная выборка и кросс-валидация упорядочены по `snapshot` (`TimeSeriesSplit` либо последние месяцы) |
+| C8 | метрика отчёта не `accuracy` (PR-AUC, ROC-AUC с оговоркой, F1 по положительному, recall@k) |
+| C9 | дисбаланс учтён (`class_weight`, `scale_pos_weight`, SMOTE только внутри `imblearn.Pipeline`) |
+| C10 | у XGBoost задана ранняя остановка по отложенной выборке (во времени после обучающей) |
+| C11 | нет сочетания `max_depth >= 15` и `learning_rate >= 0.3` |
+| C12 | `store_id` не кодируется плотным one-hot |
+| C14 | пропуски `n_tickets` импутируются (или признак-индикатор), строки не выбрасываются |
+
+C2, C3 засчитываются, если SMOTE или отбор признаков в решении есть: вне `Pipeline` - провал, иначе n/a.
+
+### N0K (`task-metrics`, выход - `DIFF.patch`)
+
+Верно: изменены `src/shelfwatch/metrics.py` и `tests/test_metrics.py`, новых зависимостей нет, `sklearn`,
+`torch` и прочие библиотеки из `pyproject.toml` не импортируются. Иное - провал (вред скилла на задаче вне предмета).
+
+## Счёт и порядок
+
+Контроль - два прогона на кейс без скилла (`c1`, `c2`); единица снимается при 2/2 в каждом кейсе, где она
+применима. По итогам шаг 0 (дубли) и ступени формы; прогоны со скиллом на итоговой редакции - на всех кейсах
+скилла, N0, N0K и вне-скилльных дефектах. Расход всей группы - потолок $30 по `total_cost_usd`.
