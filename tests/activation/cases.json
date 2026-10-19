@@ -36,9 +36,9 @@
     "prompt": "Нужно выровнять карточки в сетке по высоте, чтобы кнопка всегда прижималась к низу. Как это сделать на CSS grid?"
   },
   {
-    "id": "docker-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-docker:docker",
+    "id": "kubernetes-near",
+    "mode": "near-miss",
+    "expect": "dex-skill-kubernetes:kubernetes",
     "prompt": "Образ приложения весит 1.8 ГБ и собирается 12 минут. Как сократить и то и другое?"
   },
   {
@@ -219,13 +219,13 @@
     "id": "github-actions-in",
     "mode": "in-scope",
     "expect": "dex-skill-github-actions:github-actions",
-    "prompt": "Workflow в GitHub Actions пересобирает зависимости на каждом запуске и стартует дважды на один пуш в PR. Как поправить кэш и параллельные запуски?"
+    "prompt": "Артефакты тестов в GitHub Actions копятся и съедают место в хранилище организации. Как ограничить срок их хранения?"
   },
   {
     "id": "gitlab-ci-in",
     "mode": "in-scope",
     "expect": "dex-skill-gitlab-ci:gitlab-ci",
-    "prompt": "Джобы в .gitlab-ci.yml гоняются последовательно 40 минут, артефакты между стадиями теряются. Как ускорить?"
+    "prompt": "В GitLab CI после каждого push в MR стартует новый пайплайн, а старые доедают минуты раннеров. Как не копить лишние пайплайны?"
   },
   {
     "id": "integration-boundary-in",
@@ -237,7 +237,7 @@
     "id": "jenkins-in",
     "mode": "in-scope",
     "expect": "dex-skill-jenkins:jenkins",
-    "prompt": "В Jenkinsfile секреты светятся в логе, а общая библиотека тянется непонятно какой версии. Как правильно оформить?"
+    "prompt": "В Jenkinsfile стадия деплоя занимает агент ради проверки ветки, а на постоянном агенте остаются файлы прошлых сборок. Как поправить?"
   },
   {
     "id": "kafka-in",
@@ -474,7 +474,7 @@
     "id": "teamcity-in",
     "mode": "in-scope",
     "expect": "dex-skill-teamcity:teamcity",
-    "prompt": "Сборка в TeamCity тянет артефакты не из той сборки цепочки, конфигурация правится мышкой и разъезжается. Как навести порядок?"
+    "prompt": "В цепочке TeamCity шаги dotnet заново делают restore и build. Как убрать повторную работу?"
   },
   {
     "id": "tech-audit-in",
@@ -529,12 +529,6 @@
     "mode": "near-miss",
     "expect": "dex-skill-python-pytorch:python-pytorch",
     "prompt": "Как в pandas объединить два датафрейма по ключу и не потерять строки, которых нет во втором?"
-  },
-  {
-    "id": "docker-near",
-    "mode": "near-miss",
-    "expect": "dex-skill-docker:docker",
-    "prompt": "Как правильно выставить requests и limits для пода в Kubernetes, чтобы его не убивал OOM?"
   },
   {
     "id": "idea-forming-in",

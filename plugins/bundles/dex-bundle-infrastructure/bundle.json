@@ -28,7 +28,6 @@
   ],
   "dependencies": [
     "dex-skill-artifact-naming",
-    "dex-skill-docker",
     "dex-skill-docs-layout",
     "dex-skill-dotnet-logging",
     "dex-skill-elasticsearch",

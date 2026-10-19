@@ -1,6 +1,6 @@
 ---
 name: jenkins
-description: Jenkins - Jenkinsfile, стадии со своим agent, parallel, постоянные агенты, credentials, плагины. Активируется при jenkins, jenkinsfile, declarative pipeline, parallel stages, when beforeAgent, cleanWs, credentials scope, replay
+description: Jenkins - Jenkinsfile, стадии со своим agent, parallel, постоянные агенты, credentials, плагины. Активируется при jenkins, jenkinsfile, declarative pipeline, parallel stages, failFast, when beforeAgent, cleanWs, workspace, credentials scope, plugins, replay
 ---
 
 # Jenkins - чек-лист
