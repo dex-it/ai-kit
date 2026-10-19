@@ -16,7 +16,7 @@
 
 `<набор>/sources.md` - основания пунктов, пришедших из `/mr-apply`: MR, триада, самооценка анализатора. По ним строится кейс, когда пункт идёт в заход сжатия.
 
-`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `loyalty` - группа 3.2, корпус требований, `rooms` - группа 3.1, требования фичи, `bookings` - группа 4.2, ASP.NET Core и контракт OpenAPI, `classmate` - группа 4.8, продуктовые документы и история ревью): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
+`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `loyalty` - группа 3.2, корпус требований, `rooms` - группа 3.1, требования фичи, `bookings` - группа 4.2, ASP.NET Core и контракт OpenAPI, `classmate` - группа 4.8, продуктовые документы и история ревью, `shelfwatch` - группа 4.5, Python ML): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
 
 `removed/` - наборы снятых скиллов: скилла в каталоге нет, набор хранит свидетельство снятия и не
 перезапускается.
@@ -98,3 +98,10 @@
 | [removed/karpathy-guidelines](removed/karpathy-guidelines/README.md) | `dex-skill-karpathy-guidelines` 1.1.1 | код по тикету (K1, K2), тикет об исправленном (K0) | снят |
 | [rule-mining](rule-mining/README.md) | `dex-rulebook-miner` 2.3.1, скилл `rule-mining` | партия добычи по истории ревью (RM1), база - тело `rule-collector` | 18 ловушек -> пункт и H3 (RM-47, ступени 1, 3, 4); правлен перечень исходов `sources-ledger`, `no-rule:no-remark` (#364) |
 | [rulebook-quality](rulebook-quality/README.md) | `dex-rulebook-miner` 2.3.1, оракул `rulebook-quality` | вердикт по своду (RQ1, RQ2), «ничего не менять» (RQ0), база - шаг 2 `/rulebook` и `project-rulebook` | 20 ловушек -> вводная с признаком блокирующей и 1 H3 (ступени 1-4) |
+| [python-pytorch](python-pytorch/README.md) | `dex-skill-python-pytorch` 2.0.1, 2.1.0 | ревью (RV-PT, RV-DDP), чистый MR (N0), чистая задача (N0K); общий заход группы 4.5, `_projects/shelfwatch` | 14 ловушек и чек-лист -> 1 пункт (`loss.item()` на батче, с фактом версии) |
+| [python-tensorflow](python-tensorflow/README.md) | `dex-skill-python-tensorflow` 2.0.1, 2.1.0 | ревью (RV-TF); общий заход группы 4.5, `_projects/shelfwatch` | 15 ловушек и чек-лист -> 1 название (`map` без `num_parallel_calls`) |
+| [python-classical-ml](python-classical-ml/README.md) | `dex-skill-python-classical-ml` 2.0.1, 2.1.0 | ревью (RV-ML), код (K-ML); общий заход группы 4.5, `_projects/shelfwatch` | 14 ловушек и чек-лист -> 2 названия (веса классов; ранняя остановка XGBoost) |
+| [python-computer-vision](python-computer-vision/README.md) | `dex-skill-python-computer-vision` 2.0.1, 2.1.0 | ревью (RV-CV); общий заход группы 4.5, `_projects/shelfwatch` | 13 ловушек и таблица -> 1 название (`Resize` одним числом на неквадратных кадрах) |
+| [python-nlp-transformers](python-nlp-transformers/README.md) | `dex-skill-python-nlp-transformers` 2.0.1, 2.1.0 | ревью (RV-NLP), код (K-NLP); общий заход группы 4.5, `_projects/shelfwatch` | 16 ловушек и чек-лист -> 4 пункта (токенизация пачкой, прогрев с фактом версии, жадная генерация, `quantize_dynamic`) |
+| [python-ml-optimization](python-ml-optimization/README.md) | `dex-skill-python-ml-optimization` 2.0.1, 2.1.0 | ревью (RV-OPT, RV-DDP); общий заход группы 4.5, `_projects/shelfwatch` | 14 ловушек и таблица -> 1 название (`suggest_int` на диапазоне в сотни значений) |
+| [python-project-hygiene](python-project-hygiene/README.md) | `dex-skill-python-project-hygiene` 1.0.0, 1.1.0 | ревью (RV-HYG), код (K-HYG); общий заход группы 4.5, `_projects/shelfwatch` | 11 ловушек -> 5 названий (правила против форматтера, `ignore_missing_imports`, порог покрытия, `filterwarnings`, аудит зависимостей) |
