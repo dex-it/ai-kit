@@ -274,3 +274,9 @@ ed655d607599924febd5ddea697270009129c3e30c91b0b5f61d7d23af482a0b  key/W-DS.md
 8087920aaf115bdcc8097aefc5a3762709073092eb7de02081253f375b3dab47  setup.sh
 1742c13cfdc4f970e5fbad6baf339a9ee58eba102164a7e2fef3f2d92dd9592c  git ls-tree -r HEAD branches
 ed73f2c1f77522fbe6d3716c67f84bb0cffdc946784e3f3278041930807ac60c  git ls-tree -r HEAD stages
+
+## Полные хеши редакций наборов k, l, m - 2026-10-19 11:07:43 +0300
+Дополняют блоки «Правка по ревью PR #365» и «Итог наборов k и l» (там 8 знаков и отсылка к `inputs/`). Команда: `sha256sum <файл>` из `tests/trap-skills/`. rule-mining s11: тело совпадает с `SKILL.md` 3.0.0, поле `description` в `SKILL.md` правлено после прогонов `l` по треду активации.
+0ee1db398e5cc94bc5a18bc450aa43e48ffe6252467a04a22ed3cc3d3ac2b2cf  epic-planning/inputs/SKILL-s9.md
+c2cb071495c2ad088de71871ffd5647c4765f0c5da4e2c5f3d94de212807de76  rule-mining/inputs/SKILL-s11.md
+da189fbe964e12dab1b4418d4c8af90902f919fa2c4fd946545c9a6d26846233  prioritization/inputs/SKILL-s12.md
