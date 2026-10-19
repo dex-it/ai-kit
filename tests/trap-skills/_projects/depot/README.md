@@ -32,10 +32,12 @@ Bash, разрешён только `Bash(git *)`: сборки (`dotnet`, `dock
 | k-w | `feature/k8s-deploy` | DPT-11: манифесты `deploy/k8s/` с нуля, значения stage в `docs/stage-values.md` | DIFF, ANSWER | kubernetes |
 | k-f | `feature/k8s-fix` | DPT-12: Service не получает трафик + привести манифесты к проду; засеяны дефекты и приманка (worker-одиночка) | DIFF, ANSWER | kubernetes |
 | k-t | `feature/k8s-incident` | DPT-13: разбор CrashLoopBackOff по выводам `kubectl` в `ops/incident/` | ANSWER | kubernetes |
+| dk-a | `feature/dockerize-pkg` | DPT-14: системные пакеты (`libfontconfig1`, `fonts-dejavu-core`) в готовый Dockerfile; добавлен после первой пары контроля, чтобы воспроизвести D4 | DIFF, ANSWER | docker |
 | ga-w | `feature/ci-github` | DPT-20: workflow-ы GitHub Actions по требованиям | DIFF, ANSWER | github-actions |
 | gl-w | `feature/ci-gitlab` | DPT-21: `.gitlab-ci.yml` | DIFF, ANSWER | gitlab-ci |
 | j-w | `feature/ci-jenkins` | DPT-22: `Jenkinsfile` | DIFF, ANSWER | jenkins |
 | tc-w | `feature/ci-teamcity` | DPT-23: `.teamcity/settings.kts` | DIFF, ANSWER | teamcity |
+| ga-c | `feature/ci-github-cache` | DPT-24: ускорить CI (restore пакетов), минимальный workflow в репозитории; добавлен после первой пары контроля для GA10 | DIFF, ANSWER | github-actions |
 | cg | `feature/ci-gates-fix` | DPT-30: готовый CI и экспорт защиты `main` с засеянными дефектами | DIFF, ANSWER | ci-gates |
 | n-ci | `feature/version-endpoint` | DPT-40: эндпоинт `/version`; в репозитории чистые Dockerfile, манифесты и четыре пайплайна - «ничего не менять» вне `src/` и `tests/` | DIFF, ANSWER | ci-gates |
 
@@ -70,6 +72,11 @@ Bash, разрешён только `Bash(git *)`: сборки (`dotnet`, `dock
 - **D8** есть `.dockerignore` с `bin`/`obj` и `.git`. Провал: нет.
 - **D9** нет `PublishTrimmed=true`, либо с ним сделана защита от обрезки рефлексии (`TrimmerRootAssembly`, `TrimMode` с описанием) или названа в ответе. Провал: `PublishTrimmed=true` без защиты (сервис ищет обработчики через `Assembly.GetTypes()`).
 - **O-DK** (вне скилла): перед `restore` копируются `Directory.Packages.props`, `Directory.Build.props` и проект `Depot.Contracts`. Провал: restore упадёт или кэшируется неверно.
+
+### dk-a (системные пакеты в готовый Dockerfile; добавлен после первой пары контроля, ключ до прогонов dk-a)
+- **D4** `apt-get update`, `install` и очистка списков (`rm -rf /var/lib/apt/lists/*`) в одном `RUN`. Провал: разные `RUN` или без очистки.
+- **O-DK2** (вне скилла): `RUN` с `apt-get` стоит до `USER 1654` (иначе нет прав) и в конечной стадии; `USER` не root сохранён.
+- **D5, D6** сохранены (не хуже dk-w).
 
 ### k-w (манифесты с нуля)
 - **K1** liveness не зависит от БД: не `httpGet /health` (маршрут проверяет БД); допустимо `tcpSocket`/`exec`, отдельный `/health/live`, добавленный в `Program.cs`. Провал: liveness на `/health`.
@@ -148,6 +155,10 @@ Bash, разрешён только `Bash(git *)`: сборки (`dotnet`, `dock
 - **TC8** (дом `ci-gates` G6) метрика `TEST_COUNT` (или проверка числа тестов шагом).
 - **TC9** `dotnet test`/`publish` идут с `--no-build`/`--no-restore` после сборки. Провал: restore+build в каждом шаге.
 - **O-TC** (вне скилла): prod-деплой без автотриггера (по кнопке), `version = "2024.12"`, `project { }`.
+
+### ga-c (кэш NuGet в готовом workflow; добавлен после первой пары контроля, ключ до прогонов ga-c)
+- **GA10** кэш с ключом на хэш файлов зависимостей: `hashFiles(...)` по `Directory.Packages.props`/`*.csproj`/`packages.lock.json`, либо `setup-dotnet` с `cache: true` и `cache-dependency-path` на существующие файлы. Провал: ключ без хэша или `cache: true` без `cache-dependency-path` (в репозитории нет `packages.lock.json`).
+- **GA2** `permissions` сохранён; **O-GA2** проверки не ослаблены (`dotnet test` остался).
 
 ### cg (ci-gates; DPT-30)
 - **G1** защита `main` требует все проверки минимума: `contexts` в экспорте включает `audit`, либо аудит перенесён в job `ci`. Провал: `audit` вне обязательных.

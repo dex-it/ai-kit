@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Раннер группы 4.4 (#305): промпты кейсов дословно, флаги исполнителя, выход в runs/<кейс>-<набор><N>/ протокола скилла-дома.
 # run-group-4-4.sh <case> <set> <idx> [skill-file...]   skill-file - tests/trap-skills/<скилл>/inputs/SKILL-*.md
-# case: dk-w, k-w, k-f, k-t, ga-w, gl-w, j-w, tc-w, cg, n-ci. Каталог прогонов - $G44_WORK (вне репозитория: на пути не должно быть CLAUDE.md).
+# case: dk-w, dk-a, ga-c, k-w, k-f, k-t, ga-w, gl-w, j-w, tc-w, cg, n-ci. Каталог прогонов - $G44_WORK (вне репозитория: на пути не должно быть CLAUDE.md).
 set -uo pipefail
 T="$(cd "$(dirname "$0")/../.." && pwd)"
 SP="${G44_WORK:?G44_WORK - каталог прогонов вне репозитория}"
@@ -10,9 +10,9 @@ case "$SP/" in "$REPO"/*) echo "G44_WORK внутри репозитория"; e
 d="$SP"; while [[ $d != / ]]; do [[ -e $d/CLAUDE.md ]] && { echo "CLAUDE.md на пути: $d"; exit 1; }; d=$(dirname "$d"); done
 [[ -e $HOME/.claude/CLAUDE.md ]] && { echo "есть ~/.claude/CLAUDE.md"; exit 1; }
 case_="$1"; set_="$2"; idx="$3"; shift 3; skills=("$@")
-declare -A BR=([dk-w]=dockerize [k-w]=k8s-deploy [k-f]=k8s-fix [k-t]=k8s-incident [ga-w]=ci-github [gl-w]=ci-gitlab [j-w]=ci-jenkins [tc-w]=ci-teamcity [cg]=ci-gates-fix [n-ci]=version-endpoint)
-declare -A HOME_=([dk-w]=docker [k-w]=kubernetes [k-f]=kubernetes [k-t]=kubernetes [ga-w]=github-actions [gl-w]=gitlab-ci [j-w]=jenkins [tc-w]=teamcity [cg]=ci-gates [n-ci]=ci-gates)
-declare -A ROLE=([dk-w]="DevOps-инженер" [k-w]="DevOps-инженер" [k-f]="DevOps-инженер" [k-t]="DevOps-инженер" [ga-w]="DevOps-инженер" [gl-w]="DevOps-инженер" [j-w]="DevOps-инженер" [tc-w]="DevOps-инженер" [cg]="DevOps-инженер" [n-ci]=".NET-разработчик")
+declare -A BR=([dk-w]=dockerize [dk-a]=dockerize-pkg [ga-c]=ci-github-cache [k-w]=k8s-deploy [k-f]=k8s-fix [k-t]=k8s-incident [ga-w]=ci-github [gl-w]=ci-gitlab [j-w]=ci-jenkins [tc-w]=ci-teamcity [cg]=ci-gates-fix [n-ci]=version-endpoint)
+declare -A HOME_=([dk-w]=docker [dk-a]=docker [ga-c]=github-actions [k-w]=kubernetes [k-f]=kubernetes [k-t]=kubernetes [ga-w]=github-actions [gl-w]=gitlab-ci [j-w]=jenkins [tc-w]=teamcity [cg]=ci-gates [n-ci]=ci-gates)
+declare -A ROLE=([dk-w]="DevOps-инженер" [dk-a]="DevOps-инженер" [ga-c]="DevOps-инженер" [k-w]="DevOps-инженер" [k-f]="DevOps-инженер" [k-t]="DevOps-инженер" [ga-w]="DevOps-инженер" [gl-w]="DevOps-инженер" [j-w]="DevOps-инженер" [tc-w]="DevOps-инженер" [cg]="DevOps-инженер" [n-ci]=".NET-разработчик")
 b=${BR[$case_]:?unknown case $case_}; id="$case_-$set_$idx"
 W=$SP/w/$id; rm -rf "$W"; mkdir -p "$SP/w" "$SP/log"
 DIR=$W/depot
