@@ -47,20 +47,20 @@ async function runOne(spec) {
   const env = { ...process.env, PATH: `${NODEDIR}:/usr/bin:/bin:/usr/sbin:/sbin:${dirname(execFileSync('bash', ['-c', 'command -v claude'], { encoding: 'utf8' }).trim())}`, GIT_CONFIG_GLOBAL: gc, NO_COLOR: '1' };
   const a = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--model', MODEL, '--effort', EFFORT, '--max-turns', '100', '--max-budget-usd', '2',
     '--restricted', '--strict-mcp-config', '--disable-slash-commands', '--no-session-persistence', '--permission-mode', 'acceptEdits', '--settings', JSON.stringify(settings),
-    '--tools', 'Read,Write,Edit,Glob,Grep,Bash', ...add];
+    '--tools', 'Read,Write,Edit,Glob,Grep,Bash', '--allowed-tools', 'Read,Write,Edit,Glob,Grep,Bash', ...add];
   const raw = await new Promise((done) => { const ch = spawn('claude', a, { cwd: w, env, stdio: ['ignore', 'pipe', 'pipe'] }); const o = []; ch.stdout.on('data', (d) => o.push(d)); ch.on('close', () => done(Buffer.concat(o).toString())); });
   writeFileSync(join(root, 'stream.jsonl'), raw);
   let init = {}, res = {}, last = ''; const tools = {}, bash = [];
   for (const l of raw.split('\n')) { let e; try { e = JSON.parse(l); } catch { continue; }
     if (e.type === 'system' && e.subtype === 'init') init = e; if (e.type === 'result') res = e;
     if (e.type === 'assistant') for (const p of e.message?.content ?? []) { if (p.type === 'tool_use') { tools[p.name] = (tools[p.name] ?? 0) + 1; if (p.name === 'Bash') bash.push(p.input.command); } if (p.type === 'text') last = p.text; } }
-  writeFileSync(join(root, 'answer.md'), res.result ?? last); writeFileSync(join(root, 'bash.txt'), bash.join('\n---\n'));
+  const denials = (res.permission_denials ?? []).length; writeFileSync(join(root, 'answer.md'), res.result ?? last); writeFileSync(join(root, 'bash.txt'), bash.join('\n---\n'));
   const git = (...x) => { try { return execFileSync('git', x, { cwd: w, encoding: 'utf8', env: { ...env } }); } catch (e) { return `ERR ${e.message}`; } };
   writeFileSync(join(root, 'git-log.txt'), git('log', '--graph', '--all', '--format=%h %an | %s %d', '-n', '30'));
   writeFileSync(join(root, 'git-status.txt'), git('status', '--porcelain=v1', '-uall') + '\n' + git('branch', '-a'));
   writeFileSync(join(root, 'final.diff'), git('diff', 'HEAD') + git('diff', '--cached'));
   if (c.out && existsSync(join(w, c.out))) copyFileSync(join(w, c.out), join(root, c.out));
-  writeFileSync(join(root, 'meta.json'), JSON.stringify({ id, case: cs, skill: skill ?? '-', model: init.model, requested: MODEL, effort: EFFORT, claude_code_version: init.claude_code_version, skills: init.skills, mcp_servers: init.mcp_servers, tools, cost: res.total_cost_usd, turns: res.num_turns, subtype: res.subtype }, null, 1));
+  writeFileSync(join(root, 'meta.json'), JSON.stringify({ id, case: cs, skill: skill ?? '-', model: init.model, requested: MODEL, effort: EFFORT, claude_code_version: init.claude_code_version, skills: init.skills, mcp_servers: init.mcp_servers, tools, denials, cost: res.total_cost_usd, turns: res.num_turns, subtype: res.subtype }, null, 1));
   console.log(`${id} ${cs} skill=${skill ?? '-'} model=${init.model} cost=${(res.total_cost_usd ?? 0).toFixed(3)} turns=${res.num_turns} ${res.subtype}`);
 }
 const argv = process.argv.slice(2); const pi = argv.indexOf('--parallel'); const PAR = pi >= 0 ? Number(argv[pi + 1]) : 3;
