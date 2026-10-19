@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-redis",
-  "version": "1.1.1",
-  "description": "Redis: кэширование, pub/sub, структуры данных, распределённая блокировка, rate limiting.",
+  "version": "1.2.0",
+  "description": "Redis: старт без Redis, потеря распределённого лока, лимит запросов на границе окон.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
