@@ -110,6 +110,21 @@ const probeNode = 'dex-auto:goal-reader'
 const deliverArgs = { task: 'F-1', track: 'feature', branch: 'auto/F-1', goal_path: '/ledger/F-1/00-goal.md', cwd: '/repo-F-1' }
 const deliverNode = 'dex-auto:deliverer'
 const delivered = { status: 'complete', url: 'https://host/o/r/pull/1', channel: 'gh', head: 'abc', missing: '' }
+const recordArgs = { task: 'F-1', goal_path: '/ledger/F-1/00-goal.md', cwd: '/repo-F-1' }
+const unitSrc = { id: 'FR-1001', path: 'docs/01-product/01-retry/srs.md', kind: 'FR', action: 'added', origin: 'source', trace: 'R1' }
+const unitDerived = { ...unitSrc, id: 'FR-1002', origin: 'derived', trace: 'src/A.cs:12' }
+const recorded = { status: 'complete', 'corpus-status': 'present', units: [unitSrc, unitDerived], covered: [], unrecorded: [], conflicts: [], commit: 'c0ffee1', decisions: ['скиллы: project-docs-map, docs-layout'], missing: '' }
+const upheld = (u) => ({ id: u.id, verdict: 'upheld', evidence: `src/A.cs:12 делает то, что ${u.path}` })
+const coveredUnit = { id: 'FR-0901', path: 'docs/01-product/01-retry/srs.md', what: 'повтор на 503' }
+const checked = { status: 'complete', 'corpus-status': 'present', 'corpus-basis': 'docs/', checks: [upheld(unitSrc), upheld(unitDerived)], missed: [], foreign: [], secrets: [], decisions: ['скиллы: project-docs-map, docs-layout'], missing: '' }
+const onboardArgs = { cwd: '/repo' }
+const unitBrd = { id: 'BR-001', path: 'docs/product/brd.md', kind: 'BR', origin: 'derived', trace: 'README.md:3' }
+const unitAdr = { id: 'ADR-0001', path: 'docs/adr/0001-postgres.md', kind: 'ADR', origin: 'derived', trace: 'docker-compose.yml:12' }
+const onboarded = { status: 'complete', 'corpus-status': 'deployed', layout: ['расхождений нет'], units: [unitBrd, unitAdr], covered: [], unrecorded: [], conflicts: [], map: [{ path: 'src/', what: 'код сервиса' }], rules: [], guards: [], commit: 'b0a7d01', decisions: ['скиллы: project-docs-map, docs-layout'], missing: '' }
+const scaffoldArgs = { cwd: '/repo', brief: 'CRM для отдела продаж', stack: 'ts', scripts: '/plug/hooks/scripts' }
+const scaffolded = { status: 'complete', files: ['package.json', 'src/index.ts', 'test/smoke.test.ts', '.github/workflows/ci.yml'], skipped: [], build_cmd: 'npx tsc --noEmit', test_cmd: 'npm test', report_cmd: 'node --test --test-reporter=junit --test-reporter-destination="$DEX_AUTO_JUNIT_DIR/r.xml"', commit: '5ca1f01', decisions: ['скиллы: project-baseline, stack-registry'], missing: '' }
+const scGreen = { ...green, pass_count: 1, ahead: 1, head: '5ca1f01 chore: скелет', head_sha: '5ca1f01' }
+const onChecked = { ...checked, checks: [upheld(unitBrd), upheld(unitAdr)] }
 const guessA = { where: 'goal.md «Критерий «готово»»', decision: 'запись сбрасывает кэш либо он живёт до TTL - вызывающий видит новую или старую цену', cost: 'клиент платит старую цену' }
 const guessB = { where: 'source.md:3', decision: 'предел 100 либо 1000 записей - 101-я получает отказ или нет', cost: 'отказ легитимному клиенту' }
 const probePlan = ['writeSlugCache: файл ключа внутри CACHE_DIR - черновик, критерий R4']
@@ -4229,6 +4244,342 @@ const SCENARIOS = [
         ['каждое поле схемы названо в файле, описаний в схеме нет', !!schema && schemaFields(schema).every(f => agentBody('deliverer').includes(`\`${f}\``)) && !JSON.stringify(schema).includes('"description"')],
       ]
     } },
+  { name: 'C1 фиксатор и сверщик - узлы dex-auto без model, вход: каталог, цель, файлы прогонов, места правки, предмет и трейлер сверщику; complete, derived к приёмке', track: 'record', args: recordArgs, responses: { record: { ...recorded, covered: [coveredUnit] }, check: checked },
+    expect: ({ result, calls }) => [
+      ['по одному вызову фиксатора и сверщика', labelsOf(calls).join() === 'record,check' && typeOf(calls, 'record') === 'dex-auto:recorder' && typeOf(calls, 'check') === 'dex-auto:corpus-checker' && calls.every(c => c.model === undefined)],
+      ['вход фиксатора: каталог, файл цели, файлы прогонов, свои коммиты, сторона оператора, без push', ['/repo-F-1', '/ledger/F-1/00-goal.md', 'файлы 01-*.md', 'git rev-list HEAD --not', '| tail -1)^" HEAD, своих коммитов нет - git diff HEAD', '«ответ оператора»', 'Push не делать'].every(t => promptOf(calls, 'record').includes(t))],
+      ['вход сверщика: те же места правки, единицы, covered и коммит фиксатора', promptOf(calls, 'check').includes('git rev-list HEAD --not') && promptOf(calls, 'check').includes('- FR-1002 FR, docs/01-product/01-retry/srs.md, added, derived, trace src/A.cs:12') && promptOf(calls, 'check').includes('covered:\n- FR-0901, docs/01-product/01-retry/srs.md: повтор на 503\n') && promptOf(calls, 'check').includes('Коммит фиксатора: c0ffee1.') && promptOf(calls, 'check').includes('Предмет - раздел «Предмет фиксации». Трейлер коммитов фиксатора - `Dex-Auto-Record: yes`.')],
+      ['covered в выходе', result.covered.length === 1 && result.na === ''],
+      ['complete, выведенная из кода - в derived', result.status === 'complete' && result.where === '' && result.derived.join() === 'FR-1002' && result.corpus === 'present' && result.commit === 'c0ffee1'],
+      ['решения сверщика помечены', result.decisions.join('|') === 'скиллы: project-docs-map, docs-layout|сверщик: скиллы: project-docs-map, docs-layout'],
+    ] },
+  { name: 'C2 base входа - дельта против base у обоих узлов (T2)', track: 'record', args: { ...recordArgs, base: 'develop', source: 'FEAT.md' }, responses: { record: recorded, check: checked },
+    expect: ({ calls }) => [
+      ['git diff develop...HEAD, не найден - свои коммиты', ['record', 'check'].every(l => promptOf(calls, l).includes('Места правки: git diff develop...HEAD; develop не найден - git diff "$('))],
+      ['источник назван', promptOf(calls, 'record').includes('Источник требований: FEAT.md.')],
+    ] },
+  { name: 'C3 вход не разобран -> blocked до вызова узлов (T1)', track: 'record', args: { ...recordArgs, cwd: '' }, responses: {},
+    expect: async ({ result, calls }) => {
+      const str = (await runTrack('record', JSON.stringify(recordArgs), {})).result
+      const none = (await runTrack('record', { cwd: '/repo' }, {})).result
+      const base = (await runTrack('record', { ...recordArgs, base: 7 }, {})).result
+      const nul = (await runTrack('record', null, {})).result
+      return [
+        ['узлы не вызваны', calls.length === 0],
+        ['cwd пуст', result.status === 'blocked' && result.where === 'вход фиксации не разобран: cwd пуст либо не строка'],
+        ['args строкой', str.where === 'вход фиксации не разобран: args строкой, а не объектом'],
+        ['args не объект', nul.where === 'вход фиксации не разобран: args не объект'],
+        ['постановки нет', none.where === 'вход фиксации не разобран: постановки нет: ни goal_path, ни goal'],
+        ['base не строка', base.where === 'вход фиксации не разобран: не строка: base'],
+      ]
+    } },
+  { name: 'C4 фиксатор не установлен -> blocked без замены (T3)', track: 'record', args: recordArgs, responses: {}, unavailable: ['dex-auto:recorder'],
+    expect: ({ result, calls }) => [['агент и ошибка названы', result.status === 'blocked' && result.where === 'узел фиксации dex-auto:recorder не отработал: agent type not found: dex-auto:recorder' && calls.length === 0]] },
+  { name: 'C5 фиксатор не вернул выход -> blocked (T4)', track: 'record', args: recordArgs, responses: { record: null },
+    expect: ({ result, calls }) => [['blocked, сверщик не вызван', result.status === 'blocked' && result.where === 'фиксатор не вернул выход' && labelsOf(calls).join() === 'record']] },
+  { name: 'C6 фиксатор blocked -> blocked с его нехваткой, сверщик не вызван (T5)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, status: 'blocked', units: [], commit: '', missing: 'папка фичи занята чужим ключом раскладки' } },
+    expect: ({ result, calls }) => [['нехватка фиксатора', result.status === 'blocked' && result.where === 'фиксация: папка фичи занята чужим ключом раскладки' && labelsOf(calls).join() === 'record'],
+      ['corpus-status узла при blocked в выход не идёт', result.corpus === '']] },
+  { name: 'C7 корпуса нет, фиксатор не complete -> partial с его нехваткой, сверщик не вызван (T6)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, status: 'partial', 'corpus-status': 'absent', units: [], commit: '', missing: 'каталог docs/ не прочитан целиком' } },
+    expect: ({ result, calls }) => [
+      ['partial с нехваткой фиксатора', result.status === 'partial' && result.where === 'фиксация: каталог docs/ не прочитан целиком' && result.na === '' && result.corpus === 'absent'],
+      ['сверщик не вызван', labelsOf(calls).join() === 'record'],
+    ] },
+  { name: 'C8 корпуса нет, а дельта есть -> blocked (T6)', track: 'record', args: recordArgs, responses: { record: { ...recorded, 'corpus-status': 'absent' } },
+    expect: ({ result, calls }) => [['blocked без сверки', result.status === 'blocked' && result.where === 'фиксатор вернул corpus-status absent с дельтой корпуса' && labelsOf(calls).join() === 'record']] },
+  { name: 'C9 противоречие принятой единице -> blocked, conflicts в выходе, сверщик не вызван (T7)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, conflicts: ['docs/01-product/01-retry/srs.md:14 FR-0901 требует 3 повтора против src/A.cs:20 - 5 повторов'] } },
+    expect: ({ result, calls }) => [
+      ['blocked с конфликтом', result.status === 'blocked' && result.where === 'противоречие принятой единице корпуса: docs/01-product/01-retry/srs.md:14 FR-0901 требует 3 повтора против src/A.cs:20 - 5 повторов'],
+      ['conflicts в выходе, сверщик не вызван', result.conflicts.length === 1 && labelsOf(calls).join() === 'record'],
+    ] },
+  { name: 'C10 сверщик не установлен либо без выхода -> partial, дельта в выходе (T9)', track: 'record', args: recordArgs, responses: { record: recorded }, unavailable: ['dex-auto:corpus-checker'],
+    expect: async ({ result }) => {
+      const nul = (await runTrack('record', recordArgs, { record: recorded, check: null })).result
+      return [
+        ['отказ узла назван', result.status === 'partial' && result.where === 'сверка дельты не состоялась: узел сверки dex-auto:corpus-checker не отработал: agent type not found: dex-auto:corpus-checker'],
+        ['без выхода', nul.status === 'partial' && nul.where === 'сверка дельты не состоялась: сверщик не вернул выход'],
+        ['дельта в выходе', result.units.length === 2 && result.checks.length === 0],
+      ]
+    } },
+  { name: 'C11 сверщик blocked -> partial, вердикты единиц не судятся (T11)', track: 'record', args: recordArgs,
+    responses: { record: recorded, check: { ...checked, status: 'blocked', checks: [], missing: 'корпус не прочитать: docs/ без прав чтения' } },
+    expect: ({ result }) => [['одна нехватка сверки', result.status === 'partial' && result.where === 'сверка: корпус не прочитать: docs/ без прав чтения']] },
+  { name: 'C12 файл вне корпуса в коммите фиксатора -> blocked (T10)', track: 'record', args: recordArgs,
+    responses: { record: recorded, check: { ...checked, foreign: ['src/A.cs'] } },
+    expect: ({ result }) => [['blocked с файлом', result.status === 'blocked' && result.where === 'фиксатор тронул файлы вне корпуса: src/A.cs' && result.foreign.join() === 'src/A.cs']] },
+  { name: 'C22 значение секрета в корпусе -> blocked, сдачи кода нет (T10, I7)', track: 'record', args: recordArgs,
+    responses: { record: recorded, check: { ...checked, secrets: ['docs/adr/0003-db.md:14'] } },
+    expect: ({ result }) => [['blocked с местом секрета, значения нет', result.status === 'blocked' && result.where === 'в корпусе значение секрета: docs/adr/0003-db.md:14' && result.secrets.join() === 'docs/adr/0003-db.md:14']] },
+  { name: 'C13 contradicted, unverifiable, молчание о единице, missed -> partial, каждое названо (T12)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, units: [unitSrc, unitDerived, { ...unitSrc, id: 'NFR-1003' }] },
+      check: { ...checked, checks: [{ id: 'FR-1001', verdict: 'contradicted', evidence: 'src/A.cs:20 - 5 повторов, srs.md:3 - 3' }, { id: 'FR-1002', verdict: 'unverifiable', evidence: 'файла единицы нет' }], missed: [{ where: 'src/B.cs:7', what: 'отказ 429 без повтора' }] } },
+    expect: ({ result }) => [
+      ['partial', result.status === 'partial'],
+      ['каждая единица без подтверждения названа', result.where.includes('единица не подтверждена сверкой: FR-1001 - contradicted: src/A.cs:20 - 5 повторов, srs.md:3 - 3 | FR-1002 - unverifiable: файла единицы нет | NFR-1003 - без вердикта: сверщик промолчал')],
+      ['предмет без единицы назван', result.where.includes('предмет без единицы корпуса: src/B.cs:7 - отказ 429 без повтора')],
+    ] },
+  { name: 'C14 partial фиксатора и сверщика -> partial, сверщик вызван (T12)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, status: 'partial', missing: 'решение о таймауте месту раскладки не нашлось' }, check: { ...checked, status: 'partial', missing: '' } },
+    expect: ({ result, calls }) => [
+      ['сверщик вызван', labelsOf(calls).join() === 'record,check'],
+      ['обе нехватки', result.status === 'partial' && result.where === 'фиксация: решение о таймауте месту раскладки не нашлось; сверка: сверщик вернул partial без нехватки'],
+    ] },
+  { name: 'C15 постановка текстом без файла цели (T2)', track: 'record', args: { cwd: '/repo', goal: 'ретрай платежа на 503' }, responses: { record: recorded, check: checked },
+    expect: ({ calls }) => [['текст цели в промпте, файлов прогонов нет', promptOf(calls, 'record').includes('Цель:\nретрай платежа на 503') && !promptOf(calls, 'record').includes('01-*.md') && !promptOf(calls, 'record').startsWith('TASK')]] },
+  { name: 'C16 файлы узлов: поля схем названы, описаний в схемах нет, предмет фиксации - общий блок, сверщик без записи', track: 'record', args: recordArgs, responses: { record: recorded, check: checked },
+    expect: ({ calls }) => {
+      const fields = (label, node) => { const schema = (calls.find(c => c.label === label) || {}).schema; return !!schema && schemaFields(schema).every(f => agentBody(node).includes(`\`${f}\``)) && !JSON.stringify(schema).includes('"description"') }
+      return [
+        ['поля фиксатора', fields('record', 'recorder')],
+        ['поля сверщика', fields('check', 'corpus-checker')],
+        ['предмет фиксации - блок в обоих файлах', ['recorder', 'corpus-checker'].every(n => agentBody(n).includes('<!-- >>> shared: record-subject -->'))],
+        ['сверщик без Write и Edit', agentTools('corpus-checker') === 'Bash,Glob,Grep,Read,Skill'],
+      ]
+    } },
+  { name: 'C17 дельты нет и сверщик предмета без единицы не нашёл -> complete (T13)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, units: [], commit: '' }, check: { ...checked, checks: [] } },
+    expect: ({ result, calls }) => [['complete после сверки', result.status === 'complete' && labelsOf(calls).join() === 'record,check' && promptOf(calls, 'check').includes('Единицы дельты корпуса:\nнет') && promptOf(calls, 'check').includes('Коммит фиксатора: не назван.')]] },
+  { name: 'C18 корпуса нет у фиксатора и сверщика -> сверщик вызван, complete n/a (T6, T8, T13)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, 'corpus-status': 'absent', units: [], commit: '' }, check: { ...checked, 'corpus-status': 'absent', 'corpus-basis': 'docs/ и README.md - корпуса нет', checks: [] } },
+    expect: ({ result, calls }) => [
+      ['сверщик вызван без единиц', labelsOf(calls).join() === 'record,check' && promptOf(calls, 'check').includes('Единицы дельты корпуса:\nнет')],
+      ['complete с причиной n/a', result.status === 'complete' && result.where === '' && result.corpus === 'absent' && result.na === 'корпуса нет: фиксация n/a'],
+      ['T13 спецификации называет ту же причину, что код', readFileSync(join(TRACKS, '..', '..', 'docs', 'tracks', 'record.md'), 'utf8').includes('`na` «корпуса нет: фиксация n/a»')],
+    ] },
+  { name: 'C19 корпус по-разному у фиксатора и сверщика -> partial, расхождение названо (T12)', track: 'record', args: recordArgs,
+    responses: { record: { ...recorded, 'corpus-status': 'absent', units: [], commit: '' }, check: { ...checked, checks: [], 'corpus-basis': 'docs/product/brd.md' } },
+    expect: async ({ result }) => {
+      const back = (await runTrack('record', recordArgs, { record: recorded, check: { ...checked, 'corpus-status': 'absent', 'corpus-basis': 'docs/ не найден', checks: [] } })).result
+      return [
+        ['фиксатор absent, сверщик present', result.status === 'partial' && result.where === 'корпус: фиксатор - absent, сверщик - present: docs/product/brd.md' && result.na === ''],
+        ['фиксатор present, сверщик absent - и единицы без вердикта', back.status === 'partial' && back.where.startsWith('корпус: фиксатор - present, сверщик - absent: docs/ не найден; единица не подтверждена сверкой: FR-1001 - без вердикта') && back.na === ''],
+      ]
+    } },
+  { name: 'C20 файлы узлов: трейлер коммита фиксатора, сверщик судит его коммиты, covered, unrecorded, статус review, origin и trace', track: 'record', args: recordArgs, responses: { record: recorded, check: checked },
+    expect: () => [
+      ['фиксатор ставит трейлер', agentBody('recorder').includes('трейлером `Dex-Auto-Record: yes`')],
+      ['фиксатор: принятую не правит, covered', agentBody('recorder').includes('описывает предмет - запись `covered`')],
+      ['сверщик: коммиты с трейлером, который называет вход', agentBody('corpus-checker').includes('каждый коммит с трейлером, который называет\n   вход')],
+      ['сверщик: статус review, origin, trace по origin', ['в файле статус `review`', '`origin` верен', 'у `source` пункт постановки'].every(t => agentBody('corpus-checker').includes(t))],
+      ['сверщик: covered и unrecorded в полноте', ['запись `covered`, чья единица', 'запись `unrecorded`, чей предмет раскладка корпуса вмещает, а вход либо код выводит'].every(t => agentBody('corpus-checker').includes(t))],
+    ] },
+  { name: 'C21 /auto фиксирует истину после complete feature и bugfix до сдачи кода, исход - Фиксация: в ledger и в описании PR', track: 'record', args: recordArgs, responses: { record: recorded, check: checked },
+    expect: () => {
+      const auto = readFileSync(join(TRACKS, '..', 'commands', 'auto.md'), 'utf8')
+      return [
+        ['record до deliver', auto.indexOf('`dex-auto:dex-auto-record`') > 0 && auto.indexOf('`dex-auto:dex-auto-record`') < auto.indexOf('`dex-auto:dex-auto-deliver`')],
+        ['исход строкой Фиксация', auto.includes('`set TASK Фиксация') && auto.includes('`Фиксация:` (фиксация истины)')],
+        ['interactive: принять либо отклонить с revert коммитов фиксатора', ['принять | отклонить', '`git revert`', 'трейлером `Dex-Auto-Record: yes`', 'принята оператором'].every(t => auto.includes(t))],
+        ['без дельты вопроса нет', auto.includes('`autonomous` либо возврат без `units` и `commit` - `set TASK Фиксация <строка>`. Иначе, в `interactive`,')],
+        ['закрытая цель без Фиксация: - ещё фиксация', auto.includes('без `Фиксация:`, а с `продолжить`')],
+        ['продолжить по фиксации blocked, partial либо не состоялась без ответа оператора - фиксация заново', auto.includes('при `Фиксация:` на `blocked`, `partial` либо `не состоялась` без ответа оператора, - ещё фиксация истины')],
+        ['описание PR несёт строку Фиксация:', agentBody('deliverer').includes('строка `Фиксация:`')],
+        ['foreign у фиксатора - сдачи кода нет, коммит остаётся оператору', auto.includes('`foreign` либо `secrets` непусты - сдачи кода нет: `set TASK PR "не открыт - фиксатор тронул файлы вне корпуса"` либо `"не открыт - в корпусе значение секрета"`') && auto.includes('пока оператор не убрал, сдачи нет и при `продолжить --pr`') && auto.includes('`foreign`, `secrets`, вердикты сверщика - принять | отклонить')],
+        ['фиксатор, составитель и сверщик: значения секретов не переносятся, файлы окружения и ключей не читаются', ['recorder', 'corpus-checker', 'onboarder'].every(n => agentBody(n).includes('значения секретов') && agentBody(n).includes('`.env*`, `*.pem`, `*.key`, `*.pfx`, `id_rsa`'))] ,
+        ['сверщик: секрет - в поле secrets, значения в evidence нет', agentBody('corpus-checker').includes('в `evidence` и `decisions` значение не называешь') && agentBody('corpus-checker').includes('- `secrets` -')],
+      ]
+    } },
+  { name: 'O1 составитель и сверщик - узлы dex-auto без model, вход: каталог, предмет входа, трейлер; complete, derived к приёмке (T2, T7, T11, T16)', track: 'onboard', args: onboardArgs, responses: { onboard: onboarded, check: onChecked },
+    expect: ({ result, calls }) => [
+      ['по одному вызову составителя и сверщика', labelsOf(calls).join() === 'onboard,check' && typeOf(calls, 'onboard') === 'dex-auto:onboarder' && typeOf(calls, 'check') === 'dex-auto:corpus-checker' && calls.every(c => c.model === undefined)],
+      ['вход составителя: каталог, описания нет, без push', ['Рабочий каталог - /repo.', 'Описания продукта от оператора нет.', 'Push не делать'].every(t => promptOf(calls, 'onboard').includes(t))],
+      ['вход сверщика: предмет входа без мест правки, трейлер, единицы, коммит', ['Предмет - раздел «Предмет входа», мест правки нет', '`Dex-Auto-Onboard: yes`', '- ADR-0001 ADR, docs/adr/0001-postgres.md, derived, trace docker-compose.yml:12', 'covered:\nнет', 'Коммит составителя: b0a7d01.'].every(t => promptOf(calls, 'check').includes(t)) && !promptOf(calls, 'check').includes('Места правки')],
+      ['complete, выведенное из кода - в derived', result.status === 'complete' && result.where === '' && result.derived.join() === 'BR-001,ADR-0001' && result.corpus === 'deployed' && result.layout.join() === 'расхождений нет' && result.commit === 'b0a7d01'],
+      ['решения сверщика помечены', result.decisions.join('|') === 'скиллы: project-docs-map, docs-layout|сверщик: скиллы: project-docs-map, docs-layout'],
+    ] },
+  { name: 'O2 описание оператора у обоих узлов, раскладка найденного корпуса - строками layout без нехватки (T7, I4)', track: 'onboard', args: { cwd: '/repo', brief: 'CRM для отдела продаж' },
+    responses: { onboard: { ...onboarded, 'corpus-status': 'found', layout: ['docs/specs/ - в норме docs/03-specs/'], units: [{ ...unitBrd, origin: 'source', trace: 'описание входа: CRM для отдела продаж' }] }, check: { ...checked, checks: [upheld(unitBrd)] } },
+    expect: ({ result, calls }) => [
+      ['описание в обоих входах', ['onboard', 'check'].every(l => promptOf(calls, l).includes('Описание продукта от оператора:\nCRM для отдела продаж'))],
+      ['layout в выходе, complete', result.status === 'complete' && result.corpus === 'found' && result.layout.join() === 'docs/specs/ - в норме docs/03-specs/' && result.derived.length === 0],
+    ] },
+  { name: 'O3 вход не разобран -> blocked до вызова узлов (T1)', track: 'onboard', args: { cwd: '' }, responses: {},
+    expect: async ({ result, calls }) => {
+      const str = (await runTrack('onboard', JSON.stringify(onboardArgs), {})).result
+      const nul = (await runTrack('onboard', null, {})).result
+      const brief = (await runTrack('onboard', { cwd: '/repo', brief: 7 }, {})).result
+      const scripts = (await runTrack('onboard', { cwd: '/repo', scripts: 7 }, {})).result
+      const stacks = await Promise.all(['', ' ', 7].map(async stack => (await runTrack('onboard', { cwd: '/repo', stack }, {})).result))
+      return [
+        ['узлы не вызваны', calls.length === 0],
+        ['cwd пуст', result.status === 'blocked' && result.where === 'вход в проект не разобран: cwd пуст либо не строка'],
+        ['args строкой', str.where === 'вход в проект не разобран: args строкой, а не объектом'],
+        ['args не объект', nul.where === 'вход в проект не разобран: args не объект'],
+        ['brief не строка', brief.where === 'вход в проект не разобран: не строка: brief'],
+        ['scripts не строка', scripts.where === 'вход в проект не разобран: не строка: scripts'],
+        ['stack пуст либо не строка', stacks.every(r => r.status === 'blocked' && r.where === 'вход в проект не разобран: stack подан пустым либо не строкой')],
+      ]
+    } },
+  { name: 'O4 составитель не установлен -> blocked без замены (T8)', track: 'onboard', args: onboardArgs, responses: {}, unavailable: ['dex-auto:onboarder'],
+    expect: ({ result, calls }) => [['агент и ошибка названы', result.status === 'blocked' && result.where === 'узел входа dex-auto:onboarder не отработал: agent type not found: dex-auto:onboarder' && calls.length === 0]] },
+  { name: 'O5 составитель не вернул выход -> blocked (T9)', track: 'onboard', args: onboardArgs, responses: { onboard: null },
+    expect: ({ result, calls }) => [['blocked, сверщик не вызван', result.status === 'blocked' && result.where === 'составитель не вернул выход' && labelsOf(calls).join() === 'onboard']] },
+  { name: 'O6 составитель blocked -> blocked с его нехваткой, сверщик не вызван (T10)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: { ...onboarded, status: 'blocked', units: [], commit: '', missing: 'Unknown skill: dex-skill-docs-layout:docs-layout' } },
+    expect: async ({ result, calls }) => {
+      const mute = (await runTrack('onboard', onboardArgs, { onboard: { ...onboarded, status: 'blocked', missing: '' } })).result
+      return [
+        ['нехватка составителя', result.status === 'blocked' && result.where === 'вход: Unknown skill: dex-skill-docs-layout:docs-layout' && labelsOf(calls).join() === 'onboard'],
+        ['blocked без нехватки', mute.where === 'вход: составитель вернул blocked без нехватки'],
+        ['corpus-status узла при blocked в выход не идёт', result.corpus === ''],
+      ]
+    } },
+  { name: 'O7 расхождение корпуса с кодом -> сверщик вызван, partial, conflicts в выходе (T11, T15)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: { ...onboarded, 'corpus-status': 'found', conflicts: ['docs/adr/0003-mysql.md ADR-0003 - MySQL против docker-compose.yml:12 - postgres:16'] }, check: onChecked },
+    expect: ({ result, calls }) => [
+      ['сверщик вызван', labelsOf(calls).join() === 'onboard,check'],
+      ['partial с расхождением', result.status === 'partial' && result.where === 'корпус расходится с кодом: docs/adr/0003-mysql.md ADR-0003 - MySQL против docker-compose.yml:12 - postgres:16' && result.conflicts.length === 1],
+    ] },
+  { name: 'O8 сверщик не установлен либо без выхода -> partial, дельта в выходе (T12)', track: 'onboard', args: onboardArgs, responses: { onboard: onboarded }, unavailable: ['dex-auto:corpus-checker'],
+    expect: async ({ result }) => {
+      const nul = (await runTrack('onboard', onboardArgs, { onboard: onboarded, check: null })).result
+      return [
+        ['отказ узла назван', result.status === 'partial' && result.where === 'сверка дельты не состоялась: узел сверки dex-auto:corpus-checker не отработал: agent type not found: dex-auto:corpus-checker'],
+        ['без выхода', nul.status === 'partial' && nul.where === 'сверка дельты не состоялась: сверщик не вернул выход'],
+        ['дельта в выходе', result.units.length === 2 && result.checks.length === 0],
+      ]
+    } },
+  { name: 'O9 файл вне корпуса в коммите составителя -> blocked (T13, I1)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: onboarded, check: { ...onChecked, foreign: ['src/A.cs'] } },
+    expect: ({ result }) => [['blocked с файлом', result.status === 'blocked' && result.where === 'составитель тронул файлы вне корпуса: src/A.cs' && result.foreign.join() === 'src/A.cs']] },
+  { name: 'O22 значение секрета в корпусе -> blocked (T13, I8)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: onboarded, check: { ...onChecked, secrets: ['docs/adr/0001-postgres.md:9'] } },
+    expect: ({ result }) => [['blocked с местом секрета', result.status === 'blocked' && result.where === 'в корпусе значение секрета: docs/adr/0001-postgres.md:9' && result.secrets.join() === 'docs/adr/0001-postgres.md:9']] },
+  { name: 'O10 сверщик blocked -> partial, вердикты единиц не судятся (T14)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: onboarded, check: { ...onChecked, status: 'blocked', checks: [], missing: 'корпус не прочитать: docs/ без прав чтения' } },
+    expect: ({ result }) => [['одна нехватка сверки', result.status === 'partial' && result.where === 'сверка: корпус не прочитать: docs/ без прав чтения']] },
+  { name: 'O11 contradicted, unverifiable, молчание о единице, missed -> partial, каждое названо (T15)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: { ...onboarded, units: [unitBrd, unitAdr, { ...unitAdr, id: 'ADR-0002' }] },
+      check: { ...checked, checks: [{ id: 'BR-001', verdict: 'contradicted', evidence: 'README.md:3 - склад, brd.md:9 - CRM' }, { id: 'ADR-0001', verdict: 'unverifiable', evidence: 'файла единицы нет' }], missed: [{ where: 'Dockerfile:1', what: 'рантайм node 22' }] } },
+    expect: ({ result }) => [
+      ['partial', result.status === 'partial'],
+      ['каждая единица без подтверждения названа', result.where.includes('единица не подтверждена сверкой: BR-001 - contradicted: README.md:3 - склад, brd.md:9 - CRM | ADR-0001 - unverifiable: файла единицы нет | ADR-0002 - без вердикта: сверщик промолчал')],
+      ['предмет без единицы назван', result.where.includes('предмет без единицы корпуса: Dockerfile:1 - рантайм node 22')],
+    ] },
+  { name: 'O12 корпуса у сверщика нет -> partial, расхождение названо (T15)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: onboarded, check: { ...onChecked, 'corpus-status': 'absent', 'corpus-basis': '.docs_layout не найден' } },
+    expect: ({ result }) => [['partial с корпусом', result.status === 'partial' && result.where === 'корпус: составитель - deployed, сверщик - absent: .docs_layout не найден']] },
+  { name: 'O13 partial составителя и сверщика -> partial, сверщик вызван (T15)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: { ...onboarded, status: 'partial', missing: 'назначение продукта не выводится: README нет' }, check: { ...onChecked, status: 'partial', missing: '' } },
+    expect: ({ result, calls }) => [
+      ['сверщик вызван', labelsOf(calls).join() === 'onboard,check'],
+      ['обе нехватки', result.status === 'partial' && result.where === 'вход: назначение продукта не выводится: README нет; сверка: сверщик вернул partial без нехватки'],
+    ] },
+  { name: 'O14 файлы узлов: поля схем названы, описаний в схемах нет, предмет входа - общий блок, review, существующее не правится, трейлеры', track: 'onboard', args: scaffoldArgs, responses: { scaffold: scaffolded, 'verify:scaffold': scGreen, onboard: onboarded, check: onChecked },
+    expect: ({ calls }) => {
+      const fields = (label, node) => { const schema = (calls.find(c => c.label === label) || {}).schema; return !!schema && schemaFields(schema).every(f => agentBody(node).includes(`\`${f}\``)) && !JSON.stringify(schema).includes('"description"') }
+      return [
+        ['поля составителя', fields('onboard', 'onboarder')],
+        ['поля сверщика', fields('check', 'corpus-checker')],
+        ['поля скелетника', fields('scaffold', 'scaffolder')],
+        ['скелетник: запись без замены, без model', agentTools('scaffolder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('scaffolder'))],
+        ['скелетник: baseline по норме, стек по реестру, smoke-тест, лок, свой трейлер, без бизнес-кода и слоёв', ['`dex-skill-project-baseline:project-baseline`', '`dex-skill-stack-registry:stack-registry`', 'smoke-тест', 'лок-файл', 'трейлером `Dex-Auto-Onboard: scaffold`', 'Бизнес-код, архитектурный стиль и разбиение на слои'].every(t => agentBody('scaffolder').includes(t))],
+        ['составитель: карта, правила - документы-нормы, запреты по улике; правил из кода не выводит', ['`map`', '`rules`', '`guards`', 'Правило из кода не выводишь'].every(t => agentBody('onboarder').includes(t))],
+        ['предмет входа - блок в обоих файлах', ['onboarder', 'corpus-checker'].every(n => agentBody(n).includes('<!-- >>> shared: onboard-subject -->'))],
+        ['составитель: запись без замены продукта', agentTools('onboarder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('onboarder'))],
+        ['составитель: трейлер, review, существующее - covered либо conflicts, реконструкция по норме', ['трейлером `Dex-Auto-Onboard: yes`', 'статус `review`', 'описывает предмет - запись `covered`', 'запись `conflicts`', '`dex-skill-legacy-reconstruction:legacy-reconstruction`', 'одна строка `расхождений нет`'].every(t => agentBody('onboarder').includes(t))],
+        ['составитель: значения существующих ключей раскладки не меняет, недостающие - строкой layout', agentBody('onboarder').includes('значения существующих ключей раскладки не меняешь') && agentBody('onboarder').includes('строкой `layout` они не идут') && agentBody('onboarder').includes('в порядке путей, `what` и')],
+        ['составитель и сверщик: значения секретов не переносятся, .env и ключи не читаются; единица с секретом - contradicted', ['значения секретов', '`.env*`'].every(t => agentBody('onboarder').includes(t) && agentBody('corpus-checker').includes(t)) && agentBody('corpus-checker').includes('`contradicted`')],
+        ['сверщик: без мест правки - репозиторий, вход называет предмет', ['вход без мест правки - код и конфигурацию репозитория', 'Предмет - раздел, который называет вход', 'вход не называет предмет'].every(t => agentBody('corpus-checker').includes(t))],
+      ]
+    } },
+  { name: 'O15 /onboard: чистое дерево до записи, пустота и стек, трек, блок CLAUDE.md из шаблона между маркерами, гейты, карта, правила, запреты, готовность, приёмка', track: 'onboard', args: onboardArgs, responses: { onboard: onboarded, check: onChecked },
+    expect: () => {
+      const cmd = readFileSync(join(TRACKS, '..', 'commands', 'onboard.md'), 'utf8')
+      const flow = readFileSync(join(TRACKS, '..', 'templates', 'flow.md'), 'utf8')
+      return [
+        ['чистое дерево до записи', cmd.includes('`git status --porcelain` непуст - остановка') && cmd.includes('до любой записи')],
+        ['трек по имени', cmd.includes('`dex-auto:dex-auto-onboard`')],
+        ['interactive: воля постановщика вопросом до трека', cmd.includes('режим `interactive` - до трека `AskUserQuestion`')],
+        ['блок между маркерами из шаблона, вне маркеров не трогается', ['`<!-- >>> dex-auto: flow -->`', '`<!-- <<< dex-auto: flow -->`', '`${CLAUDE_PLUGIN_ROOT}/templates/flow.md`', 'Текст вне маркеров не трогаешь'].every(t => cmd.includes(t))],
+        ['пустота - факт дерева, стек из описания либо вопросом, autonomous без стека - blocked до трека', ['`git ls-files` не несёт файлов, кроме README, LICENSE', '`blocked` «стек не задан', '`dex-skill-stack-registry:stack-registry`'].every(t => cmd.includes(t))],
+        ['стек - язык либо рантайм, фреймворком тоже; то же у скелетника', cmd.includes('язык либо рантайм, названный в описании прямо либо фреймворком') && readFileSync(join(TRACKS, '..', 'agents', 'scaffolder.md'), 'utf8').includes('не задаёт язык либо рантайм ни прямо, ни фреймворком')],
+        ['незелёный скелет откатывается до прочих шагов', cmd.includes('Возврат несёт `unverified` - `git revert` этого коммита до прочих\nшагов')],
+        ['трек получает стек только пустым и каталог скриптов', cmd.includes('`{cwd, brief, stack, scripts}`') && cmd.includes('`stack` - только пустому проекту') && cmd.includes('`${CLAUDE_PLUGIN_ROOT}/hooks/scripts`')],
+        ['карта, правила, запреты; нет правил - сбор свода предложен; путь сверен с деревом', ['`## Карта`', '`## Правила`', '`## Запреты`', '`/dex-rulebook-miner:rulebook`', 'чей путь не найден `git ls-files`'].every(t => cmd.includes(t))],
+        ['готовность по осям, секреты и размер CLAUDE.md, в непустом ничего не заводится', ['**Готовность.**', '`есть` либо `нет` с тем, что\nсделать', 'по перечню сам ничего не меняешь', '`.env`', 'не длиннее 200 строк'].every(t => cmd.includes(t))],
+        ['маркеры: пара не ровно одна - блок не пишется, причина в выход', cmd.includes('нет - блок дописываешь в конец') && cmd.includes('Маркер есть, а\n   пара маркеров не ровно одна - блок не пишешь') && cmd.includes('маркер в код-блоке не считается')],
+        ['после остановки либо отката - git status --porcelain и что удалить', cmd.includes('`git status --porcelain` и назови оператору файлы, которые удалить') && readFileSync(join(TRACKS, '..', 'agents', 'scaffolder.md'), 'utf8').includes('оставленные неотслеженные файлы')],
+        ['гейты по норме, не заводятся', cmd.includes('`dex-skill-project-baseline:project-baseline`') && cmd.includes('Отсутствующий гейт не заводишь')],
+        ['коммит CLAUDE.md своим трейлером', cmd.includes('`Dex-Auto-Onboard: flow`')],
+        ['приёмка: отклонить - revert коммитов вызова, скелета тоже', cmd.includes('принять | отклонить') && cmd.includes('у вызова есть неоткаченный коммит - трека, скелета либо `CLAUDE.md`') && cmd.includes('`git revert` каждого коммита этого\nвызова от нового к старому')],
+        ['правил из кода не выводит, свода не собирает', cmd.includes('правил проекта из кода не\nвыводишь и свода не собираешь')],
+        ['шаблон: цикл goal -> auto -> фиксация -> MR', ['`/dex-auto:goal', '`/dex-auto:auto TASK`', 'Фиксация истины', '`/dex-auto:auto TASK --pr`', '`продолжить`', '`.docs_layout`'].every(t => flow.includes(t))],
+      ]
+    } },
+  { name: 'O16 пустой проект: скелетник, верификатор по verify.py, составитель со стеком и коммитом скелета, сверщик без суда скелета; complete (T3, T6, T7, T11, T16)', track: 'onboard', args: scaffoldArgs,
+    responses: { scaffold: scaffolded, 'verify:scaffold': scGreen, onboard: onboarded, check: onChecked },
+    expect: ({ result, calls }) => {
+      const hex = (promptOf(calls, 'verify:scaffold').match(/verify\.py' ([0-9a-f]+)/) || [])[1]
+      const spec = hex ? JSON.parse(Buffer.from(hex, 'hex').toString('utf8')) : {}
+      const v = calls.find(c => c.label === 'verify:scaffold') || {}
+      return [
+        ['скелетник, верификатор, составитель, сверщик по одному разу', labelsOf(calls).join() === 'scaffold,verify:scaffold,onboard,check' && typeOf(calls, 'scaffold') === 'dex-auto:scaffolder'],
+        ['вход скелетника: каталог, описание, стек, без push', ['Рабочий каталог - /repo.', 'Описание продукта от оператора:\nCRM для отдела продаж', 'Проект пуст. Стек оператора - ts.', 'Push не делать'].every(t => promptOf(calls, 'scaffold').includes(t))],
+        ['верификатор: общий узел haiku low, команды скелетника', v.agentType === undefined && v.model === 'haiku' && v.effort === 'low' && spec.build === 'npx tsc --noEmit' && spec.test === scaffolded.report_cmd && spec.known.length === 0],
+        ['составитель знает стек оператора и коммит скелета', ['скелет на стеке оператора ts - коммит 5ca1f01', '`Dex-Auto-Onboard: scaffold`', 'выбор стека - слово оператора', 'Не заложено в скелет:\nнет'].every(t => promptOf(calls, 'onboard').includes(t))],
+        ['сверщик: коммит скелета вне суда', promptOf(calls, 'check').includes('Коммит скелета 5ca1f01 с трейлером `Dex-Auto-Onboard: scaffold` - не коммит составителя, его не судишь.')],
+        ['complete, коммит скелета и решения скелетника в выходе', result.status === 'complete' && result.where === '' && result.scaffold === '5ca1f01' && result.unverified === '' && result.commit === 'b0a7d01' && result.decisions[0] === 'скелетник: скиллы: project-baseline, stack-registry'],
+      ]
+    } },
+  { name: 'O17 скелетник не установлен либо без выхода -> blocked, составитель не вызван (T4)', track: 'onboard', args: scaffoldArgs, responses: {}, unavailable: ['dex-auto:scaffolder'],
+    expect: async ({ result, calls }) => {
+      const nul = await runTrack('onboard', scaffoldArgs, { scaffold: null })
+      return [
+        ['отказ узла назван', result.status === 'blocked' && result.where === 'узел скелета dex-auto:scaffolder не отработал: agent type not found: dex-auto:scaffolder' && calls.length === 0],
+        ['без выхода', nul.result.status === 'blocked' && nul.result.where === 'скелетник не вернул выход' && labelsOf(nul.calls).join() === 'scaffold'],
+      ]
+    } },
+  { name: 'O18 скелетник blocked, без коммита либо без команд -> blocked, верификатор не вызван, коммит - в unverified (T5, I7)', track: 'onboard', args: scaffoldArgs,
+    responses: { scaffold: { ...scaffolded, status: 'blocked', commit: '', skipped: ['CI: remote не задан'], missing: 'стек входа не задаёт язык: CRM' } },
+    expect: async ({ result, calls }) => {
+      const mute = (await runTrack('onboard', scaffoldArgs, { scaffold: { ...scaffolded, status: 'blocked', missing: '' } })).result
+      const bare = await runTrack('onboard', scaffoldArgs, { scaffold: { ...scaffolded, commit: ' ' } })
+      return [
+        ['нехватка скелетника, skipped в выходе', result.status === 'blocked' && result.where === 'скелет: стек входа не задаёт язык: CRM' && labelsOf(calls).join() === 'scaffold' && result.skipped.join() === 'CI: remote не задан' && result.scaffold === '' && result.unverified === ''],
+        ['blocked без нехватки, его коммит - в unverified', mute.where === 'скелет: скелетник вернул blocked без нехватки' && mute.unverified === '5ca1f01' && mute.scaffold === ''],
+        ['complete без коммита', bare.result.status === 'blocked' && bare.result.where === 'скелет: коммита нет' && labelsOf(bare.calls).join() === 'scaffold'],
+        ...await Promise.all([{ build_cmd: '' }, { test_cmd: ' ' }].map(async (x, i) => { const r = await runTrack('onboard', scaffoldArgs, { scaffold: { ...scaffolded, ...x } }); return [`без команды ${i ? 'тестов' : 'сборки'}`, r.result.status === 'blocked' && r.result.where === 'скелет: нет команды сборки либо тестов' && labelsOf(r.calls).join() === 'scaffold' && r.result.unverified === '5ca1f01'] })),
+      ]
+    } },
+  { name: 'O19 верификация скелета не вышла, blocked, красная, грязная либо без тестов -> blocked, составитель не вызван (T6, I7)', track: 'onboard', args: scaffoldArgs,
+    responses: { scaffold: scaffolded, 'verify:scaffold': null },
+    expect: async ({ result, calls }) => {
+      const run = (v, args = scaffoldArgs) => runTrack('onboard', args, { scaffold: scaffolded, 'verify:scaffold': v })
+      const blk = (await run({ ...scGreen, status: 'blocked', missing: 'npm не найден' })).result
+      const r = await run({ ...scGreen, exit_code: 1, fail_count: 1, failing: ['smoke'] })
+      const dirt = (await run({ ...scGreen, dirty: true })).result
+      const none = (await run({ ...scGreen, pass_count: 0 })).result
+      const noScripts = await runTrack('onboard', { ...scaffoldArgs, scripts: undefined }, { scaffold: scaffolded, 'verify:scaffold': scGreen, onboard: onboarded, check: onChecked })
+      return [
+        ['без выхода', result.status === 'blocked' && result.where === 'верификация скелета не состоялась: верификатор не вернул выход' && labelsOf(calls).join() === 'scaffold,verify:scaffold' && result.unverified === '5ca1f01' && result.scaffold === ''],
+        ['blocked верификатора', blk.where === 'верификация скелета не состоялась: npm не найден'],
+        ['красная', r.result.status === 'blocked' && r.result.where === 'скелет не зелёный: exit=1, build_ok=true, прошло тестов: 1, новые падения: smoke, dirty=false' && labelsOf(r.calls).join() === 'scaffold,verify:scaffold' && r.result.unverified === '5ca1f01'],
+        ['после verify.py - чистота дерева', promptOf(calls, 'verify:scaffold').includes('Затем git status --porcelain: вывод непуст - dirty true.')],
+        ['грязное дерево после прогона', dirt.status === 'blocked' && dirt.where.endsWith('dirty=true')],
+        ['ни одного прошедшего теста', none.status === 'blocked' && none.where.startsWith('скелет не зелёный: ')],
+        ['без scripts верификатор гоняет команды сам', ['сборку: npx tsc --noEmit; тесты: npm test'].every(t => promptOf(noScripts.calls, 'verify:scaffold').includes(t)) && noScripts.result.status === 'complete'],
+      ]
+    } },
+  { name: 'O20 partial скелетника -> составитель вызван с незаложенным, partial с нехваткой скелета (T7, T15)', track: 'onboard', args: scaffoldArgs,
+    responses: { scaffold: { ...scaffolded, status: 'partial', skipped: ['CI: remote не задан - платформа не выводится'], missing: 'CI не заложен: remote не задан' }, 'verify:scaffold': scGreen, onboard: onboarded, check: onChecked },
+    expect: ({ result, calls }) => [
+      ['составитель и сверщик вызваны, незаложенное у составителя', labelsOf(calls).join() === 'scaffold,verify:scaffold,onboard,check' && promptOf(calls, 'onboard').includes('Не заложено в скелет:\n- CI: remote не задан - платформа не выводится')],
+      ['partial, skipped в выходе', result.status === 'partial' && result.where === 'скелет: CI не заложен: remote не задан' && result.skipped.join() === 'CI: remote не задан - платформа не выводится' && result.scaffold === '5ca1f01'],
+    ] },
+  { name: 'O21 карта, правила и запреты составителя - в выход как есть при любом исходе после него; без stack скелета нет (T2, T7)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: { ...onboarded, rules: [{ path: 'CONTRIBUTING.md', what: 'стиль коммитов и ревью' }], guards: [{ path: 'src/gen/', basis: 'src/gen/api.ts:1 - заголовок генератора' }] }, check: onChecked },
+    expect: async ({ result, calls }) => {
+      const blk = (await runTrack('onboard', onboardArgs, { onboard: { ...onboarded, status: 'blocked', missing: 'корпус не развернуть', guards: [{ path: 'vendor/', basis: 'vendor/modules.txt:1' }] } })).result
+      return [
+        ['скелетник не вызван', labelsOf(calls).join() === 'onboard,check' && result.scaffold === '' && result.skipped.length === 0],
+        ['map, rules, guards как есть', result.map.join() === onboarded.map.join() && result.map[0].path === 'src/' && result.rules[0].path === 'CONTRIBUTING.md' && result.guards[0].basis === 'src/gen/api.ts:1 - заголовок генератора'],
+        ['при blocked составителя - тоже', blk.status === 'blocked' && blk.guards[0].path === 'vendor/'],
+      ]
+    } },
 ]
 
 // Скептик зовётся только при P0/P1 в находках ревью либо в перечне (T12c, T16c): сценарию о самой сверке скептика
@@ -4260,7 +4611,7 @@ const DEFAULT_REVIEW = { 'hunks:первое': hunksNone, 'falsify:первое'
 // Команды зовут трек именем `dex-auto:<meta.name>` из каталога `workflows` манифеста (P67).
 const manifest = JSON.parse(readFileSync(join(TRACKS, '..', '.claude-plugin', 'plugin.json'), 'utf8'))
 const REGISTRATION = [['манифест регистрирует tracks/ каталогом workflows', manifest.workflows === './tracks/'],
-  ...['feature', 'bugfix', 'review', 'goal', 'deliver'].map(t => [`meta.name трека ${t} - dex-auto-${t}`,
+  ...['feature', 'bugfix', 'review', 'goal', 'deliver', 'record', 'onboard'].map(t => [`meta.name трека ${t} - dex-auto-${t}`,
     /export const meta = \{\s*name: '([^']+)'/.exec(readFileSync(join(TRACKS, `${t}.js`), 'utf8'))?.[1] === `dex-auto-${t}`])]
 
 const only = process.argv[2]
