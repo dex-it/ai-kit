@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { cleanName, failureOf, messageFor, nameFromTask, dirChoices, presetsOf, startArgv, startedOf } from '../hooks/dispatch.ts'
+import { cleanName, failureOf, messageFor, nameFromTask, dirChoices, presetsOf, recentDirs, startArgv, startedOf } from '../hooks/dispatch.ts'
 
 describe('имена', () => {
   it('имя из задачи: первые слова через дефис', () => {
@@ -69,6 +69,7 @@ describe('dirChoices', () => {
   it('текущая первой, затем папки сессий, затем соседи, без повторов', () => {
     const choices = dirChoices({
       current: '/h/work/a',
+      recents: ['/h/work/r', '/h/work/a'],
       sessionDirs: ['/h/work/b', '/h/work/a'],
       neighbours: ['/h/work/b', '/h/work/c'],
       home: '/h',
@@ -76,6 +77,7 @@ describe('dirChoices', () => {
 
     assert.deepEqual(choices, [
       { value: '/h/work/a', label: 'эта папка: ~/work/a' },
+      { value: '/h/work/r', label: 'недавняя: ~/work/r' },
       { value: '/h/work/b', label: 'где идут сессии: ~/work/b' },
       { value: '/h/work/c', label: 'рядом: ~/work/c' },
     ])
@@ -84,6 +86,32 @@ describe('dirChoices', () => {
   it('не длиннее потолка', () => {
     const many = Array.from({ length: 40 }, (_, i) => `/p/d${i}`)
 
-    assert.equal(dirChoices({ current: '/p', sessionDirs: [], neighbours: many, home: '' }).length, 15)
+    assert.equal(dirChoices({ current: '/p', recents: [], sessionDirs: [], neighbours: many, home: '' }).length, 20)
+  })
+})
+
+describe('recentDirs', () => {
+  const row = (project: unknown) => JSON.stringify({ display: 'x', project })
+
+  it('свежие первыми, без повторов и временных, оборванная первая строка отброшена', () => {
+    const text = [
+      '{"оборвано',
+      row('/h/old'),
+      row('/h/new'),
+      row('/h/old'),
+      row('/private/tmp/claude-501/x'),
+      row('/h/.cache/review/pr1'),
+      row(42),
+      'мусор',
+      row('/h/last'),
+    ].join('\n')
+
+    assert.deepEqual(recentDirs(text), ['/h/last', '/h/old', '/h/new'])
+  })
+
+  it('не длиннее лимита', () => {
+    const text = ['x', ...Array.from({ length: 50 }, (_, i) => row(`/p/${i}`))].join('\n')
+
+    assert.equal(recentDirs(text, 5).length, 5)
   })
 })

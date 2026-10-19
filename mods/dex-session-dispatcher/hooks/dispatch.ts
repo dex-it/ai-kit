@@ -108,16 +108,18 @@ export function presetsOf(commandNames: readonly string[]): Preset[] {
 
 export type DirChoice = { value: string; label: string }
 
-export const DIR_CHOICES_MAX = 15
+export const DIR_CHOICES_MAX = 20
 
 /**
  * Папки, в которых можно начать сессию, - выбором, а не набором руками:
- * текущая, те, где уже идут сессии, и соседние с текущей (рядом лежат
+ * текущая, недавние (где человек уже работал с Claude Code), те, где идут
+ * сессии, и соседние с текущей (рядом лежат
  * проекты). Повторы схлопываются, порядок - по близости к тому, что человек
  * делает сейчас.
  */
 export function dirChoices(input: {
   current: string
+  recents: readonly string[]
   sessionDirs: readonly string[]
   neighbours: readonly string[]
   home: string
@@ -134,8 +136,41 @@ export function dirChoices(input: {
 
   add(input.current, 'эта папка: ')
 
+  for (const dir of input.recents) add(dir, 'недавняя: ')
   for (const dir of input.sessionDirs) add(dir, 'где идут сессии: ')
   for (const dir of input.neighbours) add(dir, 'рядом: ')
 
   return choices
+}
+
+const TEMPORARY = /^\/(private\/)?(tmp|var\/folders)\/|\/\.cache\//
+
+/**
+ * Недавние папки из истории ввода Claude Code (`history.jsonl`, у записи есть
+ * `project`): свежие первыми, без повторов, без временных. Читается хвост
+ * файла, поэтому первая строка может быть оборвана и отбрасывается. Формат
+ * внутренний: что не разобралось, молча пропускается.
+ */
+export function recentDirs(text: string, limit = 30): string[] {
+  const lines = text.split('\n').slice(1).reverse()
+  const found: string[] = []
+
+  for (const line of lines) {
+    if (found.length >= limit) break
+
+    let project: unknown
+
+    try {
+      project = (JSON.parse(line) as { project?: unknown }).project
+    } catch {
+      continue
+    }
+
+    if (typeof project !== 'string' || !project.startsWith('/')) continue
+    if (TEMPORARY.test(project) || found.includes(project)) continue
+
+    found.push(project)
+  }
+
+  return found
 }

@@ -19,7 +19,7 @@
 import type { PluginOptions, Register, RenderElement, Timer } from 'claude-code'
 
 import { parseArgs } from './args.ts'
-import { dirChoices, failureOf, messageFor, presetsOf, startArgv, startedOf } from './dispatch.ts'
+import { dirChoices, failureOf, recentDirs, messageFor, presetsOf, startArgv, startedOf } from './dispatch.ts'
 import type { DirChoice, Preset } from './dispatch.ts'
 import { projectsRoot, transcriptPath } from './paths.ts'
 import { isFinished, ordered, parseAgents, pickSession } from './sessions.ts'
@@ -109,6 +109,8 @@ export const register: Register = (on, pluginOptions) => {
   let neighbours: string[] = []
   /** Выбранная для новой сессии папка; пусто - папка этой сессии. */
   let newDir = ''
+  /** Недавние папки из истории Claude Code, существующие; перечитываются при открытии панели. */
+  let recents: string[] = []
   const cache = new Map<string, Cached>()
 
   // --- Reading ----------------------------------------------------------
@@ -243,6 +245,7 @@ export const register: Register = (on, pluginOptions) => {
   function dirsOf(): DirChoice[] {
     return dirChoices({
       current: cwd,
+      recents,
       sessionDirs: [...new Set(ordered(rows).map(row => row.cwd))],
       neighbours,
       home,
@@ -281,7 +284,29 @@ export const register: Register = (on, pluginOptions) => {
 
   // --- Actions ----------------------------------------------------------
 
+  /** Недавние папки: хвост истории ввода, лишь те, что ещё существуют. */
+  async function loadRecents(): Promise<void> {
+    if (!bound) return
+
+    const res = await bound.run(['tail', '-c', '300000', `${configDir}/history.jsonl`]).catch(() => null)
+
+    if (!res || res.exitCode !== 0) return
+
+    const alive: string[] = []
+
+    for (const dir of recentDirs(res.stdout)) {
+      if (alive.length >= 12) break
+
+      if (await bound.exists(dir)) alive.push(dir)
+    }
+
+    recents = alive
+    bound.invalidate()
+  }
+
   async function openPane(title: string): Promise<void> {
+    void loadRecents()
+
     await bound?.openPane(title)
     isPaneOpen = true
   }
