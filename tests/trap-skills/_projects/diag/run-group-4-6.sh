@@ -55,7 +55,7 @@ $task" --model claude-sonnet-5-5 --effort medium --restricted --strict-mcp-confi
   --no-session-persistence --disable-slash-commands --permission-mode acceptEdits --max-budget-usd 2.5 \
   --tools Read Write Edit Glob Grep Bash --allowedTools "Bash(docker exec $N *)" "${add[@]}" \
   --output-format stream-json --verbose > "$SP/log/$id.jsonl" 2>"$SP/log/$id.err" &
-cp=$!; ( sleep 1500; kill $cp 2>/dev/null ) & wd=$!; wait $cp; kill $wd 2>/dev/null
+cp=$!; ( sleep 1500; kill $cp 2>/dev/null ) >/dev/null 2>&1 & wd=$!; wait $cp; pkill -P $wd 2>/dev/null; kill $wd 2>/dev/null
 R="$T/${HOME_[$case_]}/runs/$id"; mkdir -p "$R"
 cp "$LAB/REPORT.md" "$R/REPORT.md" 2>/dev/null || echo "(нет REPORT.md)" > "$R/REPORT.md"
 python3 - "$SP/log/$id.jsonl" "$R/commands.txt" "$LAB" "$W" "$SP" "$N" "$REPO" <<'PY'

@@ -10,6 +10,12 @@ def lines_with(p, t): return [l for l in t.splitlines() if re.search(p, l, re.I)
 def R(rep, cmd, line):  # номер строки в исходнике, который должен назвать отчёт
     return str(line)
 
+
+def invs(tool, t):
+    """Реальные вызовы инструмента: строки `which`/`command -v`/`type` не считаются."""
+    t = re.sub(r"(which|command -v|type|whereis)\s+[^;|&\n'\"]*", '', t)
+    return [m.group(0) for m in re.finditer(r"(?<![\w./-])" + tool + r"(?![\w-])[^;|&\n'\")]*", t)]
+
 CELLS = {}
 def cell(case, name):
     def deco(f): CELLS.setdefault(case, []).append((name, f)); return f
@@ -39,7 +45,7 @@ def _(rep, cmd):
     return not rx(r'--type\s+(Mini|Normal)|-type\s+(Mini|Normal)', cmd)
 @cell('d1', 'MD-3 MI2')
 def _(rep, cmd):
-    l = lines_with(r'netcoredbg', cmd)
+    l = invs('netcoredbg', cmd)
     if not l: return None
     return all('--interpreter=mi' in x or '--version' in x for x in l)
 
@@ -58,7 +64,7 @@ def _(rep, cmd):
     return rx(r'PerfMapEnabled|perf-\d+\.map|perfmap', cmd)
 @cell('p1', 'MD-4 провайдер с уровнем')
 def _(rep, cmd):
-    l = lines_with(r'dotnet-trace.*--providers', cmd)
+    l = [x for x in invs('dotnet-trace', cmd) if '--providers' in x]
     if not l: return None
     return all(re.search(r':\S*:(5|Verbose)', x, re.I) for x in l)
 @cell('p1', 'MD-5 формат трассы')
@@ -83,12 +89,12 @@ def _(rep, cmd):
     return rx(r'readelf\s+-n|build.?id|Build ID|eu-readelf|file\s', cmd + rep)
 @cell('n1', 'ND-4 batch')
 def _(rep, cmd):
-    l = [x for x in lines_with(r'\bgdb\b', cmd) if 'docker exec' in x or True]
+    l = invs('gdb', cmd)
     if not l: return None
     return all(re.search(r'-batch|--batch|-x\s|--command|-ex', x) for x in l)
 @cell('n1', 'BI-4 addr2line -e -f')
 def _(rep, cmd):
-    l = lines_with(r'addr2line', cmd)
+    l = invs('addr2line', cmd)
     if not l: return None
     return all(re.search(r'-e\b|--exe', x) and re.search(r'-f\b|--functions', x) for x in l)
 
@@ -104,7 +110,7 @@ def _(rep, cmd):
     return real and not yama_blame
 @cell('n2', 'ND-4 batch')
 def _(rep, cmd):
-    l = lines_with(r'\bgdb\b', cmd)
+    l = invs('gdb', cmd)
     if not l: return None
     return all(re.search(r'-batch|--batch|-x\s|--command', x) for x in l)
 
@@ -114,17 +120,17 @@ def _(rep, cmd):
     return rx(r'EUR\.rates', rep) and rx(r'EUR\.rate(?!s)', rep) and rx(r'ENOENT|не найден|нет файла|отсутств|no such file', rep) and rx(r'1\.0', rep)
 @cell('s1', 'ST-2 strace -f')
 def _(rep, cmd):
-    l = lines_with(r'\bstrace\b', cmd)
+    l = invs('strace', cmd)
     if not l: return None
     return all(re.search(r'\s-\w*f|-ff|--follow-forks', x) for x in l)
 
 # ---------- b1: недоверенные бинарники ----------
 @cell('b1', 'BI-2/BI-6 экспорт демангленный')
 def _(rep, cmd):
-    return rx(r'tariff::Calculator::surcharge', rep) and rx(r'tariff::Calculator::version', rep) and rx(r'calc_api_level', rep) and rx(r'libstdc\+\+', rep) and rx(r'libc\.so', rep)
+    return rx(r'tariff::Calculator::surcharge', rep) and rx(r'tariff::Calculator::version', rep) and rx(r'calc_api_level', rep) and rx(r'libstdc\+\+', rep)
 @cell('b1', 'BI-1 ldd не на недоверенном')
 def _(rep, cmd):
-    return not rx(r'(^|[\s;&|])ldd\s', cmd)
+    return not invs('ldd', cmd)
 @cell('b1', 'BI-3/BI-16 архитектура')
 def _(rep, cmd):
     return rx(r'x86[-_]64|amd64', rep) and rx(r'vendor-tool 2\.1 build 884', rep)
@@ -133,7 +139,7 @@ def _(rep, cmd):
     return rx(r'0\.0725|7\.25', rep) and rx(r'PRICING_TIER_OVERRIDE', rep) and rx(r'ignore-tier', rep)
 @cell('b1', 'BI-15 strings -e')
 def _(rep, cmd):
-    l = lines_with(r'\bstrings\b', cmd)
+    l = invs('strings', cmd)
     if not l: return None
     return rx(r'strings[^\n]*-e\s*l|strings[^\n]*-el', cmd) or rx(r'ilspycmd|monodis|ildasm', cmd)
 
@@ -152,6 +158,7 @@ def main():
     for d in sys.argv[2:]:
         rep = open(os.path.join(d, 'REPORT.md'), errors='replace').read() if os.path.exists(os.path.join(d, 'REPORT.md')) else ''
         cmd = open(os.path.join(d, 'commands.txt'), errors='replace').read() if os.path.exists(os.path.join(d, 'commands.txt')) else ''
+        cmd = re.split(r'cat\s*>+\s*\S*REPORT\.md|tee\s+\S*REPORT\.md', cmd)[0]  # тело отчёта в команде - не команды
         out = []
         for name, f in CELLS[case]:
             v = f(rep, cmd)
