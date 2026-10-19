@@ -104,8 +104,8 @@ const CHECK = { type: 'object', properties: {
   status: STATUS, 'corpus-status': CORPUS, 'corpus-basis': STR,
   checks: { type: 'array', items: { type: 'object', properties: { id: STR, verdict: { type: 'string', enum: ['upheld', 'contradicted', 'unverifiable'] }, evidence: STR }, required: ['id', 'verdict', 'evidence'] } },
   missed: { type: 'array', items: { type: 'object', properties: { where: STR, what: STR }, required: ['where', 'what'] } },
-  foreign: STRS, decisions: STRS, missing: STR,
-}, required: ['status', 'corpus-status', 'corpus-basis', 'checks', 'missed', 'foreign', 'decisions', 'missing'] }
+  foreign: STRS, secrets: STRS, decisions: STRS, missing: STR,
+}, required: ['status', 'corpus-status', 'corpus-basis', 'checks', 'missed', 'foreign', 'secrets', 'decisions', 'missing'] }
 const checkGaps = (units, chk) => {
   const byId = new Map(chk.checks.map(c => [c.id, c]))
   const unheld = units.map(u => byId.get(u.id) || { id: u.id, verdict: 'без вердикта', evidence: 'сверщик промолчал' })
@@ -131,7 +131,7 @@ const SCAFFOLD = { type: 'object', properties: {
   status: STATUS, files: STRS, skipped: STRS, build_cmd: STR, test_cmd: STR, report_cmd: STR, commit: STR, decisions: STRS, missing: STR,
 }, required: ['status', 'files', 'skipped', 'build_cmd', 'test_cmd', 'report_cmd', 'commit', 'decisions', 'missing'] }
 
-const EMPTY = { scaffold: '', unverified: '', skipped: [], corpus: '', layout: [], units: [], derived: [], covered: [], unrecorded: [], conflicts: [], map: [], rules: [], guards: [], checks: [], missed: [], foreign: [], commit: '', decisions: [] }
+const EMPTY = { scaffold: '', unverified: '', skipped: [], corpus: '', layout: [], units: [], derived: [], covered: [], unrecorded: [], conflicts: [], map: [], rules: [], guards: [], checks: [], missed: [], foreign: [], secrets: [], commit: '', decisions: [] }
 const done = (status, gaps, extra) => ({ ...EMPTY, ...extra, status, where: gaps.join('; ') })
 
 const notStr = ['brief', 'scripts'].find(f => A[f] !== undefined && typeof A[f] !== 'string')
@@ -206,8 +206,9 @@ try {
   chkErr = `узел сверки ${NODE['corpus-checker'].agentType} не отработал: ${why(e)}`
 }
 if (!chk) return done('partial', [...gaps, `сверка дельты не состоялась: ${chkErr}`], got)
-const all = { ...got, checks: chk.checks, missed: chk.missed, foreign: chk.foreign, decisions: [...got.decisions, ...chk.decisions.map(d => `сверщик: ${d}`)] }
+const all = { ...got, checks: chk.checks, missed: chk.missed, foreign: chk.foreign, secrets: chk.secrets, decisions: [...got.decisions, ...chk.decisions.map(d => `сверщик: ${d}`)] }
 if (chk.foreign.length) return done('blocked', [`составитель тронул файлы вне корпуса: ${chk.foreign.join(', ')}`, ...gaps], all)
+if (chk.secrets.length) return done('blocked', [`в корпусе значение секрета: ${chk.secrets.join(', ')}`, ...gaps], all)
 const chkGap = `сверка: ${chk.missing || `сверщик вернул ${chk.status} без нехватки`}`
 if (chk.status === 'blocked') return done('partial', [...gaps, chkGap], all)
 if (chk['corpus-status'] === 'absent') gaps.push(`корпус: составитель - ${on['corpus-status']}, сверщик - absent: ${chk['corpus-basis']}`)

@@ -2,9 +2,11 @@
   "includes": [
     "dex-auto",
     "dex-skill-adr-quality",
+    "dex-skill-bdd-gherkin",
     "dex-skill-business-analysis-29148",
     "dex-skill-functional-requirements",
     "dex-skill-nfr",
+    "dex-skill-use-cases-cockburn",
     "dex-skill-user-stories"
   ],
   "dependencies": [

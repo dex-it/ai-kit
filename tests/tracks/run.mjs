@@ -116,7 +116,7 @@ const unitDerived = { ...unitSrc, id: 'FR-1002', origin: 'derived', trace: 'src/
 const recorded = { status: 'complete', 'corpus-status': 'present', units: [unitSrc, unitDerived], covered: [], unrecorded: [], conflicts: [], commit: 'c0ffee1', decisions: ['скиллы: project-docs-map, docs-layout'], missing: '' }
 const upheld = (u) => ({ id: u.id, verdict: 'upheld', evidence: `src/A.cs:12 делает то, что ${u.path}` })
 const coveredUnit = { id: 'FR-0901', path: 'docs/01-product/01-retry/srs.md', what: 'повтор на 503' }
-const checked = { status: 'complete', 'corpus-status': 'present', 'corpus-basis': 'docs/', checks: [upheld(unitSrc), upheld(unitDerived)], missed: [], foreign: [], decisions: ['скиллы: project-docs-map, docs-layout'], missing: '' }
+const checked = { status: 'complete', 'corpus-status': 'present', 'corpus-basis': 'docs/', checks: [upheld(unitSrc), upheld(unitDerived)], missed: [], foreign: [], secrets: [], decisions: ['скиллы: project-docs-map, docs-layout'], missing: '' }
 const onboardArgs = { cwd: '/repo' }
 const unitBrd = { id: 'BR-001', path: 'docs/product/brd.md', kind: 'BR', origin: 'derived', trace: 'README.md:3' }
 const unitAdr = { id: 'ADR-0001', path: 'docs/adr/0001-postgres.md', kind: 'ADR', origin: 'derived', trace: 'docker-compose.yml:12' }
@@ -4310,6 +4310,9 @@ const SCENARIOS = [
   { name: 'C12 файл вне корпуса в коммите фиксатора -> blocked (T10)', track: 'record', args: recordArgs,
     responses: { record: recorded, check: { ...checked, foreign: ['src/A.cs'] } },
     expect: ({ result }) => [['blocked с файлом', result.status === 'blocked' && result.where === 'фиксатор тронул файлы вне корпуса: src/A.cs' && result.foreign.join() === 'src/A.cs']] },
+  { name: 'C22 значение секрета в корпусе -> blocked, сдачи кода нет (T10, I7)', track: 'record', args: recordArgs,
+    responses: { record: recorded, check: { ...checked, secrets: ['docs/adr/0003-db.md:14'] } },
+    expect: ({ result }) => [['blocked с местом секрета, значения нет', result.status === 'blocked' && result.where === 'в корпусе значение секрета: docs/adr/0003-db.md:14' && result.secrets.join() === 'docs/adr/0003-db.md:14']] },
   { name: 'C13 contradicted, unverifiable, молчание о единице, missed -> partial, каждое названо (T12)', track: 'record', args: recordArgs,
     responses: { record: { ...recorded, units: [unitSrc, unitDerived, { ...unitSrc, id: 'NFR-1003' }] },
       check: { ...checked, checks: [{ id: 'FR-1001', verdict: 'contradicted', evidence: 'src/A.cs:20 - 5 повторов, srs.md:3 - 3' }, { id: 'FR-1002', verdict: 'unverifiable', evidence: 'файла единицы нет' }], missed: [{ where: 'src/B.cs:7', what: 'отказ 429 без повтора' }] } },
@@ -4374,8 +4377,9 @@ const SCENARIOS = [
         ['закрытая цель без Фиксация: - ещё фиксация', auto.includes('без `Фиксация:`, а с `продолжить`')],
         ['продолжить по фиксации blocked, partial либо не состоялась без ответа оператора - фиксация заново', auto.includes('при `Фиксация:` на `blocked`, `partial` либо `не состоялась` без ответа оператора, - ещё фиксация истины')],
         ['описание PR несёт строку Фиксация:', agentBody('deliverer').includes('строка `Фиксация:`')],
-        ['foreign у фиксатора - сдачи кода нет, коммит остаётся оператору', auto.includes('`foreign` непуст - сдачи кода нет: `set TASK PR "не открыт - фиксатор тронул файлы вне корпуса"`, коммит фиксатора остаётся оператору')],
-        ['фиксатор и сверщик: значений секретов в единицы не переносят, .env и ключи не читают', ['recorder', 'corpus-checker'].every(n => agentBody(n).includes('значений секретов') && agentBody(n).includes('`.env`'))],
+        ['foreign у фиксатора - сдачи кода нет, коммит остаётся оператору', auto.includes('`foreign` либо `secrets` непусты - сдачи кода нет: `set TASK PR "не открыт - фиксатор тронул файлы вне корпуса"` либо `"не открыт - в корпусе значение секрета"`') && auto.includes('пока оператор не убрал, сдачи нет и при `продолжить --pr`') && auto.includes('`foreign`, `secrets`, вердикты сверщика - принять | отклонить')],
+        ['фиксатор, составитель и сверщик: значения секретов не переносятся, файлы окружения и ключей не читаются', ['recorder', 'corpus-checker', 'onboarder'].every(n => agentBody(n).includes('значения секретов') && agentBody(n).includes('`.env*`, `*.pem`, `*.key`, `*.pfx`, `id_rsa`'))] ,
+        ['сверщик: секрет - в поле secrets, значения в evidence нет', agentBody('corpus-checker').includes('в `evidence` и `decisions` значение не называешь') && agentBody('corpus-checker').includes('- `secrets` -')],
       ]
     } },
   { name: 'O1 составитель и сверщик - узлы dex-auto без model, вход: каталог, предмет входа, трейлер; complete, derived к приёмке (T2, T7, T11, T16)', track: 'onboard', args: onboardArgs, responses: { onboard: onboarded, check: onChecked },
@@ -4441,6 +4445,9 @@ const SCENARIOS = [
   { name: 'O9 файл вне корпуса в коммите составителя -> blocked (T13, I1)', track: 'onboard', args: onboardArgs,
     responses: { onboard: onboarded, check: { ...onChecked, foreign: ['src/A.cs'] } },
     expect: ({ result }) => [['blocked с файлом', result.status === 'blocked' && result.where === 'составитель тронул файлы вне корпуса: src/A.cs' && result.foreign.join() === 'src/A.cs']] },
+  { name: 'O22 значение секрета в корпусе -> blocked (T13, I8)', track: 'onboard', args: onboardArgs,
+    responses: { onboard: onboarded, check: { ...onChecked, secrets: ['docs/adr/0001-postgres.md:9'] } },
+    expect: ({ result }) => [['blocked с местом секрета', result.status === 'blocked' && result.where === 'в корпусе значение секрета: docs/adr/0001-postgres.md:9' && result.secrets.join() === 'docs/adr/0001-postgres.md:9']] },
   { name: 'O10 сверщик blocked -> partial, вердикты единиц не судятся (T14)', track: 'onboard', args: onboardArgs,
     responses: { onboard: onboarded, check: { ...onChecked, status: 'blocked', checks: [], missing: 'корпус не прочитать: docs/ без прав чтения' } },
     expect: ({ result }) => [['одна нехватка сверки', result.status === 'partial' && result.where === 'сверка: корпус не прочитать: docs/ без прав чтения']] },
@@ -4474,8 +4481,8 @@ const SCENARIOS = [
         ['предмет входа - блок в обоих файлах', ['onboarder', 'corpus-checker'].every(n => agentBody(n).includes('<!-- >>> shared: onboard-subject -->'))],
         ['составитель: запись без замены продукта', agentTools('onboarder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('onboarder'))],
         ['составитель: трейлер, review, существующее - covered либо conflicts, реконструкция по норме', ['трейлером `Dex-Auto-Onboard: yes`', 'статус `review`', 'описывает предмет - запись `covered`', 'запись `conflicts`', '`dex-skill-legacy-reconstruction:legacy-reconstruction`', 'одна строка `расхождений нет`'].every(t => agentBody('onboarder').includes(t))],
-        ['составитель: значения существующих ключей раскладки не меняет, недостающие - строкой layout', agentBody('onboarder').includes('значения существующих ключей раскладки не меняешь') && agentBody('onboarder').includes('каждый дописанный - строка `layout`')],
-        ['составитель и сверщик: значения секретов не переносятся, .env и ключи не читаются; единица с секретом - contradicted', ['значений секретов', '`.env`'].every(t => agentBody('onboarder').includes(t) && agentBody('corpus-checker').includes(t)) && agentBody('corpus-checker').includes('`contradicted`')],
+        ['составитель: значения существующих ключей раскладки не меняет, недостающие - строкой layout', agentBody('onboarder').includes('значения существующих ключей раскладки не меняешь') && agentBody('onboarder').includes('строкой `layout` они не идут') && agentBody('onboarder').includes('в порядке путей, `what` и')],
+        ['составитель и сверщик: значения секретов не переносятся, .env и ключи не читаются; единица с секретом - contradicted', ['значения секретов', '`.env*`'].every(t => agentBody('onboarder').includes(t) && agentBody('corpus-checker').includes(t)) && agentBody('corpus-checker').includes('`contradicted`')],
         ['сверщик: без мест правки - репозиторий, вход называет предмет', ['вход без мест правки - код и конфигурацию репозитория', 'Предмет - раздел, который называет вход', 'вход не называет предмет'].every(t => agentBody('corpus-checker').includes(t))],
       ]
     } },
@@ -4494,7 +4501,7 @@ const SCENARIOS = [
         ['трек получает стек только пустым и каталог скриптов', cmd.includes('`{cwd, brief, stack, scripts}`') && cmd.includes('`stack` - только пустому проекту') && cmd.includes('`${CLAUDE_PLUGIN_ROOT}/hooks/scripts`')],
         ['карта, правила, запреты; нет правил - сбор свода предложен; путь сверен с деревом', ['`## Карта`', '`## Правила`', '`## Запреты`', '`/dex-rulebook-miner:rulebook`', 'чей путь не найден `git ls-files`'].every(t => cmd.includes(t))],
         ['готовность по осям, секреты и размер CLAUDE.md, в непустом ничего не заводится', ['**Готовность.**', '`есть` либо `нет` с тем, что\nсделать', 'по перечню сам ничего не меняешь', '`.env`', 'не длиннее 200 строк'].every(t => cmd.includes(t))],
-        ['маркеры: пара не ровно одна - блок не пишется, причина в выход', cmd.includes('пара маркеров не ровно одна - блок не пишешь') && cmd.includes('маркер в код-блоке не считается')],
+        ['маркеры: пара не ровно одна - блок не пишется, причина в выход', cmd.includes('нет - блок дописываешь в конец') && cmd.includes('Маркер есть, а\n   пара маркеров не ровно одна - блок не пишешь') && cmd.includes('маркер в код-блоке не считается')],
         ['после остановки либо отката - git status --porcelain и что удалить', cmd.includes('`git status --porcelain` и назови оператору файлы, которые удалить') && readFileSync(join(TRACKS, '..', 'agents', 'scaffolder.md'), 'utf8').includes('оставленные неотслеженные файлы')],
         ['гейты по норме, не заводятся', cmd.includes('`dex-skill-project-baseline:project-baseline`') && cmd.includes('Отсутствующий гейт не заводишь')],
         ['коммит CLAUDE.md своим трейлером', cmd.includes('`Dex-Auto-Onboard: flow`')],

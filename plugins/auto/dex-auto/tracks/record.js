@@ -61,8 +61,8 @@ const CHECK = { type: 'object', properties: {
   status: STATUS, 'corpus-status': CORPUS, 'corpus-basis': STR,
   checks: { type: 'array', items: { type: 'object', properties: { id: STR, verdict: { type: 'string', enum: ['upheld', 'contradicted', 'unverifiable'] }, evidence: STR }, required: ['id', 'verdict', 'evidence'] } },
   missed: { type: 'array', items: { type: 'object', properties: { where: STR, what: STR }, required: ['where', 'what'] } },
-  foreign: STRS, decisions: STRS, missing: STR,
-}, required: ['status', 'corpus-status', 'corpus-basis', 'checks', 'missed', 'foreign', 'decisions', 'missing'] }
+  foreign: STRS, secrets: STRS, decisions: STRS, missing: STR,
+}, required: ['status', 'corpus-status', 'corpus-basis', 'checks', 'missed', 'foreign', 'secrets', 'decisions', 'missing'] }
 const checkGaps = (units, chk) => {
   const byId = new Map(chk.checks.map(c => [c.id, c]))
   const unheld = units.map(u => byId.get(u.id) || { id: u.id, verdict: 'без вердикта', evidence: 'сверщик промолчал' })
@@ -80,7 +80,7 @@ const RECORD = { type: 'object', properties: {
   conflicts: STRS, commit: STR, decisions: STRS, missing: STR,
 }, required: ['status', 'corpus-status', 'units', 'covered', 'unrecorded', 'conflicts', 'commit', 'decisions', 'missing'] }
 
-const EMPTY = { corpus: '', na: '', units: [], derived: [], covered: [], unrecorded: [], conflicts: [], checks: [], missed: [], foreign: [], commit: '', decisions: [] }
+const EMPTY = { corpus: '', na: '', units: [], derived: [], covered: [], unrecorded: [], conflicts: [], checks: [], missed: [], foreign: [], secrets: [], commit: '', decisions: [] }
 const done = (status, gaps, extra) => ({ ...EMPTY, ...extra, status, where: gaps.join('; ') })
 
 const badType = ['goal_path', 'goal', 'source', 'base', 'task'].filter(k => A[k] !== undefined && typeof A[k] !== 'string')
@@ -134,8 +134,9 @@ try {
   chkErr = `узел сверки ${NODE['corpus-checker'].agentType} не отработал: ${why(e)}`
 }
 if (!chk) return done('partial', [...gaps, `сверка дельты не состоялась: ${chkErr}`], got)
-const all = { ...got, checks: chk.checks, missed: chk.missed, foreign: chk.foreign, decisions: [...rec.decisions, ...chk.decisions.map(d => `сверщик: ${d}`)] }
+const all = { ...got, checks: chk.checks, missed: chk.missed, foreign: chk.foreign, secrets: chk.secrets, decisions: [...rec.decisions, ...chk.decisions.map(d => `сверщик: ${d}`)] }
 if (chk.foreign.length) return done('blocked', [`фиксатор тронул файлы вне корпуса: ${chk.foreign.join(', ')}`, ...gaps], all)
+if (chk.secrets.length) return done('blocked', [`в корпусе значение секрета: ${chk.secrets.join(', ')}`, ...gaps], all)
 const chkGap = `сверка: ${chk.missing || `сверщик вернул ${chk.status} без нехватки`}`
 if (chk.status === 'blocked') return done('partial', [...gaps, chkGap], all)
 if (chk['corpus-status'] !== rec['corpus-status']) gaps.push(`корпус: фиксатор - ${rec['corpus-status']}, сверщик - ${chk['corpus-status']}: ${chk['corpus-basis']}`)
