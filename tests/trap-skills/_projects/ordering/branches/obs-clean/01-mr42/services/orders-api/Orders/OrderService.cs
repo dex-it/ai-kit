@@ -13,6 +13,7 @@ public class OrderService(IOrderRepository repo, ILogger<OrderService> log)
     public const string SourceName = "Orders";
     private static readonly ActivitySource Source = new(SourceName);
     private static readonly Meter AppMeter = new(SourceName);
+    private static readonly HashSet<string> Channels = new() { "web", "mobile", "partner" };
     private static readonly Counter<long> Created = AppMeter.CreateCounter<long>("orders_created_total");
     private static readonly Histogram<double> Duration = AppMeter.CreateHistogram<double>("order_create_duration_seconds", unit: "s");
 
@@ -25,12 +26,12 @@ public class OrderService(IOrderRepository repo, ILogger<OrderService> log)
         try
         {
             if (r.Lines.Count == 0) throw new ArgumentException("empty order");
+            if (!Channels.Contains(r.Channel)) throw new ArgumentException("unknown channel");
             var total = r.Lines.Sum(l => l.Qty * l.Price);
             var order = new Order(Guid.NewGuid(), r.CustomerId, r.Channel, "new", total, DateTime.UtcNow);
             activity?.SetTag("order.id", order.Id);
             await repo.SaveAsync(order, ct);
             Created.Add(1, new KeyValuePair<string, object?>("channel", r.Channel), new KeyValuePair<string, object?>("status", order.Status));
-            Duration.Record(Stopwatch.GetElapsedTime(start).TotalSeconds);
             log.LogInformation("Order {OrderId} created, total {Total}", order.Id, total);
             return order;
         }
@@ -39,6 +40,10 @@ public class OrderService(IOrderRepository repo, ILogger<OrderService> log)
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
             activity?.RecordException(ex);
             throw;
+        }
+        finally
+        {
+            Duration.Record(Stopwatch.GetElapsedTime(start).TotalSeconds);
         }
     }
 }
