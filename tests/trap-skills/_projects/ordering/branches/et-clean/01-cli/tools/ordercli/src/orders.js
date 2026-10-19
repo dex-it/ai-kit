@@ -7,14 +7,14 @@ const save = (db) => fs.writeFileSync(file(), JSON.stringify(db, null, 1));
 function fail(msg, code) { const e = new Error(msg); e.code = code; throw e; }
 
 function create({ sku, qty, price, ref }) {
+  if (ref !== undefined && ref === '') fail('bad ref', 2);
+  const db = load();
+  if (ref) { const dup = db.orders.find((o) => o.ref === ref); if (dup) return dup; }
   if (!/^[A-Za-z0-9-]+$/.test(sku || '')) fail('bad sku', 2);
   if (!/^\d+$/.test(qty || '')) fail('qty must be 1..100', 2);
   const n = Number(qty);
   if (n < 1 || n > 100) fail('qty must be 1..100', 2);
   if (!/^\d+$/.test(price || '') || Number(price) < 1 || Number(price) > 1000000) fail('bad price', 2);
-  if (ref !== undefined && ref === '') fail('bad ref', 2);
-  const db = load();
-  if (ref) { const dup = db.orders.find((o) => o.ref === ref); if (dup) return dup; }
   const order = { id: db.next++, sku: sku.toUpperCase(), qty: n, price: Number(price), total: n * Number(price), status: 'new', ref };
   db.orders.push(order);
   save(db);
@@ -24,9 +24,9 @@ function create({ sku, qty, price, ref }) {
 function list({ sku, status } = {}) {
   const db = load();
   let rows = db.orders;
-  if (sku) rows = rows.filter((o) => o.sku === sku.toUpperCase());
-  if (status && !['new', 'paid', 'shipped', 'cancelled'].includes(status)) fail('bad status', 2);
-  if (status) rows = rows.filter((o) => o.status === status);
+  if (sku !== undefined) rows = rows.filter((o) => o.sku === sku.toUpperCase());
+  if (status !== undefined && !['new', 'paid', 'shipped', 'cancelled'].includes(status)) fail('bad status', 2);
+  if (status !== undefined) rows = rows.filter((o) => o.status === status);
   return rows.sort((a, b) => a.id - b.id);
 }
 
