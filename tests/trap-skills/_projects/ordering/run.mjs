@@ -64,5 +64,5 @@ async function runOne(spec) {
   console.log(`${id} ${cs} skill=${skill ?? '-'} model=${init.model} cost=${(res.total_cost_usd ?? 0).toFixed(3)} turns=${res.num_turns} ${res.subtype}`);
 }
 const argv = process.argv.slice(2); const pi = argv.indexOf('--parallel'); const PAR = pi >= 0 ? Number(argv[pi + 1]) : 3;
-const q = argv.filter((x, i) => x.includes(':') && i !== pi + 1);
+const q = argv.filter((x, i) => x.includes(':') && (pi < 0 || i !== pi + 1));
 await Promise.all(Array.from({ length: Math.min(PAR, q.length) }, async () => { while (q.length) { const s = q.shift(); try { await runOne(s); } catch (e) { console.log(`${s} FAILED ${e.message}`); } } }));
