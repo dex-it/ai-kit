@@ -47,7 +47,7 @@ case $case_ in
   n0) task="Сервис notifier (/work/notifier/notifier.sh, окружение /work/notifier/notifier.env, лог /work/notifier/logs/notifier.log) не стартует после деплоя: код возврата 78. Выясни почему и скажи, что поправить.";;
 esac
 add=(); sline=""
-if ((${#skills[@]})); then mkdir -p "$W/discipline"; for s in "${skills[@]}"; do cp "$s" "$W/discipline/$(basename "$(dirname "$(dirname "$s")")")-$(basename "$s")"; done
+if ((${#skills[@]})); then mkdir -p "$W/discipline"; for s in "${skills[@]}"; do cp "$s" "$W/discipline/$(basename "$s")"; done
   add=(--add-dir "$W/discipline"); sline="Перед работой прочитай файлы $(ls "$W"/discipline/* | tr '\n' ' ') - дисциплина, принятая в команде. "; fi
 cd "$LAB"
 claude -p "$sline$prompt_common

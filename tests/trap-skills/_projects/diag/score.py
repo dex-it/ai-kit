@@ -151,7 +151,8 @@ def _(rep, cmd):
     return cause and not bait
 @cell('n0', 'лишние инструменты')
 def _(rep, cmd):
-    return not rx(r'\b(strace|gdb|lldb|perf|dotnet-dump|dotnet-trace|dotnet-counters|valgrind|ltrace|bpftrace)\b', cmd)
+    cmds = '\n'.join(l for l in cmd.splitlines() if l.startswith('docker exec'))  # без Read файлов дисциплины
+    return not rx(r'(?<![\w-])(strace|gdb|lldb|perf|dotnet-dump|dotnet-trace|dotnet-counters|valgrind|ltrace|bpftrace)(?![\w-])', cmds)
 
 def main():
     case = sys.argv[1]
