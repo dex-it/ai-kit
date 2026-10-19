@@ -25,9 +25,8 @@ Gather -> Analyze -> Prioritize -> Present. Gather собирает текуще
 
 **Exit criteria:** Есть полный snapshot backlog с метаданными (status, priority, age, owner). Пустые слоты помечены.
 
-Загрузить skills через Skill tool:
-- `dex-skill-agile:agile` - для правильной структуры и терминологии
-- `dex-skill-epic-planning:epic-planning` - для оценки готовности epics
+Загрузить через Skill tool:
+- `dex-skill-epic-planning:epic-planning` - ограничения цели, точность оценки и размер эпика
 
 ## Phase 2: Analyze
 
@@ -51,7 +50,7 @@ Gather -> Analyze -> Prioritize -> Present. Gather собирает текуще
 **Exit criteria:** Top-10 items упорядочены с обоснованием. Для каждого epic указано: почему на этой позиции и что теряем, если отложим. Epic без business value в упорядочивание не идёт и позицией не наделяется: он выносится отдельным перечнем, и при спавне узлом фаза закрывается `status: blocked` по этому перечню (см. Boundaries). Value не определён ни у одного - упорядочивать нечего, и это тот же `blocked`, а не пустой Top-10.
 
 Загрузить через Skill tool:
-- `dex-skill-prioritization:prioritization` - RICE/ICE scoring, MoSCoW, trade-off frameworks
+- `dex-skill-prioritization:prioritization` - оценки RICE, доля P0, решение по авторитету
 
 **Mandatory:** yes
 

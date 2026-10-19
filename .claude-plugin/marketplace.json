@@ -1,6 +1,6 @@
 {
   "name": "dex-claude-marketplace",
-  "version": "6.19.0",
+  "version": "6.21.0",
   "description": "Маркетплейс AI-агентов для разработчиков. Атомарные плагины с узкой специализацией: Skills (знания), Specialists (агенты), Bundles (наборы).",
   "owner": {
     "name": "Dex Team",
@@ -12,7 +12,7 @@
       "name": "dex-adr-writer",
       "source": "./plugins/specialists/architecture/dex-adr-writer",
       "description": "Автор ADR: пишет Architecture Decision Records в формате MADR - драйверы решения, альтернативы, trade-off.",
-      "version": "3.7.1",
+      "version": "3.7.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -75,8 +75,8 @@
     {
       "name": "dex-auto",
       "source": "./plugins/auto/dex-auto",
-      "description": "Автономные треки под открытую цель - feature и bugfix (до локальных коммитов) и ревью чужого MR/PR (read-only, треды по санкции): ledger вне рабочего дерева, Workflow-скрипт на трек с потолками петель и схемами выхода узлов, сдача исхода скриптом finish.sh, сторожа SessionStart (возобновление по открытой цели) и Stop (терминал цели). Команды /goal (подготовка цели из тикета, спеки или симптома; для feature - проба черновика на домыслы) и /auto (прогон трека, возобновление с верификации).",
-      "version": "9.3.0",
+      "description": "Автономные треки под открытую цель - feature и bugfix (до локальных коммитов) и ревью чужого MR/PR (read-only, треды по санкции), фиксация истины - дельта корпуса проекта на ветке цели со сверкой против кода, вход проекта - корпус, уровень 0 и порядок работы в CLAUDE.md: ledger вне рабочего дерева, Workflow-скрипт на трек с потолками петель и схемами выхода узлов, сдача исхода скриптом finish.sh, сторожа SessionStart (возобновление по открытой цели) и Stop (терминал цели). Команды /onboard (вход проекта в агентскую работу), /goal (подготовка цели из тикета, спеки или симптома; для feature - проба черновика на домыслы) и /auto (прогон трека, возобновление с верификации).",
+      "version": "9.4.0",
       "category": "specialist",
       "keywords": [
         "autonomous",
@@ -106,7 +106,7 @@
       "name": "dex-backlog-manager",
       "source": "./plugins/specialists/product/dex-backlog-manager",
       "description": "Менеджер бэклога: ведение бэклога на уровне эпиков, приоритизация, груминг и refinement.",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -176,6 +176,20 @@
       ]
     },
     {
+      "name": "dex-bundle-auto",
+      "source": "./plugins/bundles/dex-bundle-auto",
+      "description": "Бандл агентской разработки на dex-auto: вход проекта (корпус, уровень 0, порядок работы в CLAUDE.md), подготовка цели, автономные треки feature, bugfix и ревью, фиксация истины - вместе со скиллами, которые грузят узлы треков.",
+      "version": "1.0.0",
+      "category": "bundle",
+      "keywords": [
+        "bundle",
+        "autonomous",
+        "agentic-development",
+        "onboarding",
+        "workflow"
+      ]
+    },
+    {
       "name": "dex-bundle-architect",
       "source": "./plugins/bundles/dex-bundle-architect",
       "description": "Бандл для архитектора: интерактивный system design, ADR, диаграммы, проектирование API, анализ кодовой базы, безопасность, наблюдаемость.",
@@ -194,7 +208,7 @@
       "name": "dex-bundle-bug-lifecycle",
       "source": "./plugins/bundles/dex-bundle-bug-lifecycle",
       "description": "Bundle жизненного цикла бага: активный поиск, оформление, расследование корневой причины на общем стенде и фикс на источнике, плюс skills методологии RCA и поиска багов и CLI для чтения стенда и трекера.",
-      "version": "1.32.0",
+      "version": "1.33.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -223,7 +237,7 @@
       "name": "dex-bundle-code-review",
       "source": "./plugins/bundles/dex-bundle-code-review",
       "description": "Бандл жизненного цикла кода: языко-агностичное ревью MR/PR, повторное ревью после правок, план правок, реализация фичи, подтягивание базовой ветки с разрешением конфликтов, саморевью перед push, приёмка слитой фичи на стенде с ремедиацией, расследование инцидента, плюс скиллы дисциплины ревью.",
-      "version": "1.44.0",
+      "version": "1.45.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -317,7 +331,7 @@
       "name": "dex-bundle-product-manager",
       "source": "./plugins/bundles/dex-bundle-product-manager",
       "description": "Бандл для продакт-менеджера: бизнес-требования, roadmap, бэклог, анализ метрик.",
-      "version": "1.26.0",
+      "version": "1.27.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -359,7 +373,7 @@
       "name": "dex-bundle-system-analyst",
       "source": "./plugins/bundles/dex-bundle-system-analyst",
       "description": "Бандл для системного аналитика: требования, user stories, BPMN, спецификации API, документация, оценка реализуемости.",
-      "version": "1.29.0",
+      "version": "1.30.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -373,7 +387,7 @@
       "name": "dex-bundle-ts-fullstack",
       "source": "./plugins/bundles/dex-bundle-ts-fullstack",
       "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, Docker, E2E на Playwright.",
-      "version": "1.40.0",
+      "version": "1.41.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -387,7 +401,7 @@
       "name": "dex-business-analyst",
       "source": "./plugins/specialists/product/dex-business-analyst",
       "description": "Бизнес-аналитик: формализует идею в BRD - цели сторон с мерой успеха, стейкхолдеры, риски, эпики.",
-      "version": "5.18.1",
+      "version": "5.18.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -512,7 +526,7 @@
       "name": "dex-design-reviewer",
       "source": "./plugins/specialists/architecture/dex-design-reviewer",
       "description": "Ревью и согласование чужого дизайн-документа (спека, ADR, диаграммы) до написания кода: полнота NFR, дефекты требований, качество ADR-решений, консистентность и слои, полнота и непротиворечивость набора артефактов работы, фальсификация находок, severity. Не архитектура реализованного кода - её ревьюит /review-arch.",
-      "version": "2.13.1",
+      "version": "2.13.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -558,7 +572,7 @@
       "name": "dex-doc-writer",
       "source": "./plugins/specialists/product/dex-doc-writer",
       "description": "Технический писатель: спеки, руководства, README, release notes, описания архитектуры и API.",
-      "version": "1.7.0",
+      "version": "1.8.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1073,7 +1087,7 @@
       "name": "dex-pm-metrics-analyst",
       "source": "./plugins/specialists/product/dex-pm-metrics-analyst",
       "description": "Аналитик продуктовых метрик: KPI, критерии успеха, OKR, воронки и когорты, решения на данных.",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1099,7 +1113,7 @@
       "name": "dex-process-modeler",
       "source": "./plugins/specialists/product/dex-process-modeler",
       "description": "Моделировщик процессов: BPMN 2.0, диаграммы AS-IS и TO-BE, дорожки, поиск точек автоматизации.",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1229,7 +1243,7 @@
       "name": "dex-roadmap-planner",
       "source": "./plugins/specialists/product/dex-roadmap-planner",
       "description": "Планировщик roadmap: стратегия развития продукта, планирование релизов и кварталов, OKR.",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1242,7 +1256,7 @@
       "name": "dex-rulebook-miner",
       "source": "./plugins/specialists/review/dex-rulebook-miner",
       "description": "Добыча свода правил проекта из истории ревью: оркестратор ведёт окно и запись, read-only сборщики разбирают источники, каждое правило стоит на дословной цитате и якоре. Норматив жанра, ловушки добычи и оракул приёмки свода едут скиллами этого же плагина. Точка входа - команда /rulebook.",
-      "version": "2.3.1",
+      "version": "3.0.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1300,21 +1314,6 @@
         "decisions",
         "documentation",
         "spec"
-      ]
-    },
-    {
-      "name": "dex-skill-agile",
-      "source": "./plugins/skills/dex-skill-agile",
-      "description": "Основы Agile: иерархия Epic/Story/Task, критерии INVEST, DoR/DoD, оценка и приоритизация. Общий skill для PM, аналитика и разработки.",
-      "version": "1.2.2",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "agile",
-        "scrum",
-        "epic",
-        "story",
-        "invest"
       ]
     },
     {
@@ -1401,7 +1400,7 @@
       "name": "dex-skill-artifact-review",
       "source": "./plugins/skills/dex-skill-artifact-review",
       "description": "Авторский скилл: работает в клоне репозитория маркетплейса, часть адресов вне его не резолвится. Ревью артефакта каталога (skill / агент / команда) по обязательным осям: соответствие фреймворку, fact-check, полезность против целей продукта, лаконичность, сверка с гайдом модели, терминология по словарю домена. Активируется при ревью скилла, ревью агента, ревью команды, приёмке артефакта, оси ревью, стоит ли держать в каталоге, какой цели служит артефакт, сверка с BRD, нарушение инварианта проекта, заявление автора как claim, утверждение о поведении платформы, новый термин в артефакте.",
-      "version": "1.11.0",
+      "version": "1.11.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1449,19 +1448,6 @@
       ]
     },
     {
-      "name": "dex-skill-bpmn",
-      "source": "./plugins/skills/dex-skill-bpmn",
-      "description": "Моделирование BPMN: потоки процесса, шлюзы, события, дорожки, границы ошибок.",
-      "version": "1.1.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "bpmn",
-        "process",
-        "modeling"
-      ]
-    },
-    {
       "name": "dex-skill-bug-reproduction",
       "source": "./plugins/skills/dex-skill-bug-reproduction",
       "description": "Воспроизведение бага, которое ломает само наблюдение: лог, дебаггер или sleep прячут гонку, и баг перестаёт повторяться.",
@@ -1480,7 +1466,7 @@
       "name": "dex-skill-business-analysis-29148",
       "source": "./plugins/skills/dex-skill-business-analysis-29148",
       "description": "Норматив этапа бизнес-анализа (ISO/IEC/IEEE 29148 §6.2): состав Business requirements specification, разделы BRD, атрибуты бизнес-требования, мера успеха MOE, режим сбора interactive/autonomous, поиск конфликта целей, стадии готовности артефакта, вход и выход этапа",
-      "version": "4.4.0",
+      "version": "4.4.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1652,15 +1638,17 @@
     {
       "name": "dex-skill-doc-standards",
       "source": "./plugins/skills/dex-skill-doc-standards",
-      "description": "Стандарты и шаблоны документов: BRD/PRD, ADR, user stories, техспека, спецификация API, процессные документы. Общий skill для PM, аналитика и любой документации.",
-      "version": "1.7.1",
+      "description": "Документация: требования качества и ограничение цели в документе требований, запись требований полными предложениями.",
+      "version": "2.0.0",
       "category": "skill",
       "keywords": [
         "skill",
         "documentation",
+        "requirements",
+        "nfr",
         "brd",
         "prd",
-        "adr"
+        "spec"
       ]
     },
     {
@@ -1832,14 +1820,15 @@
     {
       "name": "dex-skill-epic-planning",
       "source": "./plugins/skills/dex-skill-epic-planning",
-      "description": "Планирование эпиков: декомпозиция, объём, зависимости, метрики успеха и анти-метрики, планирование релиза.",
-      "version": "1.1.1",
+      "description": "Планирование эпиков: ограничения цели «не должно ухудшиться», точность оценки, размер эпика.",
+      "version": "2.0.0",
       "category": "skill",
       "keywords": [
         "skill",
         "epic",
         "planning",
-        "roadmap"
+        "anti-metrics",
+        "product"
       ]
     },
     {
@@ -1925,7 +1914,7 @@
       "name": "dex-skill-idea-forming",
       "source": "./plugins/skills/dex-skill-idea-forming",
       "description": "Этап формирования идеи до конвейера BRD: замыкание сырой мысли в идею с названной проблемой, носителем, базой сравнения, ценностью и самым рискованным допущением; методика подбирается по дефициту идеи - по одной за раз, не каталогом",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2007,25 +1996,6 @@
         "kafka",
         "streaming",
         "events"
-      ]
-    },
-    {
-      "name": "dex-skill-karpathy-guidelines",
-      "source": "./plugins/skills/dex-skill-karpathy-guidelines",
-      "description": "Дисциплина изменений по мотивам Karpathy: думать до кода и выносить допущения, простота вперёд, хирургические правки без лишнего рефакторинга, цель через проверяемые критерии, test-first для багов. Adapted from multica-ai/andrej-karpathy-skills (MIT).",
-      "version": "1.1.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "code-quality",
-        "karpathy",
-        "think-before-coding",
-        "simplicity",
-        "surgical-changes",
-        "goal-driven",
-        "assumptions",
-        "test-first",
-        "minimal-diff"
       ]
     },
     {
@@ -2141,7 +2111,7 @@
       "name": "dex-skill-node-contract",
       "source": "./plugins/skills/dex-skill-node-contract",
       "description": "Рантайм-контракт агента-узла - режим interactive/autonomous, реакция на неполный вход (blocking/default-ok), возврат наверх, словарь полей handoff, метка quality-checks и её носитель, транспорт артефакта, выбор канала хостинга (native/CLI), graceful degradation при недоступности skill",
-      "version": "9.4.2",
+      "version": "9.4.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2312,27 +2282,30 @@
     {
       "name": "dex-skill-prioritization",
       "source": "./plugins/skills/dex-skill-prioritization",
-      "description": "Приоритизация: RICE, ICE, MoSCoW, Kano, матрица ценность/трудоёмкость, ловушки скоринга.",
-      "version": "1.1.1",
+      "description": "Приоритизация: оценки RICE (effort, confidence), доля P0, решение по авторитету.",
+      "version": "2.0.0",
       "category": "skill",
       "keywords": [
         "skill",
         "prioritization",
         "rice",
-        "moscow"
+        "backlog",
+        "product"
       ]
     },
     {
       "name": "dex-skill-product-discovery",
       "source": "./plugins/skills/dex-skill-product-discovery",
-      "description": "Product discovery: проверка гипотезы после того, как идея сформулирована - интервью, лестница валидации, оценка возможностей, эксперименты MVP, красные флаги",
-      "version": "1.1.4",
+      "description": "Product discovery: вопросы и выборка интервью, гипотеза с порогом опровержения, проверка поведением до разработки.",
+      "version": "2.0.0",
       "category": "skill",
       "keywords": [
         "skill",
         "discovery",
-        "research",
-        "validation"
+        "customer-interview",
+        "hypothesis",
+        "validation",
+        "product"
       ]
     },
     {
@@ -3038,7 +3011,7 @@
       "name": "dex-user-story-analyst",
       "source": "./plugins/specialists/product/dex-user-story-analyst",
       "description": "Аналитик user stories: нарезка сценариев на истории и написание критериев приёмки в форме Given-When-Then.",
-      "version": "5.3.1",
+      "version": "5.3.2",
       "category": "specialist",
       "keywords": [
         "specialist",

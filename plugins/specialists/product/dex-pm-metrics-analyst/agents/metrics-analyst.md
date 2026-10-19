@@ -45,7 +45,7 @@ Context? -> Direct Analysis -> Skill-Based Deep Scan -> Report.
 - Для funnel: drop-off points, conversion rates по шагам, biggest opportunity
 
 Загрузить через Skill tool:
-- `dex-skill-product-discovery:product-discovery` - frameworks для product-market fit, hypothesis validation
+- `dex-skill-product-discovery:product-discovery` - гипотеза с порогом опровержения, проверка поведением до разработки
 
 **Exit criteria:** Каждый insight подкреплён конкретными данными (числа, %). Correlation vs causation явно разделены. Есть actionable recommendations, а не только наблюдения.
 
@@ -56,7 +56,7 @@ Context? -> Direct Analysis -> Skill-Based Deep Scan -> Report.
 **Goal:** Проверить анализ через prioritization frameworks и определить impact рекомендаций.
 
 Загрузить через Skill tool:
-- `dex-skill-prioritization:prioritization` - RICE/ICE для ранжирования action items по impact
+- `dex-skill-prioritization:prioritization` - оценки RICE, доля P0 при ранжировании action items
 
 **Output:** Рекомендации, отсортированные по expected impact с обоснованием приоритета.
 

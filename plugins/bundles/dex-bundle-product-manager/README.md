@@ -46,10 +46,9 @@ Bundle for Product Managers: business requirements, roadmap, backlog, metrics an
 
 ### Skills
 - `dex-skill-project-docs-map` - Where project docs live
-- `dex-skill-agile` - Agile methodology
 - `dex-skill-product-discovery` - Product discovery
 - `dex-skill-epic-planning` - Epic planning
-- `dex-skill-prioritization` - Prioritization frameworks
+- `dex-skill-prioritization` - Prioritization traps: RICE scores, P0 share, HiPPO
 - `dex-skill-doc-standards` - Documentation standards
 - `dex-skill-requirement-quality` - Requirement defect detection (unit)
 - `dex-skill-nfr` - Non-functional requirement traps

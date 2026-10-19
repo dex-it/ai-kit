@@ -48,7 +48,6 @@ Bundle для полного цикла работы с кодом, языко-�
 ### Skills, новые в этом bundle
 - `dex-skill-review-evidence` - источник намерения ревью (intent-gate) и порог уверенности находок
 - `dex-skill-review-threads` - инлайн-доставка ревью, один тред на находку через gh/glab
-- `dex-skill-karpathy-guidelines` - дисциплина изменений по мотивам Karpathy (MIT)
 - `dex-skill-merge-conflict-resolution` - конфликты merge/rebase без тихой потери стороны (ours/theirs в rebase, modify/delete как переезд, lock-файлы, evil merge)
 
 ### Skills, переиспользуемые из маркетплейса
