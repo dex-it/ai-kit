@@ -242,10 +242,10 @@ claude plugins uninstall dex-dotnet-coder
 | Категория | Skills |
 |-----------|--------|
 | **Контракт и адресация артефактов** | `node-contract`, `docs-layout`, `project-docs-map`, `issue-tracking`, `artifact-naming`, `unit-identity`, `decision-log`, `stack-registry` |
-| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `agile`, `epic-planning`, `prioritization`, `user-stories`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `bpmn`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
+| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `epic-planning`, `prioritization`, `user-stories`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
 | **Оракулы качества артефактов** | `requirement-quality`, `requirement-set-quality`, `use-case-quality`, `adr-quality`, `design-quality`, `plan-quality`, `api-spec-quality`, `completeness-mapping`, `fact-verification`, `legacy-reconstruction`, `verification-planning-29119`, `bdd-gherkin` |
 | **Архитектура и дизайн** | `ddd`, `solid`, `scalability`, `architecture-definition-42010`, `interface-definition-openapi`, `implementation-plan` |
-| **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `karpathy-guidelines`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
+| **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
 | **Раздача работы исполнителям (экспериментально)** | `subagent-dispatch` |
 | **QA и тестирование** | `api-testing`, `test-coverage`, `testability`, `integration-boundary`, `exploratory-testing`, `bug-reproduction`, `deep-audit`, `tech-audit`, `playwright`, `stand-verification` |
 | **Инциденты и RCA** | `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
@@ -389,7 +389,6 @@ MCP конфигурации в каталоге `mcp/`. Подробнее: [mc
 claude-code-marketplace/
 ├── plugins/
 │   ├── skills/                    # Level 1: базы знаний
-│   │   ├── dex-skill-agile/
 │   │   ├── dex-skill-dotnet-ef-core/
 │   │   └── ...
 │   ├── utilities/                 # Level 1: инструменты и CLI-обёртки
@@ -479,4 +478,4 @@ GPL v3.0 - см. [LICENSE](./LICENSE)
 
 ---
 
-**DEX Team** - Version 6.20.0
+**DEX Team** - Version 6.21.0

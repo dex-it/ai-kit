@@ -126,6 +126,9 @@ Current entries:
 | Removed | Replacement | Notes |
 |---|---|---|
 | `dex-skill-dotnet-project-baseline` | `dex-skill-project-baseline` | stack-neutral successor, same skill name inside the plugin changed from `dotnet-project-baseline` to `project-baseline` |
+| `dex-skill-agile` | - | removed by control runs: the model holds the subject without the skill |
+| `dex-skill-bpmn` | - | removed by control runs: the model holds the subject without the skill |
+| `dex-skill-karpathy-guidelines` | - | removed by control runs: the model holds the subject without the skill |
 
 ### Catalogue 6.0.0: the SDLC engine is gone
 

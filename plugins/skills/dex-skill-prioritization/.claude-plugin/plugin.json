@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-prioritization",
-  "version": "1.1.1",
-  "description": "Приоритизация: RICE, ICE, MoSCoW, Kano, матрица ценность/трудоёмкость, ловушки скоринга.",
+  "version": "2.0.0",
+  "description": "Приоритизация: оценки RICE (effort, confidence), доля P0, решение по авторитету.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
-  "keywords": ["skill", "prioritization", "rice", "moscow", "backlog"],
+  "keywords": ["skill", "prioritization", "rice", "backlog", "product"],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"
 }

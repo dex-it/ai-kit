@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-product-discovery",
-  "version": "1.1.4",
-  "description": "Product discovery: проверка гипотезы после того, как идея сформулирована - интервью, лестница валидации, оценка возможностей, эксперименты MVP, красные флаги",
+  "version": "2.0.0",
+  "description": "Product discovery: вопросы и выборка интервью, гипотеза с порогом опровержения, проверка поведением до разработки.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
@@ -9,7 +9,8 @@
   "keywords": [
     "skill",
     "discovery",
-    "research",
+    "customer-interview",
+    "hypothesis",
     "validation",
     "product"
   ],

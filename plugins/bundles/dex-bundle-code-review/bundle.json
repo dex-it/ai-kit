@@ -11,7 +11,6 @@
     "dex-skill-ci-gates",
     "dex-skill-defect-classification",
     "dex-skill-issue-tracking",
-    "dex-skill-karpathy-guidelines",
     "dex-stand-reviewer",
     "dex-test"
   ],
@@ -29,7 +28,6 @@
     "dex-skill-completeness-mapping",
     "dex-skill-ddd",
     "dex-skill-decision-log",
-    "dex-skill-doc-standards",
     "dex-skill-docs-layout",
     "dex-skill-exploratory-testing",
     "dex-skill-fact-verification",
