@@ -10,7 +10,6 @@
     "dex-jira-cli",
     "dex-kubectl-cli",
     "dex-skill-ci-gates",
-    "dex-skill-karpathy-guidelines",
     "dex-stand-reviewer",
     "dex-teamcity-cli",
     "dex-test"
@@ -28,7 +27,6 @@
     "dex-skill-ddd",
     "dex-skill-decision-log",
     "dex-skill-defect-classification",
-    "dex-skill-doc-standards",
     "dex-skill-docs-layout",
     "dex-skill-exploratory-testing",
     "dex-skill-fact-verification",

@@ -33,7 +33,7 @@ Gather -> Analyze -> Prioritize -> Present. Gather собирает страте
 **Exit criteria:** Горизонт и goals определены. Goals не формализованы -> при канале (тело исполняет главный цикл, `interactive`) помочь оператору их сформулировать; при спавне узлом спрашивать некого ни в каком режиме - зафиксировать «goals not defined, roadmap будет основан на available input» - ожидание ответа в субагентной позиции повисает.
 
 Загрузить через Skill tool:
-- `dex-skill-epic-planning:epic-planning` - sizing, progressive elaboration, anti-metrics
+- `dex-skill-epic-planning:epic-planning` - ограничения цели, точность оценки и размер эпика
 
 ## Phase 2: Analyze
 
@@ -54,7 +54,7 @@ Gather -> Analyze -> Prioritize -> Present. Gather собирает страте
 **Goal:** Определить порядок initiatives в roadmap с явными trade-off'ами.
 
 Загрузить через Skill tool:
-- `dex-skill-prioritization:prioritization` - RICE/ICE scoring, trade-off analysis
+- `dex-skill-prioritization:prioritization` - оценки RICE, доля P0, решение по авторитету
 
 **Output:**
 

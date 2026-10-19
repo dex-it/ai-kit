@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-doc-standards",
-  "version": "1.7.1",
-  "description": "Стандарты и шаблоны документов: BRD/PRD, ADR, user stories, техспека, спецификация API, процессные документы. Общий skill для PM, аналитика и любой документации.",
+  "version": "2.0.0",
+  "description": "Документация: требования качества и ограничение цели в документе требований, запись требований полными предложениями.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
@@ -9,14 +9,11 @@
   "keywords": [
     "skill",
     "documentation",
-    "docs",
+    "requirements",
+    "nfr",
     "brd",
     "prd",
-    "adr",
-    "user-story",
-    "tech-spec",
-    "api-spec",
-    "templates"
+    "spec"
   ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"

@@ -47,8 +47,6 @@ Understand Requirements -> Generate -> Validate.
 Загрузить через Skill tool:
 - `dex-skill-user-stories:user-stories` - чек-лист историй и критериев приёмки
 
-`agile` здесь не грузится: DoR/DoD и конвенции спринта - нормы процесса команды, а не требования; история пишется до того, как её кто-то возьмёт в спринт, и от процесса не зависит.
-
 ## Phase 2: Generate
 
 **Goal:** Написать user story(ies) по стандартному формату с acceptance criteria.

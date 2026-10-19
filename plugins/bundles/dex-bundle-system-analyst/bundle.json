@@ -6,7 +6,6 @@
     "dex-doc-writer",
     "dex-process-modeler",
     "dex-requirements-reviewer",
-    "dex-skill-agile",
     "dex-skill-idea-forming",
     "dex-skill-opportunity-canvas",
     "dex-use-case-writer"
@@ -23,7 +22,6 @@
     "dex-skill-api-spec-quality",
     "dex-skill-architecture-definition-42010",
     "dex-skill-artifact-naming",
-    "dex-skill-bpmn",
     "dex-skill-business-analysis-29148",
     "dex-skill-codebase-conventions",
     "dex-skill-ddd",
