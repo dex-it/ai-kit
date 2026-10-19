@@ -4344,6 +4344,7 @@ const SCENARIOS = [
     expect: ({ result, calls }) => [
       ['сверщик вызван без единиц', labelsOf(calls).join() === 'record,check' && promptOf(calls, 'check').includes('Единицы дельты корпуса:\nнет')],
       ['complete с причиной n/a', result.status === 'complete' && result.where === '' && result.corpus === 'absent' && result.na === 'корпуса нет: фиксация n/a'],
+      ['T13 спецификации называет ту же причину, что код', readFileSync(join(TRACKS, '..', '..', 'docs', 'tracks', 'record.md'), 'utf8').includes('`na` «корпуса нет: фиксация n/a»')],
     ] },
   { name: 'C19 корпус по-разному у фиксатора и сверщика -> partial, расхождение названо (T12)', track: 'record', args: recordArgs,
     responses: { record: { ...recorded, 'corpus-status': 'absent', units: [], commit: '' }, check: { ...checked, checks: [], 'corpus-basis': 'docs/product/brd.md' } },
@@ -4373,6 +4374,8 @@ const SCENARIOS = [
         ['закрытая цель без Фиксация: - ещё фиксация', auto.includes('без `Фиксация:`, а с `продолжить`')],
         ['продолжить по фиксации blocked, partial либо не состоялась без ответа оператора - фиксация заново', auto.includes('при `Фиксация:` на `blocked`, `partial` либо `не состоялась` без ответа оператора, - ещё фиксация истины')],
         ['описание PR несёт строку Фиксация:', agentBody('deliverer').includes('строка `Фиксация:`')],
+        ['foreign у фиксатора - сдачи кода нет, коммит остаётся оператору', auto.includes('`foreign` непуст - сдачи кода нет: `set TASK PR "не открыт - фиксатор тронул файлы вне корпуса"`, коммит фиксатора остаётся оператору')],
+        ['фиксатор и сверщик: значений секретов в единицы не переносят, .env и ключи не читают', ['recorder', 'corpus-checker'].every(n => agentBody(n).includes('значений секретов') && agentBody(n).includes('`.env`'))],
       ]
     } },
   { name: 'O1 составитель и сверщик - узлы dex-auto без model, вход: каталог, предмет входа, трейлер; complete, derived к приёмке (T2, T7, T11, T16)', track: 'onboard', args: onboardArgs, responses: { onboard: onboarded, check: onChecked },
@@ -4471,6 +4474,8 @@ const SCENARIOS = [
         ['предмет входа - блок в обоих файлах', ['onboarder', 'corpus-checker'].every(n => agentBody(n).includes('<!-- >>> shared: onboard-subject -->'))],
         ['составитель: запись без замены продукта', agentTools('onboarder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('onboarder'))],
         ['составитель: трейлер, review, существующее - covered либо conflicts, реконструкция по норме', ['трейлером `Dex-Auto-Onboard: yes`', 'статус `review`', 'описывает предмет - запись `covered`', 'запись `conflicts`', '`dex-skill-legacy-reconstruction:legacy-reconstruction`', 'одна строка `расхождений нет`'].every(t => agentBody('onboarder').includes(t))],
+        ['составитель: значения существующих ключей раскладки не меняет, недостающие - строкой layout', agentBody('onboarder').includes('значения существующих ключей раскладки не меняешь') && agentBody('onboarder').includes('каждый дописанный - строка `layout`')],
+        ['составитель и сверщик: значения секретов не переносятся, .env и ключи не читаются; единица с секретом - contradicted', ['значений секретов', '`.env`'].every(t => agentBody('onboarder').includes(t) && agentBody('corpus-checker').includes(t)) && agentBody('corpus-checker').includes('`contradicted`')],
         ['сверщик: без мест правки - репозиторий, вход называет предмет', ['вход без мест правки - код и конфигурацию репозитория', 'Предмет - раздел, который называет вход', 'вход не называет предмет'].every(t => agentBody('corpus-checker').includes(t))],
       ]
     } },
@@ -4489,6 +4494,8 @@ const SCENARIOS = [
         ['трек получает стек только пустым и каталог скриптов', cmd.includes('`{cwd, brief, stack, scripts}`') && cmd.includes('`stack` - только пустому проекту') && cmd.includes('`${CLAUDE_PLUGIN_ROOT}/hooks/scripts`')],
         ['карта, правила, запреты; нет правил - сбор свода предложен; путь сверен с деревом', ['`## Карта`', '`## Правила`', '`## Запреты`', '`/dex-rulebook-miner:rulebook`', 'чей путь не найден `git ls-files`'].every(t => cmd.includes(t))],
         ['готовность по осям, секреты и размер CLAUDE.md, в непустом ничего не заводится', ['**Готовность.**', '`есть` либо `нет` с тем, что\nсделать', 'по перечню сам ничего не меняешь', '`.env`', 'не длиннее 200 строк'].every(t => cmd.includes(t))],
+        ['маркеры: пара не ровно одна - блок не пишется, причина в выход', cmd.includes('пара маркеров не ровно одна - блок не пишешь') && cmd.includes('маркер в код-блоке не считается')],
+        ['после остановки либо отката - git status --porcelain и что удалить', cmd.includes('`git status --porcelain` и назови оператору файлы, которые удалить') && readFileSync(join(TRACKS, '..', 'agents', 'scaffolder.md'), 'utf8').includes('оставленные неотслеженные файлы')],
         ['гейты по норме, не заводятся', cmd.includes('`dex-skill-project-baseline:project-baseline`') && cmd.includes('Отсутствующий гейт не заводишь')],
         ['коммит CLAUDE.md своим трейлером', cmd.includes('`Dex-Auto-Onboard: flow`')],
         ['приёмка: отклонить - revert коммитов вызова, скелета тоже', cmd.includes('принять | отклонить') && cmd.includes('у вызова есть неоткаченный коммит - трека, скелета либо `CLAUDE.md`') && cmd.includes('`git revert` каждого коммита этого\nвызова от нового к старому')],
