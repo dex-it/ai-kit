@@ -623,7 +623,7 @@
       "name": "dex-dotnet-performance",
       "source": "./plugins/specialists/dotnet/dex-dotnet-performance",
       "description": "Аналитик производительности .NET: профилирование, N+1, медленные запросы, утечки памяти, метрики и трассировка.",
-      "version": "2.4.0",
+      "version": "2.4.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1813,8 +1813,7 @@
       "keywords": [
         "skill",
         "elasticsearch",
-        "search",
-        "nest"
+        "search"
       ]
     },
     {
@@ -2468,8 +2467,7 @@
       "keywords": [
         "skill",
         "redis",
-        "cache",
-        "pubsub"
+        "cache"
       ]
     },
     {
