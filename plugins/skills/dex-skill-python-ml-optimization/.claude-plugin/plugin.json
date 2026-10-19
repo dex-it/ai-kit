@@ -1,12 +1,18 @@
 {
   "name": "dex-skill-python-ml-optimization",
-  "version": "2.0.1",
-  "description": "Оптимизация ML: подбор гиперпараметров (Optuna, Ray Tune), распределённое обучение, память и OOM, профилирование, трекинг экспериментов.",
+  "version": "2.1.0",
+  "description": "Оптимизация ML: целочисленные пространства поиска Optuna.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
-  "keywords": ["skill", "ml-optimization", "hyperparameters", "optuna", "mlflow"],
+  "keywords": [
+    "skill",
+    "ml-optimization",
+    "hyperparameters",
+    "optuna",
+    "mlflow"
+  ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"
 }

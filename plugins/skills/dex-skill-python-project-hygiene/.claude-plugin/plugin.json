@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-python-project-hygiene",
-  "version": "1.0.0",
-  "description": "Гигиена Python-проекта: ruff, mypy, pytest и их рабочие настройки в pyproject.toml.",
+  "version": "1.1.0",
+  "description": "Гигиена Python-проекта: правила ruff и форматтер, mypy и недостающие импорты, порог покрытия, предупреждения pytest, аудит зависимостей.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
