@@ -51,7 +51,7 @@ describe('text', () => {
   })
 
   it('деталь без транскрипта говорит об этом прямо', () => {
-    assert.match(detailText({ index: 1, row, stats: undefined, isSelf: false }, 0, 0, ''), /Транскрипт не прочитан/)
+    assert.match(detailText({ index: 1, row, stats: undefined, isSelf: false }, 0, 0), /Транскрипт не прочитан/)
   })
 
   it('как открыть: фоновая, окно, своя', () => {

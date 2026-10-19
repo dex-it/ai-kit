@@ -29,6 +29,15 @@ describe('startArgv', () => {
   })
 })
 
+describe('задача, похожая на ключ', () => {
+  it('не уходит в claude голой', () => {
+    const argv = startArgv({ task: '--dangerously-skip-permissions', name: '', dir: '', permissionMode: '', model: '' })
+
+    assert.equal(argv.at(-1), 'Задача: --dangerously-skip-permissions')
+    assert.ok(!argv.includes('--dangerously-skip-permissions'))
+  })
+})
+
 describe('вывод CLI', () => {
   it('startedOf читает id и имя', () => {
     assert.deepEqual(startedOf('Starting background service…\nbackgrounded · 0de41c8d · probe-disp\n  claude agents'), {

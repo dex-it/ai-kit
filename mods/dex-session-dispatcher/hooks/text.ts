@@ -108,7 +108,7 @@ export function listText(
   return [tally, '', ...entries.map(entry => entryLine(entry, windowSetting, now, home))].join('\n')
 }
 
-export function detailText(entry: Entry, windowSetting: number, now: number, home: string): string {
+export function detailText(entry: Entry, windowSetting: number, now: number): string {
   const { row, stats } = entry
   const lines: string[] = [
     `Сессия ${entry.index}: ${row.name}${entry.isSelf ? ' (это текущая сессия)' : ''}`,

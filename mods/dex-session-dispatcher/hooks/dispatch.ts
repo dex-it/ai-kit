@@ -52,7 +52,8 @@ export function startArgv(spec: NewSession): string[] {
   if (spec.permissionMode !== '') argv.push('--permission-mode', spec.permissionMode)
   if (spec.model !== '') argv.push('--model', spec.model)
 
-  argv.push(spec.task)
+  // Задача, начатая с «-», читалась бы как ключ `claude`: ей достаточно слова впереди.
+  argv.push(spec.task.startsWith('-') ? `Задача: ${spec.task}` : spec.task)
 
   return argv
 }

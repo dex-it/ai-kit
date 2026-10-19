@@ -385,6 +385,11 @@ export const register: Register = (on, pluginOptions) => {
 
     if (row.sessionId === selfId) return say('Текущую сессию отсюда остановить нельзя: закройте её как обычно.')
 
+    // `stop` и `rm` в CLI - для фоновых сессий; окно терминала закрывается в самом окне.
+    if (row.kind !== 'background') {
+      return say(`«${row.name}» открыта в окне терминала${row.pid !== null ? ` (процесс ${row.pid})` : ''}: закройте её там (/exit). Отсюда останавливаются и удаляются только фоновые сессии.`)
+    }
+
     if (!(confirm && confirm.kind === kind && confirm.sessionId === row.sessionId)) {
       confirm = { kind, sessionId: row.sessionId }
 
@@ -666,7 +671,6 @@ export const register: Register = (on, pluginOptions) => {
             { index: shownRows().indexOf(found.row) + 1, row: found.row, stats: cache.get(found.row.sessionId)?.stats, isSelf: found.row.sessionId === selfId },
             settings.contextWindow,
             clockNow,
-            home,
           ),
         }
       }
