@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { cleanName, failureOf, messageFor, nameFromTask, presetsOf, startArgv, startedOf } from '../hooks/dispatch.ts'
+import { cleanName, failureOf, messageFor, nameFromTask, dirChoices, presetsOf, startArgv, startedOf } from '../hooks/dispatch.ts'
 
 describe('имена', () => {
   it('имя из задачи: первые слова через дефис', () => {
@@ -62,5 +62,28 @@ describe('presetsOf', () => {
   it('кнопка есть, только если команда в сессии есть', () => {
     assert.deepEqual(presetsOf(['review', 'dex-auto:onboard']).map(preset => preset.task), ['/dex-auto:onboard'])
     assert.deepEqual(presetsOf(['review']), [])
+  })
+})
+
+describe('dirChoices', () => {
+  it('текущая первой, затем папки сессий, затем соседи, без повторов', () => {
+    const choices = dirChoices({
+      current: '/h/work/a',
+      sessionDirs: ['/h/work/b', '/h/work/a'],
+      neighbours: ['/h/work/b', '/h/work/c'],
+      home: '/h',
+    })
+
+    assert.deepEqual(choices, [
+      { value: '/h/work/a', label: 'эта папка: ~/work/a' },
+      { value: '/h/work/b', label: 'где идут сессии: ~/work/b' },
+      { value: '/h/work/c', label: 'рядом: ~/work/c' },
+    ])
+  })
+
+  it('не длиннее потолка', () => {
+    const many = Array.from({ length: 40 }, (_, i) => `/p/d${i}`)
+
+    assert.equal(dirChoices({ current: '/p', sessionDirs: [], neighbours: many, home: '' }).length, 15)
   })
 })

@@ -19,8 +19,8 @@
 import type { PluginOptions, Register, RenderElement, Timer } from 'claude-code'
 
 import { parseArgs } from './args.ts'
-import { failureOf, messageFor, presetsOf, startArgv, startedOf } from './dispatch.ts'
-import type { Preset } from './dispatch.ts'
+import { dirChoices, failureOf, messageFor, presetsOf, startArgv, startedOf } from './dispatch.ts'
+import type { DirChoice, Preset } from './dispatch.ts'
 import { projectsRoot, transcriptPath } from './paths.ts'
 import { isFinished, ordered, parseAgents, pickSession } from './sessions.ts'
 import type { SessionRow } from './sessions.ts'
@@ -105,6 +105,10 @@ export const register: Register = (on, pluginOptions) => {
   let clockNow = 0
   let reading: Promise<void> | null = null
   let presets: Preset[] = []
+  /** Соседние с текущей папки: куда ещё можно отправить новую сессию, не набирая путь. */
+  let neighbours: string[] = []
+  /** Выбранная для новой сессии папка; пусто - папка этой сессии. */
+  let newDir = ''
   const cache = new Map<string, Cached>()
 
   // --- Reading ----------------------------------------------------------
@@ -236,6 +240,15 @@ export const register: Register = (on, pluginOptions) => {
     }))
   }
 
+  function dirsOf(): DirChoice[] {
+    return dirChoices({
+      current: cwd,
+      sessionDirs: [...new Set(ordered(rows).map(row => row.cwd))],
+      neighbours,
+      home,
+    })
+  }
+
   const hiddenCount = (): number => rows.length - shownRows().length
 
   function modelOf(canType: boolean, columns: number): PaneModel {
@@ -253,6 +266,8 @@ export const register: Register = (on, pluginOptions) => {
       confirm,
       hidden: hiddenCount(),
       presets,
+      dirs: dirsOf(),
+      newDir,
       note: note !== '' ? note : loadError,
     }
   }
@@ -305,6 +320,7 @@ export const register: Register = (on, pluginOptions) => {
     if (!bound) return 'мод ещё не готов'
 
     const text = task.trim()
+    const where = dir !== '' ? dir : newDir !== cwd ? newDir : ''
 
     if (text === '') {
       return say('Опишите задачу: что должна сделать новая сессия. Например: /sessions new разобрать падающие тесты.')
@@ -313,7 +329,7 @@ export const register: Register = (on, pluginOptions) => {
     const argv = startArgv({
       task: text,
       name,
-      dir,
+      dir: where,
       permissionMode: settings.permissionMode,
       model: settings.model,
     })
@@ -321,7 +337,7 @@ export const register: Register = (on, pluginOptions) => {
     argv[0] = settings.binary
     say('Запускаю новую сессию...')
 
-    const res = await bound.run(argv, dir !== '' ? dir : undefined).catch((error: unknown) => ({
+    const res = await bound.run(argv, where !== '' ? where : undefined).catch((error: unknown) => ({
       exitCode: -1,
       stdout: '',
       stderr: messageOf(error),
@@ -448,6 +464,10 @@ export const register: Register = (on, pluginOptions) => {
       start: task => {
         void start(task, '', '')
       },
+      chooseDir: dir => {
+        newDir = dir
+        bound?.invalidate()
+      },
       say: (sessionId, text) => {
         const row = rowOf(sessionId)
 
@@ -547,6 +567,17 @@ export const register: Register = (on, pluginOptions) => {
 
     presets = presetsOf(await bound.commandNames())
 
+    const parent = cwd.replace(/\/[^/]*\/?$/, '')
+
+    neighbours =
+      parent !== '' && parent !== cwd
+        ? (await bound.listDir(parent))
+            .filter(name => !name.startsWith('.') && `${parent}/${name}` !== cwd)
+            .sort()
+            .slice(0, 30)
+            .map(name => `${parent}/${name}`)
+        : []
+
     await $.command
       .register({
         name: COMMAND,
@@ -589,6 +620,7 @@ export const register: Register = (on, pluginOptions) => {
       Text: table.Text,
       Button: table.Button,
       ...('Input' in table ? { Input: table.Input } : {}),
+      ...('Select' in table ? { Select: table.Select } : {}),
     }
 
     return paneView(ui, actionsOf(), modelOf(ui.Input !== undefined, e.props.bodyColumns))

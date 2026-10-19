@@ -1,5 +1,7 @@
 // Запуск новой сессии: имя, команда и поручение. Чистое, без `$`.
 
+import { shortPath } from './text.ts'
+
 export const NAME_LIMIT = 40
 
 /**
@@ -102,4 +104,38 @@ export function presetsOf(commandNames: readonly string[]): Preset[] {
   }
 
   return presets
+}
+
+export type DirChoice = { value: string; label: string }
+
+export const DIR_CHOICES_MAX = 15
+
+/**
+ * Папки, в которых можно начать сессию, - выбором, а не набором руками:
+ * текущая, те, где уже идут сессии, и соседние с текущей (рядом лежат
+ * проекты). Повторы схлопываются, порядок - по близости к тому, что человек
+ * делает сейчас.
+ */
+export function dirChoices(input: {
+  current: string
+  sessionDirs: readonly string[]
+  neighbours: readonly string[]
+  home: string
+}): DirChoice[] {
+  const seen = new Set<string>()
+  const choices: DirChoice[] = []
+
+  const add = (value: string, prefix: string) => {
+    if (value === '' || seen.has(value) || choices.length >= DIR_CHOICES_MAX) return
+
+    seen.add(value)
+    choices.push({ value, label: `${prefix}${shortPath(value, input.home)}` })
+  }
+
+  add(input.current, 'эта папка: ')
+
+  for (const dir of input.sessionDirs) add(dir, 'где идут сессии: ')
+  for (const dir of input.neighbours) add(dir, 'рядом: ')
+
+  return choices
 }

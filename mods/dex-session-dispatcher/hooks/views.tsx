@@ -10,10 +10,11 @@ import type {
   ElementConstructor,
   InputProps,
   RenderElement,
+  SelectProps,
   TextProps,
 } from 'claude-code'
 
-import type { Preset } from './dispatch.ts'
+import type { DirChoice, Preset } from './dispatch.ts'
 import { PHASE_HINT, PHASE_WORD, isFinished, tallyLine, tallyOf } from './sessions.ts'
 import type { Phase, SessionRow } from './sessions.ts'
 import { EMPTY_LIST, START_STEPS, ageWord, planLine, shortPath, usageLine } from './text.ts'
@@ -26,6 +27,7 @@ export type Ui = {
   Button: ElementConstructor<ButtonProps>
   /** Нет на телефоне: управляющий протокол пока не несёт ввода. */
   Input?: ElementConstructor<InputProps>
+  Select?: ElementConstructor<SelectProps>
 }
 
 export type Actions = {
@@ -33,6 +35,7 @@ export type Actions = {
   openList: () => void
   step: (delta: 1 | -1) => void
   start: (task: string) => void
+  chooseDir: (dir: string) => void
   say: (sessionId: string, text: string) => void
   stop: (sessionId: string) => void
   remove: (sessionId: string) => void
@@ -63,6 +66,9 @@ export type PaneModel = {
   hidden: number
   /** Готовые задачи кнопками; пусто, когда нужных команд в сессии нет. */
   presets: readonly Preset[]
+  /** Папки на выбор для новой сессии и выбранная (пусто - текущая). */
+  dirs: readonly DirChoice[]
+  newDir: string
   /** Последнее, что сделал мод: запуск, отправка, отказ. Видно прямо в панели. */
   note: string
 }
@@ -162,7 +168,7 @@ function entryRow(ui: Ui, actions: Actions, model: PaneModel, entry: Entry): Ren
 }
 
 function newSessionBox(ui: Ui, actions: Actions, model: PaneModel): RenderElement {
-  const { Box, Text, Input } = ui
+  const { Box, Text, Input, Select } = ui
 
   const { Button } = ui
   const presetRow =
@@ -190,6 +196,17 @@ function newSessionBox(ui: Ui, actions: Actions, model: PaneModel): RenderElemen
     <Box flexDirection="column">
       <Text bold>Новая сессия</Text>
       {presetRow}
+      {Select && model.dirs.length > 1 ? (
+        <Select
+          key="new-dir"
+          label="Папка: "
+          options={model.dirs.map(choice => ({ value: choice.value, label: choice.label }))}
+          value={model.newDir !== '' ? model.newDir : model.dirs[0]?.value}
+          onSelect={value => actions.chooseDir(value)}
+        />
+      ) : (
+        <Box />
+      )}
       <Input
         key="new-session"
         label="Задача: "
