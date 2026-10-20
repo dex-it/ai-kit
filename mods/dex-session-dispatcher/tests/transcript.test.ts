@@ -253,12 +253,18 @@ describe('snippet: секреты маскируются', () => {
   })
 
   it('маска линейна: длинный пробельный кусок не морозит клиент', () => {
-    for (const filler of [' '.repeat(100_000), '\n'.repeat(100_000), `token${' '.repeat(100_000)}=`]) {
+    for (const filler of [
+      ' '.repeat(100_000),
+      '\n'.repeat(100_000),
+      `token${' '.repeat(100_000)}=`,
+      `${'token='.repeat(20_000)}.`,
+      'eyJ-'.repeat(20_000),
+    ]) {
       const started = performance.now()
 
       maskSecrets(`a${filler}b`)
 
-      assert.ok(performance.now() - started < 500, `${filler.length} знаков`)
+      assert.ok(performance.now() - started < 500, `${filler.slice(0, 8)} x${filler.length}`)
     }
   })
 
