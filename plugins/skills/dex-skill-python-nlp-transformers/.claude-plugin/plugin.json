@@ -11,7 +11,7 @@
     "nlp",
     "transformers",
     "huggingface",
-    "bert"
+    "quantization"
   ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"

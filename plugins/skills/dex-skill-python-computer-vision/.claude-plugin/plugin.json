@@ -9,9 +9,9 @@
   "keywords": [
     "skill",
     "computer-vision",
-    "cnn",
     "image",
-    "detection"
+    "torchvision",
+    "resize"
   ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"
