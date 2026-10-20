@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { cleanName, failureOf, messageFor, nameFromTask, dirChoices, presetsOf, recentDirs, startArgv, startedOf } from '../hooks/dispatch.ts'
+import { cleanName, dangerEcho, failureOf, launchDir, mayMutate, messageFor, nameFromTask, dirChoices, presetsOf, recentDirs, settled, startArgv, startedMessage, startedOf } from '../hooks/dispatch.ts'
+import type { SessionRow } from '../hooks/sessions.ts'
 
 describe('имена', () => {
   it('имя из задачи: первые слова через дефис', () => {
@@ -113,5 +114,88 @@ describe('recentDirs', () => {
     const text = ['x', ...Array.from({ length: 50 }, (_, i) => row(`/p/${i}`))].join('\n')
 
     assert.equal(recentDirs(text, 5).length, 5)
+  })
+})
+
+const sample: SessionRow = {
+  sessionId: '0de41c8d-0000-4000-8000-000000000000',
+  shortId: '0de41c8d',
+  name: 'fix-tests',
+  cwd: '/p',
+  kind: 'background',
+  phase: 'done',
+  waitingFor: '',
+  startedAt: 0,
+  pid: null,
+}
+
+describe('dangerEcho: номер не исполняется, эхо называет сессию и команду', () => {
+  it('удаление: имя, короткий id и точная команда повтора', () => {
+    const text = dangerEcho('remove', sample)
+
+    assert.match(text, /Удалить «fix-tests» \(0de41c8d\)/)
+    assert.ok(text.includes('/sessions remove 0de41c8d'))
+  })
+
+  it('остановка: то же для stop', () => {
+    const text = dangerEcho('stop', sample)
+
+    assert.match(text, /Остановить «fix-tests» \(0de41c8d\)/)
+    assert.ok(text.includes('/sessions stop 0de41c8d'))
+  })
+})
+
+describe('launchDir: командный путь не наследует выбор панели', () => {
+  it('команда без --dir идёт в каталог этой сессии, даже если в панели выбрано другое', () => {
+    assert.equal(launchDir({ flag: '', panel: '/other', cwd: '/here', fromPanel: false }), '')
+  })
+
+  it('команда с --dir идёт туда, куда сказано', () => {
+    assert.equal(launchDir({ flag: '/x', panel: '/other', cwd: '/here', fromPanel: false }), '/x')
+  })
+
+  it('панель берёт выбранную папку, а выбранная текущая - пусто', () => {
+    assert.equal(launchDir({ flag: '', panel: '/other', cwd: '/here', fromPanel: true }), '/other')
+    assert.equal(launchDir({ flag: '', panel: '/here', cwd: '/here', fromPanel: true }), '')
+  })
+})
+
+describe('startedMessage', () => {
+  it('называет папку, в которой запущена сессия', () => {
+    const text = startedMessage({ id: 'abc123', name: 'job' }, '/work/app', '/Users/me')
+
+    assert.match(text, /«job» \(abc123\)/)
+    assert.ok(text.includes('/work/app'))
+  })
+
+  it('без разбора вывода папка всё равно названа', () => {
+    assert.ok(startedMessage(null, '/Users/me/app', '/Users/me').includes('~/app'))
+  })
+})
+
+describe('settled: отказ запуска становится ответом', () => {
+  it('reject превращается в код -1 с текстом ошибки', async () => {
+    const res = await settled(Promise.reject(new Error('timeout 30000')))
+
+    assert.equal(res.exitCode, -1)
+    assert.match(res.stderr, /timeout 30000/)
+  })
+
+  it('успех проходит как есть', async () => {
+    const ok = { exitCode: 0, stdout: 'x', stderr: '' }
+
+    assert.deepEqual(await settled(Promise.resolve(ok)), ok)
+  })
+})
+
+describe('mayMutate: изменяющие команды только от человека и хоста', () => {
+  it('composer, bridge, sdk допустимы', () => {
+    for (const kind of ['composer', 'bridge', 'sdk']) assert.equal(mayMutate(kind), true, kind)
+  })
+
+  it('чужие сообщения, каналы и триггеры - нет', () => {
+    for (const kind of ['peer', 'peer-send-message', 'channel', 'scheduled-trigger', 'task-notification', 'coordinator', 'plugin', 'unclassified', 'slack-ping']) {
+      assert.equal(mayMutate(kind), false, kind)
+    }
   })
 })

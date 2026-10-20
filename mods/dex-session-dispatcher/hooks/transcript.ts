@@ -83,9 +83,30 @@ const str = (value: unknown): string => (typeof value === 'string' ? value : '')
 const num = (value: unknown): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : 0
 
-/** Однострочный фрагмент чужого текста: без управляющих символов, с потолком длины. */
+export const SECRET_MASK = '[секрет скрыт]'
+
+/**
+ * Токеноподобные строки известных видов. Чужой промпт попадает в контекст этой
+ * сессии, а с ним и вставленный в него ключ: лишнее копирование секрета в другой
+ * проект и его сжатие. Это маска от случайного, а не защита от намеренного.
+ */
+const SECRET_PATTERNS: readonly RegExp[] = [
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/g,
+  /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}/g,
+  /\bgithub_pat_[A-Za-z0-9_]{20,}/g,
+  /\bglpat-[A-Za-z0-9_-]{16,}/g,
+  /\bsk-[A-Za-z0-9_-]{16,}/g,
+  /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g,
+  /\bxox[abprs]-[A-Za-z0-9-]{10,}/g,
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{12,}/gi,
+]
+
+export const maskSecrets = (value: string): string =>
+  SECRET_PATTERNS.reduce((text, pattern) => text.replace(pattern, SECRET_MASK), value)
+
+/** Однострочный фрагмент чужого текста: без секретов и управляющих символов, с потолком длины. */
 export function snippet(value: string, limit = SNIPPET): string {
-  const flat = value
+  const flat = maskSecrets(value)
     // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f]+/g, ' ')
     .replace(/\s+/g, ' ')
@@ -290,22 +311,37 @@ export type Chunk = {
 
 /**
  * Влить прочитанный кусок в статистику. Кусок, начатый не с нуля, начинается
- * посреди строки - первая строка отбрасывается; кусок, оборванный посреди
- * записи, дочитывается следующим разом, потому что `offset` встаёт до неё.
+ * посреди строки, а то и посреди многобайтного символа: всё до первого `\n`
+ * отбрасывается, а `offset` ведётся по сырым байтам. Обрубок символа в строке
+ * приходит как U+FFFD (три байта в перекодировании, а в файле - один), поэтому
+ * длину отброшенной части считаем сами: ведущие U+FFFD - по байту. Кусок,
+ * оборванный посреди записи, дочитывается следующим разом, потому что `offset`
+ * встаёт до неё.
  */
 export function absorbChunk(stats: Stats, chunk: Chunk): Stats {
-  const lines = chunk.text.split('\n')
-  const lastLine = lines.pop() ?? ''
   const isFirstRead = stats.offset === 0 && stats.since === 0
-  const skip = isFirstRead && chunk.from > 0 ? 1 : 0
+  let text = chunk.text
+  let from = chunk.from
 
-  if (isFirstRead) stats.since = chunk.from
+  if (isFirstRead && from > 0) {
+    // Нет ни одной целой строки (запись длиннее куска): весь кусок - обрывок, берём с его конца.
+    const cut = text.indexOf('\n') + 1 || text.length
+    const dropped = text.slice(0, cut)
+    const stray = /^\uFFFD{0,3}/.exec(dropped)?.[0].length ?? 0
 
-  for (const line of lines.slice(skip)) {
+    from += stray + encoder.encode(dropped.slice(stray)).length
+    text = text.slice(cut)
+    stats.since = chunk.from
+  }
+
+  const lines = text.split('\n')
+  const lastLine = lines.pop() ?? ''
+
+  for (const line of lines) {
     if (line !== '') absorbLine(stats, line)
   }
 
-  stats.offset = chunk.from + encoder.encode(chunk.text).length - encoder.encode(lastLine).length
+  stats.offset = from + encoder.encode(text).length - encoder.encode(lastLine).length
 
   return stats
 }

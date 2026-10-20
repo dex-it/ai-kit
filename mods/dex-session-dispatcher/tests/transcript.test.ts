@@ -141,3 +141,86 @@ describe('вспомогательные', () => {
     assert.deepEqual(topOf({ a: 1, b: 3, c: 3 }, 2), [['b', 3], ['c', 3]])
   })
 })
+
+describe('absorbChunk: хвост, начатый посреди многобайтного символа', () => {
+  const enc = new TextEncoder()
+  const dec = new TextDecoder()
+  const user = (text: string) => JSON.stringify({ type: 'user', message: { role: 'user', content: text } })
+
+  it('offset считается по сырым байтам и равен размеру файла', () => {
+    const file = enc.encode(`${user('привет, мир')}\n${user('второе задание')}\n`)
+    const mid = file.indexOf(0xd0) + 1 // вторая половина первого кириллического символа
+
+    // tail отдаёт сырые байты, а мод получает строку: обрубок символа становится U+FFFD.
+    const text = dec.decode(file.slice(mid))
+    const stats = absorbChunk(emptyStats(), { text, from: mid })
+
+    assert.equal(stats.offset, file.length)
+    assert.equal(stats.prompts, 1)
+    assert.equal(stats.lastPrompt, 'второе задание')
+  })
+
+  it('следующее чтение с этого offset ничего не теряет', () => {
+    const first = enc.encode(`${user('привет')}\n${user('раз')}\n`)
+    const second = enc.encode(`${user('два')}\n`)
+    const mid = first.indexOf(0xd0) + 1
+    const stats = absorbChunk(emptyStats(), { text: dec.decode(first.slice(mid)), from: mid })
+
+    absorbChunk(stats, { text: dec.decode(second), from: stats.offset })
+
+    assert.equal(stats.offset, first.length + second.length)
+    assert.equal(stats.lastPrompt, 'два')
+  })
+
+  it('начало на границе символа ведёт себя как раньше', () => {
+    const file = enc.encode(`${user('привет')}\n${user('мир')}\n`)
+    const cut = file.indexOf(0xd0) + 2 // ровно после первого символа: границы символа соблюдены
+    const stats = absorbChunk(emptyStats(), { text: dec.decode(file.slice(cut)), from: cut })
+
+    assert.equal(stats.offset, file.length)
+    assert.equal(stats.lastPrompt, 'мир')
+  })
+})
+
+describe('snippet: секреты маскируются', () => {
+  const FAKE = 'FAKE-test-only-not-a-key'
+
+  it('токены известных видов заменяются заглушкой', () => {
+    const tokens = [
+      `ghp_${'A1b2C3d4E5'.repeat(3)}`,
+      `github_pat_${'A1b2C3d4E5'.repeat(3)}`,
+      `glpat-${'A1b2C3d4E5'.repeat(2)}`,
+      `sk-ant-${'A1b2C3d4E5'.repeat(3)}`,
+      'AKIAABCDEFGHIJKLMNOP',
+      `xoxb-${'1234567890'.repeat(2)}`,
+      `Bearer ${'abcDEF123456'.repeat(3)}`,
+    ]
+
+    for (const token of tokens) {
+      const out = snippet(`запусти curl с ${token} и всё`)
+
+      assert.ok(!out.includes(token), token)
+      assert.match(out, /\[секрет скрыт\]/)
+      assert.match(out, /^запусти curl с .* и всё$/)
+    }
+  })
+
+  it('приватный ключ в несколько строк уходит целиком', () => {
+    const out = snippet(`ключ:\n-----BEGIN RSA PRIVATE KEY-----\n${FAKE}\nMIIBOg\n-----END RSA PRIVATE KEY-----\nдальше`)
+
+    assert.ok(!out.includes(FAKE))
+    assert.ok(!out.includes('MIIBOg'))
+    assert.match(out, /дальше$/)
+  })
+
+  it('маска ставится до обрезки: хвост токена на границе не торчит', () => {
+    const token = `ghp_${'Z9y8X7w6V5'.repeat(3)}`
+    const out = snippet(`${'я'.repeat(20)} ${token}`, 30)
+
+    assert.ok(!out.includes('ghp_Z9'))
+  })
+
+  it('обычный текст, похожий на префикс, не трогается', () => {
+    assert.equal(snippet('task-sk-1 и ghp короткое'), 'task-sk-1 и ghp короткое')
+  })
+})

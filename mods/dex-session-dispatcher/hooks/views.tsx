@@ -17,7 +17,7 @@ import type {
 import type { DirChoice, Preset } from './dispatch.ts'
 import { PHASE_HINT, PHASE_WORD, isFinished, tallyLine, tallyOf } from './sessions.ts'
 import type { Phase, SessionRow } from './sessions.ts'
-import { EMPTY_LIST, START_STEPS, ageWord, planLine, shortPath, usageLine } from './text.ts'
+import { EMPTY_LIST, START_STEPS, ageWord, planLine, selectedIndex, shortPath, usageLine } from './text.ts'
 import type { Entry } from './text.ts'
 import { percentOf, topOf, windowOf } from './transcript.ts'
 
@@ -333,10 +333,17 @@ function dangerButton(
 
 function detailsView(ui: Ui, actions: Actions, model: PaneModel): RenderElement {
   const { Box, Text, Button, Input } = ui
-  const index = Math.max(0, model.entries.findIndex(entry => entry.row.sessionId === model.selectedId))
+  const index = selectedIndex(model.entries, model.selectedId)
   const entry = model.entries[index]
 
-  if (!entry) return <Text dimColor>Эта сессия больше не показана. Вернитесь к списку.</Text>
+  if (!entry) {
+    return (
+      <Box flexDirection="column">
+        <Text dimColor>Эта сессия больше не показана: она удалена или спрятана фильтром.</Text>
+        <Button key="nav-list" label="‹ список" dimColor onPress={() => actions.openList()} />
+      </Box>
+    )
+  }
 
   const { row, stats } = entry
   const todos = stats?.todos ?? []

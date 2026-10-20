@@ -203,3 +203,33 @@ export function pickSession(
 
   return { error: `«${q}» подходит нескольким сессиям: ${names}. Назовите имя целиком, начало id или номер из списка.` }
 }
+
+export type DangerPick = { row: SessionRow; isNamed: boolean } | { error: string }
+
+/**
+ * Сессия для остановки или удаления. Список переставляется каждые десять секунд,
+ * поэтому номер, набранный по увиденному раньше списку, может указывать на другую
+ * сессию, а удаление необратимо. `isNamed` - сессия названа точно (имя целиком,
+ * короткий или полный id): только такое называние подтверждает действие. Номер и
+ * начало имени лишь указывают сессию, и действие просит повторить с её id.
+ */
+export function pickForDanger(
+  query: string,
+  shown: readonly SessionRow[],
+  all: readonly SessionRow[] = shown,
+): DangerPick {
+  const q = query.trim().replace(/^#/, '').toLowerCase()
+
+  if (q !== '' && !/^\d+$/.test(q)) {
+    const exact = all.filter(
+      row =>
+        row.name.toLowerCase() === q || row.shortId.toLowerCase() === q || row.sessionId.toLowerCase() === q,
+    )
+
+    if (exact.length === 1 && exact[0]) return { row: exact[0], isNamed: true }
+  }
+
+  const picked = pickSession(query, shown, all)
+
+  return 'error' in picked ? picked : { row: picked.row, isNamed: false }
+}

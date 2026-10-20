@@ -1,5 +1,6 @@
 // Запуск новой сессии: имя, команда и поручение. Чистое, без `$`.
 
+import type { SessionRow } from './sessions.ts'
 import { shortPath } from './text.ts'
 
 export const NAME_LIMIT = 40
@@ -174,3 +175,54 @@ export function recentDirs(text: string, limit = 30): string[] {
 
   return found
 }
+
+/** Нужно ли подтверждение: вместо исполнения вернуть название сессии и точную команду повтора. */
+export function dangerEcho(kind: 'stop' | 'remove', row: SessionRow): string {
+  const label = `«${row.name}» (${row.shortId})`
+
+  return kind === 'stop'
+    ? `Остановить ${label}? Разговор сохранится. Чтобы подтвердить, повторите: /sessions stop ${row.shortId}`
+    : `Удалить ${label} вместе с рабочей копией, без возврата? Чтобы подтвердить, повторите: /sessions remove ${row.shortId}`
+}
+
+/**
+ * Каталог новой сессии (`''` - каталог этой). Команда берёт только `--dir`: выбор в
+ * панели в ней не участвует, иначе фоновая сессия с правом правки ушла бы в папку,
+ * выбранную когда-то давно и не названную в команде.
+ */
+export function launchDir(input: { flag: string; panel: string; cwd: string; fromPanel: boolean }): string {
+  if (input.flag !== '') return input.flag
+
+  return input.fromPanel && input.panel !== input.cwd ? input.panel : ''
+}
+
+/** Ответ о запуске называет и папку: сессия фоновая, и человек должен знать, где она правит файлы. */
+export function startedMessage(
+  started: { id: string; name: string } | null,
+  dir: string,
+  home: string,
+): string {
+  const where = shortPath(dir, home)
+
+  return started
+    ? `Запущена сессия «${started.name}» (${started.id}) в папке ${where}. Она работает в фоне; когда ей понадобится ваш ответ, она появится в списке как «ждёт вас».`
+    : `Сессия запущена в папке ${where}. Она появится в списке через несколько секунд.`
+}
+
+export type RunResult = { exitCode: number; stdout: string; stderr: string }
+
+/** Отказ запуска процесса (таймаут, нет файла) - обычный ответ с кодом -1, а не падение хука. */
+export const settled = (run: Promise<RunResult>): Promise<RunResult> =>
+  run.catch((error: unknown) => ({
+    exitCode: -1,
+    stdout: '',
+    stderr: error instanceof Error ? error.message : String(error),
+  }))
+
+/**
+ * Кто вправе менять: `new`, `say`, `stop`, `remove` исполняются только по слову
+ * человека (терминал, мост, хост SDK). Сообщение другой сессии, канала или
+ * триггера слеш-командой управлять сессиями не должно.
+ */
+export const mayMutate = (originKind: string): boolean =>
+  originKind === 'composer' || originKind === 'bridge' || originKind === 'sdk'

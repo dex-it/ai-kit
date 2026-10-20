@@ -27,3 +27,25 @@ export function transcriptPath(configDir: string, cwd: string, sessionId: string
 /** Папка субагентов сессии рядом с транскриптом. */
 export const subagentsDir = (transcript: string): string =>
   `${transcript.replace(/\.jsonl$/, '')}/subagents`
+
+/** Лежит ли `path` в каталоге `root` (или он сам): префикс берётся по границе имени, а не по знакам. */
+export function isInside(path: string, root: string): boolean {
+  if (root === '') return false
+
+  const base = root.replace(/\/+$/, '')
+
+  return base === '' || path === base || path.startsWith(`${base}/`)
+}
+
+/** Не нашли транскрипт: перебор папок проектов повторяется не чаще раза в минуту. */
+export const MISS_RETRY_MS = 60_000
+
+export type Miss = { at: number; cwd: string }
+
+/**
+ * Нужно ли перебирать папки проектов. Сессия без транскрипта (окно до первого
+ * сообщения) в каждом опросе заставляла бы обходить все папки `projects`;
+ * провал помнится до смены каталога сессии либо `MISS_RETRY_MS`.
+ */
+export const needsScan = (miss: Miss | undefined, now: number, cwd: string): boolean =>
+  miss === undefined || miss.cwd !== cwd || now - miss.at >= MISS_RETRY_MS

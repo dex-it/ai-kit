@@ -19,12 +19,13 @@
 import type { PluginOptions, Register, RenderElement, Timer } from 'claude-code'
 
 import { parseArgs } from './args.ts'
-import { dirChoices, failureOf, recentDirs, messageFor, presetsOf, startArgv, startedOf } from './dispatch.ts'
-import type { DirChoice, Preset } from './dispatch.ts'
-import { projectsRoot, transcriptPath } from './paths.ts'
-import { isFinished, ordered, parseAgents, pickSession } from './sessions.ts'
+import { dangerEcho, dirChoices, failureOf, launchDir, mayMutate, recentDirs, messageFor, presetsOf, settled, startArgv, startedMessage, startedOf } from './dispatch.ts'
+import type { DirChoice, Preset, RunResult } from './dispatch.ts'
+import { isInside, needsScan, projectsRoot, transcriptPath } from './paths.ts'
+import type { Miss } from './paths.ts'
+import { isFinished, ordered, parseAgents, pickForDanger, pickSession } from './sessions.ts'
 import type { SessionRow } from './sessions.ts'
-import { HELP_TEXT as HELP, detailText, listText, openText } from './text.ts'
+import { HELP_TEXT as HELP, detailText, framedLog, listText, openText } from './text.ts'
 import type { Entry } from './text.ts'
 import { absorbChunk, emptyStats } from './transcript.ts'
 import type { Stats } from './transcript.ts'
@@ -57,7 +58,12 @@ const optNumber = (options: PluginOptions, key: string, fallback: number): numbe
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)
 
-type Cached = { stats: Stats; path: string | null; size: number }
+/** Вызов, которого нет в сгенерированном контракте типов 2.1.272. */
+type SessionSend = {
+  send?: (input: { to: { sessionId: string }; text: string }) => Promise<{ isDelivered?: unknown; reason?: unknown }>
+}
+
+type Cached = { stats: Stats; path: string | null; size: number; miss?: Miss }
 
 type Bound = {
   log: (text: string) => void
@@ -65,7 +71,7 @@ type Bound = {
   invalidate: () => void
   openPane: (title: string) => Promise<void>
   closePane: () => Promise<void>
-  run: (argv: string[], cwd?: string) => Promise<{ exitCode: number; stdout: string; stderr: string }>
+  run: (argv: string[], cwd?: string) => Promise<RunResult>
   send: (sessionId: string, text: string) => Promise<{ isDelivered: boolean; reason: string }>
   statSize: (path: string) => Promise<number | null>
   exists: (path: string) => Promise<boolean>
@@ -124,8 +130,11 @@ export const register: Register = (on, pluginOptions) => {
 
     if (direct !== null && (await bound?.exists(direct))) return direct
 
-    // Имя папки обрезано хешем или каталог сессии - не тот, что в списке:
-    // перебор папок проектов, раз на сессию.
+    // Имя папки обрезано хешем или каталог сессии - не тот, что в списке: перебор
+    // папок проектов. Неудача запоминается (сессия без первого сообщения не имеет
+    // транскрипта), и перебор не повторяется чаще раза в минуту, пока каталог тот же.
+    if (!needsScan(known?.miss, clockNow, row.cwd)) return null
+
     const root = projectsRoot(configDir)
 
     for (const dir of (await bound?.listDir(root)) ?? []) {
@@ -133,6 +142,13 @@ export const register: Register = (on, pluginOptions) => {
 
       if (await bound?.exists(candidate)) return candidate
     }
+
+    cache.set(row.sessionId, {
+      stats: known?.stats ?? emptyStats(),
+      path: null,
+      size: known?.size ?? 0,
+      miss: { at: clockNow, cwd: row.cwd },
+    })
 
     return null
   }
@@ -143,11 +159,7 @@ export const register: Register = (on, pluginOptions) => {
     const path = await pathOf(row)
     const known = cache.get(row.sessionId)
 
-    if (path === null) {
-      if (!known) cache.set(row.sessionId, { stats: emptyStats(), path: null, size: 0 })
-
-      return
-    }
+    if (path === null) return
 
     const size = await bound.statSize(path)
 
@@ -175,9 +187,7 @@ export const register: Register = (on, pluginOptions) => {
   async function readRows(): Promise<void> {
     if (!bound) return
 
-    const res = await bound
-      .run([settings.binary, 'agents', '--json', '--all'])
-      .catch((error: unknown) => ({ exitCode: -1, stdout: '', stderr: messageOf(error) }))
+    const res = await bound.run([settings.binary, 'agents', '--json', '--all'])
 
     if (res.exitCode !== 0) {
       loadError = `не удалось получить список сессий: ${failureOf(res.stderr, res.stdout)}`
@@ -226,7 +236,7 @@ export const register: Register = (on, pluginOptions) => {
     return ordered(
       rows.filter(row => {
         if (!showFinished && isFinished(row.phase) && row.sessionId !== selectedId) return false
-        if (onlyHere && cwd !== '' && !row.cwd.startsWith(cwd)) return false
+        if (onlyHere && cwd !== '' && !isInside(row.cwd, cwd)) return false
 
         return true
       }),
@@ -314,6 +324,10 @@ export const register: Register = (on, pluginOptions) => {
   async function showList(): Promise<void> {
     view = 'list'
     confirm = null
+
+    // Выбранная сессия пропала из показанных (удалена, спрятана фильтром): выбор не держим.
+    if (selectedId !== null && !entriesOf().some(entry => entry.row.sessionId === selectedId)) selectedId = null
+
     await openPane(LIST_TITLE)
     bound?.invalidate()
   }
@@ -341,11 +355,11 @@ export const register: Register = (on, pluginOptions) => {
     return ''
   }
 
-  async function start(task: string, name: string, dir: string): Promise<string> {
+  async function start(task: string, name: string, flagDir: string, fromPanel: boolean): Promise<string> {
     if (!bound) return 'мод ещё не готов'
 
     const text = task.trim()
-    const where = dir !== '' ? dir : newDir !== cwd ? newDir : ''
+    const where = launchDir({ flag: flagDir, panel: newDir, cwd, fromPanel })
 
     if (text === '') {
       return say('Опишите задачу: что должна сделать новая сессия. Например: /sessions new разобрать падающие тесты.')
@@ -362,11 +376,7 @@ export const register: Register = (on, pluginOptions) => {
     argv[0] = settings.binary
     say('Запускаю новую сессию...')
 
-    const res = await bound.run(argv, where !== '' ? where : undefined).catch((error: unknown) => ({
-      exitCode: -1,
-      stdout: '',
-      stderr: messageOf(error),
-    }))
+    const res = await bound.run(argv, where !== '' ? where : undefined)
 
     if (res.exitCode !== 0) return say(`Не удалось запустить: ${failureOf(res.stderr, res.stdout)}`)
 
@@ -374,9 +384,7 @@ export const register: Register = (on, pluginOptions) => {
 
     await refresh()
 
-    const message = started
-      ? `Запущена сессия «${started.name}» (${started.id}). Она работает в фоне; когда ей понадобится ваш ответ, она появится в списке как «ждёт вас».`
-      : 'Сессия запущена. Она появится в списке через несколько секунд.'
+    const message = startedMessage(started, where !== '' ? where : cwd, home)
 
     bound.toast(`Новая сессия: ${started?.name ?? 'запущена'}`)
 
@@ -415,21 +423,30 @@ export const register: Register = (on, pluginOptions) => {
     const res = await bound.run([settings.binary, 'logs', row.shortId])
     const out = (res.exitCode === 0 ? res.stdout : failureOf(res.stderr, res.stdout)).trim()
 
-    bound.log(`sessions: вывод «${row.name}»\n${out === '' ? '(пусто)' : out}`)
+    bound.log(framedLog(row.name, out === '' ? '(пусто)' : out))
 
     return say(`Вывод «${row.name}» записан в историю сессии.`)
+  }
+
+  /** Почему сессию нельзя остановить или удалить отсюда; `null` - можно. */
+  function dangerBlock(row: SessionRow): string | null {
+    if (row.sessionId === selfId) return 'Текущую сессию отсюда остановить нельзя: закройте её как обычно.'
+
+    // `stop` и `rm` в CLI - для фоновых сессий; окно терминала закрывается в самом окне.
+    if (row.kind !== 'background') {
+      return `«${row.name}» открыта в окне терминала${row.pid !== null ? ` (процесс ${row.pid})` : ''}: закройте её там (/exit). Отсюда останавливаются и удаляются только фоновые сессии.`
+    }
+
+    return null
   }
 
   /** Опасное действие: первое нажатие спрашивает, второе в течение шести секунд делает. */
   async function guarded(kind: 'stop' | 'remove', row: SessionRow): Promise<string> {
     if (!bound) return 'мод ещё не готов'
 
-    if (row.sessionId === selfId) return say('Текущую сессию отсюда остановить нельзя: закройте её как обычно.')
+    const blocked = dangerBlock(row)
 
-    // `stop` и `rm` в CLI - для фоновых сессий; окно терминала закрывается в самом окне.
-    if (row.kind !== 'background') {
-      return say(`«${row.name}» открыта в окне терминала${row.pid !== null ? ` (процесс ${row.pid})` : ''}: закройте её там (/exit). Отсюда останавливаются и удаляются только фоновые сессии.`)
-    }
+    if (blocked !== null) return say(blocked)
 
     if (!(confirm && confirm.kind === kind && confirm.sessionId === row.sessionId)) {
       confirm = { kind, sessionId: row.sessionId }
@@ -487,7 +504,7 @@ export const register: Register = (on, pluginOptions) => {
         step(delta)
       },
       start: task => {
-        void start(task, '', '')
+        void start(task, '', '', true)
       },
       chooseDir: dir => {
         newDir = dir
@@ -549,15 +566,28 @@ export const register: Register = (on, pluginOptions) => {
       closePane: async () => {
         await $.ui.close({ id: PANE_ID })
       },
-      run: (argv, dir) => $.process.run(argv, { ...(dir === undefined ? {} : { cwd: dir }), timeoutMs: 30_000 }),
+      run: (argv, dir) =>
+        settled(Promise.resolve().then(() => $.process.run(argv, { ...(dir === undefined ? {} : { cwd: dir }), timeoutMs: 30_000 }))),
       send: async (sessionId, text) => {
-        // Вызов есть в сборке 2.1.303, а в сгенерированном контракте 2.1.272 его ещё нет.
-        // @ts-ignore
-        const sent = await $.session.send({ to: { sessionId }, text })
+        // Контракт типов (2.1.272) вызова не знает, а сборка 2.1.303 его даёт. Читать
+        // `$.session.send` как значение (typeof) `claude plugin validate` запрещает: вызов
+        // пишется только как `$.noun.event(...)`. Поэтому на старой сборке, где метода нет,
+        // его отсутствие ловится на вызове: это ответ человеку, а не падение хука.
+        try {
+          const sent = await ($.session as unknown as SessionSend).send!({ to: { sessionId }, text })
 
-        return {
-          isDelivered: sent.isDelivered === true,
-          reason: typeof sent.reason === 'string' ? sent.reason : '',
+          return {
+            isDelivered: sent.isDelivered === true,
+            reason: typeof sent.reason === 'string' ? sent.reason : '',
+          }
+        } catch (error) {
+          return {
+            isDelivered: false,
+            reason:
+              error instanceof TypeError && /not a function/i.test(error.message)
+                ? 'эта сборка Claude Code не умеет отправлять сообщения другим сессиям (проверено на 2.1.303 и новее)'
+                : messageOf(error),
+          }
         }
       },
       statSize: path =>
@@ -673,6 +703,14 @@ export const register: Register = (on, pluginOptions) => {
 
     if (action.kind !== 'toggle' && action.kind !== 'refresh') note = ''
 
+    // Менять сессии слеш-командой может человек и хост; сообщение другой сессии или
+    // канала, дошедшее как команда, - нет.
+    const changes = action.kind === 'new' || action.kind === 'say' || action.kind === 'stop' || action.kind === 'remove'
+
+    if (changes && !mayMutate(e.origin.kind)) {
+      return { text: `/sessions ${action.kind} выполняется только по команде человека (из терминала, моста или SDK), а не по сообщению другой сессии или канала.` }
+    }
+
     // Номер читается по списку, который человек видит; имя и id - по всем сессиям,
     // чтобы законченную, спрятанную фильтром, можно было назвать.
     const pick = (query: string) => pickSession(query, shownRows(), ordered(rows))
@@ -733,7 +771,7 @@ export const register: Register = (on, pluginOptions) => {
       }
 
       case 'new':
-        return { text: await start(action.task, action.name, action.dir) }
+        return { text: await start(action.task, action.name, action.dir, false) }
 
       case 'say': {
         const found = pick(action.query)
@@ -761,12 +799,20 @@ export const register: Register = (on, pluginOptions) => {
 
       case 'stop':
       case 'remove': {
-        const found = pick(action.query)
+        const found = pickForDanger(action.query, shownRows(), ordered(rows))
 
         if ('error' in found) return { text: found.error }
 
-        // Из строки команды подтверждение даёт сам набор команды: человек уже
-        // назвал сессию и действие, второй проход не нужен.
+        const blocked = dangerBlock(found.row)
+
+        if (blocked !== null) return { text: say(blocked) }
+
+        // Номер и начало имени лишь указывают сессию: список переставляется каждые
+        // десять секунд, и номер, набранный по старому списку, попадает в другую.
+        // Исполняется только точное имя или id; иначе - эхо с командой повтора.
+        if (!found.isNamed) return { text: say(dangerEcho(action.kind, found.row)) }
+
+        // Точное имя или id набрал человек: сам набор команды и есть подтверждение.
         confirm = { kind: action.kind, sessionId: found.row.sessionId }
 
         return { text: await guarded(action.kind, found.row) }
@@ -796,6 +842,11 @@ export const register: Register = (on, pluginOptions) => {
     const result = await next(e)
 
     if (isPaneOpen) await bound?.closePane().catch(() => undefined)
+
+    // `/clear` и `/resume` дают сессии новый id (имя файла транскрипта): прежний,
+    // оставшийся в selfId, показал бы эту же сессию чужой и разрешил бы ей `say` самой себе.
+    selfId = await $.session.id().catch(() => selfId)
+    cwd = await $.session.cwd().catch(() => cwd)
 
     isPaneOpen = false
     view = 'list'

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { ordered, parseAgents, phaseOf, pickSession, tallyLine, tallyOf } from '../hooks/sessions.ts'
+import { ordered, parseAgents, phaseOf, pickForDanger, pickSession, tallyLine, tallyOf } from '../hooks/sessions.ts'
 
 const SAMPLE = JSON.stringify([
   { pid: 1, cwd: '/a', kind: 'interactive', startedAt: 10, sessionId: 'aaaaaaaa-1', name: 'dp-3168', status: 'idle' },
@@ -101,5 +101,70 @@ describe('pickSession', () => {
 
   it('по началу id', () => {
     assert.deepEqual(pickSession('cccc', shown), { row: shown[0] })
+  })
+})
+
+describe('pickForDanger: stop и remove по номеру не исполняются', () => {
+  // Список переставляется каждые десять секунд, поэтому номер, набранный по старому
+  // списку, может указывать на другую сессию: действие допустимо только по имени или id.
+  const before = ordered(parseAgents(SAMPLE))
+  const first = before[0]
+  const second = before[1]
+  const third = before[2]
+
+  if (!first || !second || !third) throw new Error('в образце мало сессий')
+
+  it('номер только называет сессию, но не подтверждает действие', () => {
+    const picked = pickForDanger('2', before, before)
+
+    assert.ok('row' in picked)
+    assert.equal(picked.row, second)
+    assert.equal(picked.isNamed, false)
+  })
+
+  it('полное имя, короткий id и полный id подтверждают действие', () => {
+    for (const query of [second.name, second.name.toUpperCase(), second.shortId, second.sessionId]) {
+      const picked = pickForDanger(query, before, before)
+
+      assert.ok('row' in picked, query)
+      assert.equal(picked.row, second)
+      assert.equal(picked.isNamed, true, query)
+    }
+  })
+
+  it('начало имени или id - только эхо: префикс мог выбрать не ту', () => {
+    const picked = pickForDanger('fix', before, before)
+
+    assert.ok('row' in picked)
+    assert.equal(picked.isNamed, false)
+  })
+
+  it('список поменялся: номер 2 теперь другая сессия, а имя прежнее', () => {
+    // `first` закончилась и выпала из показанного списка; прежний «2» (вторая) стал «1»,
+    // а прежний «3» стал «2».
+    const after = before.filter(row => row !== first)
+    const byNumber = pickForDanger('2', after, before)
+
+    assert.ok('row' in byNumber)
+    assert.equal(byNumber.row, third)
+    assert.equal(byNumber.isNamed, false)
+
+    const byName = pickForDanger(second.name, after, before)
+
+    assert.ok('row' in byName)
+    assert.equal(byName.row, second)
+    assert.equal(byName.isNamed, true)
+  })
+
+  it('одинаковое имя у двух сессий - ошибка с перечнем, а не первая', () => {
+    const twin = [first, { ...second, name: first.name }]
+    const picked = pickForDanger(first.name, twin, twin)
+
+    assert.ok('error' in picked)
+    assert.match(picked.error, /нескольким/)
+  })
+
+  it('не найдено - ошибка как у pickSession', () => {
+    assert.ok('error' in pickForDanger('нет такой', before, before))
   })
 })
