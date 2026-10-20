@@ -98,10 +98,10 @@
 | [removed/karpathy-guidelines](removed/karpathy-guidelines/README.md) | `dex-skill-karpathy-guidelines` 1.1.1 | код по тикету (K1, K2), тикет об исправленном (K0) | снят |
 | [rule-mining](rule-mining/README.md) | `dex-rulebook-miner` 2.3.1, скилл `rule-mining` | партия добычи по истории ревью (RM1), база - тело `rule-collector` | 18 ловушек -> пункт и H3 (RM-47, ступени 1, 3, 4); правлен перечень исходов `sources-ledger`, `no-rule:no-remark` (#364) |
 | [rulebook-quality](rulebook-quality/README.md) | `dex-rulebook-miner` 2.3.1, оракул `rulebook-quality` | вердикт по своду (RQ1, RQ2), «ничего не менять» (RQ0), база - шаг 2 `/rulebook` и `project-rulebook` | 20 ловушек -> вводная с признаком блокирующей и 1 H3 (ступени 1-4) |
-| [observability](observability/README.md) | `dex-skill-observability` 1.2.1 | код (OBSW), ревью (OBSR, OBS0); мини-проект `ordering`, общий заход группы 4.7 | 13 ловушек и чек-лист -> 4 названия; W9 снят по вреду на OBS0 |
+| [observability](observability/README.md) | `dex-skill-observability` 1.2.1 | код (OBSW), ревью (OBSR, OBS0); мини-проект `ordering`, общий заход группы 4.7 | 13 ловушек и чек-лист -> 4 названия; W9 снят по вреду на OBS0, возвращён с границей в стеке на #374 (1.4.0) |
 | [merge-conflict-resolution](merge-conflict-resolution/README.md) | `dex-skill-merge-conflict-resolution` 2.0.1 | merge, rebase, чистое слияние (MC1, MC2, MC0) | протокол сохранён, 15 ловушек -> 7 названий |
 | [stand-verification](stand-verification/README.md) | `dex-skill-stand-verification` 1.1.2 | приёмка на стенде (K7, K8, `_projects/shipping`) | 11 ловушек -> 1 название (V3) |
 | [removed/shared-stand-safety](removed/shared-stand-safety/README.md) | `dex-skill-shared-stand-safety` 1.0.0 | инцидент на общем стенде (K6) | снят |
 | [removed/exploratory-testing](removed/exploratory-testing/README.md) | `dex-skill-exploratory-testing` 1.0.1 | тестировщик (ET1, ET0) | снят |
-| [removed/deep-audit](removed/deep-audit/README.md) | `dex-skill-deep-audit` 1.0.2 | аудит компонента (DA1, DA0) | снят; A6 -> ось `dotnet-runtime-diagnostician` |
+| [removed/deep-audit](removed/deep-audit/README.md) | `dex-skill-deep-audit` 1.0.2 | аудит компонента (DA1, DA0) | снят; A6 -> ось `dotnet-runtime-diagnostician`, в стеке на #374 убрана и из оси (контроль 3/4) |
 | [removed/tech-audit](removed/tech-audit/README.md) | `dex-skill-tech-audit` 1.0.2 | аудит RFC (TA1, TA0) | снят: потребителей нет |
