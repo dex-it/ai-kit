@@ -226,3 +226,47 @@ export const settled = (run: Promise<RunResult>): Promise<RunResult> =>
  */
 export const mayMutate = (originKind: string): boolean =>
   originKind === 'composer' || originKind === 'bridge' || originKind === 'sdk'
+
+/** Вход вызова `$.session.send`, как его даёт сборка 2.1.303 и новее. */
+export type SendInput = { to: { sessionId: string }; text: string }
+
+type SendOutcome = { isDelivered?: unknown; reason?: unknown }
+
+/**
+ * Объект `$` вместе с вызовом `$.session.send`. Контракт типов (2.1.272) его не
+ * знает, а сборка 2.1.303 и новее даёт; на старой члена нет, поэтому он
+ * необязательный. Тип стоит на параметре хука: приведения `as` нет, `$` из
+ * контракта ему удовлетворяет (объект без необязательного члена подходит).
+ */
+export type WithSend<Dollar extends { session: object }> = Dollar & {
+  session: { send?: (input: SendInput) => Promise<SendOutcome> }
+}
+
+export const NO_SEND_REASON = 'эта сборка Claude Code не умеет отправлять сообщения другим сессиям (проверено на 2.1.303 и новее)'
+
+/**
+ * Ответ на отправку: вызов отдаёт промис или `undefined` (члена нет). Отсутствие
+ * вызова и отказ хоста - ответ человеку, а не падение хука.
+ */
+export async function delivery(call: () => Promise<SendOutcome> | undefined): Promise<{ isDelivered: boolean; reason: string }> {
+  try {
+    const sent = await call()
+
+    if (sent === undefined) return { isDelivered: false, reason: NO_SEND_REASON }
+
+    return {
+      isDelivered: sent.isDelivered === true,
+      reason: typeof sent.reason === 'string' ? sent.reason : '',
+    }
+  } catch (error) {
+    return {
+      isDelivered: false,
+      reason:
+        error instanceof TypeError && /not a function/i.test(error.message)
+          ? NO_SEND_REASON
+          : error instanceof Error
+            ? error.message
+            : String(error),
+    }
+  }
+}

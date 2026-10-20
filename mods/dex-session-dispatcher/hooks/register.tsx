@@ -16,11 +16,11 @@
 // Everything the mod knows lives in this module's own variables: a hot reload
 // or a new session starts from a fresh read, which is cheap.
 
-import type { PluginOptions, Register, RenderElement, Timer } from 'claude-code'
+import type { Hook, PluginOptions, Register, RenderElement, Timer } from 'claude-code'
 
 import { parseArgs } from './args.ts'
-import { dangerEcho, dirChoices, failureOf, launchDir, mayMutate, recentDirs, messageFor, presetsOf, settled, startArgv, startedMessage, startedOf } from './dispatch.ts'
-import type { DirChoice, Preset, RunResult } from './dispatch.ts'
+import { dangerEcho, delivery, dirChoices, failureOf, launchDir, mayMutate, recentDirs, messageFor, presetsOf, settled, startArgv, startedMessage, startedOf } from './dispatch.ts'
+import type { DirChoice, Preset, RunResult, WithSend } from './dispatch.ts'
 import { isInside, needsScan, projectsRoot, transcriptPath } from './paths.ts'
 import type { Miss } from './paths.ts'
 import { isFinished, ordered, parseAgents, pickForDanger, pickSession } from './sessions.ts'
@@ -57,11 +57,6 @@ const optNumber = (options: PluginOptions, key: string, fallback: number): numbe
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)
-
-/** Вызов, которого нет в сгенерированном контракте типов 2.1.272. */
-type SessionSend = {
-  send?: (input: { to: { sessionId: string }; text: string }) => Promise<{ isDelivered?: unknown; reason?: unknown }>
-}
 
 type Cached = { stats: Stats; path: string | null; size: number; miss?: Miss }
 
@@ -553,7 +548,7 @@ export const register: Register = (on, pluginOptions) => {
 
   // --- Hooks ------------------------------------------------------------
 
-  on('session.start', async ($, e, next) => {
+  on('session.start', async ($: WithSend<Parameters<Hook<'session.start'>>[0]>, e, next) => {
     const result = await next(e)
 
     bound = {
@@ -568,28 +563,11 @@ export const register: Register = (on, pluginOptions) => {
       },
       run: (argv, dir) =>
         settled(Promise.resolve().then(() => $.process.run(argv, { ...(dir === undefined ? {} : { cwd: dir }), timeoutMs: 30_000 }))),
-      send: async (sessionId, text) => {
-        // Контракт типов (2.1.272) вызова не знает, а сборка 2.1.303 его даёт. Читать
-        // `$.session.send` как значение (typeof) `claude plugin validate` запрещает: вызов
-        // пишется только как `$.noun.event(...)`. Поэтому на старой сборке, где метода нет,
-        // его отсутствие ловится на вызове: это ответ человеку, а не падение хука.
-        try {
-          const sent = await ($.session as unknown as SessionSend).send!({ to: { sessionId }, text })
-
-          return {
-            isDelivered: sent.isDelivered === true,
-            reason: typeof sent.reason === 'string' ? sent.reason : '',
-          }
-        } catch (error) {
-          return {
-            isDelivered: false,
-            reason:
-              error instanceof TypeError && /not a function/i.test(error.message)
-                ? 'эта сборка Claude Code не умеет отправлять сообщения другим сессиям (проверено на 2.1.303 и новее)'
-                : messageOf(error),
-          }
-        }
-      },
+      // `claude plugin validate` пускает только вызов `$.session.send(...)` прямо: ни `typeof`,
+      // ни `?.`, ни проверку до вызова. Тип члена необязательный (на сборке старше 2.1.303 его
+      // нет), поэтому `!` здесь - единственное утверждение типа; отсутствие метода ловит
+      // `delivery` по TypeError на вызове.
+      send: (sessionId, text) => delivery(() => $.session.send!({ to: { sessionId }, text })),
       statSize: path =>
         $.fs
           .stat(path)

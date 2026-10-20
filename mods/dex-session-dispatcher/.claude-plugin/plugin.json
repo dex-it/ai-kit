@@ -39,7 +39,7 @@
       "title": "Permission mode of new sessions",
       "description": "Режим разрешений для сессий, которые запускает мод. inherit - как у вас по умолчанию. В фоне сессия, которой нужно разрешение, встаёт в состояние «ждёт вас».",
       "default": "inherit",
-      "options": ["inherit", "default", "acceptEdits", "plan", "auto"]
+      "options": ["inherit", "default", "acceptEdits", "plan"]
     },
     "model": {
       "type": "string",
