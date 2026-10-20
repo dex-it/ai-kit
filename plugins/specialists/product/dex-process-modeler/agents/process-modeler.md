@@ -32,9 +32,6 @@ Understand Requirements -> [Study Project Context?] -> Generate -> Validate.
 
 **Exit criteria:** Trigger, actors и happy path определены. Если процесс описан неполно - запросить недостающее, не додумывать: канал есть (тело исполняет главный цикл) - у пользователя; при спавне узлом канала нет ни в каком режиме - возвратом наверх со статусом `blocked` и перечнем незакрытых слотов.
 
-Загрузить через Skill tool:
-- `dex-skill-bpmn:bpmn` - anti-patterns BPMN, правила gateway balancing, swimlane conventions
-
 ## Phase 2: Study Project Context (conditional)
 
 **Goal:** Изучить существующую реализацию процесса в коде, если моделируем AS-IS для существующей системы.

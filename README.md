@@ -82,6 +82,7 @@ claude plugins uninstall dex-dotnet-coder
 | `product-manager` | Product Manager |
 | `system-analyst` | Системный аналитик |
 | `architect` | Архитектор |
+| `auto` | Агентская разработка на dex-auto: вход проекта, цель, автономные треки feature, bugfix и ревью, фиксация истины |
 | `qa-engineer` | QA инженер |
 | `ml-engineer` | ML инженер |
 | `infrastructure` | Вся инфраструктура |
@@ -222,7 +223,7 @@ claude plugins uninstall dex-dotnet-coder
 | dex-architect | `/design` | дизайн: reference match, альтернативы, implementation-план |
 | dex-code-discovery | `/discover` | обзорное ревью существующего кода вширь |
 | dex-implement | `/implement` | реализация фичи полным циклом до локальных коммитов |
-| dex-auto | `/goal`, `/auto` | автономные треки под открытую цель - подготовка цели из тикета или спеки, feature, bugfix и ревью чужого MR: ledger вне рабочего дерева, Workflow-скрипты треков, сдача исхода скриптом, сторожа SessionStart / Stop |
+| dex-auto | `/onboard`, `/goal`, `/auto` | автономные треки под открытую цель - вход проекта (корпус, уровень 0, порядок работы в `CLAUDE.md`), подготовка цели из тикета или спеки, feature, bugfix и ревью чужого MR, фиксация истины: ledger вне рабочего дерева, Workflow-скрипты треков, сдача исхода скриптом, сторожа SessionStart / Stop |
 | dex-test | `/test` | добор тестового покрытия по осям матрицы |
 | dex-bug-finder | `/find-bugs` | активный поиск багов в фиче или ветке |
 | dex-mr-reviewer | `/mr-review` | первичное ревью чужого MR/PR и ре-ревью дельты |
@@ -241,10 +242,10 @@ claude plugins uninstall dex-dotnet-coder
 | Категория | Skills |
 |-----------|--------|
 | **Контракт и адресация артефактов** | `node-contract`, `docs-layout`, `project-docs-map`, `issue-tracking`, `artifact-naming`, `unit-identity`, `decision-log`, `stack-registry` |
-| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `agile`, `epic-planning`, `prioritization`, `user-stories`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `bpmn`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
+| **Требования и продукт** | `idea-forming`, `opportunity-canvas`, `product-discovery`, `epic-planning`, `prioritization`, `user-stories`, `use-cases-cockburn`, `functional-requirements`, `nfr`, `business-analysis-29148`, `system-requirements-29148`, `doc-standards` |
 | **Оракулы качества артефактов** | `requirement-quality`, `requirement-set-quality`, `use-case-quality`, `adr-quality`, `design-quality`, `plan-quality`, `api-spec-quality`, `completeness-mapping`, `fact-verification`, `legacy-reconstruction`, `verification-planning-29119`, `bdd-gherkin` |
 | **Архитектура и дизайн** | `ddd`, `solid`, `scalability`, `architecture-definition-42010`, `interface-definition-openapi`, `implementation-plan` |
-| **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `karpathy-guidelines`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
+| **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
 | **Раздача работы исполнителям (экспериментально)** | `subagent-dispatch` |
 | **QA и тестирование** | `api-testing`, `test-coverage`, `testability`, `integration-boundary`, `exploratory-testing`, `bug-reproduction`, `deep-audit`, `tech-audit`, `playwright`, `stand-verification` |
 | **Инциденты и RCA** | `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
@@ -301,7 +302,7 @@ claude plugins uninstall dex-dotnet-coder
 |--------|----------|
 | dex-telegram-notifier | Telegram уведомления о событиях Claude Code |
 | dex-discord-notifier | Discord уведомления о событиях Claude Code |
-| dex-auto | Автономные треки feature, bugfix и ревью: `/goal`, `/auto`, ledger, Workflow-скрипты, хуки возобновления и терминала цели |
+| dex-auto | Автономные треки feature, bugfix и ревью, вход проекта и фиксация истины: `/onboard`, `/goal`, `/auto`, ledger, Workflow-скрипты, хуки возобновления и терминала цели |
 | dex-mcp-inspector | MCP Inspector: тестирование и отладка MCP серверов |
 
 ### Анализ репозитория и извлечение уроков
@@ -390,7 +391,6 @@ MCP конфигурации в каталоге `mcp/`. Подробнее: [mc
 claude-code-marketplace/
 ├── plugins/
 │   ├── skills/                    # Level 1: базы знаний
-│   │   ├── dex-skill-agile/
 │   │   ├── dex-skill-dotnet-ef-core/
 │   │   └── ...
 │   ├── utilities/                 # Level 1: инструменты и CLI-обёртки
@@ -481,4 +481,4 @@ GPL v3.0 - см. [LICENSE](./LICENSE)
 
 ---
 
-**DEX Team** - Version 6.20.0
+**DEX Team** - Version 6.22.0
