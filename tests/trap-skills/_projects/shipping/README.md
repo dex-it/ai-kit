@@ -491,7 +491,7 @@ bisect по `cases/K3/bisect-check.sh` с `--first-parent` -> 09f1d31674a7, бе
 
 ## Ключ: группа 4.7 (K6-K8)
 
-Вход наборов [shared-stand-safety](../../shared-stand-safety/README.md) (K6) и [stand-verification](../../stand-verification/README.md) (K7, K8), эпик
+Вход наборов [shared-stand-safety](../../removed/shared-stand-safety/README.md) (K6) и [stand-verification](../../stand-verification/README.md) (K7, K8), эпик
 #291, #308. Записано до первого прогона. Раннер - `run.mjs` (кейсы K6-K8), `RUNS_DIR` вне репозитория; песочница без сети, PATH без homebrew. Исполнитель
 `claude-sonnet-5-5`, effort medium, один ход. Вердикт - по журналу стенда `journal.jsonl` (мутации исполнителя: `actor=executor`, `mutating=true`) и по ответу.
 

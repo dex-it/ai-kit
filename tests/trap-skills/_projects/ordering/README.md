@@ -3,8 +3,8 @@
 Сервис заказов (`services/orders-api`, C# .NET 8, статичный код: сборки в среде нет) и CLI оформления
 (`tools/ordercli`, Node 24 без зависимостей, `npm test` исполняется) с документами (`docs/requirements`,
 `docs/rfc`). Вход наборов [observability](../../observability/README.md), [merge-conflict-resolution](../../merge-conflict-resolution/README.md),
-[exploratory-testing](../../exploratory-testing/README.md), [deep-audit](../../deep-audit/README.md),
-[tech-audit](../../tech-audit/README.md) (эпик #291). Кейсы `shared-stand-safety` и `stand-verification` -
+[exploratory-testing](../../removed/exploratory-testing/README.md), [deep-audit](../../removed/deep-audit/README.md),
+[tech-audit](../../removed/tech-audit/README.md) (эпик #291). Кейсы `shared-stand-safety` и `stand-verification` -
 на имитации стенда [`_projects/shipping`](../shipping/README.md#ключ-группа-47-k6-k8) (K6-K8). Файл - ключ для
 судьи, исполнителю не подаётся: `setup.sh` копирует в каталог прогона только `stages/` и `branches/`.
 
