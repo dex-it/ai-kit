@@ -1,6 +1,6 @@
 ---
 name: python-computer-vision
-description: Computer Vision - предобработка снимков для сети, Resize. Активируется при computer vision, torchvision, transforms, Resize, albumentations, augmentation, фото, снимки, классификация изображений, ResNet
+description: Computer Vision - предобработка снимков для сети, Resize. Активируется при computer vision, torchvision, transforms, Resize, albumentations, фото, снимки, классификация изображений, ResNet, соотношение сторон
 ---
 
 # Computer Vision - чек-лист

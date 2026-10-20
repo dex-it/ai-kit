@@ -366,19 +366,19 @@
     "id": "python-cv-in",
     "mode": "in-scope",
     "expect": "dex-skill-python-computer-vision:python-computer-vision",
-    "prompt": "Обучаю детектор объектов на своих фото, на валидации метрика хорошая, на новых снимках рамки съезжают. Что посмотреть в подготовке данных?"
+    "prompt": "Готовлю фото полок для классификатора на ResNet: кадры разного формата, привожу их к одному размеру через Resize. Что учесть, чтобы не исказить снимки?"
   },
   {
     "id": "python-ml-opt-in",
     "mode": "in-scope",
     "expect": "dex-skill-python-ml-optimization:python-ml-optimization",
-    "prompt": "Подбор гиперпараметров идёт третьи сутки, а обучение на двух картах медленнее, чем на одной. Как это ускорить?"
+    "prompt": "Подбираю гиперпараметры в Optuna: число деревьев и глубину задаю целыми числами от 100 до 1000, поиск идёт долго и сходится плохо. Как лучше задать пространство поиска?"
   },
   {
     "id": "python-nlp-in",
     "mode": "in-scope",
     "expect": "dex-skill-python-nlp-transformers:python-nlp-transformers",
-    "prompt": "Дообучаю BERT из huggingface transformers на своём датасете: не хватает памяти GPU, а после дообучения качество просело. Как правильно?"
+    "prompt": "Дообучаю BERT из huggingface transformers: на первых шагах loss скачет, а в проде модель на CPU не укладывается по задержке. Что сделать?"
   },
   {
     "id": "python-hygiene-in",
@@ -390,13 +390,13 @@
     "id": "python-pytorch-in",
     "mode": "in-scope",
     "expect": "dex-skill-python-pytorch:python-pytorch",
-    "prompt": "Цикл обучения на PyTorch: лосс скачет, на валидации метрики хуже, чем на трейне при том же коде, и GPU загружена на 20%. Что не так?"
+    "prompt": "Пишу цикл обучения на PyTorch и вывожу значение потери в лог на каждом батче; GPU при этом простаивает. С чем это может быть связано?"
   },
   {
     "id": "python-tensorflow-in",
     "mode": "in-scope",
     "expect": "dex-skill-python-tensorflow:python-tensorflow",
-    "prompt": "Обучение на Keras: входной конвейер данных тормозит, а после сохранения и загрузки модель предсказывает иначе. Как правильно?"
+    "prompt": "Обучение на Keras упирается во входной конвейер tf.data: в нём map с тяжёлой предобработкой, а загрузка GPU низкая. Как ускорить?"
   },
   {
     "id": "rabbitmq-in",

@@ -1,6 +1,6 @@
 ---
 name: python-tensorflow
-description: TensorFlow/Keras - входной конвейер tf.data, параллельность map. Активируется при tensorflow, keras, tf.data, map, num_parallel_calls, AUTOTUNE, prefetch, входной конвейер, Dataset, model.fit
+description: TensorFlow/Keras - входной конвейер tf.data, параллельность map. Активируется при tensorflow, keras, tf.data, map, num_parallel_calls, AUTOTUNE, входной конвейер, Dataset, model.fit, предобработка данных
 ---
 
 # TensorFlow/Keras - чек-лист

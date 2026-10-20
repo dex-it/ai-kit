@@ -1,6 +1,6 @@
 ---
 name: python-nlp-transformers
-description: NLP Transformers - токенизация пачкой, прогрев при дообучении, генерация, инференс на CPU. Активируется при huggingface, transformers, tokenizer, fine-tune, warmup, generate, do_sample, TrainingArguments, quantization, отзывы
+description: NLP Transformers - токенизация пачкой, прогрев при дообучении, генерация, инференс на CPU. Активируется при huggingface, transformers, tokenizer, fine-tune, warmup, generate, do_sample, TrainingArguments, quantization, генерация текста
 ---
 
 # NLP Transformers - чек-лист

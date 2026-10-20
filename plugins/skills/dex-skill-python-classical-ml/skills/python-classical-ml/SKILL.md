@@ -1,6 +1,6 @@
 ---
 name: python-classical-ml
-description: Classical ML - дисбаланс классов и ранняя остановка при обучении sklearn и XGBoost. Активируется при scikit-learn, xgboost, RandomForest, class_weight, scale_pos_weight, early_stopping_rounds, дисбаланс классов, редкий класс, отток, классификатор
+description: Classical ML - дисбаланс классов и ранняя остановка при обучении sklearn и XGBoost. Активируется при scikit-learn, xgboost, RandomForest, class_weight, scale_pos_weight, early_stopping_rounds, дисбаланс классов, редкий класс, классификатор, n_estimators
 ---
 
 # Classical ML - чек-лист
