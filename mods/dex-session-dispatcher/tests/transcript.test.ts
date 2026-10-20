@@ -4,6 +4,7 @@ import { describe, it } from 'node:test'
 import {
   absorbChunk,
   emptyStats,
+  maskSecrets,
   percentOf,
   snippet,
   todoProgress,
@@ -115,7 +116,7 @@ describe('absorbChunk', () => {
 
 describe('вспомогательные', () => {
   it('snippet чистит управляющие символы и режет длину', () => {
-    assert.equal(snippet('а\u001b[31m\nб   в'), 'а [31m б в')
+    assert.equal(snippet('а\u001b[31m\nб   в'), 'а б в')
     assert.equal(snippet('x'.repeat(50), 10), 'xxxxxxxxx…')
   })
 
@@ -194,6 +195,17 @@ describe('snippet: секреты маскируются', () => {
       'AKIAABCDEFGHIJKLMNOP',
       `xoxb-${'1234567890'.repeat(2)}`,
       `Bearer ${'abcDEF123456'.repeat(3)}`,
+      `sk_live_${'A1b2C3d4E5'.repeat(3)}`,
+      `rk_test_${'A1b2C3d4E5'.repeat(3)}`,
+      `AIza${'A1b2C3d4E5'.repeat(3)}abcde`,
+      `npm_${'A1b2C3d4E5'.repeat(3)}abcdef`,
+      `gldt-${'A1b2C3d4E5'.repeat(2)}`,
+      `eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.${'A1b2C3d4E5'.repeat(2)}`,
+      `Basic ${'dXNlcjpwYXNzd29yZA=='}`,
+      `\u001b[0mghp_${'A1b2C3d4E5'.repeat(3)}`,
+      `\u001b[38:5:1msk-${'A1b2C3d4E5'.repeat(2)}`,
+      `\u001b[>4;1msk-${'A1b2C3d4E5'.repeat(2)}`,
+      `tokenghp_${'A1b2C3d4E5'.repeat(3)}`,
     ]
 
     for (const token of tokens) {
@@ -222,5 +234,40 @@ describe('snippet: секреты маскируются', () => {
 
   it('обычный текст, похожий на префикс, не трогается', () => {
     assert.equal(snippet('task-sk-1 и ghp короткое'), 'task-sk-1 и ghp короткое')
+    assert.equal(snippet('Basic authentication включена'), 'Basic authentication включена')
+    assert.equal(snippet('max_tokens: 100000'), 'max_tokens: 100000')
+
+    for (const plain of [
+      'input_tokens: 12345678',
+      '"output_tokens":123456789',
+      'tokenizer: cl100k_base',
+      'Secretary: Johnson-Smith',
+      'secrets: /home/u/.config/app/secrets.yaml',
+      'const secretKey = getSecretKeyFromVault();',
+      'token: process.env.GH_TOKEN',
+      'Basic auth/authorization flow',
+      'basic config/settings.json',
+    ]) {
+      assert.equal(snippet(plain), plain, plain)
+    }
+  })
+
+  it('маска линейна: длинный пробельный кусок не морозит клиент', () => {
+    for (const filler of [' '.repeat(100_000), '\n'.repeat(100_000), `token${' '.repeat(100_000)}=`]) {
+      const started = performance.now()
+
+      maskSecrets(`a${filler}b`)
+
+      assert.ok(performance.now() - started < 500, `${filler.length} знаков`)
+    }
+  })
+
+  it('пароль в URL и значение по ключу скрываются, ключ и адрес остаются', () => {
+    assert.equal(snippet('postgres://app:S3cretPass@db:5432/x'), 'postgres://app:[секрет скрыт]@db:5432/x')
+    assert.equal(snippet('AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMIK7MDENG'), 'AWS_SECRET_ACCESS_KEY=[секрет скрыт]')
+    assert.equal(snippet('api_key: "abcd1234efgh"'), 'api_key: "[секрет скрыт]"')
+    assert.equal(snippet('password=hunter2hunter2 дальше'), 'password=[секрет скрыт] дальше')
+    assert.equal(snippet('redis://:p4ssw0rd@host:6379'), 'redis://:[секрет скрыт]@host:6379')
+    assert.equal(snippet('Authorization: basic dXNlcjpwYXNz'), 'Authorization: basic [секрет скрыт]')
   })
 })

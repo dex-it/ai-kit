@@ -25,7 +25,7 @@ import { isInside, needsScan, projectsRoot, transcriptPath } from './paths.ts'
 import type { Miss } from './paths.ts'
 import { isFinished, ordered, parseAgents, pickForDanger, pickSession } from './sessions.ts'
 import type { SessionRow } from './sessions.ts'
-import { HELP_TEXT as HELP, detailText, framedLog, listText, openText } from './text.ts'
+import { HELP_TEXT as HELP, detailText, framedLog, listText, openText, quote } from './text.ts'
 import type { Entry } from './text.ts'
 import { absorbChunk, emptyStats } from './transcript.ts'
 import type { Stats } from './transcript.ts'
@@ -402,9 +402,9 @@ export const register: Register = (on, pluginOptions) => {
 
     const sent = await bound.send(row.sessionId, messageFor(selfId.slice(0, 8), body))
 
-    if (sent.isDelivered) return say(`Отправлено «${row.name}». Её ответ придёт сюда сообщением или появится в её выводе.`)
+    if (sent.isDelivered) return say(`Отправлено ${quote(row.name)}. Её ответ придёт сюда сообщением или появится в её выводе.`)
 
-    return say(`Не доставлено «${row.name}»: ${sent.reason !== '' ? sent.reason : 'сессия не принимает сообщения'}.`)
+    return say(`Не доставлено ${quote(row.name)}: ${sent.reason !== '' ? sent.reason : 'сессия не принимает сообщения'}.`)
   }
 
   async function logOf(row: SessionRow): Promise<string> {
@@ -415,8 +415,8 @@ export const register: Register = (on, pluginOptions) => {
 
       return say(
         stats?.lastAnswer
-          ? `«${row.name}», последний ответ: ${stats.lastAnswer}`
-          : `У «${row.name}» нет сохранённого вывода: она открыта в другом окне терминала.`,
+          ? framedLog(row.name, stats.lastAnswer, 'последний ответ')
+          : `У ${quote(row.name)} нет сохранённого вывода: она открыта в другом окне терминала.`,
       )
     }
 
@@ -425,7 +425,7 @@ export const register: Register = (on, pluginOptions) => {
 
     bound.log(framedLog(row.name, out === '' ? '(пусто)' : out))
 
-    return say(`Вывод «${row.name}» записан в историю сессии.`)
+    return say(`Вывод ${quote(row.name)} записан в историю сессии.`)
   }
 
   /** Почему сессию нельзя остановить или удалить отсюда; `null` - можно. */
@@ -434,7 +434,7 @@ export const register: Register = (on, pluginOptions) => {
 
     // `stop` и `rm` в CLI - для фоновых сессий; окно терминала закрывается в самом окне.
     if (row.kind !== 'background') {
-      return `«${row.name}» открыта в окне терминала${row.pid !== null ? ` (процесс ${row.pid})` : ''}: закройте её там (/exit). Отсюда останавливаются и удаляются только фоновые сессии.`
+      return `${quote(row.name)} открыта в окне терминала${row.pid !== null ? ` (процесс ${row.pid})` : ''}: закройте её там (/exit). Отсюда останавливаются и удаляются только фоновые сессии.`
     }
 
     return null
@@ -464,8 +464,8 @@ export const register: Register = (on, pluginOptions) => {
 
       return say(
         kind === 'stop'
-          ? `Остановить «${row.name}»? Разговор сохранится. Нажмите кнопку ещё раз.`
-          : `Удалить «${row.name}» без возврата? Нажмите кнопку ещё раз.`,
+          ? `Остановить ${quote(row.name)}? Разговор сохранится. Нажмите кнопку ещё раз.`
+          : `Удалить ${quote(row.name)} без возврата? Нажмите кнопку ещё раз.`,
       )
     }
 
@@ -485,7 +485,7 @@ export const register: Register = (on, pluginOptions) => {
       view = 'list'
     }
 
-    return say(kind === 'stop' ? `«${row.name}» остановлена.` : `«${row.name}» удалена.`)
+    return say(kind === 'stop' ? `${quote(row.name)} остановлена.` : `${quote(row.name)} удалена.`)
   }
 
   function actionsOf(): Actions {
@@ -637,7 +637,7 @@ export const register: Register = (on, pluginOptions) => {
       .register({
         name: COMMAND,
         description: 'Все сессии Claude Code: список, запуск новых, сообщения, остановка.',
-        argumentHint: '[new задача | 2 | say 2 текст | log 2 | open 2 | stop 2 | remove 2 | help]',
+        argumentHint: '[new задача | 2 | say 2 текст | log 2 | open 2 | stop имя | remove имя | help]',
       })
       .catch((error: unknown) => {
         $.ui.log(`sessions: команда /${COMMAND} не занята мной: ${messageOf(error)}`)

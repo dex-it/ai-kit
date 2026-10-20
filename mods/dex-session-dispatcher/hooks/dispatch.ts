@@ -1,7 +1,7 @@
 // Запуск новой сессии: имя, команда и поручение. Чистое, без `$`.
 
 import type { SessionRow } from './sessions.ts'
-import { shortPath } from './text.ts'
+import { quote, shortPath } from './text.ts'
 
 export const NAME_LIMIT = 40
 
@@ -178,7 +178,7 @@ export function recentDirs(text: string, limit = 30): string[] {
 
 /** Нужно ли подтверждение: вместо исполнения вернуть название сессии и точную команду повтора. */
 export function dangerEcho(kind: 'stop' | 'remove', row: SessionRow): string {
-  const label = `«${row.name}» (${row.shortId})`
+  const label = `${quote(row.name)} (${row.shortId})`
 
   return kind === 'stop'
     ? `Остановить ${label}? Разговор сохранится. Чтобы подтвердить, повторите: /sessions stop ${row.shortId}`

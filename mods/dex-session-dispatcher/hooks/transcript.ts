@@ -92,28 +92,52 @@ export const SECRET_MASK = '[секрет скрыт]'
  */
 const SECRET_PATTERNS: readonly RegExp[] = [
   /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY-----|$)/g,
-  /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}/g,
-  /\bgithub_pat_[A-Za-z0-9_]{20,}/g,
-  /\bglpat-[A-Za-z0-9_-]{16,}/g,
+  /(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}/g,
+  /github_pat_[A-Za-z0-9_]{20,}/g,
+  /gl(?:pat|dt|ptt|rt)-[A-Za-z0-9_-]{16,}/g,
   /\bsk-[A-Za-z0-9_-]{16,}/g,
+  /\b[sr]k_(?:live|test)_[A-Za-z0-9]{16,}/g,
   /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g,
-  /\bxox[abprs]-[A-Za-z0-9-]{10,}/g,
+  /\bAIza[0-9A-Za-z_-]{35}/g,
+  /\bnpm_[A-Za-z0-9]{36}/g,
+  /xox[abprs]-[A-Za-z0-9-]{10,}/g,
+  /\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g,
   /\bBearer\s+[A-Za-z0-9._~+/=-]{12,}/gi,
+  /(?<=\bAuthorization["']?[ \t]{0,3}[:=][ \t]{0,3}["']?Basic[ \t]{1,3})[A-Za-z0-9+/]{8,}={0,2}/gi,
+  // Вне заголовка Basic - ключ, только если в нём цифра или `=`: иначе это слово или путь («Basic auth/flow»).
+  /\b[Bb]asic\s+(?=[A-Za-z+/]*[0-9=])[A-Za-z0-9+/]{12,}={0,2}(?=$|[\s"',;])/g,
+  /(?<=:\/\/[^\s:/@]*:)[^\s@/]+(?=@)/g,
+  // Повторы в lookbehind ограничены: неограниченный `\s*` на длинном пробельном куске
+  // перебирается заново с каждой позиции, и маска чужого вывода морозит клиент.
+  // Значение - без точки, скобки и ведущей `/` (код и пути) и хотя бы с одной буквой (не счётчик).
+  /(?<=(?<![A-Za-z0-9])(?:password|passwd|secret|token|api[_-]?key)(?:[_-][A-Za-z0-9]+){0,4}["']?[ \t]{0,3}[=:][ \t]{0,3}["']?)(?!\/)(?=[^\s"',;]*[A-Za-z])[A-Za-z0-9_+/=!@#$%^&*~-]{8,}(?=$|[\s"',;])/gi,
 ]
 
-export const maskSecrets = (value: string): string =>
-  SECRET_PATTERNS.reduce((text, pattern) => text.replace(pattern, SECRET_MASK), value)
+// eslint-disable-next-line no-control-regex
+const ANSI = /\u001b\[[0-?]*[ -/]*[@-~]/g
 
-/** Однострочный фрагмент чужого текста: без секретов и управляющих символов, с потолком длины. */
-export function snippet(value: string, limit = SNIPPET): string {
-  const flat = maskSecrets(value)
+/** Цвет терминала снимается до маски: код вплотную перед ключом съедает границу слова (`\x1b[0msk-...`). */
+export const maskSecrets = (value: string): string =>
+  SECRET_PATTERNS.reduce((text, pattern) => text.replace(pattern, SECRET_MASK), value.replace(ANSI, ''))
+
+/** Чужой текст одной строкой: без цвета, управляющих символов и переводов строк. Маски и обрезки нет. */
+export const oneLine = (value: string): string =>
+  value
+    .replace(ANSI, '')
     // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 
+/** Однострочный фрагмент чужого текста: без секретов и управляющих символов, с потолком длины. */
+export function snippet(value: string, limit = SNIPPET): string {
+  const flat = oneLine(maskSecrets(value))
+
   return flat.length > limit ? `${flat.slice(0, limit - 1)}…` : flat
 }
+
+/** Чужое поле в кавычках; собственные кавычки внутри заменены, чтобы рамку нельзя было закрыть изнутри. */
+export const quote = (value: string): string => `«${value.replace(/[«»]/g, '"')}»`
 
 const push = <T>(list: T[], item: T, limit: number): void => {
   list.push(item)
@@ -220,7 +244,7 @@ function onAssistant(stats: Stats, row: Record<string, unknown>): void {
 
     bump(stats.tools, name)
 
-    if (name === 'Skill') bump(stats.skills, str(input.skill))
+    if (name === 'Skill') bump(stats.skills, snippet(str(input.skill), 80))
 
     if (name === 'Agent' || name === 'Task') {
       stats.subagents += 1

@@ -17,7 +17,7 @@ import type {
 import type { DirChoice, Preset } from './dispatch.ts'
 import { PHASE_HINT, PHASE_WORD, isFinished, tallyLine, tallyOf } from './sessions.ts'
 import type { Phase, SessionRow } from './sessions.ts'
-import { EMPTY_LIST, START_STEPS, ageWord, planLine, selectedIndex, shortPath, usageLine } from './text.ts'
+import { EMPTY_LIST, START_STEPS, ageWord, commandName, planLine, selectedIndex, shortPath, usageLine } from './text.ts'
 import type { Entry } from './text.ts'
 import { percentOf, topOf, windowOf } from './transcript.ts'
 
@@ -435,7 +435,7 @@ function detailsView(ui: Ui, actions: Actions, model: PaneModel): RenderElement 
           />
         </Box>
       ) : (
-        <Text dimColor>Сообщение: /sessions say {row.name} &lt;текст&gt;</Text>
+        <Text dimColor>Сообщение: /sessions say {commandName(row.name)} &lt;текст&gt;</Text>
       )}
       {noteLine(ui, model)}
     </Box>

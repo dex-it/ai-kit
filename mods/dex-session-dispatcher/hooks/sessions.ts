@@ -2,6 +2,8 @@
 // разбор ответа, слова для человека, порядок внимания и выбор сессии по тому,
 // что человек набрал (номер, имя, начало id). Модуль чистый: `$` не знает.
 
+import { oneLine, quote, snippet } from './transcript.ts'
+
 export type Kind = 'interactive' | 'background'
 
 /** Что с сессией, словами, которые понятны без знания внутренностей. */
@@ -105,11 +107,13 @@ export function parseAgents(raw: string): SessionRow[] {
     rows.push({
       sessionId,
       shortId: id !== '' ? id : sessionId.slice(0, 8),
-      name: text(node.name) !== '' ? text(node.name) : sessionId.slice(0, 8),
+      // Имя и ожидание пишет чужая сессия, а читает модель этой: одной строкой. Имя - адрес
+      // в командах, поэтому без маски и обрезки: иначе по настоящему имени сессию не найти.
+      name: oneLine(text(node.name)) !== '' ? oneLine(text(node.name)) : sessionId.slice(0, 8),
       cwd: text(node.cwd),
       kind,
       phase: phaseOf(text(node.status), text(node.state)),
-      waitingFor: text(node.waitingFor),
+      waitingFor: snippet(text(node.waitingFor), 160),
       startedAt: typeof node.startedAt === 'number' ? node.startedAt : 0,
       pid: typeof node.pid === 'number' ? node.pid : null,
     })
@@ -177,13 +181,19 @@ export function pickSession(
 
   if (q === '') return { error: 'Укажите сессию: номер из списка, имя или начало id.' }
 
+  const lower = q.toLowerCase()
+  // Короткий id - 8 hex-знаков и бывает из одних цифр: точный id проверяется до номера,
+  // номера такой длины в списке не бывает.
+  const byId = all.filter(row => row.shortId.toLowerCase() === lower || row.sessionId.toLowerCase() === lower)
+
+  if (byId.length === 1 && byId[0]) return { row: byId[0] }
+
   if (/^\d+$/.test(q)) {
     const row = shown[Number(q) - 1]
 
     return row ? { row } : { error: `В списке нет сессии №${q}. Сейчас их ${shown.length}.` }
   }
 
-  const lower = q.toLowerCase()
   const exact = all.filter(row => row.name.toLowerCase() === lower)
 
   if (exact.length === 1 && exact[0]) return { row: exact[0] }
@@ -199,7 +209,7 @@ export function pickSession(
 
   if (found.length === 0) return { error: `Не нашёл сессию «${q}». Список: /sessions list.` }
 
-  const names = found.map(row => `${row.name} (${row.shortId})`).join(', ')
+  const names = found.map(row => `${quote(row.name)} (${row.shortId})`).join(', ')
 
   return { error: `«${q}» подходит нескольким сессиям: ${names}. Назовите имя целиком, начало id или номер из списка.` }
 }
@@ -220,14 +230,14 @@ export function pickForDanger(
 ): DangerPick {
   const q = query.trim().replace(/^#/, '').toLowerCase()
 
-  if (q !== '' && !/^\d+$/.test(q)) {
-    const exact = all.filter(
-      row =>
-        row.name.toLowerCase() === q || row.shortId.toLowerCase() === q || row.sessionId.toLowerCase() === q,
-    )
+  // Имя из одних цифр читается как номер, id - нет: id из цифр должен подтверждать действие.
+  const isNumber = /^\d+$/.test(q)
+  const exact = all.filter(
+    row =>
+      row.shortId.toLowerCase() === q || row.sessionId.toLowerCase() === q || (!isNumber && row.name.toLowerCase() === q),
+  )
 
-    if (exact.length === 1 && exact[0]) return { row: exact[0], isNamed: true }
-  }
+  if (q !== '' && exact.length === 1 && exact[0]) return { row: exact[0], isNamed: true }
 
   const picked = pickSession(query, shown, all)
 
