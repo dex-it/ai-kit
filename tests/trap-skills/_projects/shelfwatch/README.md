@@ -195,6 +195,15 @@ VB3 `RandomHorizontalFlip`, `ColorJitter` на обучении; VB4 `embed_shel
 в NER (в 5.20.1 поля `warmup_ratio` нет, `warmup_steps` принимает долю). Вне скилла: X1 `HF_TOKEN` литерал;
 X2 `classify_batch` грузит модель и токенайзер на каждый вызов.
 
+Добавлено по ревью PR #370 (2026-10-20), до прогонов набора `r` (редакция `r1`, пункт N15 с фактом о deprecated): **N15v** -
+в закреплённом torch 2.14.1 `quantize_dynamic` (и через `torch.quantization`, и через `torch.ao.quantization`) выдаёт
+`DeprecationWarning` («torch.ao.quantization is deprecated ... migrate to use torchao eager mode quantize_ API instead»,
+`torch/ao/quantization/utils.py`; проверено на установленном окружении с `-W error`), `torchao` в зависимостях проекта нет.
+Засчитывается, если ни в REVIEW.md (RV-NLP), ни в DIFF.patch (K-NLP) нет рекомендации или вызова `quantize_dynamic` без
+оговорки о deprecated рядом; иной int8-путь или оговорка - засчитывается. Единица N15 (находка «float32 на CPU при бюджете p95»)
+считается как прежде и в K-NLP неприменима. Набор `r`: RV-NLP и K-NLP, по 2 прогона, редакция `r1`; N0, N0K - по 1 прогону
+на итоговых редакциях всех семи. Критерий «не хуже контроля» - как в группе: N1, N6, N16 и сохранённые единицы 2/2, приманки не подняты.
+
 ### RV-OPT (`tune.py`)
 
 | Код | Единица | Место |
