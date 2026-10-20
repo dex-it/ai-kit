@@ -252,7 +252,7 @@ claude plugins uninstall dex-dotnet-coder
 | **.NET** | `dotnet-api-development`, `dotnet-async-patterns`, `dotnet-code-quality`, `dotnet-csproj-hygiene`, `dotnet-ef-core`, `dotnet-logging`, `dotnet-resilience`, `dotnet-testing-patterns`, `dotnet-validation`, `api-documentation` |
 | **Frontend и TypeScript** | `react`, `ts-nodejs-api`, `ts-vitest-jest` |
 | **Инфраструктура** | `docker`, `kubernetes`, `rabbitmq`, `kafka`, `elasticsearch`, `redis`, `mongodb`, `gitlab-ci`, `github-actions`, `jenkins`, `teamcity`, `observability` |
-| **ML и Python** | `python-pytorch`, `python-tensorflow`, `python-classical-ml`, `python-nlp-transformers`, `python-computer-vision`, `python-ml-optimization`, `python-project-hygiene` |
+| **ML и Python** | `python-pytorch`, `python-tensorflow`, `python-nlp-transformers`, `python-computer-vision`, `python-ml-optimization`, `python-project-hygiene` |
 
 ## Utilities (Level 1)
 
@@ -478,4 +478,4 @@ GPL v3.0 - см. [LICENSE](./LICENSE)
 
 ---
 
-**DEX Team** - Version 6.21.0
+**DEX Team** - Version 6.24.0

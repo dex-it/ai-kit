@@ -66,7 +66,6 @@ Context -> Direct Analysis -> Skill-Based Deep Scan -> Report. Context обяз�
 **Exit criteria:** Skill загружен, его anti-patterns проверены применительно к данным.
 
 Когда загружать:
-- Tabular data + baseline нужен -- `dex-skill-python-classical-ml:python-classical-ml` (дисбаланс классов)
 - Deep learning baseline -- `dex-skill-python-pytorch:python-pytorch` `[справочно]` или `dex-skill-python-tensorflow:python-tensorflow` `[справочно]`
 - Image data -- `dex-skill-python-computer-vision:python-computer-vision` `[справочно]` (предобработка снимков)
 - Text data -- `dex-skill-python-nlp-transformers:python-nlp-transformers` `[справочно]` (токенизация, прогрев, генерация)
