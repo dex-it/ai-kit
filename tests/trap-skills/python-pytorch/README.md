@@ -34,7 +34,7 @@ K-NLP, набор `n` (редакция `n1`, 24 прогона), набор `m`
 
 ## Потребители
 
-Загрузка `[справочно]` в агентах `model-trainer`, `model-debugger`, `ml-experimenter`, `data-pipeline-builder`, `deployment-assistant` (каталог `plugins/specialists/ml`); бандл `ml-engineer`; кейс активации `python-pytorch-in`, `pytorch-near`. Вызовов узлов dex-auto нет. Нижний тир - sonnet.
+Загрузка `[справочно]` в агентах `model-trainer`, `model-debugger`, `ml-experimenter` (каталог `plugins/specialists/ml`); бандл `ml-engineer`; кейс активации `python-pytorch-in`, `pytorch-near`. Вызовов узлов dex-auto нет. Нижний тир - sonnet.
 
 ## Неточности текста
 
@@ -88,10 +88,12 @@ DDP (`python-pytorch` = `python-ml-optimization`), `no_grad` (тот же дво
 | Носитель | До | После | Взамен |
 |---|---|---|---|
 | `python-pytorch/SKILL.md` | 5039 символов, 98 строк | 447 символов, 10 строк | 14 единиц (ловушки, чек-лист, таблицы) -> 1 пункт |
-| `description` | триггеры по ловушкам | предмет пунктов; кейс `python-pytorch-in` 3/3 на `claude-sonnet-5-5` |
+| `description` | триггеры по ловушкам | предмет пунктов; поле без слов снятых ловушек и домена фикстуры; кейс `python-pytorch-in` переписан вопросом об оставшихся пунктах (ревью PR #370), 3/3, `pytorch-near` 0/3 (молчит) (`node tools/run-activation.js --runs 3`, модель sonnet, 2026-10-20) |
 
 Норма письма (`dex-skill-norm-writing`): носитель меньше, чем до правки; пункт - одно утверждение без оговорок, называет ситуацию, решение выводит исполнитель; факт версии (где есть) назван с версией и источником. Числа без источника в пункты не вошли.
 
 ## Синхронизации
 
 Версия скилла 2.0.1 -> 2.1.0 (`plugin.json`, `marketplace.json`). Витрина (`plugin.json` `description`) переписана по телу и разошлась в `marketplace.json` генератором. Агенты `ml-experimenter`, `model-debugger`, `model-trainer` (1.6.0 -> 1.6.1): скобки с перечнем снятых ловушек у ссылок на скиллы заменены предметом пунктов. Бандлы и каталог не меняются: состав плагинов прежний. Кейс активации - в `tests/activation/cases.json`.
+
+По ревью PR #370: `data-pipeline-builder` (`dex-data-pipeline` 1.7.0 -> 1.7.1) - строка pytorch снята, пункта про `DataLoader` больше нет; `deployment-assistant` (`dex-ml-deployer` 1.5.0 -> 1.5.1) - загрузки pytorch, tensorflow и classical-ml сняты: оставшиеся пункты про обучение, не про export и serving; записанный там фолбэк («профильного skill по export/serving в каталоге нет») сохранён.
