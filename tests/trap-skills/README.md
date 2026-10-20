@@ -16,7 +16,7 @@
 
 `<набор>/sources.md` - основания пунктов, пришедших из `/mr-apply`: MR, триада, самооценка анализатора. По ним строится кейс, когда пункт идёт в заход сжатия.
 
-`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `loyalty` - группа 3.2, корпус требований, `rooms` - группа 3.1, требования фичи, `bookings` - группа 4.2, ASP.NET Core и контракт OpenAPI, `classmate` - группа 4.8, продуктовые документы и история ревью): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
+`_projects/` - общие мини-проекты нескольких наборов (`billing` - группы 0-1, `parcel` - группа 2.4, часть «тесты», `shipping` - группа 2.4b и имитация стенда, `loyalty` - группа 3.2, корпус требований, `rooms` - группа 3.1, требования фичи, `bookings` - группа 4.2, ASP.NET Core и контракт OpenAPI, `classmate` - группа 4.8, `diag` - группа 4.6, Docker-лаборатория диагностики, продуктовые документы и история ревью): `setup.sh` разворачивает git-репозиторий прогона, README проекта - ключ для судьи, исполнителю не подаётся.
 
 `removed/` - наборы снятых скиллов: скилла в каталоге нет, набор хранит свидетельство снятия и не
 перезапускается.
@@ -98,3 +98,9 @@
 | [removed/karpathy-guidelines](removed/karpathy-guidelines/README.md) | `dex-skill-karpathy-guidelines` 1.1.1 | код по тикету (K1, K2), тикет об исправленном (K0) | снят |
 | [rule-mining](rule-mining/README.md) | `dex-rulebook-miner` 2.3.1, скилл `rule-mining` | партия добычи по истории ревью (RM1), база - тело `rule-collector` | 18 ловушек -> пункт и H3 (RM-47, ступени 1, 3, 4); правлен перечень исходов `sources-ledger`, `no-rule:no-remark` (#364) |
 | [rulebook-quality](rulebook-quality/README.md) | `dex-rulebook-miner` 2.3.1, оракул `rulebook-quality` | вердикт по своду (RQ1, RQ2), «ничего не менять» (RQ0), база - шаг 2 `/rulebook` и `project-rulebook` | 20 ловушек -> вводная с признаком блокирующей и 1 H3 (ступени 1-4) |
+| [managed-debug](managed-debug/README.md) | `dex-skill-managed-debug` 1.1.0, 1.2.0 | управляемый hang (d1), дамп (d3), медленный путь (p1), «ничего не менять» (n0); `_projects/diag`, общий заход группы 4.6 | 16 ловушек -> 13; сняты attach без CAP, Mini-дамп, `.Result`; остальное `unverifiable` |
+| [core-dumps](core-dumps/README.md) | `dex-skill-core-dumps` 1.0.0 | core по build-id (n1), дамп (d3) | 13 ловушек -> 9; сняты четыре (двойники и build-id) |
+| [native-debug](native-debug/README.md) | `dex-skill-native-debug` 1.0.0 | core (n1), живой процесс без `CAP_SYS_PTRACE` (n2) | 16 ловушек -> 10; сняты Yama, CAP, REPL, build-id, порядок аргументов, Apple Silicon (вне предмета) |
+| [syscall-tracing](syscall-tracing/README.md) | `dex-skill-syscall-tracing` 1.0.0 | скрытый дочерний процесс (s1) | 14 ловушек -> 13; снят `-f` |
+| [binary-inspection](binary-inspection/README.md) | `dex-skill-binary-inspection` 1.0.0 | недоверенные бинарники (b1), core (n1) | 16 ловушек -> 10; сняты ldd, nm -D, file, ilspycmd, strings, build-id |
+| [perf-profiling](perf-profiling/README.md) | `dex-skill-perf-profiling` 1.0.0 | медленный .NET-путь (p1) | 13 ловушек -> 12; снята PerfMap |
