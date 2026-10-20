@@ -7,15 +7,10 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ## Attach и launch
 
-### Attach без CAP_SYS_PTRACE в контейнере
-Плохо: `docker exec -it ... netcoredbg --interpreter=mi --attach <PID>` без `--cap-add=SYS_PTRACE`
-Правильно: контейнер запускается с `--cap-add=SYS_PTRACE --security-opt seccomp=unconfined`, либо `--privileged` для тестового окружения
-Почему: ядро Linux требует CAP_SYS_PTRACE для cross-process attach. Docker по умолчанию её не даёт - silent fail или `ptrace: Operation not permitted`
-
 ### Just-my-code маскирует framework-кадры
-Плохо: `netcoredbg ... -ex "set just-my-code on"` при разборе hang в чужом async-коде
-Правильно: `set just-my-code off` пока root cause не локализован
-Почему: при `on` стек обрезается на первом не-user кадре, теряется ContinueWith / TaskScheduler.UnobservedTaskException - именно там часто живёт hang
+Плохо: Just My Code включён при разборе hang в чужом async-коде
+Правильно: `set just-my-code 0` в CLI netcoredbg (3.1.0, `help set`) пока root cause не локализован
+Почему: Just My Code шагает мимо кода framework и не-user кода, а hang часто живёт в ContinueWith / TaskScheduler
 
 ### Интерактивный режим вместо MI2 для скриптинга
 Плохо: запускать `netcoredbg` без `--interpreter=mi`, пытаясь скриптовать REPL
@@ -48,11 +43,6 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ## dotnet-dump и dotnet-gcdump
 
-### Mini-тип на Linux в надежде анализировать в WinDbg
-Плохо: `dotnet-dump collect --type Mini` на Linux потом попытка `windbg core.dump`
-Правильно: на Linux всегда `--type Full`, анализ только через `dotnet-dump analyze`
-Почему: Mini на Linux - не Windows minidump формат. WinDbg на Linux core не работает. Full включает managed metadata, читается только `dotnet-dump`
-
 ### gcdump блокирует процесс на multi-GB heap
 Плохо: `dotnet-gcdump collect -p <PID>` на prod-сервисе с heap 8GB во время инцидента
 Правильно: до prod-инцидента понимать что gcdump блокирует worker на seconds-minutes; в проде использовать `dotnet-counters` для live или `dotnet-dump --type Full` для post-mortem
@@ -77,14 +67,6 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ## ThreadPool starvation и async hang
 
-### Lock на async-методе с .Result внутри
-Плохо: считать «hang в async-методе - это deadlock на SynchronizationContext»
-Правильно: проверить через `dumpasync` нет ли цепочки `.Result` / `.Wait()` / `GetAwaiter().GetResult()` в hot-path; одновременно `dotnet-counters` `threadpool-queue-length`
-Почему: ASP.NET Core нет SynchronizationContext capture, классический deadlock редок. Чаще starvation от `.Result` блокирующего worker thread
-
-
-## Mismatched symbols и SourceLink
-
 ### PDB не подгружены - стеки в IL-смещениях
 Плохо: managed stack показывает `MyApp.Service.Process+IL_0042` вместо `Service.cs:123`
 Правильно: `dotnet-symbol --recurse-subdirectories <dump-or-dll>` для restore из symbol server; для прода - embedded PDB через `<DebugType>embedded</DebugType>` в csproj
@@ -92,7 +74,7 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ### SourceLink требует git-доступ к origin
 Плохо: при анализе дампа netcoredbg выдаёт `Source not available` для своего же кода
-Правильно: проверить что PDB содержит SourceLink JSON (`pwsh -c "& dotnet-symbol --packages <pdb> -o ."`), доступ к git-origin из debug-машины
+Правильно: проверить что PDB содержит SourceLink JSON и доступ к git-origin из debug-машины
 Почему: SourceLink резолвит `https://raw.githubusercontent.com/...` по коммит-хэшу. Без auth или offline-машины ссылка не открывается, source не подгружается
 
 ### netcoredbg ABI mismatch с runtime

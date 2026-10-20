@@ -29,13 +29,6 @@ description: Post-mortem анализ coredump - gcore live snapshot, coredumpct
 Правильно: понимать что gcore делает stop+ptrace+write всех страниц RAM; multi-GB = секунды-минуты остановки, health-check может зафейлиться; для .NET использовать `dotnet-dump collect` (менее блокирующе через diagnostic port)
 Почему: gcore через ptrace останавливает процесс на время записи. Размер дампа = RES процесса в худшем случае
 
-### gcore в контейнере без CAP
-Плохо: `gcore <PID>` внутри контейнера без `--cap-add=SYS_PTRACE`
-Правильно: либо привилегии контейнеру, либо gcore с host-side через `nsenter`
-Почему: gcore = ptrace + write. CAP_SYS_PTRACE обязателен; без него silent fail
-
-## coredumpctl
-
 ### coredumpctl list не показывает старые дампы
 Плохо: ожидать что дамп от вчерашнего инцидента доступен через `coredumpctl list`
 Правильно: проверить `journalctl --since="24 hours ago" -u systemd-coredump` и `/etc/systemd/coredump.conf` - `MaxUse=` и `MaxFileSize`; настройка `Storage=external` сохраняет в `/var/lib/systemd/coredump/`
@@ -52,25 +45,6 @@ description: Post-mortem анализ coredump - gcore live snapshot, coredumpct
 Плохо: дамп с prod (Ubuntu 22.04, glibc 2.35), gdb на dev (Ubuntu 24.04, glibc 2.39) - backtrace внутри libc =`??`
 Правильно: `set sysroot /path/to/prod-rootfs` (rsync целевой rootfs); либо docker run с base image прода, mount дампа, gdb внутри
 Почему: gdb загружает символы из локальных `.so`, версии не совпадают - адреса смещены, frame внутри libc - мусор
-
-### Build-id mismatch на executable
-Плохо: prod-бинарь rebuilded, исходного нет, дамп остался; gdb берёт текущий бинарь
-Правильно: проверить `readelf -n <core>` (note section с executable Build-ID) vs `readelf -n <binary>`; restore старого бинаря через `debuginfod-find executable <build-id>`
-Почему: коркового файла не хватает - GDB ищет executable по пути; mismatch build-id = врущий backtrace
-
-## Managed dump
-
-### Full vs Mini на Linux
-Плохо: `dotnet-dump collect --type Mini` на Linux потом ожидание Windows-совместимости
-Правильно: на Linux `--type Full` для cross-machine; Mini-format Linux != Windows minidump, WinDbg не откроет
-Почему: Mini на Linux - только ELF core с пометкой managed; не равен Windows DMP. Кросс-машинный анализ только Full
-
-### dotnet-dump analyze требует matching runtime
-Плохо: дамп с prod .NET 8.0.10, analyze на dev .NET 8.0.5 - `Failed to load CLR data access library`
-Правильно: либо установить точно совпадающий runtime через `dotnet-symbol --recurse-subdirectories <dump>`, либо использовать Docker с тем же runtime
-Почему: SOS-плагин и DAC (CLR Data Access) ABI привязаны к точной версии. Несовпадение - parse failure
-
-## Container caveats
 
 ### core_pattern named-pipe host-only
 Плохо: настроить `core_pattern` внутри контейнера и ожидать что host увидит

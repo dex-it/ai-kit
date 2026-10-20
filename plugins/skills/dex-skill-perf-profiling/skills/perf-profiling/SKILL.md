@@ -21,12 +21,12 @@ description: Linux sampling-профилирование - perf record/script/re
 
 ### Backtrace без frame pointers
 Плохо: `perf record -g` на бинаре собранном без `-fno-omit-frame-pointer` - flamegraph «плоский», виден только main
-Правильно: для собственного кода `-fno-omit-frame-pointer`; для prod-бинарей чужих - `--call-graph dwarf,16384` (DWARF unwind, дорого)
+Правильно: для собственного кода `-fno-omit-frame-pointer`; для prod-бинарей чужих - `--call-graph dwarf,<размер>` (DWARF unwind, дорого)
 Почему: компилятор по умолчанию убирает frame pointer для оптимизации регистров. Без него perf не может развернуть стек, видит только текущий кадр
 
 ### DWARF unwind size
 Плохо: `--call-graph dwarf` без размера - дефолт 8192 байт, глубокие стеки обрезаются
-Правильно: `--call-graph dwarf,16384` для типовых сервисов; `--call-graph dwarf,65536` для очень глубоких (.NET, Java, async chains)
+Правильно: `--call-graph dwarf,<размер>` с размером под глубину стеков (.NET, Java, async chains)
 Почему: при unwind perf копирует часть user-stack в каждый sample. Маленький размер обрезает глубокий стек, потеря root cause
 
 ### LBR быстрее DWARF на Intel
@@ -59,11 +59,6 @@ description: Linux sampling-профилирование - perf record/script/re
 Почему: глазами разница в 5% не видна, дифф визуализирует процентные изменения по функциям
 
 ## JIT-символы для .NET и Java
-
-### .NET без PerfMap
-Плохо: flamegraph .NET-сервиса показывает все managed-функции как `JIT-frame-0xdeadbeef`
-Правильно: `DOTNET_PerfMapEnabled=1` и `DOTNET_EnableEventPipe=1` в env процесса; perfmap-файлы появляются в `/tmp/perf-<PID>.map`
-Почему: JIT-код не имеет статических символов в бинаре. PerfMap - текстовый файл `<addr> <size> <symbol>`, который perf читает автоматически
 
 ### Java aync-profiler vs perf
 Плохо: пытаться `perf record` Java-приложение и парсить через стандартный pipeline
