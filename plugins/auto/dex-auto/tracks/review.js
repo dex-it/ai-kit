@@ -1,20 +1,22 @@
-// Трек ревью чужого MR/PR как Workflow-скрипт (artifacts.md, O12 вариант A). Read-only: код не правится.
-// Вход через args: { task, mr, intent, mode, publish, last_review_sha, cwd, open_findings }.
+// Трек ревью чужого MR/PR либо своей ветки (local) как Workflow-скрипт (artifacts.md, O12 вариант A). Read-only: код не правится.
+// Вход через args: { task, mr, local, base, intent, mode, publish, last_review_sha, cwd, open_findings }.
 // Публикация тредов - outward-facing: только при publish=true (флаг --post команды), иначе перечень в возврате.
 export const meta = {
   name: 'dex-auto-review',
-  description: 'Трек ревью MR/PR: контекст -> ревью -> фальсификация и покрытие -> публикация по санкции',
+  description: 'Трек ревью MR/PR либо своей ветки: контекст -> ревью -> фальсификация и покрытие -> публикация по санкции',
   phases: [
     { title: 'Context', detail: 'предмет ревью: SHA, объём diff, источник намерения; рабочий каталог на head_sha' },
     { title: 'Review', detail: 'dex-auto:reviewer - первичное ревью либо ревизия дельты' },
     { title: 'Falsify', detail: 'каждая находка и статус прежней - claim: сверка с кодом ветки, вердикт по покрытию и итоговый вердикт' },
-    { title: 'Publish', detail: 'инлайн-треды при publish=true; иначе перечень к публикации' },
+    { title: 'Publish', detail: 'инлайн-треды при publish=true; иначе перечень к публикации; local - публиковать некуда' },
   ],
 }
 
 const A = args || {}
 const DELTA = !!A.last_review_sha
-const HEAD = `mode: ${A.mode || 'autonomous'}\nцель (${A.task}): ревью ${A.mr}${DELTA ? ` - ревизия дельты от ${A.last_review_sha}` : ''}.\nread-only: код не менять, тесты не писать, в MR ничего не публиковать - публикует отдельный узел по санкции.\nРабочий каталог - ${A.cwd}, процесс уже в нём. Веток не создавай, код не меняй, коммитов не делай. Оператора нет: невыводимое верни status: blocked с полем нехватки; неясность намерения по diff - вопрос автору в перечне, не оператору.\n`
+const LOCAL = !!A.local
+const SUBJECT = LOCAL ? `своей ветки рабочего каталога против ${A.base || 'ветки по умолчанию у remote'}` : A.mr
+const HEAD = `mode: ${A.mode || 'autonomous'}\nцель (${A.task}): ревью ${SUBJECT}${DELTA ? ` - ревизия дельты от ${A.last_review_sha}` : ''}.\nread-only: код не менять, тесты не писать, ${LOCAL ? 'ничего не публиковать - MR нет' : 'в MR ничего не публиковать - публикует отдельный узел по санкции'}.\nРабочий каталог - ${A.cwd}, процесс уже в нём. Веток не создавай, код не меняй, коммитов не делай. Оператора нет: невыводимое верни status: blocked с полем нехватки; неясность намерения по diff - вопрос автору в перечне, не оператору.\n`
 
 // >>> shared: contract
 const STATUS = { type: 'string', enum: ['complete', 'blocked', 'partial'] }
@@ -285,7 +287,8 @@ const checkGap = (rev, fal) => {
   return [silentGap(rev.findings, fal), axesCheckGap(rev.axes, fal['axes-check'], found), rootsCheckGap(rev.roots, fal['roots-check'], found), rootsMissedGap(fal['roots-missed'], rev.roots)].filter(Boolean).join('; ')
 }
 const CTX = { type: 'object', properties: {
-  status: STATUS, platform: { type: 'string', enum: ['github', 'gitlab', 'other'] },
+  status: STATUS, platform: { type: 'string', enum: ['github', 'gitlab', 'other', 'local'] },
+  base_ref: { type: 'string', description: 'local: ссылка целевой ветки, от которой взят base SHA; MR - пусто' },
   base_sha: { type: 'string' }, head_sha: { type: 'string' }, files: { type: 'array', items: { type: 'string' } },
   hunks: { type: 'array', items: { type: 'string' }, description: 'путь от корня репозитория без a/ и b/, место file:from-to по +start,count заголовка @@ (from = start, to = start+count-1); только удалённые строки (count 0) - file:start; удалённый файл - file' },
   at_head: { type: 'boolean' },
@@ -302,34 +305,40 @@ const REVIEW = { type: 'object', properties: {
   roots: ROOTS,
   'review-verdict': VERDICT,
   prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня ledger - запись с её id, статус с доказательством; перечня нет - пусто' },
-  threads: { type: 'array', items: THREAD, description: 'ре-ревью дельты: прежние находки тредов MR, которых нет в перечне ledger, - статус с доказательством; иначе пусто' },
+  threads: { type: 'array', items: THREAD, description: LOCAL ? 'local: тредов MR нет - всегда пусто' : 'ре-ревью дельты: прежние находки тредов MR, которых нет в перечне ledger, - статус с доказательством; иначе пусто' },
   questions: { type: 'array', items: { type: 'string' }, description: 'вопросы автору по намерению' },
   missing: { type: 'string' },
 }, required: ['status', 'findings', 'fact-check', 'conventions-read', 'axes', 'roots', 'review-verdict', 'prior', 'threads', 'questions', 'missing'] }
 
 const loops = { review: 0, falsify: 0 }
 const trail = [], degraded = []
-const unfedArgs = unfed(A, ['task', 'cwd', 'mr'])
+const unfedArgs = unfed(A, LOCAL ? ['task', 'cwd'] : ['task', 'cwd', 'mr'])
 if (unfedArgs.length) return outcome('blocked', 'Context', `трек вызван без входа: нет ${unfedArgs.join(', ')}`)
+if (LOCAL && String(A.mr ?? '').trim()) return outcome('blocked', 'Context', 'предмет ревью неоднозначен: заданы mr и local')
 const LEDGER = ledgerList(A.open_findings, 'прежние находки этим прогоном не сверены')
 const fmt = (fs) => fs.map(findingLine).join('\n')
 
 phase('Context')
-const ctx = await node('сбор предмета ревью', `${HEAD}Шаг 1: предмет ревью. Канал хостинга - MCP платформы через ToolSearch, иначе gh/glab. Возьми метаданные ${A.mr}: base/head SHA, список файлов diff, описание; hunks - места правки ${DELTA ? A.last_review_sha : 'base SHA'}..head SHA по заголовкам @@ git diff -U0 на стороне правки, без файлов тестов. Получи head SHA (git fetch ссылки MR) и сверь с ним HEAD рабочего каталога (git rev-parse HEAD) и проверь git status --porcelain; каталог не переключай; at_head - HEAD совпал и вывод git status пуст; иначе status partial, причина в missing. Источник намерения: ${A.intent || 'не передан - возьми описание MR и связанный тикет; нет и их - "n/a" с перечнем, где искали'}. ${conventionsAsk} Код и MR не меняй.`,
+const HUNKS_ASK = `hunks - места правки ${DELTA ? A.last_review_sha : 'base SHA'}..head SHA по заголовкам @@ git diff -U0 на стороне правки, без файлов тестов.`
+const SUBJECT_ASK = LOCAL
+  ? `Предмет - своя ветка рабочего каталога, канал хостинга не нужен, platform - local. Целевая ветка - ${A.base ? `origin/${A.base}, нет её - локальная ${A.base}; нет и её - status blocked, в missing «целевая ветка ${A.base} не найдена»` : 'ветка по умолчанию у remote (git symbolic-ref refs/remotes/origin/HEAD); не определилась - status blocked, в missing «целевая ветка не определена: задай --base»'}; взятую ссылку - в base_ref. base SHA - git merge-base HEAD <целевая ветка>, head SHA - git rev-parse HEAD; общего предка нет - status blocked, в missing «нет общего предка с <целевая ветка>»; SHA совпали - status blocked, в missing «своих коммитов против <целевая ветка> нет». Файлы - git diff --name-only base SHA..head SHA; ${HUNKS_ASK} Проверь git status --porcelain; каталог не переключай; at_head - вывод пуст; иначе status partial, в missing «незакоммиченные правки в ревью не входят». Источник намерения: ${A.intent || 'не передан - сообщения коммитов base SHA..head SHA и тикет, названный в них; нет и их - "n/a" с перечнем, где искали'}. ${conventionsAsk}`
+  : `Канал хостинга - MCP платформы через ToolSearch, иначе gh/glab. Возьми метаданные ${A.mr}: base/head SHA, список файлов diff, описание; ${HUNKS_ASK} Получи head SHA (git fetch ссылки MR) и сверь с ним HEAD рабочего каталога (git rev-parse HEAD) и проверь git status --porcelain; каталог не переключай; at_head - HEAD совпал и вывод git status пуст; иначе status partial, причина в missing. Источник намерения: ${A.intent || 'не передан - возьми описание MR и связанный тикет; нет и их - "n/a" с перечнем, где искали'}. ${conventionsAsk} Код и MR не меняй.`
+const ctx = await node('сбор предмета ревью', `${HEAD}Шаг 1: предмет ревью. ${SUBJECT_ASK}`,
   { label: 'ctx:subject', phase: 'Context', effort: 'low', schema: CTX })
 trail.push({ step: 1, doer: 'general-purpose', status: ctx ? ctx.status : 'null' })
 if (!ctx || ctx.status === 'blocked') return outcome('blocked', 'Context', lack(ctx, 'узел контекста'))
 
 phase('Review')
 // Где читать код правки, знают оба узла суждения: скептик, читающий диск не на head_sha, сбросил бы находки о правке.
-const TREE_AT = `${ctx.at_head ? `Каталог ${A.cwd} на ${ctx.head_sha}, код читай с диска` : `Каталог ${A.cwd} не на ${ctx.head_sha} (${ctx.missing || 'причина не названа'}): код правки читай через канал хостинга на этой ревизии`}; ревизию не переключай - нужна другая, читай её через git show.`
-const common = `MR/PR: ${A.mr}, BASE_SHA ${ctx.base_sha}, HEAD_SHA ${ctx.head_sha}, файлов ${ctx.files.length}. intent: ${ctx.intent}. publish: false - ноль записей в MR. ${TREE_AT}${conventionsText(ctx)}`
+const TREE_AT = `${ctx.at_head ? `Каталог ${A.cwd} на ${ctx.head_sha}, код читай с диска` : `Каталог ${A.cwd} не на ${ctx.head_sha} (${ctx.missing || 'причина не названа'}): код правки читай ${LOCAL ? `через git show ${ctx.head_sha}` : 'через канал хостинга на этой ревизии'}`}; ревизию не переключай - нужна другая, читай её через git show.`
+const common = `${LOCAL ? `Своя ветка против ${A.base || 'ветки по умолчанию у remote'}` : `MR/PR: ${A.mr}`}, BASE_SHA ${ctx.base_sha}, HEAD_SHA ${ctx.head_sha}, файлов ${ctx.files.length}. intent: ${ctx.intent}. ${LOCAL ? '' : 'publish: false - ноль записей в MR. '}${TREE_AT}${conventionsText(ctx)}`
 const LEDGER_TEXT = LEDGER.length ? `\nПрежние находки из ledger - по каждой запись в prior с её id, статус с доказательством; находка перечня идёт только в prior, в findings - то, чего в перечне нет:\n${LEDGER.map(priorLine).join('\n')}` : ''
-const rev = await own(DELTA ? 'ре-ревьюер дельты' : 'ревьюер MR', `${HEAD}Шаг 2: ${DELTA ? `ре-ревью дельты: LAST_REVIEW_SHA ${A.last_review_sha}, статус прежних находок, новые находки только в дельте` : `первичное ревью правки ${ctx.base_sha}..${ctx.head_sha}`}. ${common}${DELTA ? ' Прежняя находка из тредов MR, которой нет в перечне ledger, - в threads, не в prior.' : ''}${hunkList(ctx.hunks)}${LEDGER_TEXT}`,
+const rev = await own(DELTA ? 'ре-ревьюер дельты' : LOCAL ? 'ревьюер ветки' : 'ревьюер MR', `${HEAD}Шаг 2: ${DELTA ? `ре-ревью дельты: LAST_REVIEW_SHA ${A.last_review_sha}, статус прежних находок, новые находки только в дельте` : `первичное ревью правки ${ctx.base_sha}..${ctx.head_sha}`}. ${common}${DELTA && !LOCAL ? ' Прежняя находка из тредов MR, которой нет в перечне ledger, - в threads, не в prior.' : ''}${hunkList(ctx.hunks)}${LEDGER_TEXT}`,
   { label: DELTA ? 'review:delta' : 'review:first', phase: 'Review', schema: { type: 'object', properties: { ...REVIEW.properties, 'conventions-read': conventionsRead(ctx) }, required: [...REVIEW.required] } }, NODE.reviewer)
 loops.review = 1
 trail.push({ step: 2, doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1 })
 if (!rev || rev.status === 'blocked') return outcome('blocked', 'Review', lack(rev, 'узел ревью'), { ctx })
+if (LOCAL && rev.threads.length) { degraded.push(`ревьюер: threads при local не засчитаны - тредов MR нет (${rev.threads.length})`); rev.threads = [] }
 const claims = rev.findings
 const axes = rev.axes || []
 // Статус прежней у ревьюера - claim: выносит его скептик, а прежняя, о которой он промолчал, остаётся непроверенной.
@@ -357,7 +366,8 @@ const unsettled = prior.filter(p => p.status === 'unverified')
 
 phase('Publish')
 let pub = null
-if (A.publish && confirmed.length) {
+if (LOCAL && A.publish) degraded.push('publish при local не применим: MR нет')
+if (!LOCAL && A.publish && confirmed.length) {
   // Исход публикации называет находку её id из перечня: на одном якоре и оси бывают две находки, и место одну от другой не отличает.
   const ids = { type: 'string', enum: confirmed.map(f => f.id) }
   pub = await node('публикатор тредов', `${HEAD}Шаг 4: санкция publish=true получена от оператора. Опубликуй каждую находку инлайн-тредом в ${A.mr} по anchor через канал хостинга (MCP платформы через ToolSearch, иначе gh/glab); severity и критерий закрытия - в тексте треда. До публикации прочитай треды MR своего аккаунта: на том же anchor уже есть тред по этой находке - не публикуй, в published с url существующего и note «уже был». Чужие треды не трогать, approve/request changes не ставить. Отказ канала - тред в unpublished с причиной, находку не терять. Исход каждой находки - запись с её id из перечня.\n${fmt(confirmed)}`,
@@ -374,9 +384,9 @@ if (pub) for (const t of [...pub.published, ...pub.unpublished]) if (!byId(t)) d
 const told = pub ? [...pub.published, ...pub.unpublished].filter(byId).map(t => t.id) : []
 const tag = (f, rest) => ({ id: f.id, anchor: f.anchor, axis: f.axis, ...rest })
 const published = pub ? pub.published.filter(byId).map(t => tag(byId(t), { url: t.url, note: t.note })) : []
-const unpublished = !pub ? confirmed.map(f => tag(f, { reason: A.publish ? 'узел публикации не вернул выход - находки к публикации' : 'санкции publish нет - перечень к публикации' }))
+const unpublished = LOCAL ? [] : !pub ? confirmed.map(f => tag(f, { reason: A.publish ? 'узел публикации не вернул выход - находки к публикации' : 'санкции publish нет - перечень к публикации' }))
   : [...pub.unpublished.filter(byId).map(t => tag(byId(t), { reason: t.reason })), ...confirmed.filter(f => !told.includes(f.id)).map(f => tag(f, { reason: `публикатор (${pub.status}): исход по находке не назван` }))]
-const allPublished = !A.publish || !confirmed.length || (pub && pub.status === 'complete' && unpublished.length === 0)
+const allPublished = LOCAL || !A.publish || !confirmed.length || (pub && pub.status === 'complete' && unpublished.length === 0)
 const issues = []
 if (ledgerUnread) issues.push(LEDGER_UNREAD)
 if (ctx.status === 'partial') issues.push(`предмет ревью неполон: ${ctx.missing || 'узел не назвал нехватку'}`)
@@ -395,7 +405,7 @@ const openBlocking = [...confirmed, ...prior.filter(isOpen)].filter(isBlocking)
 if (fal['review-verdict'] === 'APPROVE' && openBlocking.length) issues.push(`review-verdict APPROVE при открытых P0/P1: ${openBlocking.map(f => f.id).join(', ')}`)
 const where = issues.join('; ')
 return outcome(where ? 'partial' : 'complete', where, where, {
-  subject: { mr: A.mr, base_sha: ctx.base_sha, head_sha: ctx.head_sha, files: ctx.files.length, platform: ctx.platform },
+  subject: { mr: LOCAL ? '' : A.mr, local: LOCAL, base: LOCAL ? A.base || '' : '', base_ref: LOCAL ? ctx.base_ref || '' : '', base_sha: ctx.base_sha, head_sha: ctx.head_sha, files: ctx.files.length, platform: ctx.platform },
   intent: ctx.intent, 'review-verdict': fal['review-verdict'], reviewer_verdict: rev['review-verdict'], axes, roots: rev.roots || [], 'fact-check': rev['fact-check'], prior, questions: rev.questions,
   confirmed, dropped: fal.dropped, coverage: fal.coverage, 'axes-check': fal['axes-check'], 'roots-check': fal['roots-check'], 'roots-missed': fal['roots-missed'],
   published,
