@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-observability",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Наблюдаемость: OpenTelemetry, метрики, распределённая трассировка, health checks.",
   "author": {
     "name": "Dex Team",

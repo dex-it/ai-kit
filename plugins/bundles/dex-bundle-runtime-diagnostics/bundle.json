@@ -2,7 +2,6 @@
   "includes": [
     "dex-dotnet-runtime-diagnostician",
     "dex-netcoredbg-cli",
-    "dex-skill-deep-audit",
     "dex-skill-observability"
   ],
   "dependencies": [

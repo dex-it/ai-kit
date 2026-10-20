@@ -43,8 +43,6 @@ Scope & Stack -> Risk Model & Charters -> Direct Hunt -> Skill-Based Deep Scan -
 
 **Mandatory:** yes
 
-Загрузи `dex-skill-exploratory-testing:exploratory-testing` - чартеры, оракулы, туры-эвристики.
-
 ## Phase 2: Direct Hunt
 
 **Goal:** Адверсариально исследовать область своими знаниями, без Skill tool, и собрать кандидатов в баги.
