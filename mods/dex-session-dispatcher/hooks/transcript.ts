@@ -101,17 +101,31 @@ const SECRET_PATTERNS: readonly RegExp[] = [
   /\bAIza[0-9A-Za-z_-]{35}/g,
   /\bnpm_[A-Za-z0-9]{36}/g,
   /xox[abprs]-[A-Za-z0-9-]{10,}/g,
-  /(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{8,4096}\.eyJ[A-Za-z0-9_-]{8,4096}\.[A-Za-z0-9_-]{8,4096}/g,
+  // Начало без знака токена перед `eyJ`: иначе кандидатом стала бы каждая позиция внутри длинного куска.
+  /(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g,
   /\bBearer\s+[A-Za-z0-9._~+/=-]{12,}/gi,
   /(?<=\bAuthorization["']?[ \t]{0,3}[:=][ \t]{0,3}["']?Basic[ \t]{1,3})[A-Za-z0-9+/]{8,}={0,2}/gi,
-  // Вне заголовка Basic - ключ, только если в нём цифра или `=`: иначе это слово или путь («Basic auth/flow»).
-  /\b[Bb]asic\s+(?=[A-Za-z+/]{0,512}?[0-9=])[A-Za-z0-9+/]{12,512}={0,2}(?=$|[\s"',;])/g,
   /(?<=:\/\/[^\s:/@]*:)[^\s@/]+(?=@)/g,
-  // Повторы ограничены: шаблон с условием после неограниченного повтора перебирается заново
-  // с каждой позиции (`token=token=...`, длинный пробельный кусок), и маска чужого вывода
-  // морозит клиент. Значение - без точки, скобки и ведущей `/` (код и пути) и хотя бы с одной
-  // буквой (не счётчик).
-  /(?<=(?<![A-Za-z0-9])(?:password|passwd|secret|token|api[_-]?key)(?:[_-][A-Za-z0-9]+){0,4}["']?[ \t]{0,3}[=:][ \t]{0,3}["']?)(?!\/)(?=[^\s"',;]{0,512}?[A-Za-z])[A-Za-z0-9_+/=!@#$%^&*~-]{8,512}(?=$|[\s"',;])/gi,
+]
+
+/** Значение кончается на разделителе, а не на точке кода или скобке вызова (`config.token`, `getToken()`). */
+const endsValue = (whole: string, end: number): boolean => {
+  const next = whole[end]
+
+  if (next === undefined || /[\s"',;]/.test(next)) return true
+
+  return next === '.' && (whole[end + 1] === undefined || /\s/.test(whole[end + 1] ?? ''))
+}
+
+// Условие за повтором в шаблоне перебиралось бы квадратично, потолок повтора пропускал бы длинный ключ: судит код.
+const CHECKED_PATTERNS: readonly (readonly [RegExp, (value: string) => boolean])[] = [
+  // Вне заголовка Basic - ключ, только если в нём цифра или `=`: иначе это слово или путь («Basic auth/flow»).
+  [/\b[Bb]asic\s+[A-Za-z0-9+/]+={0,2}/g, value => /[0-9=]/.test(value) && value.replace(/^[Bb]asic\s+|=+$/g, '').length >= 12],
+  // Значение - без точки, скобки и ведущей `/` (код и пути) и хотя бы с одной буквой (не счётчик).
+  [
+    /(?<=(?<![A-Za-z0-9])(?:password|passwd|secret|token|api[_-]?key)(?:[_-][A-Za-z0-9]+){0,4}["']?[ \t]{0,3}[=:][ \t]{0,3}["']?)(?!\/)[A-Za-z0-9_+/=!@#$%^&*~-]+/gi,
+    value => value.length >= 8 && /[A-Za-z]/.test(value),
+  ],
 ]
 
 // eslint-disable-next-line no-control-regex
@@ -119,7 +133,13 @@ const ANSI = /\u001b\[[0-?]*[ -/]*[@-~]/g
 
 /** Цвет терминала снимается до маски: код вплотную перед ключом съедает границу слова (`\x1b[0msk-...`). */
 export const maskSecrets = (value: string): string =>
-  SECRET_PATTERNS.reduce((text, pattern) => text.replace(pattern, SECRET_MASK), value.replace(ANSI, ''))
+  CHECKED_PATTERNS.reduce(
+    (text, [pattern, isSecret]) =>
+      text.replace(pattern, (found: string, at: number, whole: string) =>
+        isSecret(found) && endsValue(whole, at + found.length) ? SECRET_MASK : found,
+      ),
+    SECRET_PATTERNS.reduce((text, pattern) => text.replace(pattern, SECRET_MASK), value.replace(ANSI, '')),
+  )
 
 /** Чужой текст одной строкой: без цвета, управляющих символов и переводов строк. Маски и обрезки нет. */
 export const oneLine = (value: string): string =>

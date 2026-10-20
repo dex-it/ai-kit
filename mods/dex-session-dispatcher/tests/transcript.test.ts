@@ -259,6 +259,9 @@ describe('snippet: секреты маскируются', () => {
       `token${' '.repeat(100_000)}=`,
       `${'token='.repeat(20_000)}.`,
       'eyJ-'.repeat(20_000),
+      `${'eyJabcdefgh.'.repeat(10_000)}-`,
+      `${'Basic '.repeat(20_000)}x`,
+      `token=${'a'.repeat(100_000)}(`,
     ]) {
       const started = performance.now()
 
@@ -266,6 +269,23 @@ describe('snippet: секреты маскируются', () => {
 
       assert.ok(performance.now() - started < 500, `${filler.slice(0, 8)} x${filler.length}`)
     }
+  })
+
+  it('ключ длиннее любого потолка скрыт целиком', () => {
+    const long = 'A1b2C3d4E5'.repeat(600)
+
+    for (const [text, kept] of [
+      [`jwt eyJ${long}.eyJ${long}.${long} конец`, 'jwt [секрет скрыт] конец'],
+      [`token=${long} конец`, 'token=[секрет скрыт] конец'],
+      [`Basic ${long}== конец`, '[секрет скрыт] конец'],
+    ] as const) {
+      assert.equal(maskSecrets(text), kept)
+    }
+  })
+
+  it('значение перед точкой в конце фразы скрыто, перед точкой кода - нет', () => {
+    assert.equal(maskSecrets('мой token=abcd1234efgh.'), 'мой token=[секрет скрыт].')
+    assert.equal(maskSecrets('token = settings.tokenValue'), 'token = settings.tokenValue')
   })
 
   it('пароль в URL и значение по ключу скрываются, ключ и адрес остаются', () => {
