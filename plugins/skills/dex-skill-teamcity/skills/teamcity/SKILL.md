@@ -7,5 +7,5 @@ description: TeamCity - Kotlin DSL и шаги dotnet в цепочке сбор
 
 Пункт называет ситуацию, которую конфигурация проверяет.
 
-- Шаги `dotnet` без `--no-restore` и `--no-build` между шагами цепочки
+- Шаги `dotnet` одной конфигурации заново делают restore и build
 - Конфигурация только в UI, без Kotlin DSL в репозитории

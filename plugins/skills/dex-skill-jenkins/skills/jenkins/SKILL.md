@@ -8,8 +8,8 @@ description: Jenkins - Jenkinsfile, стадии со своим agent, parallel
 Пункт называет ситуацию, которую пайплайн проверяет.
 
 - `when` со `branch` у стадии со своим `agent` без `beforeAgent true`
-- `parallel` без `failFast`
+- `parallel` без `failFast true`, когда провал одной ветки обесценивает остальные
 - Workspace постоянного агента без очистки
-- Credentials в global scope
+- Credentials, видимые всем пайплайнам контроллера
 - Массовое обновление плагинов на рабочем Jenkins
 - Правки через Replay, не перенесённые в Jenkinsfile
