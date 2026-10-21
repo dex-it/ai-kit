@@ -7,10 +7,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dexauto as dx
 
 MESSAGE = ("dex-auto: цель {task} открыта ({dir}/00-goal.md). Остановка разрешена при одном из: Статус: закрыт "
-           "(критерий «готово» подтверждён внешним фактом, ledger.py close {task}); Исход: blocked с непустой "
+           "(критерий «готово» подтверждён внешним фактом, {ledger} close {task} complete); Исход: blocked с непустой "
            "Нехватка:; Режим: interactive и Ожидает: оператор (значение перечислимое, уточнение причины - следом "
-           "за словом). Критерий не подтверждён - цель не закрывай: ledger.py set {task} Исход blocked и "
-           "ledger.py set {task} Нехватка <текст>. Иначе продолжай трек.")
+           "за словом). Критерий не подтверждён - цель не закрывай: {ledger} set {task} Исход blocked и "
+           "{ledger} set {task} Нехватка <текст>. Иначе продолжай трек.")
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
         # Сверка префиксом, не равенством: уточнение причины дописывают следом за словом (issue #250).
         if dx.get_key(goal, "Ожидает").startswith("оператор") and dx.get_key(goal, "Режим") == "interactive":
             continue
-        sys.stderr.write(MESSAGE.format(task=task, dir=directory) + "\n")
+        sys.stderr.write(MESSAGE.format(task=task, dir=directory, ledger=dx.ledger_cli()) + "\n")
         return 2
     return 0
 
