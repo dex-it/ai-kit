@@ -33,12 +33,12 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ### ThreadPool метрика без understanding
 Плохо: смотрим `threadpool-thread-count` и решаем «много thread'ов - всё ок»
-Правильно: одновременно `threadpool-queue-length` (растёт = starvation), `working-threads` (упёрся в `MaxThreads` = starvation), `monitor-lock-contention-count`
-Почему: ThreadPool starvation проявляется как «queue растёт, working-threads = MaxThreads, latency деградирует». ThreadCount без queue не диагностичен
+Правильно: одновременно `threadpool-queue-length` (растёт = starvation), `threadpool-completed-items-count` (не растёт при растущей очереди = starvation), `monitor-lock-contention-count`
+Почему: ThreadPool starvation проявляется как «queue растёт, completed-items стоит, latency деградирует». ThreadCount без queue не диагностичен
 
 ### Counter-only без allocation rate
-Плохо: фиксируем «gen0-gc-count высокий» как root cause GC pressure
-Правильно: одновременно `alloc-rate` (байт/сек), `gen2-gc-count` (gen2 дорог), `% time in gc`
+Плохо: фиксируем «gen-0-gc-count высокий» как root cause GC pressure
+Правильно: одновременно `alloc-rate` (байт/сек), `gen-2-gc-count` (gen2 дорог), `time-in-gc` (доля времени в GC)
 Почему: gen0 GC дёшев, gen2 дорог. Высокий gen0 без alloc-rate не значит pressure - может быть просто busy app
 
 ## dotnet-dump и dotnet-gcdump
@@ -57,7 +57,7 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ### clrstack -a без локалей символов
 Плохо: `dotnet-dump analyze core.dump` -> `clrstack -a`, ожидание увидеть параметры методов
-Правильно: сперва `setsymbolserver -ms` или `dotnet-symbol --symbols --reference-symbols <dump>`, потом `clrstack -a`
+Правильно: сперва `setsymbolserver -ms` или `dotnet-symbol --symbols <dump>`, потом `clrstack -a`
 Почему: `-a` (locals и parameters) требует public PDB символов. Без них видны только имена методов, аргументы как `<no data>`
 
 ### dumpasync скрывает completed continuations
@@ -65,7 +65,7 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 Правильно: `!dumpasync -completed` дополнительно, плюс `!syncblk` для managed monitors, `!clrthreads -live` для активных threads
 Почему: `dumpasync` по умолчанию фильтрует завершённые. Cause hang может быть в continuation, которая уже вернула Task но висит на нижестоящем .Wait()
 
-## ThreadPool starvation и async hang
+## Символы и исходники
 
 ### PDB не подгружены - стеки в IL-смещениях
 Плохо: managed stack показывает `MyApp.Service.Process+IL_0042` вместо `Service.cs:123`

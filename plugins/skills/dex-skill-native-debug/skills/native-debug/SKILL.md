@@ -15,7 +15,7 @@ description: Native CLI debug - GDB batch и MI2, LLDB Python scripting, ptrace 
 ## Batch и scripting
 
 ### lldb-mi removed в новых LLVM
-Плохо: использовать `lldb-mi` для structured output (его удалили начиная с LLVM 16+)
+Плохо: использовать `lldb-mi` для structured output (вынесен из LLVM в 2019 году, до LLVM 10, в отдельный репозиторий без поддержки)
 Правильно: `lldb -b -o "process attach --pid <PID>" -o "thread backtrace all"`; для programmatic - lldb Python API через `lldb.SBProcess`
 Почему: lldb-mi не поддерживается, заменили на `lldb-dap` (Debug Adapter Protocol). Старые примеры из интернета не работают
 
@@ -24,7 +24,7 @@ description: Native CLI debug - GDB batch и MI2, LLDB Python scripting, ptrace 
 Правильно: `gdb --interpreter=mi2 -ex "-stack-list-frames" -p <PID>` - stable structured MI2-протокол
 Почему: human-output - часть UI и меняется. MI2 - спецификация и совместим между версиями
 
-## Символы и debuginfod
+## Символы, debuginfod и раскрутка стека
 
 ### Stripped binary без отдельного .debug
 Плохо: backtrace = `0x7f... in ??()`, agent делает выводы по адресам
@@ -43,7 +43,7 @@ description: Native CLI debug - GDB batch и MI2, LLDB Python scripting, ptrace 
 
 ### Backtrace оборван на ??
 Плохо: считать что crash в библиотеке когда `bt` обрывается на `??`
-Правильно: проверить frame pointers (`-fno-omit-frame-pointer`), для DWARF unwind использовать `set unwindonsignal on`; для stripped - debuginfod
+Правильно: проверить frame pointers (`-fno-omit-frame-pointer`), для DWARF unwind сверить `.eh_frame` / `.debug_frame` (`readelf -S`); для stripped - debuginfod
 Почему: без frame pointers и без DWARF unwind GDB не может развернуть стек до самого низа. Обрыв - артефакт компиляции, не место настоящего crash
 
 ## Coredump open
@@ -62,5 +62,5 @@ description: Native CLI debug - GDB batch и MI2, LLDB Python scripting, ptrace 
 
 ### Helgrind на блокировках без понимания false-positives
 Плохо: helgrind репортит «possible race», agent применяет это как root cause
-Правильно: пройти `--read-var-info=yes`, для C++ atomics добавить `--fair-sched=yes`; ложные срабатывания на lock-free структуры - норма
+Правильно: сверить по коду, что пара обращений не упорядочена lock'ом; для собственных примитивов и atomics разметить порядок `ANNOTATE_HAPPENS_BEFORE` / `ANNOTATE_HAPPENS_AFTER` из `helgrind.h`; `--read-var-info=yes` лишь добавляет имена переменных в отчёт (дороже по памяти и времени)
 Почему: helgrind моделирует happens-before через locks, не понимает custom synchronization (atomics, RCU, lock-free). False positives часты

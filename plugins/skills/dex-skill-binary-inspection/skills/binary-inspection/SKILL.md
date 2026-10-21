@@ -1,6 +1,6 @@
 ---
 name: binary-inspection
-description: Бинарный анализ - binutils (readelf, nm, objdump, addr2line, strings, ldd, c++filt), Rizin JSON output, LIEF Python API, ilspycmd .NET decompiler, build-id и SourceLink. Активируется при readelf, objdump, nm, ldd, strings, addr2line, c++filt, rizin, rz-pipe, ilspycmd, lief, build-id, dynamic symbols, dwarf info, ELF, PE, Mach-O
+description: Бинарный анализ - binutils (readelf, objdump, addr2line, c++filt), Rizin JSON output, LIEF Python API, ilspycmd .NET decompiler, debuginfod. Активируется при readelf, objdump, addr2line, c++filt, rizin, rz-pipe, ilspycmd, lief, debuginfod, dwarf info, ELF, PE, Mach-O
 ---
 
 # Binary inspection - ловушки статического анализа бинарей
@@ -60,7 +60,7 @@ description: Бинарный анализ - binutils (readelf, nm, objdump, add
 Правильно: `export DEBUGINFOD_URLS="https://debuginfod.ubuntu.com"`; addr2line, gdb, eu-stack автоматически тянут по build-id
 Почему: debuginfod - распределённый кэш debug-info, поддерживается binutils 2.34+, gdb 10.1+; экономит ручную работу
 
-## strings и cross-arch
+## objdump и cross-arch
 
 ### objdump для cross-arch без --target
 Плохо: `objdump -d arm64-binary.so` на x86_64 машине - неверный disassembly

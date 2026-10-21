@@ -1,6 +1,6 @@
 ---
 name: perf-profiling
-description: Linux sampling-профилирование - perf record/script/report, FlameGraph folded stacks, on-CPU vs off-CPU, hot path, JIT-символы для .NET и Java. Активируется при perf record, perf script, flamegraph, hot path, cpu profiling, off-cpu, kernel.perf_event_paranoid, frame pointers, dwarf unwinding, jit profiling, dotnet perf, perfmap, sampling
+description: Linux sampling-профилирование - perf record/script/report, FlameGraph folded stacks, on-CPU vs off-CPU, hot path, JIT-символы Java. Активируется при perf record, perf script, flamegraph, hot path, cpu profiling, off-cpu, kernel.perf_event_paranoid, frame pointers, dwarf unwinding, jit profiling, async-profiler, sampling
 ---
 
 # Linux perf-profiling - ловушки sampling-анализа
@@ -58,7 +58,7 @@ description: Linux sampling-профилирование - perf record/script/re
 Правильно: `difffolded.pl folded-before folded-after | flamegraph.pl > diff.svg`; красный - стало хуже, синий - лучше
 Почему: глазами разница в 5% не видна, дифф визуализирует процентные изменения по функциям
 
-## JIT-символы для .NET и Java
+## JIT-символы Java
 
 ### Java aync-profiler vs perf
 Плохо: пытаться `perf record` Java-приложение и парсить через стандартный pipeline

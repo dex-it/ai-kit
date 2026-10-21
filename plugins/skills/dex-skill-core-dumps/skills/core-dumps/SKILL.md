@@ -1,6 +1,6 @@
 ---
 name: core-dumps
-description: Post-mortem анализ coredump - gcore live snapshot, coredumpctl, ulimit, kernel.core_pattern, dotnet-dump analyze, mismatched libs, контейнеры. Активируется при core dump, coredumpctl, gcore, ulimit, core_pattern, post-mortem, sigsegv abort, container coredump, dotnet-dump analyze, minidump linux, systemd-coredump, sysroot, build-id mismatch
+description: Post-mortem анализ coredump - gcore live snapshot, coredumpctl, ulimit, kernel.core_pattern, dotnet-dump analyze, mismatched libs, контейнеры. Активируется при core dump, coredumpctl, gcore, ulimit, core_pattern, post-mortem, sigsegv abort, container coredump, dotnet-dump analyze, systemd-coredump, sysroot
 ---
 
 # Core dumps - ловушки сбора и анализа post-mortem
@@ -22,7 +22,7 @@ description: Post-mortem анализ coredump - gcore live snapshot, coredumpct
 Правильно: `echo 0xff > /proc/<PID>/coredump_filter` (все типы памяти); проверить через `cat /proc/<PID>/coredump_filter`
 Почему: filter определяет какие сегменты VM попадают в дамп. Дефолт исключает shared mmap. Для .NET / Java с большой heap-mmap это критично
 
-## gcore
+## gcore и coredumpctl
 
 ### gcore блокирует процесс
 Плохо: `gcore <PID>` на prod-сервисе с 8GB heap во время инцидента
@@ -39,7 +39,7 @@ description: Post-mortem анализ coredump - gcore live snapshot, coredumpct
 Правильно: `coredumpctl debug <PID>` или `coredumpctl debug <executable-name>` - запускает gdb с правильными путями и symbol mapping
 Почему: coredumpctl знает где лежат сжатые дампы (`.zst`), executable путь, и подсовывает gdb готовый setup
 
-## Mismatched libs
+## Анализ на другой машине и контейнеры
 
 ### Анализ дампа на другой машине
 Плохо: дамп с prod (Ubuntu 22.04, glibc 2.35), gdb на dev (Ubuntu 24.04, glibc 2.39) - backtrace внутри libc =`??`
