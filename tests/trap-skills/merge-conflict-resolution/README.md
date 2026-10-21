@@ -81,22 +81,20 @@ process-skill) сохранён, 15 ловушек -> 7 названий (2.1.0,
 
 ## Бюджет синхронизаций группы 4.7
 
-Снято целиком: `shared-stand-safety` 1.0.0, `exploratory-testing` 1.0.1, `deep-audit` 1.0.2, `tech-audit` 1.0.2 (минор каталога 6.21.0 -> 6.23.0: 6.22.0 занят PR #368). Сжаты: `observability`
-1.2.1 -> 1.3.0, `merge-conflict-resolution` 2.0.1 -> 2.1.0, `stand-verification` 1.1.2 -> 1.2.0.
+Снято целиком: `exploratory-testing` 1.0.1, `deep-audit` 1.0.2, `tech-audit` 1.0.2 (минор каталога 6.22.0 -> 6.23.0; develop на 6.22.0 после PR #368). Сжаты: `observability`
+1.2.1 -> 1.3.0, `merge-conflict-resolution` 2.0.1 -> 2.1.0, `stand-verification` 1.1.2 -> 1.2.0, `shared-stand-safety` 1.0.0 -> 1.1.0 (снятие целиком отменено ревью: S5, S8, S9 `unverifiable`,
+агенты, бандлы по этому скиллу, кейс активации `shared-stand-in` не менялись).
 
 | Носитель | Правка | Версия |
 |---|---|---|
-| агент `stand-reviewer` | загрузка `shared-stand-safety` и ссылка в Boundaries убраны; правило read-only осталось прозой агента | 2.6.0 -> 2.7.0 |
-| агент `incident-investigator` | загрузка и ссылка на `shared-stand-safety` убраны, санкция `deploy` и запрет значений секретов - прозой агента | 2.7.0 -> 2.8.0 |
-| агент `bug-fixer` | то же | 1.13.0 -> 1.14.0 |
 | агент `bug-finder` | загрузка `exploratory-testing` в Phase 1 убрана | 2.6.0 -> 2.7.0 |
+| агент `dotnet-performance-analyst` | скобка вызова `observability` приведена к четырём пунктам 1.3.0 (после ревью) | 2.4.0 -> 2.4.1 |
 | агент `dotnet-runtime-diagnostician` | справка `dex-skill-deep-audit` заменена названием A6 (время приложения против `now()` БД); в стеке на #374 строка A6 убрана | 2.4.0 -> 2.5.0 -> 2.6.0 (стек) |
-| бандлы `dotnet-developer`, `dotnet-fullstack`, `ts-fullstack`, `code-review`, `qa-engineer`, `bug-lifecycle` (`dependencies`) | убраны `shared-stand-safety`, `exploratory-testing` | 2.42.0 -> 2.43.0, 2.43.0 -> 2.44.0, 1.41.0 -> 1.42.0, 1.45.0 -> 1.46.0, 1.24.0 -> 1.25.0, 1.33.0 -> 1.34.0 |
+| бандлы `dotnet-developer`, `dotnet-fullstack`, `ts-fullstack`, `code-review`, `qa-engineer`, `bug-lifecycle` (`dependencies`) | убран `exploratory-testing` | 2.42.0 -> 2.43.0, 2.43.0 -> 2.44.0, 1.41.0 -> 1.42.0, 1.45.0 -> 1.46.0, 1.24.0 -> 1.25.0, 1.33.0 -> 1.34.0 |
 | бандл `runtime-diagnostics` | убран `deep-audit` из `includes`, README | 1.5.0 -> 1.6.0 |
-| README агентов `stand-reviewer`, `incident-investigator`, `bug-finder`; README бандлов `bug-lifecycle`, `runtime-diagnostics` | строки скиллов | - |
-| корневой README | строки «QA и тестирование», «Инциденты и RCA»; подвал | 6.21.0 -> 6.23.0 |
-| `.claude-plugin/marketplace.json` | четыре записи плагинов, версии | каталог 6.21.0 -> 6.23.0 |
-| `tests/activation/cases.json` | сняты `deep-audit-in`, `exploratory-testing-in`, `shared-stand-in`, `tech-audit-in` | - |
-| `docs/migration/claude5-context-inventory.md` | пометка «снят в #308» | - |
+| README агента `bug-finder`; README бандлов `bug-lifecycle`, `runtime-diagnostics` | строки скиллов | - |
+| корневой README | строка «QA и тестирование»; подвал | 6.22.0 -> 6.23.0 |
+| `.claude-plugin/marketplace.json` | три записи плагинов сняты, версии, `shared-stand-safety` 1.1.0 | каталог 6.22.0 -> 6.23.0 |
+| `tests/activation/cases.json` | сняты `deep-audit-in`, `exploratory-testing-in`, `tech-audit-in` | - |
 
-Версии бандлов и агентов, затронутые параллельным PR #368 (`dotnet-fullstack`, `ts-fullstack`), сведёт оркестратор после merge первого PR.
+Версии бандлов `dotnet-fullstack`, `ts-fullstack`, затронутые PR #368, сведены при слиянии develop (бампы считаны от версий develop).

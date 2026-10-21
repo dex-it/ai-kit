@@ -102,16 +102,19 @@ git switch -c feature/csv-export
 Пушит ветку задачи и открывает PR/MR с описанием из цели, прогона и фиксации. Флаг можно дать сразу на шаге 3 -
 PR откроется после `complete`. Ревьюера не назначает, merge - за тобой.
 
-### Ревью чужого MR
+### Ревью чужого MR либо своей ветки
 
 ```
 gh pr checkout 7                           # HEAD - на head-коммите MR, иначе ревью partial
 /dex-auto:auto review owner/repo#7         # находки списком
 /dex-auto:auto review owner/repo#7 --post  # и треды у строк MR
 /dex-auto:auto review owner/repo#7 --delta <sha прошлого ревью>   # только изменения с прошлого раза
+/dex-auto:auto review --local              # своя ветка до MR против ветки по умолчанию
+/dex-auto:auto review --local --base develop   # против develop
 ```
 
 Код MR не меняет, approve и merge не делает. Каждая находка проверена вторым агентом по коду до выдачи.
+Свою ветку не правит: находки - тебе либо треку `bugfix`; незакоммиченные правки в ревью не входят.
 
 ## Что нужно в репозитории
 

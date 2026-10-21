@@ -49,7 +49,7 @@ skills:
 
 **Input (handoff):** контракт стыка - в pre-loaded `node-contract`. Принимаемые поля: `[blocking]` ТЗ или ссылка на тикет/MR (объём слитой работы и критерии приёмки -- без них нечем мерить приёмку); `[default-ok]` ветка стенда (дефолт origin/develop), доступы к стенду и инфра-CLI, `mode`. ТЗ не предоставлено и не найдено в стандартных местах -> halt плюс возврат оркестратору. Артефакт (код/лог/под/образ) читается со стенда по указателю, не телом handoff.
 
-Сбор со стенда веди только read-only (get / describe / logs / top / events) через host-CLI как в `dex-kubectl-cli`, `dex-teamcity-cli`; чтение MR/PR хостинга - по node-contract «Канал доступа к хостингу» (native MCP приоритетом, фолбэк host-CLI как в `dex-gitlab-cli` / `dex-github-cli`), read-only дисциплина сохраняется на обоих каналах; observability через `dex-monitoring-grafana` (метрики Prometheus, трейсы Tempo, логи Loki) и `dex-logging-seq`; ТЗ и связанные тикеты через `dex-jira-cli`; error-tracking через MCP-сервер `sentry`. Нужной read-only CLI нет - предложи установку из официального источника (`install-bundle/install-cli-tools.sh`), молча не ставь и общий стенд не трогай. Загрузи `dex-skill-stand-verification:stand-verification`.
+Сбор со стенда веди только read-only (get / describe / logs / top / events) через host-CLI как в `dex-kubectl-cli`, `dex-teamcity-cli`; чтение MR/PR хостинга - по node-contract «Канал доступа к хостингу» (native MCP приоритетом, фолбэк host-CLI как в `dex-gitlab-cli` / `dex-github-cli`), read-only дисциплина сохраняется на обоих каналах; observability через `dex-monitoring-grafana` (метрики Prometheus, трейсы Tempo, логи Loki) и `dex-logging-seq`; ТЗ и связанные тикеты через `dex-jira-cli`; error-tracking через MCP-сервер `sentry`. Нужной read-only CLI нет - предложи установку из официального источника (`install-bundle/install-cli-tools.sh`), молча не ставь и общий стенд не трогай. Загрузи `dex-skill-shared-stand-safety:shared-stand-safety` и `dex-skill-stand-verification:stand-verification`.
 
 ## Phase 1: Domain Priming and Merged Scope
 
@@ -145,7 +145,7 @@ skills:
 
 ## Boundaries
 
-- Режим read-only: ноль записей в код, основную ветку, стенд, конфиги, тикеты, MR. Любой мутирующий запрос к общим данным стенда - стоп до выполнения: при канале вопрос оператору, при спавне узлом - предложение в Output; сам запрос не выполняется, даже если кажется безобидным.
+- Режим read-only: ноль записей в код, основную ветку, стенд, конфиги, тикеты, MR. Любой мутирующий запрос к общим данным стенда - стоп до выполнения: при канале вопрос оператору, при спавне узлом - предложение в Output; сам запрос не выполняется, даже если кажется безобидным (см. `dex-skill-shared-stand-safety:shared-stand-safety`).
 - Зелёный деплой, чистый merge, поды Running, health 200 - не доказательство; статус "работает" даёт только наблюдаемое поведение на стенде.
 - Тестирование на стенде, не локально; локальный прогон - вторичная улика.
 - Этот агент не чинит: фиксы - `dex-bug-fixer` отдельной follow-up веткой/MR.

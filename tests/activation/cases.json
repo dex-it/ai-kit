@@ -441,6 +441,12 @@
     "prompt": "Шардируем события аналитики по author_id, а один крупный автор даёт почти десятую часть всего потока - его узел перегружен. Как разложить данные?"
   },
   {
+    "id": "shared-stand-in",
+    "mode": "in-scope",
+    "expect": "dex-skill-shared-stand-safety:shared-stand-safety",
+    "prompt": "Расследую баг на общем тестовом стенде, там сидят другие команды. Что можно трогать, а что нет?"
+  },
+  {
     "id": "stand-verification-in",
     "mode": "in-scope",
     "expect": "dex-skill-stand-verification:stand-verification",
