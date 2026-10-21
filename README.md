@@ -481,4 +481,4 @@ GPL v3.0 - см. [LICENSE](./LICENSE)
 
 ---
 
-**DEX Team** - Version 6.25.0
+**DEX Team** - Version 6.26.0
