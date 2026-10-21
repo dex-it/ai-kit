@@ -4,7 +4,7 @@
 (PyTorch, ResNet), SKU (Keras), отток магазинов (sklearn, XGBoost), отзывы (HF, LoRA), подбор параметров
 (Optuna). Вход наборов [python-project-hygiene](../../python-project-hygiene/README.md),
 [python-pytorch](../../python-pytorch/README.md), [python-tensorflow](../../python-tensorflow/README.md),
-[python-classical-ml](../../python-classical-ml/README.md), [python-computer-vision](../../python-computer-vision/README.md),
+[python-classical-ml](../../removed/python-classical-ml/README.md), [python-computer-vision](../../python-computer-vision/README.md),
 [python-nlp-transformers](../../python-nlp-transformers/README.md), [python-ml-optimization](../../python-ml-optimization/README.md)
 (эпик #291, группа 4.5, #306). Файл - ключ для судьи, исполнителю не подаётся: `setup.sh` его в каталог
 прогона не копирует, как и раннер.
