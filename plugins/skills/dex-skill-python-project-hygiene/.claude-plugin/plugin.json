@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-python-project-hygiene",
-  "version": "1.2.0",
-  "description": "Гигиена Python-проекта: ignore_missing_imports в mypy, порог покрытия, предупреждения pytest, аудит зависимостей.",
+  "version": "1.1.0",
+  "description": "Гигиена Python-проекта: правила ruff и форматтер, mypy и недостающие импорты, порог покрытия, предупреждения pytest, аудит зависимостей.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
@@ -9,9 +9,9 @@
   "keywords": [
     "skill",
     "python",
+    "ruff",
     "mypy",
     "pytest",
-    "coverage",
     "quality-gates"
   ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
