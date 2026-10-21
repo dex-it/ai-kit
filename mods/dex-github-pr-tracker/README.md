@@ -4,7 +4,7 @@ Pull request GitHub, за которым не надо ходить в брау�
 
 Мод берёт репозиторий из git-remote той папки, в которой открыта сессия, находит PR текущей ветки и держит его перед глазами: строка над полем ввода несёт состояние, merge state status, исход обязательных проверок, вердикт ревью, счётчик тредов, комментариев и коммитов; панель `/pr` раскрывает то же подробно, с каждым тредом по файлу и строке и с перечнем упавших проверок. Когда ревьюер открывает тред, отвечает в нём, ставит апрув или падает проверка - в сессию приходит тост и строка в транскрипт. Команда `/pr threads` выписывает открытые треды текстом, `/pr checks` - не зелёные проверки со ссылками на логи, и модель читает их как задание на правки.
 
-Это **мод** - плагин на function hooks: TypeScript, который исполняется внутри процесса Claude Code, а не команда оболочки на событие. Function hooks в раннем доступе и включаются переменной окружения (см. «Установка»).
+Это **мод** - плагин на function hooks: TypeScript, который исполняется внутри процесса Claude Code, а не команда оболочки на событие. С Claude Code 2.1.287 function hooks включены по умолчанию (на более ранних версиях нужна переменная окружения, см. «Установка»).
 
 PR под наблюдением может быть несколько - свой у текущей ветки, названные руками, пришедшие ссылкой, - и у наблюдения есть общий список: `/pr list` сводит их в один перечень с итогом, а вход в строку открывает те же детали.
 
@@ -14,7 +14,7 @@ PR под наблюдением может быть несколько - сво
 
 ## Требования
 
-- Claude Code с поддержкой function hooks (проверено на 2.1.282) и `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`.
+- Claude Code с поддержкой function hooks (проверено на 2.1.304, без `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`). С 2.1.287 function hooks включены по умолчанию; флаг `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` нужен только на версиях до 2.1.286.
 - Доступ к GitHub одним из двух способов:
   - [`gh`](https://cli.github.com), залогиненный в нужный хост (`gh auth login`, для Enterprise Server - `gh auth login --hostname gh.example.com`) - рекомендуемый путь: он уже знает и хосты, и токены;
   - либо токен с правом чтения pull request в `GH_TOKEN` (или `GITHUB_TOKEN`, для Enterprise Server - `GH_ENTERPRISE_TOKEN` / `GITHUB_ENTERPRISE_TOKEN`, либо в настройке `token` мода) - тогда мод ходит в GraphQL сам.
@@ -23,13 +23,13 @@ PR под наблюдением может быть несколько - сво
 
 ## Установка
 
-1. Включить function hooks. В `~/.claude/settings.json`:
+1. Ничего включать не нужно: с Claude Code 2.1.287 function hooks работают по умолчанию. Только на версиях до 2.1.286 их включает переменная окружения; без неё на такой версии мод поставится, но ничего делать не будет. В `~/.claude/settings.json`:
 
    ```json
    { "env": { "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1" } }
    ```
 
-   Без этого мод поставится, но ничего делать не будет. Для одной сессии хватит префикса: `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`.
+   Для одной сессии хватит префикса: `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude`.
 
 2. Поставить из каталога:
 
@@ -40,7 +40,7 @@ PR под наблюдением может быть несколько - сво
    Попробовать без установки, из клона каталога:
 
    ```sh
-   CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir mods/dex-github-pr-tracker
+   claude --plugin-dir mods/dex-github-pr-tracker
    ```
 
 3. Открыть сессию в проекте GitHub на ветке, у которой есть PR. Строка появится над полем ввода в течение нескольких секунд.
@@ -193,7 +193,7 @@ marketplace#128 open · blocked · ci success · ●2/7 · ✎24 · ↑12 · ✔
 npm run typecheck:mods                            # tsc по mods/ (входит в npm run validate)
 npm run test:mods                                 # прогон чистой половины
 claude plugin validate --strict mods/dex-github-pr-tracker   # манифест, перечень хуков и вызовов $
-CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude -p "/pr status" --plugin-dir mods/dex-github-pr-tracker
+claude -p "/pr status" --plugin-dir mods/dex-github-pr-tracker
 ```
 
 Последняя команда - живой прогон без установки: она берёт PR текущей ветки и печатает его состояние текстом, то есть проверяет весь путь от remote до ответа GitHub.
