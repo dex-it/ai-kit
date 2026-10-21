@@ -33,7 +33,7 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ### ThreadPool метрика без understanding
 Плохо: смотрим `threadpool-thread-count` и решаем «много thread'ов - всё ок»
-Правильно: одновременно `threadpool-queue-length` (растёт = starvation), `threadpool-completed-items-count` (накопительный; dotnet-counters показывает темп за интервал - не растёт вслед за очередью = starvation), `monitor-lock-contention-count`
+Правильно: одновременно `threadpool-queue-length` (растёт = starvation), `threadpool-completed-items-count` (не растёт вслед за очередью = starvation), `monitor-lock-contention-count`. На .NET 9+ dotnet-counters показывает Meter: `dotnet.thread_pool.queue.length`, `dotnet.thread_pool.work_item.count`, `dotnet.monitor.lock_contentions` - накопительные, прирост за интервал в колонке `Last Delta` с `--showDeltas`; на .NET <= 8 EventCounter сразу выводится темпом `Count / 1 sec`
 Почему: ThreadPool starvation проявляется как «queue растёт, completed-items стоит, latency деградирует». ThreadCount без queue не диагностичен
 
 ### Counter-only без allocation rate
