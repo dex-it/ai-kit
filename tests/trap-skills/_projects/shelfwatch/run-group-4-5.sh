@@ -13,9 +13,9 @@ d="$SP"; while [[ $d != / ]]; do [[ -e $d/CLAUDE.md ]] && { echo "CLAUDE.md на
 case_="$1"; set_="$2"; idx="$3"; shift 3; skills=("$@")
 declare -A BR=([rv-pt]=torch-train [rv-ddp]=torch-ddp [rv-tf]=keras-train [rv-ml]=churn-baseline [rv-cv]=shelf-vision [rv-nlp]=review-sentiment
  [rv-opt]=optuna-tune [rv-hyg]=tooling-pr [n0]=clean-diff [k-hyg]=quality-gates [k-nlp]=task-sentiment [k-ml]=task-churn [n0k]=task-metrics)
-declare -A HOME_=([rv-pt]=python-pytorch [rv-ddp]=python-pytorch [rv-tf]=python-tensorflow [rv-ml]=python-classical-ml [rv-cv]=python-computer-vision
+declare -A HOME_=([rv-pt]=python-pytorch [rv-ddp]=python-pytorch [rv-tf]=python-tensorflow [rv-ml]=removed/python-classical-ml [rv-cv]=python-computer-vision
  [rv-nlp]=python-nlp-transformers [rv-opt]=python-ml-optimization [rv-hyg]=python-project-hygiene [n0]=python-pytorch [k-hyg]=python-project-hygiene
- [k-nlp]=python-nlp-transformers [k-ml]=python-classical-ml [n0k]=python-pytorch)
+ [k-nlp]=python-nlp-transformers [k-ml]=removed/python-classical-ml [n0k]=python-pytorch)
 b=${BR[$case_]}; id="$case_-$set_$idx"
 W=$SP/w/$id; rm -rf "$W"; mkdir -p "$SP/w" "$SP/log"
 DIR=$W/shelfwatch

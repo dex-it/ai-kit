@@ -63,13 +63,13 @@ Context -> Direct Analysis -> Skill-Based Deep Scan -> Report. Context обяз�
 
 **Output:** Рекомендации на основе skill knowledge: что можно сделать неправильно и как избежать.
 
-**Exit criteria:** Skill загружен, его anti-patterns проверены применительно к данным.
+**Exit criteria:** Skill загружен либо записан n/a с причиной; anti-patterns проверены применительно к данным.
 
 Когда загружать:
-- Tabular data + baseline нужен -- `dex-skill-python-classical-ml:python-classical-ml` (дисбаланс классов)
 - Deep learning baseline -- `dex-skill-python-pytorch:python-pytorch` `[справочно]` или `dex-skill-python-tensorflow:python-tensorflow` `[справочно]`
 - Image data -- `dex-skill-python-computer-vision:python-computer-vision` `[справочно]` (предобработка снимков)
 - Text data -- `dex-skill-python-nlp-transformers:python-nlp-transformers` `[справочно]` (токенизация, прогрев, генерация)
+- Tabular data / baseline -- профильного skill нет: фаза закрывается по своим anti-patterns Phase 2, в Output строка «skill: n/a - табличного skill в каталоге нет»
 
 ## Phase 4: Report
 
