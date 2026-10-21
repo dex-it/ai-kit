@@ -1,7 +1,7 @@
 ---
-description: Автономный трек под открытую цель - feature, bugfix или ревью чужого MR; ledger вне рабочего дерева, Workflow-скрипт трека, сдача исхода скриптом finish.sh, фиксация истины в корпус проекта после complete, по --pr - PR/MR своей ветки
+description: Автономный трек под открытую цель - feature, bugfix или ревью чужого MR либо своей ветки; ledger вне рабочего дерева, Workflow-скрипт трека, сдача исхода скриптом finish.sh, фиксация истины в корпус проекта после complete, по --pr - PR/MR своей ветки
 allowed-tools: Workflow, Skill, ToolSearch, Bash, Read, Write, Edit, Glob, Grep
-argument-hint: "[bugfix|feature TASK цель... | TASK | review MR] [продолжить] [--interactive] [--pr [--draft] [--base BRANCH]] [--post] [--delta SHA]"
+argument-hint: "[bugfix|feature TASK цель... | TASK | review MR | review --local [--base BRANCH]] [продолжить] [--interactive] [--pr [--draft] [--base BRANCH]] [--post] [--delta SHA]"
 ---
 
 # /auto
@@ -9,7 +9,7 @@ argument-hint: "[bugfix|feature TASK цель... | TASK | review MR] [продо
 **Goal:** цель закрыта подтверждённым внешним фактом (критерий «готово» из `00-goal.md` исполнен командой или проверкой)
 либо остановлена статусом `blocked` / `partial` с названной нехваткой и решением по каждой открытой находке; третьего исхода
 нет. Треки: **feature** и **bugfix** - до локальных коммитов, по `--pr` цель `complete` сдаётся PR/MR текущей ветки;
-**ревью** чужого MR/PR - read-only, треды только по `--post`.
+**ревью** чужого MR/PR либо своей ветки (`--local`) - read-only, треды в MR только по `--post`.
 
 **Вход.** Трек - по первому слову: `review` - ревью; `bugfix` / `feature` - далее `TASK` и цель (цели в аргументе нет
 - берётся из открытого `00-goal.md`, подготовленного `/dex-auto:goal`); `TASK` без слова трека - трек по строке `Вид:` этой
@@ -22,6 +22,8 @@ argument-hint: "[bugfix|feature TASK цель... | TASK | review MR] [продо
   `--post` (`args.publish`) - санкция на инлайн-треды в чужом MR (без неё находки перечнем в выход); `--delta SHA`
   (`args.last_review_sha`) - ревизия дельты от прошлой ревизии. Критерий «готово»: у каждой находки статус, вердикт вынесен,
   при `--post` треды опубликованы либо названы неопубликованными с причиной.
+- Ревью своей ветки: `--local` (`args.local`) вместо указателя MR, `--post` подаётся как есть; `--base BRANCH` (`args.base`) -
+  целевая ветка, без него не подаётся; `TASK` - `local-<git branch --show-current>`, пусто (detached HEAD) - `local-<git rev-parse --short HEAD>`, символы вне `A-Za-z0-9-` - `-`.
 - `--interactive` - режим с каналом к оператору, дефолт `autonomous`. Источник требований назван - суди его против критерия «готово» вызовом `Skill` `dex-skill-requirement-quality:requirement-quality`, раздел «Противоречие»; источника нет - сверять не с чем. Критерий «готово» или граница не выводятся из входа и корпуса проекта, либо оракул поднял противоречие: в `autonomous` - `set TASK Исход blocked` и `Нехватка <текст>` до первого узла, при противоречии - обе стороны якорями и что требует каждая; в `interactive` - `set TASK Ожидает оператор`, вопрос, по ответу `set TASK Ожидает ""`. Расхождение о техконтексте (файлы, команды сборки и тестов, корпус) под этот исход не подпадает - трек запускается.
 
 **Ledger.** Пишут только скрипты `${CLAUDE_PLUGIN_ROOT}/hooks/scripts/`: `ledger.py open|set|get|open-tracks|trail|findings TASK
@@ -41,14 +43,14 @@ Stop ход не держит. TRACK - `feature` | `bugfix` | `review` | `review
 (не `продолжить`) - только при пустом `git status --porcelain` и нуле от `git rev-list --count HEAD --not
 --exclude="$(git branch --show-current)" --branches`: дельту и коммиты трек считает своими. Иначе до прогона `set TASK Исход
 blocked` и `set TASK Нехватка «каталог не подготовлен под цель: <незакоммиченные файлы либо N коммитов ветки вне локальных
-веток; целевой ветки нет локально - заведи её>»`. `продолжить` при ветке `auto/<TASK>` (символы TASK вне `A-Za-z0-9-` - `-`), которая есть локально и не текущая, - цель начата до 9.0.0 в дереве рядом: `set TASK Исход blocked`, `set TASK Нехватка «цель начата до 9.0.0 в дереве <путь из git worktree list>: git worktree remove дерева, git switch auto/<TASK> в каталоге запуска, повторить»`. Ревью - HEAD на head SHA MR; не на нём - трек вернёт `partial`.
+веток; целевой ветки нет локально - заведи её>»`. `продолжить` при ветке `auto/<TASK>` (символы TASK вне `A-Za-z0-9-` - `-`), которая есть локально и не текущая, - цель начата до 9.0.0 в дереве рядом: `set TASK Исход blocked`, `set TASK Нехватка «цель начата до 9.0.0 в дереве <путь из git worktree list>: git worktree remove дерева, git switch auto/<TASK> в каталоге запуска, повторить»`. Ревью - HEAD на head SHA MR, `--local` - дерево без незакоммиченных правок; иначе трек вернёт `partial`.
 
 **Фиксация истины.** После сдачи `complete` feature или bugfix, до сдачи кода: `Workflow` `dex-auto:dex-auto-record`, `args` `{task, goal_path, source, base, cwd}` (`source` - `Источник:` цели, `base` без `--base` не подаётся), возврат ждёшь, как прогон трека. Строка фиксации - `status` возврата, затем через `; ` непустые из `na`, `derived: <id>`, `unrecorded: <what>`, `где: <where>`; отказ `Workflow` - `не состоялась - <отказ>`. `autonomous` либо возврат без `units` и `commit` - `set TASK Фиксация <строка>`. Иначе, в `interactive`, - `set TASK Ожидает оператор` и вопрос: единицы дельты, `derived`, `unrecorded`, `foreign`, `secrets`, вердикты сверщика - принять | отклонить; принять - `set TASK Фиксация "<строка>; принята оператором"`; отклонить - `git revert` коммитов мест правки с трейлером `Dex-Auto-Record: yes` и `set TASK Фиксация "отклонена оператором: <причина>"`; по ответу `set TASK Ожидает ""`. Исход цели остаётся `complete`. `foreign` либо `secrets` непусты - сдачи кода нет: `set TASK PR "не открыт - фиксатор тронул файлы вне корпуса"` либо `"не открыт - в корпусе значение секрета"`, коммит фиксатора остаётся оператору: убрать из истории ветки до push, `git revert` секрет из неё не убирает; пока оператор не убрал, сдачи нет и при `продолжить --pr`. Иначе при `--pr` - сдача кода: `Workflow` `dex-auto:dex-auto-deliver`, `args` `{task, track, branch, base, default_branch, draft, goal_path, cwd}` (`branch` - `git branch --show-current`; `base` без `--base` не подаётся; `default_branch` - `git symbolic-ref --short refs/remotes/origin/HEAD` без `origin/`, пусто при ошибке) -> `set TASK PR <url>` при `pr: opened`, иначе `set TASK PR "не открыт - <reason либо отказ Workflow>"`; исход цели остаётся `complete`.
 
 **Прогон.** `Workflow` с `name` `dex-auto:dex-auto-<трек>`, трек - `feature`, `bugfix` либо `review` (и при `--delta`); `args`: feature - `{task, goal, done, boundary,
 mode, cwd, source, goal_path, scripts, resume, trail, open_findings, ctx, findings_top}`, `scripts` - `${CLAUDE_PLUGIN_ROOT}/hooks/scripts`; bugfix - то же, но вместо `goal` - `symptom, expected,
 env`, и вместо `ctx` - `repro` (симптом - фраза цели, ожидаемое - из критерия, окружение - из `## Цель` и `## Граница`;
-`done` и `boundary` - из `## Критерий «готово»` и `## Граница`, и здесь; чего нет - пустая строка); review - `{task, mr, intent, mode, publish, last_review_sha, cwd, open_findings, findings_top}`, `open_findings` - вывод `ledger.py findings TASK review` при каждом прогоне, не только на `продолжить`: статус прежней находки ревью выносит по её `id`. `findings_top` у всех треков - вывод `ledger.py top TASK <трек>` (дельта - `review`) при каждом прогоне. Узлы, петли и потолки - внутри скрипта; главный поток
+`done` и `boundary` - из `## Критерий «готово»` и `## Граница`, и здесь; чего нет - пустая строка); review - `{task, mr, local, base, intent, mode, publish, last_review_sha, cwd, open_findings, findings_top}`, `open_findings` - вывод `ledger.py findings TASK review` при каждом прогоне, не только на `продолжить`: статус прежней находки ревью выносит по её `id`. `findings_top` у всех треков - вывод `ledger.py top TASK <трек>` (дельта - `review`) при каждом прогоне. Узлы, петли и потолки - внутри скрипта; главный поток
 узлы не спавнит и ждёт возврат в том же ходе циклом `until` в `Bash` по файлу вывода задачи `<Task ID>.output` под `claude-<uid>` временного каталога (первый заданный из `CLAUDE_CODE_TMPDIR`, `TMPDIR`, `TMP`, `TEMP`, иначе `/tmp`), Task ID - из текста старта `Workflow`; готовность - файл непуст и разбирается как JSON, возврат трека - его поле
 `result`. Закрытый ход («до уведомления», `ScheduleWakeup`) убивает прогон по потолку ожидания фоновых задач, ledger остаётся без
 сдачи. Таймаут цикла - новый такой же вызов `Bash` в том же ходе, пока прогон жив: в `Transcript dir` из текста старта `Workflow` за последние 15 минут изменился хоть один файл; длительность прогона и число повторов потолком не служат. Не изменился ни один - `finish.sh TASK TRACK blocked «возврат Workflow не получен: 15 минут без записи прогона» <<< '{}'`. Скрипт на диск не пишет: ledger заполняется до прогона и после.
@@ -71,7 +73,7 @@ env`, и вместо `ctx` - `repro` (симптом - фраза цели, о�
 **Output:** `Исход:` цели первой строкой (`complete` | `blocked` | `partial`), затем `TASK`, путь ledger, ветка,
 исход сверки требований оракулом (`расхождений нет` либо перечень сторон), для feature / bugfix `goal_check` возврата (сборка, тесты и унаследованные от базы падения, коммит, `head`),
 `review-verdict` саморевью и `prior` с `id`, строка `Фиксация:` цели, при `--pr` - строка `PR:`, для bugfix ещё `repro.root_cause`; для ревью `review-verdict` скептика и рядом `reviewer_verdict` ревьюера,
-подтверждённые и снятые находки, `prior` дельты, покрытие, треды; счётчики петель, строки `degraded`, решения по открытым находкам, стоп-линии, на которые прогон
+подтверждённые и снятые находки, `prior` дельты, покрытие, треды (кроме `--local`); счётчики петель, строки `degraded`, решения по открытым находкам, стоп-линии, на которые прогон
 вышел (push без `--pr`, деплой, миграция данных, необратимое удаление, запись в чужой MR без `--post`) - к оператору поимённо.
 
 **Constraints:** поля возврата брать из значения тула, не из пересказа; вопрос оператору в `autonomous` не задаётся - он превращается в `blocked` с нехваткой.
