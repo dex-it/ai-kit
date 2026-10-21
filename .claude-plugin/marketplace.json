@@ -318,7 +318,7 @@
       "name": "dex-bundle-ml-engineer",
       "source": "./plugins/bundles/dex-bundle-ml-engineer",
       "description": "Бандл для ML-инженера: эксперименты, обучение моделей, отладка, деплой, пайплайны данных.",
-      "version": "1.9.1",
+      "version": "1.10.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -499,7 +499,7 @@
       "name": "dex-data-pipeline",
       "source": "./plugins/specialists/ml/dex-data-pipeline",
       "description": "Пайплайны данных для ML: загрузка и предобработка, оптимизация DataLoader, схема данных.",
-      "version": "1.7.0",
+      "version": "1.7.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -942,7 +942,7 @@
       "name": "dex-ml-deployer",
       "source": "./plugins/specialists/ml/dex-ml-deployer",
       "description": "Деплой ML-моделей: экспорт в ONNX и TFLite, serving через FastAPI, квантизация, контейнеризация.",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -955,7 +955,7 @@
       "name": "dex-ml-experimenter",
       "source": "./plugins/specialists/ml/dex-ml-experimenter",
       "description": "ML-экспериментатор: разведочный анализ данных, feature engineering, baseline-модели, качество данных.",
-      "version": "1.6.0",
+      "version": "1.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -968,7 +968,7 @@
       "name": "dex-model-debugger",
       "source": "./plugins/specialists/ml/dex-model-debugger",
       "description": "Отладчик моделей: loss не падает, переобучение, NaN в градиентах, CUDA OOM, медленное обучение.",
-      "version": "1.6.0",
+      "version": "1.6.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -981,7 +981,7 @@
       "name": "dex-model-trainer",
       "source": "./plugins/specialists/ml/dex-model-trainer",
       "description": "Тренер моделей: пайплайны обучения на PyTorch, TensorFlow, scikit-learn, HuggingFace, метрики и артефакты.",
-      "version": "1.6.0",
+      "version": "1.6.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2296,49 +2296,38 @@
       ]
     },
     {
-      "name": "dex-skill-python-classical-ml",
-      "source": "./plugins/skills/dex-skill-python-classical-ml",
-      "description": "Классический ML: scikit-learn, XGBoost, пайплайны, кросс-валидация, утечка данных, дисбаланс классов, отбор модели.",
-      "version": "2.0.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "scikit-learn",
-        "xgboost",
-        "machine-learning"
-      ]
-    },
-    {
       "name": "dex-skill-python-computer-vision",
       "source": "./plugins/skills/dex-skill-python-computer-vision",
-      "description": "Computer Vision: CNN, классификация, детекция и сегментация, аугментации, форматы изображений.",
-      "version": "2.0.1",
+      "description": "Computer Vision: размер снимков при Resize перед сетью.",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
         "computer-vision",
-        "cnn",
-        "image"
+        "image",
+        "torchvision",
+        "resize"
       ]
     },
     {
       "name": "dex-skill-python-ml-optimization",
       "source": "./plugins/skills/dex-skill-python-ml-optimization",
-      "description": "Оптимизация ML: подбор гиперпараметров (Optuna, Ray Tune), распределённое обучение, память и OOM, профилирование, трекинг экспериментов.",
-      "version": "2.0.1",
+      "description": "Оптимизация ML: целочисленные пространства поиска Optuna.",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
         "ml-optimization",
         "hyperparameters",
-        "optuna"
+        "optuna",
+        "search-space"
       ]
     },
     {
       "name": "dex-skill-python-nlp-transformers",
       "source": "./plugins/skills/dex-skill-python-nlp-transformers",
-      "description": "NLP на трансформерах: HuggingFace, BERT, токенизация, fine-tuning, LoRA/QLoRA.",
-      "version": "2.0.1",
+      "description": "NLP на трансформерах: пакетная токенизация, прогрев, декодирование при генерации, квантизация для CPU.",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2350,8 +2339,8 @@
     {
       "name": "dex-skill-python-project-hygiene",
       "source": "./plugins/skills/dex-skill-python-project-hygiene",
-      "description": "Гигиена Python-проекта: ruff, mypy, pytest и их рабочие настройки в pyproject.toml.",
-      "version": "1.0.0",
+      "description": "Гигиена Python-проекта: ignore_missing_imports в mypy, порог покрытия, предупреждения pytest, аудит зависимостей.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2365,8 +2354,8 @@
     {
       "name": "dex-skill-python-pytorch",
       "source": "./plugins/skills/dex-skill-python-pytorch",
-      "description": "PyTorch: модели, цикл обучения, загрузка данных, режимы train/eval, работа с GPU и смешанная точность.",
-      "version": "2.0.1",
+      "description": "PyTorch: чтение значения потери с GPU в цикле обучения.",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2378,8 +2367,8 @@
     {
       "name": "dex-skill-python-tensorflow",
       "source": "./plugins/skills/dex-skill-python-tensorflow",
-      "description": "TensorFlow/Keras: модели и слои, tf.data, callbacks, сохранение, распределённое обучение.",
-      "version": "2.0.1",
+      "description": "TensorFlow/Keras: параллельность map во входном конвейере tf.data.",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2582,7 +2571,7 @@
       "name": "dex-skill-stack-registry",
       "source": "./plugins/skills/dex-skill-stack-registry",
       "description": "Канонический реестр стеков и правило загрузки skills по стеку×теме для общих агентов",
-      "version": "1.3.3",
+      "version": "1.4.0",
       "category": "skill",
       "keywords": [
         "skill",

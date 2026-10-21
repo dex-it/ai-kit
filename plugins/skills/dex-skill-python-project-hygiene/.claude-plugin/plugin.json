@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-python-project-hygiene",
-  "version": "1.0.0",
-  "description": "Гигиена Python-проекта: ruff, mypy, pytest и их рабочие настройки в pyproject.toml.",
+  "version": "1.2.0",
+  "description": "Гигиена Python-проекта: ignore_missing_imports в mypy, порог покрытия, предупреждения pytest, аудит зависимостей.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
@@ -9,9 +9,9 @@
   "keywords": [
     "skill",
     "python",
-    "ruff",
     "mypy",
     "pytest",
+    "coverage",
     "quality-gates"
   ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",

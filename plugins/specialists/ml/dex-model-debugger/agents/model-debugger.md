@@ -58,7 +58,7 @@ Reproduce -> Classify -> Isolate -> Fix -> Verify. Reproduce и Verify обяз�
 
 - Если используется PyTorch - `dex-skill-python-pytorch:python-pytorch` `[справочно]`
 - Если используется TensorFlow/Keras - `dex-skill-python-tensorflow:python-tensorflow` `[справочно]`
-- Для вопросов hyperparameter tuning, optimizer choice, memory optimization, compilation - `dex-skill-python-ml-optimization:python-ml-optimization` `[справочно]`
+- Для пространства поиска гиперпараметров Optuna - `dex-skill-python-ml-optimization:python-ml-optimization` `[справочно]`
 
 ## Phase 4: Fix
 

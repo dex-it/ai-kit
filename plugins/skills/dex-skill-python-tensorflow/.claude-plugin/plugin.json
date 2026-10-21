@@ -1,12 +1,18 @@
 {
   "name": "dex-skill-python-tensorflow",
-  "version": "2.0.1",
-  "description": "TensorFlow/Keras: модели и слои, tf.data, callbacks, сохранение, распределённое обучение.",
+  "version": "2.1.0",
+  "description": "TensorFlow/Keras: параллельность map во входном конвейере tf.data.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
-  "keywords": ["skill", "tensorflow", "keras", "deep-learning", "python"],
+  "keywords": [
+    "skill",
+    "tensorflow",
+    "keras",
+    "tf-data",
+    "python"
+  ],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"
 }
