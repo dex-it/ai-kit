@@ -81,7 +81,7 @@ process-skill) сохранён, 15 ловушек -> 7 названий (2.1.0,
 
 ## Бюджет синхронизаций группы 4.7
 
-Снято целиком: `exploratory-testing` 1.0.1, `deep-audit` 1.0.2, `tech-audit` 1.0.2 (минор каталога 6.22.0 -> 6.23.0; develop на 6.22.0 после PR #368). Сжаты: `observability`
+Снято целиком: `exploratory-testing` 1.0.1, `deep-audit` 1.0.2, `tech-audit` 1.0.2 (минор каталога; на момент написания develop 6.22.0, после слияния #368 и #369 - 6.24.0, итог 6.25.0). Сжаты: `observability`
 1.2.1 -> 1.3.0, `merge-conflict-resolution` 2.0.1 -> 2.1.0, `stand-verification` 1.1.2 -> 1.2.0, `shared-stand-safety` 1.0.0 -> 1.1.0 (снятие целиком отменено ревью: S5, S8, S9 `unverifiable`; бандлы по этому скиллу не менялись; раунд 3: `description` сужен до трёх пунктов, `shared-stand-in` 3/3, отсылки трёх агентов сужены).
 
 | Носитель | Правка | Версия |
@@ -93,8 +93,8 @@ process-skill) сохранён, 15 ловушек -> 7 названий (2.1.0,
 | бандл `runtime-diagnostics` | убран `deep-audit` из `includes`, README | 1.5.0 -> 1.6.0 |
 | агент `incident-investigator`, `bug-fixer`, `stand-reviewer` | отсылка на `shared-stand-safety` сужена до «exec с изменениями, внешняя запись, дорогое чтение» (раунд 3 ревью) | 2.7.0 -> 2.7.1, 1.13.0 -> 1.13.1, 2.6.0 -> 2.6.1 |
 | README агента `bug-finder`; README бандлов `bug-lifecycle`, `runtime-diagnostics` | строки скиллов | - |
-| корневой README | строка «QA и тестирование»; подвал | 6.22.0 -> 6.23.0 |
-| `.claude-plugin/marketplace.json` | три записи плагинов сняты, версии, `shared-stand-safety` 1.1.0 | каталог 6.22.0 -> 6.23.0 |
+| корневой README | строка «QA и тестирование»; подвал | 6.24.0 -> 6.25.0 |
+| `.claude-plugin/marketplace.json` | три записи плагинов сняты, версии, `shared-stand-safety` 1.1.0 | каталог 6.24.0 -> 6.25.0 |
 | `tests/activation/cases.json` | сняты `deep-audit-in`, `exploratory-testing-in`, `tech-audit-in` | - |
 
 Версии бандлов `dotnet-fullstack`, `ts-fullstack`, затронутые PR #368, сведены при слиянии develop (бампы считаны от версий develop).
