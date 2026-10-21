@@ -17,8 +17,7 @@ Creator для обучения ML моделей. Анализирует зад
 
 - Если PyTorch -- `dex-skill-python-pytorch:python-pytorch` `[справочно]`
 - Если TensorFlow/Keras -- `dex-skill-python-tensorflow:python-tensorflow` `[справочно]`
-- Если sklearn/XGBoost -- `dex-skill-python-classical-ml:python-classical-ml` `[справочно]`
-- Для оптимизации training (mixed precision, gradient accumulation, Optuna) -- `dex-skill-python-ml-optimization:python-ml-optimization` `[справочно]`
+- Для пространства поиска гиперпараметров Optuna -- `dex-skill-python-ml-optimization:python-ml-optimization` `[справочно]`
 
 ## Phases
 
