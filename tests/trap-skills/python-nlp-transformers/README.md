@@ -1,6 +1,6 @@
 # python-nlp-transformers: сжатие по свидетельству, группа 4.5
 
-Скилл `dex-skill-python-nlp-transformers` 2.0.1 ([`inputs/`](inputs/): SKILL-2.0.1.md, SKILL-n1.md, SKILL-n2.md (итоговая)), эпик #291, группа 4.5 (#306). Исход - **сжат**: 2.0.1 -> 2.1.0.
+Скилл `dex-skill-python-nlp-transformers` 2.0.1 ([`inputs/`](inputs/): SKILL-2.0.1.md, SKILL-n1.md, SKILL-n2.md, SKILL-r1.md - SKILL-r3.md, SKILL-r4.md (итоговая)), эпик #291, группа 4.5 (#306). Исход - **сжат**: 2.0.1 -> 2.1.0.
 
 **Заход группы 4.5.** Общий для семи скиллов: `python-project-hygiene`, `python-pytorch`, `python-tensorflow`,
 `python-classical-ml`, `python-computer-vision`, `python-nlp-transformers`, `python-ml-optimization`. Вход -
