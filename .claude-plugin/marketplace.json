@@ -149,7 +149,7 @@
       "name": "dex-bug-fixer",
       "source": "./plugins/specialists/delivery/dex-bug-fixer",
       "description": "Пакетная ремедиация найденных тестировщиком багов после мерджа: интейк находок, триаж и приоритет, подтверждение причины по одному, фикс на источнике через follow-up MR, верификация red->green на стенде, регрессия соседей; финиш на локальных коммитах без push.",
-      "version": "1.13.1",
+      "version": "1.13.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -797,7 +797,7 @@
       "name": "dex-incident-investigator",
       "source": "./plugins/specialists/delivery/dex-incident-investigator",
       "description": "Узел расследования инцидента и поиска корневой причины на общем стенде до фикса на источнике: спецификация IS/IS-NOT, параллельный сбор улик, причинно-следственная цепочка, фальсификация причины, фикс под gate. Делегирует сбор со стенда инфра-плагинам. Точка входа - команда /investigate, едет в этом же плагине.",
-      "version": "2.7.1",
+      "version": "2.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2552,8 +2552,8 @@
     {
       "name": "dex-skill-shared-stand-safety",
       "source": "./plugins/skills/dex-skill-shared-stand-safety",
-      "description": "Дисциплина общего стенда при расследовании: не запускать exec с побочными эффектами, не писать во внешние системы (Jira, MR, пайплайн), не делать дорогое чтение на нагруженном стенде.",
-      "version": "1.1.0",
+      "description": "Дисциплина общего стенда при расследовании: read-only по умолчанию, никаких apply/restart/scale без команды, секреты не печатать, не выдумывать улики.",
+      "version": "1.0.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2813,7 +2813,7 @@
       "name": "dex-stand-reviewer",
       "source": "./plugins/specialists/review/dex-stand-reviewer",
       "description": "Узел приёмки слитой фичи на развёрнутом стенде против ТЗ, read-only: привязка образа к merge-коммиту, карта требование -> проба на стенде, параллельные суб-агенты улик, фальсификация находок и утверждений 'выполнено', severity/confidence/scope, отчёт. Точка входа - команда /review-stand, едет в этом же плагине.",
-      "version": "2.6.1",
+      "version": "2.6.0",
       "category": "specialist",
       "keywords": [
         "specialist",

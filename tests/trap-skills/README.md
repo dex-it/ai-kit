@@ -108,7 +108,7 @@
 | [observability](observability/README.md) | `dex-skill-observability` 1.2.1 | код (OBSW), ревью (OBSR, OBS0); мини-проект `ordering`, общий заход группы 4.7 | 13 ловушек и чек-лист -> 4 названия; W9 снят по вреду на OBS0, возвращён с границей в стеке на #374 (1.4.0) |
 | [merge-conflict-resolution](merge-conflict-resolution/README.md) | `dex-skill-merge-conflict-resolution` 2.0.1 | merge, rebase, чистое слияние (MC1, MC2, MC0) | протокол сохранён, 15 ловушек -> 7 названий |
 | [stand-verification](stand-verification/README.md) | `dex-skill-stand-verification` 1.1.2 | приёмка на стенде (K7, K8, K9 «ничего не менять», `_projects/shipping`) | 11 ловушек -> 3 названия (V3, V10, V11) |
-| [shared-stand-safety](shared-stand-safety/README.md) | `dex-skill-shared-stand-safety` 1.0.0 | инцидент на общем стенде (K6, K10 «ничего не менять») | 9 ловушек и чек-лист -> 3 названия (S5, S8, S9: `unverifiable`) |
+| [shared-stand-safety](shared-stand-safety/README.md) | `dex-skill-shared-stand-safety` 1.0.0 | инцидент на общем стенде (K6, K10 «ничего не менять») | сжатие до 3 названий (1.1.0) отменено после K10 (H1 3/4 на 1.0.0 против 0/4), скилл без изменений |
 | [removed/exploratory-testing](removed/exploratory-testing/README.md) | `dex-skill-exploratory-testing` 1.0.1 | тестировщик (ET1, ET0) | снят |
 | [removed/deep-audit](removed/deep-audit/README.md) | `dex-skill-deep-audit` 1.0.2 | аудит компонента (DA1, DA0) | снят; A6 -> ось `dotnet-runtime-diagnostician`, в стеке на #374 убрана и из оси (контроль 3/4) |
 | [removed/tech-audit](removed/tech-audit/README.md) | `dex-skill-tech-audit` 1.0.2 | аудит RFC (TA1, TA0) | снят: потребителей нет |
