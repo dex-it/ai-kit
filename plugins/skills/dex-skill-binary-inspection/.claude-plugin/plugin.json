@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-binary-inspection",
   "version": "1.1.1",
-  "description": "Бинарный анализ - binutils (readelf, objdump, addr2line, c++filt), Rizin JSON, LIEF Python API, ilspycmd для .NET",
+  "description": "Бинарный анализ - binutils (objdump, addr2line, c++filt), дизассемблирование и cross-arch, Rizin JSON, LIEF Python API, ilspycmd для .NET",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
@@ -9,7 +9,7 @@
   "keywords": [
     "skill",
     "binary-inspection",
-    "readelf",
+    "cross-arch",
     "objdump",
     "debuginfod",
     "addr2line",

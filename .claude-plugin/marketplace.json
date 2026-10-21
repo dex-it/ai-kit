@@ -1432,13 +1432,13 @@
     {
       "name": "dex-skill-binary-inspection",
       "source": "./plugins/skills/dex-skill-binary-inspection",
-      "description": "Бинарный анализ - binutils (readelf, objdump, addr2line, c++filt), Rizin JSON, LIEF Python API, ilspycmd для .NET",
+      "description": "Бинарный анализ - binutils (objdump, addr2line, c++filt), дизассемблирование и cross-arch, Rizin JSON, LIEF Python API, ilspycmd для .NET",
       "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
         "binary-inspection",
-        "readelf",
+        "cross-arch",
         "objdump",
         "debuginfod",
         "addr2line",
@@ -1545,7 +1545,7 @@
     {
       "name": "dex-skill-core-dumps",
       "source": "./plugins/skills/dex-skill-core-dumps",
-      "description": "Post-mortem анализ coredump: gcore, coredumpctl, kernel.core_pattern, dotnet-dump analyze, mismatched libs, контейнеры",
+      "description": "Post-mortem анализ coredump: gcore, coredumpctl, kernel.core_pattern, mismatched libs, контейнеры",
       "version": "1.1.1",
       "category": "skill",
       "keywords": [
@@ -1554,7 +1554,7 @@
         "coredumpctl",
         "gcore",
         "post-mortem",
-        "dotnet-dump-analyze",
+        "systemd-coredump",
         "ulimit-core",
         "core-pattern"
       ]

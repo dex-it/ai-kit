@@ -1,6 +1,6 @@
 ---
 name: binary-inspection
-description: Бинарный анализ - binutils (readelf, objdump, addr2line, c++filt), Rizin JSON output, LIEF Python API, ilspycmd .NET decompiler, debuginfod. Активируется при readelf, objdump, addr2line, c++filt, rizin, rz-pipe, ilspycmd, lief, debuginfod, dwarf info, ELF, PE, Mach-O
+description: Бинарный анализ - binutils (objdump, addr2line, c++filt), дизассемблирование и cross-arch (objdump --target), Rizin JSON output, LIEF Python API, ilspycmd .NET decompiler, debuginfod. Активируется при objdump --target, cross-arch disassembly, objdump, addr2line, c++filt, rizin, rz-pipe, ilspycmd, lief, debuginfod, dwarf info, ELF, PE, Mach-O
 ---
 
 # Binary inspection - ловушки статического анализа бинарей

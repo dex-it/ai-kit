@@ -1,6 +1,6 @@
 ---
 name: core-dumps
-description: Post-mortem анализ coredump - gcore live snapshot, coredumpctl, ulimit, kernel.core_pattern, dotnet-dump analyze, mismatched libs, контейнеры. Активируется при core dump, coredumpctl, gcore, ulimit, core_pattern, post-mortem, sigsegv abort, container coredump, dotnet-dump analyze, systemd-coredump, sysroot
+description: Post-mortem анализ coredump - gcore live snapshot, coredumpctl, ulimit, kernel.core_pattern, mismatched libs, контейнеры. Активируется при core dump, coredumpctl, gcore, ulimit, core_pattern, post-mortem, sigsegv abort, container coredump, systemd-coredump, sysroot
 ---
 
 # Core dumps - ловушки сбора и анализа post-mortem
