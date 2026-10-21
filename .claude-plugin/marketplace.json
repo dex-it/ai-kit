@@ -955,7 +955,7 @@
       "name": "dex-ml-experimenter",
       "source": "./plugins/specialists/ml/dex-ml-experimenter",
       "description": "ML-экспериментатор: разведочный анализ данных, feature engineering, baseline-модели, качество данных.",
-      "version": "1.6.2",
+      "version": "1.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
