@@ -11,6 +11,7 @@ export CLAUDE_CONFIG_DIR="$T/cfg"; export DEX_AUTO_CWD="/home/u/Work my.proj"
 fail=0; n=0
 check() { n=$((n+1)); if [ "$1" = "$2" ]; then echo "ok $n - $3"; else echo "FAIL $n - $3: ожидалось [$2], получено [$1]"; fail=1; fi; }
 L="$H/ledger.py"
+Q="$(python3 -c 'import shlex,sys; print(shlex.quote(sys.argv[1]))' "$L")"
 check "$("$L" root)" "$T/cfg/projects/-home-u-Work-my-proj/ledger" "slug: символы вне [A-Za-z0-9-] -> '-', ведущий '/' даёт ведущий '-'"
 f="$("$L" open "PROJ-1" autonomous)"
 check "$f" "$T/cfg/projects/-home-u-Work-my-proj/ledger/PROJ-1/00-goal.md" "open: адрес 00-goal.md"
@@ -25,6 +26,7 @@ out="$(printf '%s' "${IN/startup/clear}" | "$H/session-start.py")"; check "$out"
 out="$(printf '%s' "${IN/startup/compact}" | "$H/session-start.py")"; check "$(printf '%s' "$out" | grep -c 'PROJ-1')" "1" "session-start: compact поднимает"
 check "$(printf '%s' "$out" | grep -c '/dex-auto:auto PROJ-1 продолжить')" "0" "session-start: трека нет - «продолжить» не советуется (resume без trail пропускает фазу правки)"
 check "$(printf '%s' "$out" | grep -c 'трека по этой цели не было')" "1" "session-start: без трека назван исход - запуск с нуля"
+check "$(printf '%s' "$out" | grep -cF "$Q close PROJ-1 complete")" "1" "session-start: ledger.py полным путём - после compact тела /auto с путём нет"
 printf 'Статус: открыт\n' > "$(dirname "$f")/01-feature.md"
 out="$(printf '%s' "$IN" | "$H/session-start.py")"
 check "$(printf '%s' "$out" | grep -c 'файлы трека 01-feature.md')" "1" "session-start: открытый трек назван файлом"
@@ -52,6 +54,8 @@ export CLAUDE_CODE_SESSION_ID=S1; "$L" set PROJ-1 Исход ""
 SIN='{"session_id":"S1","cwd":"/home/u/Work my.proj","stop_hook_active":false}'
 err="$(printf '%s' "$SIN" | "$H/stop-guard.py" 2>&1 >/dev/null)"; rc=$?
 check "$rc" "2" "stop-guard: открытая цель -> код 2"; check "$(printf '%s' "$err" | grep -c 'цель PROJ-1 открыта')" "1" "stop-guard: причина в stderr"
+check "$(printf '%s' "$err" | grep -cF "$Q set PROJ-1 Нехватка")" "1" "stop-guard: ledger.py в причине полным путём"
+check "$(printf '%s' "$err" | grep -cF "$Q close PROJ-1 complete")" "1" "stop-guard: подсказка close несёт исход - без него ledger.py close падает"
 # Главный поток вошёл в дерево трека: cwd события - дерево, ledger ищется по каталогу запуска сессии (P35).
 check "$(printf '%s' '{"cwd":"/home/u/Work my.proj-PROJ-1","source":"startup"}' | CLAUDE_PROJECT_DIR="/home/u/Work my.proj" "$H/session-start.py" | grep -c 'открытая цель PROJ-1')" "1" "session-start: в дереве трека цель найдена по каталогу запуска"
 check "$(printf '%s' '{"session_id":"S1","cwd":"/home/u/Work my.proj-PROJ-1","stop_hook_active":false}' | CLAUDE_PROJECT_DIR="/home/u/Work my.proj" "$H/stop-guard.py" >/dev/null 2>&1; echo $?)" "2" "stop-guard: в дереве трека открытая цель найдена по каталогу запуска"
