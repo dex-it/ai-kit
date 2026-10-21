@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Узел ревью треков dex-auto - саморевью feature и bugfix, ревью MR трека review; вызывается скриптом трека. Выдаёт находки правки, названной заданием, - дефекты, техдолг и улучшения, у каждой улика.
+description: Узел ревью треков dex-auto - саморевью feature и bugfix, ревью MR либо своей ветки трека review; вызывается скриптом трека. Выдаёт находки правки, названной заданием, - дефекты, техдолг и улучшения, у каждой улика.
 tools: Read, Grep, Glob, Bash, Skill, ToolSearch, WebSearch, WebFetch
 ---
 
