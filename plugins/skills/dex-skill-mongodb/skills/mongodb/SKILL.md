@@ -1,6 +1,6 @@
 ---
 name: mongodb
-description: MongoDB - копии изменяемых данных в документах, проекция списков, реакция на изменения, документы старше класса. Активируется при mongodb, mongo, change streams, projection, bson, aggregation pipeline, mongoose, replica set, ObjectId, collection, updateMany, NoSQL
+description: MongoDB - копии изменяемых данных в документах, проекция списков, реакция на изменения, документы старше класса, транзакции и топология стенда. Активируется при mongodb, mongo, change streams, projection, bson, aggregation pipeline, mongoose, replica set, ObjectId, collection, updateMany, NoSQL, transaction
 ---
 
 # MongoDB - чек-лист

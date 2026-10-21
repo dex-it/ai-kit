@@ -2060,8 +2060,8 @@
     {
       "name": "dex-skill-mongodb",
       "source": "./plugins/skills/dex-skill-mongodb",
-      "description": "MongoDB: копии изменяемых данных, проекция списков, реакция на изменения, документы старше класса.",
-      "version": "1.2.0",
+      "description": "MongoDB: копии изменяемых данных, проекция списков, реакция на изменения, документы старше класса, транзакции на одиночном mongod.",
+      "version": "1.2.1",
       "category": "skill",
       "keywords": [
         "skill",
