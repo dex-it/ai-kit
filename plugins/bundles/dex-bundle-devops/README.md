@@ -38,7 +38,6 @@ Bundle for DevOps engineers: Docker, Kubernetes, CI/CD, monitoring, logging.
 - `dex-monitoring-grafana` - Grafana monitoring
 
 ### Skills
-- `dex-skill-docker` - Docker best practices
 - `dex-skill-kubernetes` - Kubernetes patterns
 - `dex-skill-gitlab-ci` - GitLab CI/CD patterns
 - `dex-skill-teamcity` - TeamCity patterns

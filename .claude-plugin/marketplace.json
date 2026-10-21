@@ -1,6 +1,6 @@
 {
   "name": "dex-claude-marketplace",
-  "version": "6.22.0",
+  "version": "6.24.0",
   "description": "Маркетплейс AI-агентов для разработчиков. Атомарные плагины с узкой специализацией: Skills (знания), Specialists (агенты), Bundles (наборы).",
   "owner": {
     "name": "Dex Team",
@@ -252,7 +252,7 @@
       "name": "dex-bundle-devops",
       "source": "./plugins/bundles/dex-bundle-devops",
       "description": "Бандл для DevOps-инженера: Docker, Kubernetes, CI/CD, мониторинг, логирование.",
-      "version": "1.8.1",
+      "version": "1.9.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -277,7 +277,7 @@
       "name": "dex-bundle-dotnet-fullstack",
       "source": "./plugins/bundles/dex-bundle-dotnet-fullstack",
       "description": "Полный бандл для .NET fullstack: разработка, базы данных, брокеры сообщений, контейнеры, CI/CD, мониторинг, интерактивный дизайн архитектуры.",
-      "version": "2.43.0",
+      "version": "2.44.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -290,7 +290,7 @@
       "name": "dex-bundle-infrastructure",
       "source": "./plugins/bundles/dex-bundle-infrastructure",
       "description": "Полный инфраструктурный бандл: базы данных, брокеры сообщений, контейнеры, CI/CD, мониторинг.",
-      "version": "1.8.1",
+      "version": "1.9.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -386,8 +386,8 @@
     {
       "name": "dex-bundle-ts-fullstack",
       "source": "./plugins/bundles/dex-bundle-ts-fullstack",
-      "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, Docker, E2E на Playwright.",
-      "version": "1.41.0",
+      "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, E2E на Playwright.",
+      "version": "1.42.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -468,7 +468,7 @@
       "name": "dex-code-discovery",
       "source": "./plugins/specialists/architecture/dex-code-discovery",
       "description": "Обзорное ревью существующего кода вширь: инвентаризация проблем по топикам, severity с калибровкой под масштаб, результат в docs/discover/. Точка входа - команда /discover, едет в этом же плагине.",
-      "version": "2.10.0",
+      "version": "2.10.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -584,7 +584,7 @@
       "name": "dex-docker-specialist",
       "source": "./plugins/specialists/infrastructure/dex-docker-specialist",
       "description": "Специалист по Docker: контейнеры и образы, docker-compose, multi-stage сборка, health checks, оптимизация.",
-      "version": "1.7.0",
+      "version": "1.8.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1500,8 +1500,8 @@
     {
       "name": "dex-skill-ci-gates",
       "source": "./plugins/skills/dex-skill-ci-gates",
-      "description": "Минимум гейтов в CI и признаки фиктивного гейта - независимо от платформы и стека.",
-      "version": "1.0.0",
+      "description": "Минимум гейтов в CI: обязательность проверок для мержа и установка по лок-файлу - независимо от платформы.",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1649,19 +1649,6 @@
         "brd",
         "prd",
         "spec"
-      ]
-    },
-    {
-      "name": "dex-skill-docker",
-      "source": "./plugins/skills/dex-skill-docker",
-      "description": "Docker: multi-stage сборка, безопасность, оптимизация образов, docker-compose. Общий skill для .NET и любых контейнеризованных приложений.",
-      "version": "1.1.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "docker",
-        "containers",
-        "dockerfile"
       ]
     },
     {
@@ -1885,8 +1872,8 @@
     {
       "name": "dex-skill-github-actions",
       "source": "./plugins/skills/dex-skill-github-actions",
-      "description": "GitHub Actions: ловушки workflow, безопасность токенов и pull_request_target, кэширование, matrix-сборки, self-hosted раннеры.",
-      "version": "1.0.1",
+      "description": "GitHub Actions: срок хранения артефактов прогона.",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1899,8 +1886,8 @@
     {
       "name": "dex-skill-gitlab-ci",
       "source": "./plugins/skills/dex-skill-gitlab-ci",
-      "description": "GitLab CI/CD: пайплайны, джобы, артефакты, окружения, деплой, оптимизация и безопасность.",
-      "version": "1.1.1",
+      "description": "GitLab CI/CD: прерываемые джобы при повторных push.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1973,8 +1960,8 @@
     {
       "name": "dex-skill-jenkins",
       "source": "./plugins/skills/dex-skill-jenkins",
-      "description": "Jenkins: ловушки Jenkinsfile, декларативные и скриптовые пайплайны, shared libraries, работа с credentials.",
-      "version": "1.0.1",
+      "description": "Jenkins: стадии со своим agent, parallel, workspace постоянных агентов, credentials и плагины.",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2000,8 +1987,8 @@
     {
       "name": "dex-skill-kubernetes",
       "source": "./plugins/skills/dex-skill-kubernetes",
-      "description": "Kubernetes: Deployment, Service, Ingress, ConfigMap, Secrets, HPA, probes, безопасность и ресурсы. Общий skill для всех операций с кластером.",
-      "version": "1.1.1",
+      "description": "Kubernetes: проверки liveness и readiness, limits ресурсов .NET, секреты в манифестах.",
+      "version": "1.3.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2624,7 +2611,7 @@
       "name": "dex-skill-stack-registry",
       "source": "./plugins/skills/dex-skill-stack-registry",
       "description": "Канонический реестр стеков и правило загрузки skills по стеку×теме для общих агентов",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2707,8 +2694,8 @@
     {
       "name": "dex-skill-teamcity",
       "source": "./plugins/skills/dex-skill-teamcity",
-      "description": "TeamCity CI/CD: конфигурации сборки, build chains, Kotlin DSL, артефакты, деплой.",
-      "version": "1.1.1",
+      "description": "TeamCity: флаги шагов dotnet в цепочке сборок, конфигурация как код.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
