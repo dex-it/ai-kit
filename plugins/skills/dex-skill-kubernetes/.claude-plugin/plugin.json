@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-kubernetes",
   "version": "1.3.0",
-  "description": "Kubernetes: проверки liveness и readiness, секреты в манифестах.",
+  "description": "Kubernetes: проверки liveness и readiness, limits ресурсов .NET, секреты в манифестах.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
