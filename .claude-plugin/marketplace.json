@@ -1432,15 +1432,15 @@
     {
       "name": "dex-skill-binary-inspection",
       "source": "./plugins/skills/dex-skill-binary-inspection",
-      "description": "Бинарный анализ - binutils (readelf, nm, objdump, addr2line, strings, ldd), Rizin JSON, LIEF Python API, ilspycmd для .NET",
-      "version": "1.0.0",
+      "description": "Бинарный анализ - binutils (objdump, addr2line, c++filt), дизассемблирование и cross-arch, Rizin JSON, LIEF Python API, ilspycmd для .NET",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
         "binary-inspection",
-        "readelf",
+        "cross-arch",
         "objdump",
-        "ldd",
+        "debuginfod",
         "addr2line",
         "rizin",
         "ilspycmd",
@@ -1545,8 +1545,8 @@
     {
       "name": "dex-skill-core-dumps",
       "source": "./plugins/skills/dex-skill-core-dumps",
-      "description": "Post-mortem анализ coredump: gcore, coredumpctl, kernel.core_pattern, dotnet-dump analyze, mismatched libs, контейнеры",
-      "version": "1.0.0",
+      "description": "Post-mortem анализ coredump: gcore, coredumpctl, kernel.core_pattern, mismatched libs, контейнеры",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1554,7 +1554,7 @@
         "coredumpctl",
         "gcore",
         "post-mortem",
-        "dotnet-dump-analyze",
+        "systemd-coredump",
         "ulimit-core",
         "core-pattern"
       ]
@@ -2030,7 +2030,7 @@
       "name": "dex-skill-managed-debug",
       "source": "./plugins/skills/dex-skill-managed-debug",
       "description": "Runtime-отладка .NET: netcoredbg, dotnet-dump/trace/counters, SOS, managed-дампы, анализ кучи GC, async-стек.",
-      "version": "1.1.0",
+      "version": "1.2.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2075,7 +2075,7 @@
       "name": "dex-skill-native-debug",
       "source": "./plugins/skills/dex-skill-native-debug",
       "description": "Native CLI debug: GDB batch / MI2, LLDB scripting, ptrace, debuginfod, valgrind для memory leak и race detection",
-      "version": "1.0.0",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2187,8 +2187,8 @@
     {
       "name": "dex-skill-perf-profiling",
       "source": "./plugins/skills/dex-skill-perf-profiling",
-      "description": "Linux sampling-профилирование: perf record/script, FlameGraph, on-CPU vs off-CPU, JIT-символы для .NET",
-      "version": "1.0.0",
+      "description": "Linux sampling-профилирование: perf record/script, FlameGraph, on-CPU vs off-CPU, JIT-символы Java",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2664,7 +2664,7 @@
       "name": "dex-skill-syscall-tracing",
       "source": "./plugins/skills/dex-skill-syscall-tracing",
       "description": "Linux syscall и event tracing: strace, bpftrace JSON output, bcc-tools (execsnoop/opensnoop/funclatency/memleak)",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
