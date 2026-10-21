@@ -623,7 +623,7 @@
       "name": "dex-dotnet-performance",
       "source": "./plugins/specialists/dotnet/dex-dotnet-performance",
       "description": "Аналитик производительности .NET: профилирование, N+1, медленные запросы, утечки памяти, метрики и трассировка.",
-      "version": "2.4.0",
+      "version": "2.4.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1807,14 +1807,13 @@
     {
       "name": "dex-skill-elasticsearch",
       "source": "./plugins/skills/dex-skill-elasticsearch",
-      "description": "Elasticsearch: индексирование и mapping, запросы, агрегации, клиенты.",
-      "version": "1.1.1",
+      "description": "Elasticsearch: пересборка большого индекса, анализаторы языка.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
         "elasticsearch",
-        "search",
-        "nest"
+        "search"
       ]
     },
     {
@@ -1988,8 +1987,8 @@
     {
       "name": "dex-skill-kafka",
       "source": "./plugins/skills/dex-skill-kafka",
-      "description": "Apache Kafka: producer и consumer, партиционирование, consumer group, exactly-once.",
-      "version": "1.1.1",
+      "description": "Kafka: идемпотентность продьюсера, смещения потребителя при ребалансе, ядовитое сообщение.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2061,8 +2060,8 @@
     {
       "name": "dex-skill-mongodb",
       "source": "./plugins/skills/dex-skill-mongodb",
-      "description": "MongoDB: проектирование документов, запросы, индексы, aggregation pipeline.",
-      "version": "1.1.1",
+      "description": "MongoDB: копии изменяемых данных, проекция списков, реакция на изменения, документы старше класса, транзакции на одиночном mongod.",
+      "version": "1.2.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2434,8 +2433,8 @@
     {
       "name": "dex-skill-rabbitmq",
       "source": "./plugins/skills/dex-skill-rabbitmq",
-      "description": "RabbitMQ: exchange и очереди, MassTransit, retry и dead-letter, идемпотентность.",
-      "version": "1.1.1",
+      "description": "RabbitMQ: prefetch прямого консьюмера, публикация события без потери, откат шагов саги.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2462,14 +2461,14 @@
     {
       "name": "dex-skill-redis",
       "source": "./plugins/skills/dex-skill-redis",
-      "description": "Redis: кэширование, pub/sub, структуры данных, распределённая блокировка, rate limiting.",
-      "version": "1.1.1",
+      "description": "Redis: старт без Redis, промахи горячего ключа, потеря распределённого лока, лимит запросов на границе окон.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
         "redis",
         "cache",
-        "pubsub"
+        "stampede"
       ]
     },
     {

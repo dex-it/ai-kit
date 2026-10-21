@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-rabbitmq",
-  "version": "1.1.1",
-  "description": "RabbitMQ: exchange и очереди, MassTransit, retry и dead-letter, идемпотентность.",
+  "version": "1.2.0",
+  "description": "RabbitMQ: prefetch прямого консьюмера, публикация события без потери, откат шагов саги.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"

@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-elasticsearch",
-  "version": "1.1.1",
-  "description": "Elasticsearch: индексирование и mapping, запросы, агрегации, клиенты.",
+  "version": "1.2.0",
+  "description": "Elasticsearch: пересборка большого индекса, анализаторы языка.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
-  "keywords": ["skill", "elasticsearch", "search", "nest", "indexing"],
+  "keywords": ["skill", "elasticsearch", "search", "indexing"],
   "repository": "https://github.com/dex-it/claude-code-marketplace",
   "license": "GPL-3.0"
 }

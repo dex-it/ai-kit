@@ -48,8 +48,8 @@ Root cause -- сформулируй гипотезу: где именно уз�
 
 - **Всегда** -- вызови Skill tool `dex-skill-dotnet-async-patterns:dotnet-async-patterns` -- `Task.Run` над синхронным вызовом
 - **Если EF Core или БД в стеке** -- вызови Skill tool `dex-skill-dotnet-ef-core:dotnet-ef-core` -- нетранслируемый фильтр, трекинг read-only выборки
-- **Если Redis в стеке** -- вызови Skill tool `dex-skill-redis:redis` `[справочно]` -- TTL, invalidation, serialization, distributed cache
-- **Если MongoDB в стеке** -- вызови Skill tool `dex-skill-mongodb:mongodb` `[справочно]` -- индексы, aggregation pipeline, projection
+- **Если Redis в стеке** -- вызови Skill tool `dex-skill-redis:redis` `[справочно]` -- промахи горячего ключа
+- **Если MongoDB в стеке** -- вызови Skill tool `dex-skill-mongodb:mongodb` `[справочно]` -- чтение документов целиком без проекции, опрос коллекции по таймеру
 - **Если OpenTelemetry/distributed tracing** -- вызови Skill tool `dex-skill-observability:observability` -- span coverage, correlation, sampling
 - **Если логирование на hot path** -- вызови Skill tool `dex-skill-dotnet-logging:dotnet-logging` -- отладочные подробности и шаги флоу на Information
 - Дедупликация с Phase 1 -- сообщай только новые находки
