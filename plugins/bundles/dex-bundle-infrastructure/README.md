@@ -51,7 +51,6 @@ Complete infrastructure bundle: databases, messaging, containers, CI/CD, monitor
 - `dex-skill-elasticsearch` - Elasticsearch patterns
 - `dex-skill-redis` - Redis patterns
 - `dex-skill-mongodb` - MongoDB patterns
-- `dex-skill-docker` - Docker best practices
 - `dex-skill-kubernetes` - Kubernetes patterns
 - `dex-skill-gitlab-ci` - GitLab CI/CD patterns
 - `dex-skill-github-actions` - GitHub Actions patterns

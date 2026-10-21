@@ -71,7 +71,6 @@ Complete bundle for .NET fullstack: development, databases, messaging, container
 - `dex-skill-elasticsearch` - Elasticsearch patterns
 - `dex-skill-redis` - Redis patterns
 - `dex-skill-mongodb` - MongoDB patterns
-- `dex-skill-docker` - Docker best practices
 - `dex-skill-kubernetes` - Kubernetes patterns
 - `dex-skill-dotnet-logging` - Logging patterns
 - `dex-skill-observability` - Observability patterns

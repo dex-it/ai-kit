@@ -1,7 +1,7 @@
 {
   "name": "dex-skill-jenkins",
-  "version": "1.0.1",
-  "description": "Jenkins: ловушки Jenkinsfile, декларативные и скриптовые пайплайны, shared libraries, работа с credentials.",
+  "version": "1.1.0",
+  "description": "Jenkins: стадии со своим agent, parallel, workspace постоянных агентов, credentials и плагины.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
