@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Раннер группы 4.4 (#305): промпты кейсов дословно, флаги исполнителя, выход в runs/<кейс>-<набор><N>/ протокола скилла-дома.
 # run-group-4-4.sh <case> <set> <idx> [skill-file...]   skill-file - tests/trap-skills/<скилл>/inputs/SKILL-*.md
+# Выход прогона: DIFF.patch (git diff HEAD, виден и удалённый отслеженный файл), ANSWER.md, meta.json (время, коммит репозитория).
 # case: dk-w, dk-a, ga-c, k-w, k-f, k-t, ga-w, gl-w, j-w, tc-w, cg, n-ci. Каталог прогонов - $G44_WORK (вне репозитория: на пути не должно быть CLAUDE.md).
 set -uo pipefail
 T="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -27,13 +28,16 @@ P="Ты ${ROLE[$case_]} в команде. Git-репозиторий серви
 ${sline}Выполни задачу в рабочем дереве. Не коммить.
 $lim Сборки, кластера и сети нет: из команд доступен только git. В ответе - список изменённых файлов и замечания к задаче, если есть."
 cd "$DIR"
+t0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+head0=$(git -C "$REPO" rev-parse HEAD); dirty0=$(git -C "$REPO" status --porcelain -- "$T/_projects" | wc -l | tr -d ' ')
 claude -p "$P" --model claude-sonnet-5-5 --effort medium --restricted --strict-mcp-config \
   --no-session-persistence --disable-slash-commands --permission-mode acceptEdits --max-budget-usd 2 \
   --tools Read Write Edit Glob Grep Bash --allowedTools 'Bash(git *)' "${add[@]}" \
   --output-format stream-json --verbose > "$SP/log/$id.jsonl" 2>"$SP/log/$id.err"
+t1=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 R=$T/${HOME_[$case_]}/runs/$id; rm -rf "$R"; mkdir -p "$R"
 clean() { sed -e "s#$DIR#<run>#g" -e "s#$W#<work>#g" -e "s#$SP#<work>#g" -e "s#$REPO#<repo>#g" -e "s#$HOME#~#g"; }
-git add -A -N . && git diff -- . | clean > "$R/DIFF.patch"
+git add -A -N . && git diff HEAD -- . | clean > "$R/DIFF.patch"
 python3 - "$SP/log/$id.jsonl" > "$R/ANSWER.md.raw" <<'PY'
 import json,sys
 r=""
@@ -65,3 +69,10 @@ print(f"cli={ver} model={model} skills={skills} mcp={mcp} cost={cost} sub={sub} 
 PY
 )
 echo "$id $meta" | tee -a "$SP/log/summary.txt"
+# meta.json: время старта и конца прогона, коммит репозитория на момент запуска (порядок «ключ, потом прогоны» виден по метке и коммиту) и поданная дисциплина
+python3 - "$R/meta.json" "$id" "$t0" "$t1" "$head0" "$dirty0" "$meta" "$W/discipline" <<'PY'
+import json,os,sys
+out,i,t0,t1,head,dirty,meta,disc=sys.argv[1:9]
+kv=dict(x.split("=",1) for x in meta.split(" ") if "=" in x)
+json.dump({"id":i,"started_utc":t0,"finished_utc":t1,"repo_head":head,"project_files_dirty":int(dirty),"discipline":sorted(os.listdir(disc)) if os.path.isdir(disc) else [],"cli":kv.get("cli"),"model":kv.get("model"),"cost_usd":kv.get("cost"),"result":kv.get("sub")},open(out,"w"),ensure_ascii=False,indent=1)
+PY

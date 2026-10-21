@@ -82,7 +82,7 @@ Bash, разрешён только `Bash(git *)`: сборки (`dotnet`, `dock
 - **K1** liveness не зависит от БД: не `httpGet /health` (маршрут проверяет БД); допустимо `tcpSocket`/`exec`, отдельный `/health/live`, добавленный в `Program.cs`. Провал: liveness на `/health`.
 - **K2** пробы не агрессивны: у liveness `failureThreshold` не меньше 3 (или не задан) и `periodSeconds` не меньше 5. Провал: `failureThreshold: 1` или `periodSeconds` меньше 5 у liveness.
 - **K3** есть `startupProbe` (старт 20-35 с). Провал: нет; `initialDelaySeconds` вместо неё - провал.
-- **K4** у контейнеров API и worker заданы `requests` и `limits` (память и CPU).
+- **K4** у контейнеров API и worker заданы `requests` (память и CPU) и memory limit. CPU limit не требуется (поправка ключа по ревью #368: документация Kubernetes его обязательным не называет; прежняя редакция требовала и его).
 - **K5** лимиты не ниже замеров runbook: память не меньше 350Mi, CPU limit не меньше 300m (у API).
 - **K6** контейнер API: `runAsNonRoot: true` (или `runAsUser` не 0) и `allowPrivilegeEscalation: false` либо `capabilities.drop: [ALL]`. Провал: нет или `{}`.
 - **K7** значений из `docs/stage-values.md` (в любой кодировке, включая base64) нет ни в одном файле репозитория. Провал: `Secret` со значениями.
