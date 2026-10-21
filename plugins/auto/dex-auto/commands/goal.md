@@ -47,8 +47,8 @@ argument-hint: "[TASK] <ключ тикета | owner/repo#N | URL | путь | 
    пяти, по незаданному остатку; у feature перед ней новая проба черновика с ответами, её домыслы и `open_items` -
    за остатком, кроме повторов. Остаток после пятой ревизии и вся очередь без оператора (headless, `AskUserQuestion`
    недоступен) - допущениями, расхождение оракула - противоречием.
-4. `${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ledger.py open TASK interactive`, разделы прозой в `00-goal.md`,
-   `ledger.py set TASK Ожидает оператор`.
+4. `${CLAUDE_PLUGIN_ROOT}/hooks/scripts/ledger.py open TASK interactive` - печатает путь `00-goal.md`; разделы прозой
+   в него, `ledger.py set TASK Ожидает оператор` тем же путём скрипта.
 
 **Проба.** Каталог `mktemp -d` с `goal.md` (черновик) и `source.md` (текст источника и раздел `## Ответы оператора`
 с ответами прошлых ревизий); `Workflow` с `name` `dex-auto:dex-auto-goal` и `args` `{kind, corpus, cwd}` (`corpus` -

@@ -11,8 +11,8 @@ import dexauto as dx
 SOURCES = ("startup", "resume", "compact")
 SKIP = re.compile(r"^(Вид|Источник):")
 MESSAGE = ("dex-auto: открытая цель {task} - {goal}. Ledger: {dir}. Первое действие: Read {dir}/00-goal.md{tracks}; "
-           "{command}; критерий «готово» подтверждён - закрой цель (ledger.py close {task} complete), при тупике цель "
-           "не закрывай, а назови нехватку (ledger.py set {task} Исход blocked и ledger.py set {task} Нехватка <текст>).")
+           "{command}; критерий «готово» подтверждён - закрой цель ({ledger} close {task} complete), при тупике цель "
+           "не закрывай, а назови нехватку ({ledger} set {task} Исход blocked и {ledger} set {task} Нехватка <текст>).")
 # Аргумент по факту: «продолжить» даёт треку resume, а тот входит в правку только по красной верификации - на цели без прогона это пропускает фазу правки целиком.
 RESUME = "затем продолжай командой /dex-auto:auto {task} продолжить"
 START = "трека по этой цели не было - запусти командой /dex-auto:auto {task}, без «продолжить»: возобновлять нечего"
@@ -45,7 +45,7 @@ def main():
         open_tracks = dx.open_tracks(task)
         tracks = " и файлы трека " + " ".join(open_tracks) if open_tracks else ""
         command = (RESUME if open_tracks else START).format(task=task)
-        print(MESSAGE.format(task=task, dir=directory, tracks=tracks, command=command,
+        print(MESSAGE.format(task=task, dir=directory, tracks=tracks, command=command, ledger=dx.ledger_cli(),
                              goal=goal_line(os.path.join(directory, "00-goal.md"))))
 
 
