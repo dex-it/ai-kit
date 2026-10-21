@@ -40,3 +40,11 @@ test('этикетка застрахованного отправления', (
   const t = processJob({ id: 'S000001', tracking: 'T', postcode: '10115', zone: 'A', weightGrams: 1000, insured: true, insuredAmount: 5 });
   assert.match(t, /Страховка: 5\.00 EUR/);
 });
+
+test('котировка: лимит 1000 EUR и в /quote - 100000 принимается, 100001 даёт 422', async () => {
+  const ok = await post('/quote', { weight: 1, postcode: '10115', declaredValue: 100000 });
+  assert.equal(ok.status, 200);
+  assert.equal(ok.body.insurance, 10);
+  const over = await post('/quote', { weight: 1, postcode: '10115', declaredValue: 100001 });
+  assert.equal(over.status, 422);
+});

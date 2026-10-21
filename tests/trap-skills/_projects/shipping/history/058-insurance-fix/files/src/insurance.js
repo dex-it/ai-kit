@@ -3,6 +3,7 @@
 import { HttpError } from './errors.js';
 
 const RATE = 0.01; // 1 % страховой суммы
+const LIMIT_EUR = 1000; // страховая сумма; выше - только по договору (docs/api.md), и в /quote, и в /shipments
 
 // Страховая сумма, EUR; declaredValue - в центах (docs/api.md).
 export function insuredAmount(declaredValue) {
@@ -13,5 +14,7 @@ export function insuredAmount(declaredValue) {
 
 export function insuranceFee(declaredValue, zone) {
   if (zone === 'D') throw new HttpError(422, 'страховка недоступна для зоны D');
-  return Math.round(insuredAmount(declaredValue) * RATE * 100) / 100;
+  const amount = insuredAmount(declaredValue);
+  if (amount > LIMIT_EUR) throw new HttpError(422, `сумма отправления превышает лимит ${LIMIT_EUR} EUR`);
+  return Math.round(amount * RATE * 100) / 100;
 }
