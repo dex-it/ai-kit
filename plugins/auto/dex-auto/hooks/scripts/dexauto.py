@@ -3,6 +3,7 @@
 import json
 import os
 import re
+import shlex
 import sys
 
 # Формула slug та же, которой host именует папку проекта; расхождение наблюдается только чтением (ADR-0001, долг 2).
@@ -30,6 +31,11 @@ def slug(text):
 
 def root():
     return os.path.join(config_dir(), "projects", slug(cwd()), "ledger")
+
+
+# Сообщение хука читают после compact и resume, когда тела /auto с путём скриптов в контексте нет.
+def ledger_cli():
+    return shlex.quote(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ledger.py"))
 
 
 def task_dir(task):
