@@ -1440,7 +1440,7 @@
         "binary-inspection",
         "readelf",
         "objdump",
-        "ldd",
+        "debuginfod",
         "addr2line",
         "rizin",
         "ilspycmd",
