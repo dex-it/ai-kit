@@ -91,6 +91,11 @@
 | [api-spec-quality](api-spec-quality/README.md) | `dex-skill-api-spec-quality` 1.0.0 | ревью MR контракта (RV-Q), автор контракта (G-S), ничего не менять (N-Q, N-Q2, N-Q3 - не чисты) | 13 ловушек -> вводная и 5 названий; Q11 - дом норматив этапа |
 | [api-testing](api-testing/README.md) | `dex-skill-api-testing` 1.1.1 | тесты по контракту (G-T), ничего не менять в `src/` (N-T) | 11 ловушек и чек-лист -> 1 название (тестовая база) |
 | [api-documentation](api-documentation/README.md) | `dex-skill-api-documentation` 1.1.2 | Swagger к передаче (G-D), правка вне предмета (N0) | 9 ловушек и чек-лист -> 3 названия; A5, A8 - `unverifiable` |
+| [kafka](kafka/README.md) | `dex-skill-kafka` 1.1.1, 1.2.0 | код (G-K), ревью (RV-K), N-G, N-RV; мини-проект `fulfil`; общий заход группы 4.3 | 10 ловушек -> 3 пункта: 2 названия и K8 с исходом |
+| [rabbitmq](rabbitmq/README.md) | `dex-skill-rabbitmq` 1.1.1, 1.2.0 | код (G-B), ревью (RV-B) | 10 ловушек -> 3 названия; B4, B9 расходятся с `microservices` |
+| [redis](redis/README.md) | `dex-skill-redis` 1.1.1, 1.2.0 | код (G-C), ревью (RV-C) | 12 ловушек и чек-лист -> 3 названия; C4 - дом `dotnet-resilience` |
+| [mongodb](mongodb/README.md) | `dex-skill-mongodb` 1.1.1, 1.2.0 | код (G-M), ревью (RV-M) | 11 ловушек и чек-лист -> 4 названия |
+| [elasticsearch](elasticsearch/README.md) | `dex-skill-elasticsearch` 1.1.1, 1.2.0 | код (G-E), ревью (RV-E) | 11 ловушек и чек-лист -> 2 названия |
 | [doc-standards](doc-standards/README.md) | `dex-skill-doc-standards` 1.7.1 | автор спеки и CHANGELOG (W-DS), ревью PRD, спеки и ADR (R-DS); мини-проект `classmate`, общий заход группы 4.8 | 18 ловушек и чек-лист -> 3 пункта; конвенции оформления - в свод правил проекта |
 | [product-discovery](product-discovery/README.md) | `dex-skill-product-discovery` 1.1.4 | план discovery (W-PD), ревью итогов (R-PD), «ничего не менять» (R0P) | 11 ловушек и чек-лист -> 7 пунктов; первый - на шаге 3 |
 | [epic-planning](epic-planning/README.md) | `dex-skill-epic-planning` 1.1.1 | эпик и истории (W-EP), ревью плана квартала (R-BL), «ничего не менять» (R0P) | 11 ловушек и чек-лист -> 3 пункта с предметом и границей |
