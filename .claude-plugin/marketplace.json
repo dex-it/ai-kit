@@ -2461,13 +2461,14 @@
     {
       "name": "dex-skill-redis",
       "source": "./plugins/skills/dex-skill-redis",
-      "description": "Redis: старт без Redis, потеря распределённого лока, лимит запросов на границе окон.",
+      "description": "Redis: старт без Redis, промахи горячего ключа, потеря распределённого лока, лимит запросов на границе окон.",
       "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
         "redis",
-        "cache"
+        "cache",
+        "stampede"
       ]
     },
     {

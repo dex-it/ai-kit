@@ -1,6 +1,6 @@
 ---
 name: redis
-description: Redis - старт сервиса без Redis, потеря распределённого лока, лимит запросов на границе окон. Активируется при redis, distributed lock, rate limit, rate limiting, AbortOnConnectFail, StackExchange.Redis, ioredis, cache, TTL, sliding window, fixed window, sentinel
+description: Redis - старт сервиса без Redis, промахи горячего ключа, потеря распределённого лока, лимит запросов на границе окон. Активируется при redis, distributed lock, rate limit, rate limiting, AbortOnConnectFail, StackExchange.Redis, ioredis, cache, TTL, sliding window, fixed window, cache stampede, sentinel
 ---
 
 # Redis - чек-лист
