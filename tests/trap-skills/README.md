@@ -112,6 +112,13 @@
 | [removed/exploratory-testing](removed/exploratory-testing/README.md) | `dex-skill-exploratory-testing` 1.0.1 | тестировщик (ET1, ET0) | снят |
 | [removed/deep-audit](removed/deep-audit/README.md) | `dex-skill-deep-audit` 1.0.2 | аудит компонента (DA1, DA0) | снят; A6 -> ось `dotnet-runtime-diagnostician`, в стеке на #374 убрана и из оси (контроль 3/4) |
 | [removed/tech-audit](removed/tech-audit/README.md) | `dex-skill-tech-audit` 1.0.2 | аудит RFC (TA1, TA0) | снят: потребителей нет |
+| [removed/docker](removed/docker/README.md) | `dex-skill-docker` 1.1.1 | Dockerfile с нуля (dk-w), системные пакеты (dk-a); мини-проект `depot`, общий заход группы 4.4 | снят; D7-curl - дефект «Правильно» |
+| [kubernetes](kubernetes/README.md) | `dex-skill-kubernetes` 1.1.1 | манифесты с нуля (k-w), починка (k-f), разбор по `kubectl` (k-t) | 11 ловушек -> 3 названия (K1, K4, K7); ревизия 4 (стек на #368): K4 снят -> 2 названия (K1, K7), 1.3.0; ревизия 5 (ревью, раунд 4): K5 возвращён названием (контроль `k-w` 0/2 по букве ключа) -> K1, K5, K7 |
+| [github-actions](github-actions/README.md) | `dex-skill-github-actions` 1.0.1 | workflow-ы (ga-w), кэш (ga-c) | 11 ловушек и чек-лист -> 1 название (GA11); GA3 снят по вреду |
+| [gitlab-ci](gitlab-ci/README.md) | `dex-skill-gitlab-ci` 1.1.1 | `.gitlab-ci.yml` (gl-w) | 14 ловушек и чек-лист -> 1 название (GL9) |
+| [jenkins](jenkins/README.md) | `dex-skill-jenkins` 1.0.1 | `Jenkinsfile` (j-w) | 11 ловушек и чек-лист -> 6 названий; J5, J9, J10 - `unverifiable` |
+| [teamcity](teamcity/README.md) | `dex-skill-teamcity` 1.1.1 | `.teamcity/settings.kts` (tc-w) | 9 ловушек и чек-лист -> 2 названия (TC9, TC5 открыто) |
+| [ci-gates](ci-gates/README.md) | `dex-skill-ci-gates` 1.0.0 | готовый CI и защита `main` (cg), ничего не менять (n-ci) | 8 ловушек -> 2 названия (G1, G7) |
 | [managed-debug](managed-debug/README.md) | `dex-skill-managed-debug` 1.1.0, 1.2.0 | управляемый hang (d1), дамп (d3), медленный путь (p1), «ничего не менять» (n0); `_projects/diag`, общий заход группы 4.6 | 16 ловушек -> 13; сняты attach без CAP, Mini-дамп, `.Result`; остальное `unverifiable` |
 | [core-dumps](core-dumps/README.md) | `dex-skill-core-dumps` 1.0.0 | core по build-id (n1), дамп (d3) | 13 ловушек -> 9; сняты четыре (двойники и build-id) |
 | [native-debug](native-debug/README.md) | `dex-skill-native-debug` 1.0.0 | core (n1), живой процесс без `CAP_SYS_PTRACE` (n2) | 16 ловушек -> 10; сняты Yama, CAP, REPL, build-id, порядок аргументов, Apple Silicon (вне предмета) |
