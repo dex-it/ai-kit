@@ -248,7 +248,7 @@ claude plugins uninstall dex-dotnet-coder
 | **Ревью и дисциплина изменений** | `merge-conflict-resolution`, `review-evidence`, `review-step-by-step`, `review-threads`, `defect-classification`, `performance-review`, `post-merge-remediation`, `ci-gates`, `project-baseline`, `codebase-conventions`, `optimize-for-llm`, `norm-writing`, `artifact-review` |
 | **Раздача работы исполнителям (экспериментально)** | `subagent-dispatch` |
 | **QA и тестирование** | `api-testing`, `test-coverage`, `testability`, `integration-boundary`, `bug-reproduction`, `playwright`, `stand-verification` |
-| **Инциденты и RCA** | `root-cause-analysis`, `change-correlation`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
+| **Инциденты и RCA** | `root-cause-analysis`, `change-correlation`, `shared-stand-safety`, `core-dumps`, `managed-debug`, `native-debug`, `perf-profiling`, `syscall-tracing`, `binary-inspection` |
 | **.NET** | `dotnet-api-development`, `dotnet-async-patterns`, `dotnet-code-quality`, `dotnet-csproj-hygiene`, `dotnet-ef-core`, `dotnet-logging`, `dotnet-resilience`, `dotnet-testing-patterns`, `dotnet-validation`, `api-documentation` |
 | **Frontend и TypeScript** | `react`, `ts-nodejs-api`, `ts-vitest-jest` |
 | **Инфраструктура** | `docker`, `kubernetes`, `rabbitmq`, `kafka`, `elasticsearch`, `redis`, `mongodb`, `gitlab-ci`, `github-actions`, `jenkins`, `teamcity`, `observability` |

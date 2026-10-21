@@ -24,8 +24,11 @@
 
 ## Потребители
 
-Skill tool по контексту: `incident-investigator`; справка (не Skill-load): `dotnet-runtime-diagnostician`; by-stack через `stack-registry` для .NET; бандлы `runtime-diagnostics`,
-`dotnet-developer`, `dotnet-fullstack`. Кейс активации `observability-in`.
+Skill tool по контексту: `incident-investigator`, `dotnet-performance-analyst` (Phase 2, при OpenTelemetry и distributed tracing), `grafana-specialist` (фаза выбора сценария);
+топик «Наблюдаемость» в `discover-reviewer` (второй проход, загрузка по стеку); справка (не Skill-load): `dotnet-runtime-diagnostician`. README `stand-reviewer` называет скилл «по контексту», но в теле
+агента загрузки нет: ось Observability там - метрики через `dex-monitoring-grafana`, пунктов скилла не использует. By-stack через `stack-registry` для .NET; бандлы `runtime-diagnostics`,
+`dotnet-developer`, `dotnet-fullstack`. Сверка пунктов по потребителям (после ревью): `dotnet-performance-analyst` обещал «span coverage, correlation, sampling» - в 1.2.1 про sampling пункта не было, покрытие
+спанами снято (W1, 2/2); скобка агента приведена к четырём пунктам 1.3.0 (patch 2.4.0 -> 2.4.1). `grafana-specialist`, `discover-reviewer` пунктов поимённо не называют. Кейс активации `observability-in`.
 
 ## Контроль
 
