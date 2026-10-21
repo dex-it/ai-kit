@@ -2380,8 +2380,8 @@
     {
       "name": "dex-skill-python-project-hygiene",
       "source": "./plugins/skills/dex-skill-python-project-hygiene",
-      "description": "Гигиена Python-проекта: правила ruff и форматтер, mypy и недостающие импорты, порог покрытия, предупреждения pytest, аудит зависимостей.",
-      "version": "1.1.0",
+      "description": "Гигиена Python-проекта: ignore_missing_imports в mypy, порог покрытия, предупреждения pytest, аудит зависимостей.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",

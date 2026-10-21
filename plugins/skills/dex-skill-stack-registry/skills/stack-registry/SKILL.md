@@ -27,7 +27,7 @@ description: Реестр стеков и правило загрузки про
 не по корню. Стека нет в реестре -> см. «Fallback».
 
 > **`python` покрыт неравномерно.** Гигиена проекта - `dex-skill-python-project-hygiene`
-> (ruff, mypy, pytest), она не ML-специфична и годится любому Python-проекту; остальное
+> (mypy, pytest), она не ML-специфична и годится любому Python-проекту; остальное
 > - ML-домен (`dex-skill-python-pytorch`, `-tensorflow`,
 > `-nlp-transformers`, `-computer-vision`, `-ml-optimization`). Backend-темы
 > (Django/FastAPI/CLI) не заведены - по ним пересечение стек × тема даст пусто ->
