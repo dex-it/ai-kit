@@ -2347,8 +2347,9 @@
       "keywords": [
         "skill",
         "computer-vision",
-        "cnn",
-        "image"
+        "image",
+        "torchvision",
+        "resize"
       ]
     },
     {
@@ -2361,7 +2362,8 @@
         "skill",
         "ml-optimization",
         "hyperparameters",
-        "optuna"
+        "optuna",
+        "search-space"
       ]
     },
     {
