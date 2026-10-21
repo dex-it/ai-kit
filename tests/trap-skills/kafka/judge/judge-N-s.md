@@ -8,6 +8,8 @@
 | прогон | blocker + major | ложных | какие |
 |---|---|---|---|
 | s1 | 18 (1 + 17) | 3 | OrderFulfilmentStateMachine.cs:68 (откат Shipping, как в judge-N-r), Program.cs:19 (порты без реализаций, как в judge-N-r), WarehouseInboundConsumer.cs:89 (exchange не объявлен: склад - внешний, объявление не задано) |
-| s2 | 18 (2 + 16) | 3 | OrderFulfilmentStateMachine.cs:68, Program.cs:16 (порты), ProductIndexer.cs:53 (последовательная загрузка в живой алиас, как в judge-N-r) |
+| s2 | 18 (3 + 15) | 3 | OrderFulfilmentStateMachine.cs:68, Program.cs:16 (порты), ProductIndexer.cs:53 (последовательная загрузка в живой алиас, как в judge-N-r) |
+
+Правка после ревью (mmx003, PR #381): в `s2` по хвостам строк `runs/n-rv-s2/REVIEW.md` 3 blocker и 15 major (было записано 2 + 16), сумма 18 та же.
 
 Остальные находки - те же типы, что признаны настоящими в `judge-N-r.md` (три схемы в `orders`, `mailed == false`, ReplaceOne затирает статус, Seek без предела, Nack без DLX, `_id=sku` против пересчёта, MailJobQueue без try, /internal без авторизации, ReindexService). Среднее ложных 3,0 на прогон: не хуже `f` (3,5) и `r` (3,0). Оценка по строкам выборочная (схожесть с таблицей `judge-N-r.md`), построчная сверка с кодом ветки не повторялась.
