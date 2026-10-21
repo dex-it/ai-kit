@@ -89,7 +89,7 @@ process-skill) сохранён, 15 ловушек -> 7 названий (2.1.0,
 |---|---|---|
 | агент `bug-finder` | загрузка `exploratory-testing` в Phase 1 убрана | 2.6.0 -> 2.7.0 |
 | агент `dotnet-performance-analyst` | скобка вызова `observability` приведена к четырём пунктам 1.3.0 (после ревью) | 2.4.0 -> 2.4.1 |
-| агент `dotnet-runtime-diagnostician` | справка `dex-skill-deep-audit` заменена названием A6 (время приложения против `now()` БД) | 2.4.0 -> 2.5.0 |
+| агент `dotnet-runtime-diagnostician` | справка `dex-skill-deep-audit` заменена названием A6 (время приложения против `now()` БД); в стеке на #374 строка A6 убрана | 2.4.0 -> 2.5.0 -> 2.6.0 (стек) |
 | бандлы `dotnet-developer`, `dotnet-fullstack`, `ts-fullstack`, `code-review`, `qa-engineer`, `bug-lifecycle` (`dependencies`) | убран `exploratory-testing` | 2.42.0 -> 2.43.0, 2.43.0 -> 2.44.0, 1.41.0 -> 1.42.0, 1.45.0 -> 1.46.0, 1.24.0 -> 1.25.0, 1.33.0 -> 1.34.0 |
 | бандл `runtime-diagnostics` | убран `deep-audit` из `includes`, README | 1.5.0 -> 1.6.0 |
 | README агента `bug-finder`; README бандлов `bug-lifecycle`, `runtime-diagnostics` | строки скиллов | - |
