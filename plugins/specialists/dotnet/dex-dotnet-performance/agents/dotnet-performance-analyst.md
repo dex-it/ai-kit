@@ -50,7 +50,7 @@ Root cause -- сформулируй гипотезу: где именно уз�
 - **Если EF Core или БД в стеке** -- вызови Skill tool `dex-skill-dotnet-ef-core:dotnet-ef-core` -- нетранслируемый фильтр, трекинг read-only выборки
 - **Если Redis в стеке** -- вызови Skill tool `dex-skill-redis:redis` `[справочно]` -- промахи горячего ключа
 - **Если MongoDB в стеке** -- вызови Skill tool `dex-skill-mongodb:mongodb` `[справочно]` -- чтение документов целиком без проекции, опрос коллекции по таймеру
-- **Если OpenTelemetry/distributed tracing** -- вызови Skill tool `dex-skill-observability:observability` -- span coverage, correlation, sampling
+- **Если OpenTelemetry/distributed tracing** -- вызови Skill tool `dex-skill-observability:observability` -- статус ошибки спана и запись исключения, health-пробы в трассах, дедлайн health-проверки, связь логов с трассой
 - **Если логирование на hot path** -- вызови Skill tool `dex-skill-dotnet-logging:dotnet-logging` -- отладочные подробности и шаги флоу на Information
 - Дедупликация с Phase 1 -- сообщай только новые находки
 

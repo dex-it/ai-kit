@@ -120,12 +120,6 @@
     "prompt": "По ходу разбора требований мы приняли пять решений в переписке. Где их фиксировать, чтобы требования на них ссылались?"
   },
   {
-    "id": "deep-audit-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-deep-audit:deep-audit",
-    "prompt": "Модуль оплаты идёт в релиз. Нужен список слабых мест по коду: нарушенные контракты между слоями, потокобезопасность, поведение на ошибках и повторах."
-  },
-  {
     "id": "design-quality-in",
     "mode": "in-scope",
     "expect": "dex-skill-design-quality:design-quality",
@@ -196,12 +190,6 @@
     "mode": "in-scope",
     "expect": "dex-skill-epic-planning:epic-planning",
     "prompt": "Как задать эпику на квартал цель с success metrics и оценку, чтобы не ошибиться с его размером?"
-  },
-  {
-    "id": "exploratory-testing-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-exploratory-testing:exploratory-testing",
-    "prompt": "Автотесты зелёные, а пользователи находят баги. Как поискать дефекты руками, чтобы это не было бессистемным тыканьем?"
   },
   {
     "id": "fact-verification-in",
@@ -469,12 +457,6 @@
     "mode": "in-scope",
     "expect": "dex-skill-teamcity:teamcity",
     "prompt": "В цепочке TeamCity шаги dotnet заново делают restore и build. Как убрать повторную работу?"
-  },
-  {
-    "id": "tech-audit-in",
-    "mode": "in-scope",
-    "expect": "dex-skill-tech-audit:tech-audit",
-    "prompt": "Команда прислала RFC на новый сервис уведомлений. Проведи аудит предложения: что будет, если не делать, какие альтернативы не рассмотрены и что оно ломает у потребителей."
   },
   {
     "id": "testability-in",

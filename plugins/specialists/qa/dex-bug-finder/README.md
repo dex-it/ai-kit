@@ -22,7 +22,7 @@
 
 ## Skills
 
-Загружаются императивно по фазам: `dex-skill-exploratory-testing`, `dex-skill-bug-reproduction`, плюс `dex-skill-testability` по контексту.
+Загружаются императивно по фазам: `dex-skill-bug-reproduction`, плюс `dex-skill-testability` по контексту.
 
 ## Установка
 

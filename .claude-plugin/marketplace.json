@@ -1,6 +1,6 @@
 {
   "name": "dex-claude-marketplace",
-  "version": "6.25.0",
+  "version": "6.26.0",
   "description": "Маркетплейс AI-агентов для разработчиков. Атомарные плагины с узкой специализацией: Skills (знания), Specialists (агенты), Bundles (наборы).",
   "owner": {
     "name": "Dex Team",
@@ -134,7 +134,7 @@
       "name": "dex-bug-finder",
       "source": "./plugins/specialists/qa/dex-bug-finder",
       "description": "Узел активного поиска багов в фиче или ветке, языко-агностично: модель рисков и чартеры, адверсариальная охота, skill-чеклисты, воспроизведение и квалификация, handoff в расследование. Точка входа - команда /find-bugs, едет в этом же плагине.",
-      "version": "2.6.0",
+      "version": "2.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -208,7 +208,7 @@
       "name": "dex-bundle-bug-lifecycle",
       "source": "./plugins/bundles/dex-bundle-bug-lifecycle",
       "description": "Bundle жизненного цикла бага: активный поиск, оформление, расследование корневой причины на общем стенде и фикс на источнике, плюс skills методологии RCA и поиска багов и CLI для чтения стенда и трекера.",
-      "version": "1.33.0",
+      "version": "1.34.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -237,7 +237,7 @@
       "name": "dex-bundle-code-review",
       "source": "./plugins/bundles/dex-bundle-code-review",
       "description": "Бандл жизненного цикла кода: языко-агностичное ревью MR/PR, повторное ревью после правок, план правок, реализация фичи, подтягивание базовой ветки с разрешением конфликтов, саморевью перед push, приёмка слитой фичи на стенде с ремедиацией, расследование инцидента, плюс скиллы дисциплины ревью.",
-      "version": "1.45.0",
+      "version": "1.46.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -265,7 +265,7 @@
       "name": "dex-bundle-dotnet-developer",
       "source": "./plugins/bundles/dex-bundle-dotnet-developer",
       "description": "Бандл для .NET-разработчика: написание кода, отладка, тесты, code review, EF Core, производительность, интерактивный дизайн .NET-архитектуры.",
-      "version": "2.42.0",
+      "version": "2.43.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -277,7 +277,7 @@
       "name": "dex-bundle-dotnet-fullstack",
       "source": "./plugins/bundles/dex-bundle-dotnet-fullstack",
       "description": "Полный бандл для .NET fullstack: разработка, базы данных, брокеры сообщений, контейнеры, CI/CD, мониторинг, интерактивный дизайн архитектуры.",
-      "version": "2.44.0",
+      "version": "2.45.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -344,7 +344,7 @@
       "name": "dex-bundle-qa-engineer",
       "source": "./plugins/bundles/dex-bundle-qa-engineer",
       "description": "Бандл для QA-инженера: тест-анализ, автоматизация (включая E2E на Playwright), активный поиск багов, баг-репорты.",
-      "version": "1.24.0",
+      "version": "1.25.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -357,7 +357,7 @@
       "name": "dex-bundle-runtime-diagnostics",
       "source": "./plugins/bundles/dex-bundle-runtime-diagnostics",
       "description": "Bundle для runtime-диагностики .NET-сервисов и native-границы: специалист-диагностик, skills managed/native/perf/tracing/dumps/binary, netcoredbg CLI.",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -387,7 +387,7 @@
       "name": "dex-bundle-ts-fullstack",
       "source": "./plugins/bundles/dex-bundle-ts-fullstack",
       "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, E2E на Playwright.",
-      "version": "1.42.0",
+      "version": "1.43.0",
       "category": "bundle",
       "keywords": [
         "bundle",
@@ -650,7 +650,7 @@
       "name": "dex-dotnet-runtime-diagnostician",
       "source": "./plugins/specialists/dotnet/dex-dotnet-runtime-diagnostician",
       "description": "Runtime-диагностика .NET и native-симптомов: hang, crash, leak, slowdown, post-mortem через netcoredbg, gdb/lldb, perf, bpftrace, dotnet-dump",
-      "version": "2.4.0",
+      "version": "2.6.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1592,20 +1592,6 @@
       ]
     },
     {
-      "name": "dex-skill-deep-audit",
-      "source": "./plugins/skills/dex-skill-deep-audit",
-      "description": "Глубокий критический аудит компонента: архитектура, контракты, конкурентный доступ, обработка ошибок, безопасность, тесты. Языко-агностичный.",
-      "version": "1.0.2",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "audit",
-        "concurrency",
-        "security",
-        "deep-audit"
-      ]
-    },
-    {
       "name": "dex-skill-defect-classification",
       "source": "./plugins/skills/dex-skill-defect-classification",
       "description": "Разметка находок ревью MR и саморевью типом по схеме классификации дефектов - гейт по поручению, единица - находка, закрытая схема типов на характеристиках качества продукта, независимость типа от критичности, схема проекта по адресу вместо встроенной, выход разметки",
@@ -1818,21 +1804,6 @@
       ]
     },
     {
-      "name": "dex-skill-exploratory-testing",
-      "source": "./plugins/skills/dex-skill-exploratory-testing",
-      "description": "Исследовательское тестирование для поиска багов: чартеры и сессии, оракулы, туры-эвристики, атака на риск и неявные предположения, а не happy path.",
-      "version": "1.0.1",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "qa",
-        "exploratory-testing",
-        "charter",
-        "oracle",
-        "bug-hunting"
-      ]
-    },
-    {
       "name": "dex-skill-fact-verification",
       "source": "./plugins/skills/dex-skill-fact-verification",
       "description": "Сверка технического факта с источником истины для ревью, диагностики и аудита - чек-лист: имя API, поведение библиотеки по словам автора, версия проекта против latest, условие нормы, отрицательный факт. Источник по порядку: context7, официальная документация, проба на версии проекта или исходник по тегу; несверенное - статусом unverifiable, не фактом.",
@@ -2033,7 +2004,7 @@
       "name": "dex-skill-merge-conflict-resolution",
       "source": "./plugins/skills/dex-skill-merge-conflict-resolution",
       "description": "Протокол подтягивания базовой ветки и разрешения конфликтов merge/rebase без тихой потери стороны: якоря и точка отката, превью без записи, семантические конфликты без маркеров, ours/theirs в rebase, переезды, генерируемое, верификация обеих дельт. Команда /resolve-conflicts.",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2127,7 +2098,7 @@
       "name": "dex-skill-observability",
       "source": "./plugins/skills/dex-skill-observability",
       "description": "Наблюдаемость: OpenTelemetry, метрики, распределённая трассировка, health checks.",
-      "version": "1.2.1",
+      "version": "1.4.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2613,8 +2584,8 @@
     {
       "name": "dex-skill-stand-verification",
       "source": "./plugins/skills/dex-skill-stand-verification",
-      "description": "Доказательство поведения слитой фичи на развёрнутом стенде против ТЗ: зелёный деплой не равно рабочая фича, привязка образа к merge-коммиту, требование к read-only пробе на стенде, проверка на стенде, а не локально, дисциплина временных E2E (ассерт против ТЗ, изоляция, уборка).",
-      "version": "1.1.2",
+      "description": "Приёмка слитой фичи на развёрнутом стенде против ТЗ: статус пункта по пробе на стенде, а не по коду дельты, временный E2E без опоры на чужие записи, уборка данных пробы на общем стенде.",
+      "version": "1.2.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2623,7 +2594,6 @@
         "green-deploy",
         "stand-review",
         "acceptance",
-        "image-sha",
         "regression",
         "e2e",
         "scratch-test"
@@ -2691,20 +2661,6 @@
         "teamcity",
         "ci-cd",
         "build"
-      ]
-    },
-    {
-      "name": "dex-skill-tech-audit",
-      "source": "./plugins/skills/dex-skill-tech-audit",
-      "description": "Технический аудит решения: идея -> подход -> компонентная база -> код -> вердикт с рисками. Языко-агностичный.",
-      "version": "1.0.2",
-      "category": "skill",
-      "keywords": [
-        "skill",
-        "audit",
-        "tech-audit",
-        "risk",
-        "due-diligence"
       ]
     },
     {

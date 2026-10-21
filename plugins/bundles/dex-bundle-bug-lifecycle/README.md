@@ -15,7 +15,7 @@
 
 Специалисты: `dex-bug-finder`, `dex-bug-reporter`, `dex-incident-investigator`.
 
-Skills методологии: `dex-skill-root-cause-analysis`, `dex-skill-change-correlation`, `dex-skill-shared-stand-safety`, `dex-skill-exploratory-testing`, `dex-skill-bug-reproduction`.
+Skills методологии: `dex-skill-root-cause-analysis`, `dex-skill-change-correlation`, `dex-skill-shared-stand-safety`, `dex-skill-bug-reproduction`.
 
 Переиспользуемые skills: `dex-skill-testability`, `dex-skill-observability`, `dex-skill-codebase-conventions`.
 
