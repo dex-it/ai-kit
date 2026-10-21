@@ -38,7 +38,7 @@ Access & Map -> Problem Specification -> Parallel Evidence -> Hypotheses & Chain
 
 **Mandatory:** yes
 
-Сбор со стенда веди только read-only (get / describe / logs / top / events) через host-CLI, как в утилитах dex-kubectl-cli, dex-gitlab-cli (или dex-github-cli для GitHub-хостинга), dex-teamcity-cli; observability - через dex-monitoring-grafana (метрики Prometheus, трейсы Tempo, логи Loki) и dex-logging-seq, error-tracking - через MCP-сервер `sentry`; связанные тикеты - через dex-jira-cli. Нужной read-only CLI нет - предложи установку из официального источника (`install-bundle/install-cli-tools.sh`), молча не ставь и общий стенд не трогай. Загрузи `dex-skill-shared-stand-safety:shared-stand-safety` - дисциплина общего стенда и секретов.
+Сбор со стенда веди только read-only (get / describe / logs / top / events) через host-CLI, как в утилитах dex-kubectl-cli, dex-gitlab-cli (или dex-github-cli для GitHub-хостинга), dex-teamcity-cli; observability - через dex-monitoring-grafana (метрики Prometheus, трейсы Tempo, логи Loki) и dex-logging-seq, error-tracking - через MCP-сервер `sentry`; связанные тикеты - через dex-jira-cli. Нужной read-only CLI нет - предложи установку из официального источника (`install-bundle/install-cli-tools.sh`), молча не ставь и общий стенд не трогай. Загрузи `dex-skill-shared-stand-safety:shared-stand-safety` - exec с изменениями, внешняя запись и дорогое чтение на общем стенде.
 
 ## Phase 1: Problem Specification
 
