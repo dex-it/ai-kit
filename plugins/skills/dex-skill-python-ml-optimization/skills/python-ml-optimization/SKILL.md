@@ -1,6 +1,6 @@
 ---
 name: python-ml-optimization
-description: ML optimization - поиск гиперпараметров Optuna, целочисленные пространства. Активируется при optuna, suggest_int, hyperparameter tuning, пространство поиска, trial, study, гиперпараметры, подбор, Optuna, диапазон значений
+description: ML optimization - поиск гиперпараметров Optuna, целочисленные пространства. Активируется при optuna, suggest_int, hyperparameter tuning, пространство поиска, trial, study, гиперпараметры, подбор, целочисленный гиперпараметр, диапазон значений
 ---
 
 # ML Optimization - чек-лист
