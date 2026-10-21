@@ -29,6 +29,7 @@ ${sline}Выполни задачу в рабочем дереве. Не ком�
 $lim Сборки, кластера и сети нет: из команд доступен только git. В ответе - список изменённых файлов и замечания к задаче, если есть."
 cd "$DIR"
 t0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+head0=$(git -C "$REPO" rev-parse HEAD); dirty0=$(git -C "$REPO" status --porcelain -- "$T/_projects" | wc -l | tr -d ' ')
 claude -p "$P" --model claude-sonnet-5-5 --effort medium --restricted --strict-mcp-config \
   --no-session-persistence --disable-slash-commands --permission-mode acceptEdits --max-budget-usd 2 \
   --tools Read Write Edit Glob Grep Bash --allowedTools 'Bash(git *)' "${add[@]}" \
@@ -68,10 +69,10 @@ print(f"cli={ver} model={model} skills={skills} mcp={mcp} cost={cost} sub={sub} 
 PY
 )
 echo "$id $meta" | tee -a "$SP/log/summary.txt"
-# meta.json: время старта и конца прогона и коммит репозитория на момент запуска (порядок «ключ, потом прогоны» виден по метке и коммиту)
-python3 - "$R/meta.json" "$id" "$t0" "$t1" "$(git -C "$REPO" rev-parse HEAD)" "$(git -C "$REPO" status --porcelain -- "$T/_projects" | wc -l | tr -d ' ')" "$meta" <<'PY'
-import json,sys
-out,i,t0,t1,head,dirty,meta=sys.argv[1:8]
+# meta.json: время старта и конца прогона, коммит репозитория на момент запуска (порядок «ключ, потом прогоны» виден по метке и коммиту) и поданная дисциплина
+python3 - "$R/meta.json" "$id" "$t0" "$t1" "$head0" "$dirty0" "$meta" "$W/discipline" <<'PY'
+import json,os,sys
+out,i,t0,t1,head,dirty,meta,disc=sys.argv[1:9]
 kv=dict(x.split("=",1) for x in meta.split(" ") if "=" in x)
-json.dump({"id":i,"started_utc":t0,"finished_utc":t1,"repo_head":head,"project_files_dirty":int(dirty),"cli":kv.get("cli"),"model":kv.get("model"),"cost_usd":kv.get("cost"),"result":kv.get("sub")},open(out,"w"),ensure_ascii=False,indent=1)
+json.dump({"id":i,"started_utc":t0,"finished_utc":t1,"repo_head":head,"project_files_dirty":int(dirty),"discipline":sorted(os.listdir(disc)) if os.path.isdir(disc) else [],"cli":kv.get("cli"),"model":kv.get("model"),"cost_usd":kv.get("cost"),"result":kv.get("sub")},open(out,"w"),ensure_ascii=False,indent=1)
 PY
