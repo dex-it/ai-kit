@@ -151,11 +151,13 @@ Current entries:
 | `dex-skill-problem-specification` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/problem-specification/README.md`) |
 | `dex-skill-python-classical-ml` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/python-classical-ml/README.md`) |
 | `dex-skill-reference-architectures` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/reference-architectures/README.md`) |
-| `dex-skill-tech-audit` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/tech-audit/README.md`) |
+| `dex-skill-tech-audit` | - | removed: no consumers in the catalogue (protocol `tests/trap-skills/removed/tech-audit/README.md`) |
 | `dex-skill-tech-evaluation` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/tech-evaluation/README.md`) |
 | `dex-skill-test-design` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/test-design/README.md`) |
 | `dex-skill-ts-patterns` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/ts-patterns/README.md`) |
 | `dex-skill-use-cases` | - | removed by control runs: the model holds the subject without the skill (protocol `tests/trap-skills/removed/use-cases/README.md`) |
+| `dex-dotnet-debugger` | `dex-debugger` | duplicate of the stack-neutral agent; .NET depth comes from by-stack skills |
+| `dex-dotnet-reviewer` | `dex-self-reviewer`, `dex-mr-reviewer` | duplicate: own branch -> self-reviewer, someone else's PR/MR -> mr-reviewer |
 
 ### Catalogue 6.0.0: the SDLC engine is gone
 
