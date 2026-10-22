@@ -259,15 +259,16 @@ const SCENARIOS = [
       ['находка закрыта уликой сверки', result.prior.some(p => p.id === 'F21' && p.status === 'closed' && p.evidence === closedA8.evidence)],
       ['пропуска сверки в trail нет', !result.trail.some(t => t.status === 'skipped' && t.step === '3-check')],
     ] },
-  { name: 'F7b замкнутость правки кодера (потребители, непокрытое) доходит до промпта саморевью; сверку покупает toFix, не эти поля', track: 'feature', args: featureArgs,
-    responses: { 'ctx:R-I': ctxOk, 'fix:1': { ...fixOk, 'dependents-status': 'some', dependents: ['src/Caller.cs:41'], 'uncovered-status': 'some', uncovered: ['ветка таймаута'] },
-      'verify:после попытки 1': green, 'self-review:первое': revP1, 'fix:after-review': fixSealed, 'verify:после саморевью': green, 'check:правки': revRecheck },
+  { name: 'F7b замкнутость правки по находкам (потребители, непокрытое) доходит до промпта сверки правки', track: 'feature', args: featureArgs,
+    responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revP1,
+      'fix:after-review': { ...fixSealed, 'dependents-status': 'some', dependents: ['src/Caller.cs:41'], 'uncovered-status': 'some', uncovered: ['ветка таймаута'] },
+      'verify:после саморевью': green, 'check:правки': revRecheck },
     expect: ({ calls }) => {
-      const review = calls.find(c => c.label === 'self-review:первое')
+      const check = promptOf(calls, 'check:правки')
       return [
-        ['потребители кодера в промпте саморевью', !!review && review.prompt.includes('dependents: some - src/Caller.cs:41')],
-        ['непокрытое кодера в промпте саморевью', !!review && review.prompt.includes('uncovered: some - ветка таймаута')],
-        ['сверка правки куплена находкой к правке, а не полями замкнутости', labelsOf(calls).includes('check:правки')],
+        ['сверка правки вызвана', labelsOf(calls).includes('check:правки')],
+        ['потребители правки в промпте сверки', check.includes('dependents: some - src/Caller.cs:41')],
+        ['непокрытое правки в промпте сверки', check.includes('uncovered: some - ветка таймаута')],
       ]
     } },
   { name: 'F7e верификация правки по находкам красная -> сверки нет, вторая правка с итогом красной (T16c)', track: 'feature', args: featureArgs,
