@@ -71,7 +71,7 @@ skills:
 
 Решение документа против `Accepted` ADR (читать актуальный в supersede-цепочке): либо документ объявляет отмену прежнего решения (правка того ADR либо supersede), либо это дефект.
 
-Загрузи `dex-skill-codebase-conventions:codebase-conventions` (инструкции и гайды проекта, свод правил). Стиль проекта из этой фазы определяет условную загрузку арх-оракулов в Phase 2.
+Загрузи `dex-skill-codebase-conventions:codebase-conventions` (свод правил). Стиль проекта из этой фазы определяет условную загрузку арх-оракулов в Phase 2.
 
 ## Phase 2: Skill-Based Deep Scan
 
