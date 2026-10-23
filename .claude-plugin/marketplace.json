@@ -1215,7 +1215,7 @@
       "name": "dex-requirements-analyst",
       "source": "./plugins/specialists/product/dex-requirements-analyst",
       "description": "Аналитик требований: выводит FR из шагов и расширений сценариев, NFR из бизнес-требований и ограничений среды, у каждой единицы метод проверки.",
-      "version": "4.14.2",
+      "version": "4.15.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1228,7 +1228,7 @@
       "name": "dex-requirements-reviewer",
       "source": "./plugins/specialists/review/dex-requirements-reviewer",
       "description": "Ревью и согласование чужого готового набора требований (BRD/stories) как документа: дефекты единицы и дефекты набора против источника, фальсификация находок, severity, правки автору без мутации документа.",
-      "version": "2.1.1",
+      "version": "2.2.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1485,7 +1485,7 @@
       "name": "dex-skill-business-analysis-29148",
       "source": "./plugins/skills/dex-skill-business-analysis-29148",
       "description": "Норматив этапа бизнес-анализа (ISO/IEC/IEEE 29148 §6.2): состав Business requirements specification, разделы BRD, атрибуты бизнес-требования, мера успеха MOE, режим сбора interactive/autonomous, поиск конфликта целей, стадии готовности артефакта, вход и выход этапа",
-      "version": "4.5.0",
+      "version": "4.5.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1846,7 +1846,7 @@
       "name": "dex-skill-functional-requirements",
       "source": "./plugins/skills/dex-skill-functional-requirements",
       "description": "Чек-лист правила FR: правило выводится из разобранного сценария, а не напрямую из BR.",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2656,7 +2656,7 @@
       "name": "dex-skill-system-requirements-29148",
       "source": "./plugins/skills/dex-skill-system-requirements-29148",
       "description": "Норматив этапа системных требований (ISO/IEC/IEEE 29148 §6.4) - состав SRS по §9.6, атрибуты FR и NFR, метод верификации и MOP, охват фичи, целевая стадия, вход и выход",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",
