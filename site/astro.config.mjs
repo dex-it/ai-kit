@@ -4,9 +4,7 @@ import { satteri } from '@astrojs/markdown-satteri';
 import { defineMdastPlugin } from 'satteri';
 import { fileURLToPath } from 'node:url';
 
-const SITE = 'https://dex-it.github.io';
-const BASE = '/claude-code-marketplace';
-const REPO = 'https://github.com/dex-it/claude-code-marketplace';
+import { ORIGIN as SITE, BASE, REPO, BRAND, DESCRIPTION } from './site.config.mjs';
 
 const siteRoot = fileURLToPath(new URL('./', import.meta.url));
 const siteSrc = fileURLToPath(new URL('./src/', import.meta.url));
@@ -51,14 +49,14 @@ export default defineConfig({
   vite: { plugins: [resolveFromSite], resolve: { alias: { '@site': siteSrc } } },
   integrations: [
     starlight({
-      title: 'Claude Code Marketplace',
-      description: 'Плагины для Claude Code, которые знают грабли вашего стека и ведут работу по порядку: skills, специалисты, команды и бандлы под роль.',
+      title: BRAND,
+      description: DESCRIPTION,
       defaultLocale: 'root',
       locales: { root: { label: 'Русский', lang: 'ru' } },
       logo: {
         light: './src/generated/brand/dexaikit-banner-light.svg',
         dark: './src/generated/brand/dexaikit-banner-dark.svg',
-        alt: 'DEX AI KIT',
+        alt: BRAND,
         replacesTitle: false,
       },
       favicon: '/favicon.svg',
@@ -71,7 +69,7 @@ export default defineConfig({
       markdown: { processedDirs: ['../docs/guide', './src/generated'] },
       head: [
         { tag: 'meta', attrs: { property: 'og:image', content: ogImage } },
-        { tag: 'meta', attrs: { property: 'og:image:alt', content: 'DEX AI KIT: Claude Code Marketplace' } },
+        { tag: 'meta', attrs: { property: 'og:image:alt', content: `${BRAND}: набор для агентной разработки в Claude Code` } },
         { tag: 'meta', attrs: { property: 'og:locale', content: 'ru_RU' } },
         { tag: 'meta', attrs: { name: 'twitter:image', content: ogImage } },
         { tag: 'meta', attrs: { name: 'theme-color', content: '#16151D' } },
@@ -80,6 +78,20 @@ export default defineConfig({
         {
           label: 'Начать',
           items: ['start', 'start/requirements', 'start/install', 'start/first-run', 'start/update-remove'],
+        },
+        {
+          label: 'Основы',
+          collapsed: true,
+          items: [
+            { slug: 'basics', label: 'Обзор' },
+            'basics/skills',
+            'basics/subagents',
+            'basics/commands',
+            'basics/plugins',
+            'basics/hooks-mods',
+            'basics/context',
+            'basics/learn',
+          ],
         },
         {
           label: 'Сценарии',
