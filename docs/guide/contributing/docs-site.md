@@ -23,7 +23,7 @@ description: "Как устроен сайт документации: где л
 cd site
 npm ci
 npm run build       # собрать сайт в site/dist
-npm run preview     # открыть собранное, с базовым путём /claude-code-marketplace/
+npm run preview     # открыть собранное, с базовым путём /ai-kit/
 npm run dev         # режим разработки
 ```
 

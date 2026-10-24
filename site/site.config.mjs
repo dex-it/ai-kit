@@ -3,11 +3,9 @@
 // Адрес GitHub Pages задаёт имя репозитория: https://<организация>.github.io/<репозиторий>/.
 // Репозиторий переименуют - меняются REPO_NAME (и, при смене организации, OWNER) в этом файле,
 // остальное (base, canonical, sitemap, ссылки, проверка dist) подтягивается отсюда.
-// Адрес вида /ai-kit/ возможен только после переименования репозитория (решение владельца)
-// либо с собственным доменом в настройках Pages.
 
 export const OWNER = 'dex-it';
-export const REPO_NAME = 'claude-code-marketplace';
+export const REPO_NAME = 'ai-kit';
 
 export const ORIGIN = `https://${OWNER}.github.io`;
 export const BASE = `/${REPO_NAME}`;
