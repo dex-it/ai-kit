@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-prioritization",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Приоритизация: оценки RICE (effort, confidence), доля P0, решение по авторитету.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
   "keywords": ["skill", "prioritization", "rice", "backlog", "product"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "dex-mongodb-specialist",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Специалист по MongoDB: запросы, индексы, aggregation pipeline, replica set, диагностика и оптимизация.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "documents",
     "aggregation"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

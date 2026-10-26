@@ -1,6 +1,6 @@
 {
   "name": "dex-bundle-ts-fullstack",
-  "version": "1.43.0",
+  "version": "1.43.1",
   "description": "Бандл для TypeScript fullstack: бэкенд на Node.js/Bun и фронтенд на React, безопасность, E2E на Playwright.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "nodejs",
     "react"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

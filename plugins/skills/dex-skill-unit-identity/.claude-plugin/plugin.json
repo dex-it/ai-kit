@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-unit-identity",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Тождество единицы требований: чем ключ отличается от формулировки, как выдаются номера (старший разряд из номера фичи, младший по корпусу), когда пришедшее - правка принятой единицы, а когда новая, что делать с дублем и снятием.",
   "author": {
     "name": "Dex Team",
@@ -18,6 +18,6 @@
     "feature-block",
     "pipeline"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-nfr",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Чек-лист меры NFR: число меры из источника или с записью решения, доступность по доле успешных запросов, классификация данных и модель авторизации.",
   "author": {
     "name": "Dex Team",
@@ -18,6 +18,6 @@
     "data-classification",
     "authorization"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "dex-rabbitmq-specialist",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Специалист по RabbitMQ: очереди и exchange, consumers, dead-letter, MassTransit, диагностика.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "queue",
     "masstransit"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

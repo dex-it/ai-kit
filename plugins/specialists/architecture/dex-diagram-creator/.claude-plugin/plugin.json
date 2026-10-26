@@ -1,6 +1,6 @@
 {
   "name": "dex-diagram-creator",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Автор архитектурных диаграмм: C4, sequence, ER, state, flowchart в Mermaid, PlantUML, Structurizr DSL, D2.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "er-diagram",
     "state-diagram"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

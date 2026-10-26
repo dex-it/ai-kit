@@ -1,6 +1,6 @@
 {
   "name": "dex-dotnet-quality-auditor",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Аудит гигиены качества .NET-проекта: анализаторы, warning-профиль, NuGet security audit, NSDepCop, CI-gates. Отчёт «есть / нет / настроить».",
   "author": {
     "name": "Dex Team",
@@ -14,6 +14,6 @@
     "audit",
     "ci-gates"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

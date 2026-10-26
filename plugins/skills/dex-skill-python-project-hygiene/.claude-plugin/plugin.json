@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-python-project-hygiene",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Гигиена Python-проекта: ignore_missing_imports в mypy, порог покрытия, предупреждения pytest, аудит зависимостей.",
   "author": {
     "name": "Dex Team",
@@ -14,6 +14,6 @@
     "coverage",
     "quality-gates"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

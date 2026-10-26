@@ -1,6 +1,6 @@
 {
   "name": "dex-data-pipeline",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "Пайплайны данных для ML: загрузка и предобработка, оптимизация DataLoader, схема данных.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "pipeline",
     "preprocessing"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

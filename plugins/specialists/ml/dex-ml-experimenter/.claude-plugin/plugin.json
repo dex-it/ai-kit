@@ -1,6 +1,6 @@
 {
   "name": "dex-ml-experimenter",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "ML-экспериментатор: разведочный анализ данных, feature engineering, baseline-модели, качество данных.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "features",
     "experiments"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

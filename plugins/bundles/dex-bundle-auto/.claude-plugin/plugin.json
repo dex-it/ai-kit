@@ -1,6 +1,6 @@
 {
   "name": "dex-bundle-auto",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Бандл агентской разработки на dex-auto: вход проекта (корпус, уровень 0, порядок работы в CLAUDE.md), подготовка цели, автономные треки feature, bugfix и ревью, фиксация истины - вместе со скиллами, которые грузят узлы треков.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "onboarding",
     "workflow"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

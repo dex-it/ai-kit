@@ -1,6 +1,6 @@
 {
   "name": "dex-jira-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CLI Jira: задачи, поиск по JQL, спринт через jira (ankitpokhrel/jira-cli), только чтение.",
   "author": {
     "name": "Dex Team",
@@ -18,7 +18,7 @@
     "ticket",
     "read-only"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/jira-issue.md",

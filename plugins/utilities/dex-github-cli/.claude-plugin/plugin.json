@@ -1,6 +1,6 @@
 {
   "name": "dex-github-cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI GitHub: прогоны workflow, pull request, логи Actions через gh.",
   "author": {
     "name": "Dex Team",
@@ -15,7 +15,7 @@
     "pull-requests",
     "ci-cd"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/gh-runs.md",

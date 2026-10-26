@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-python-ml-optimization",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Оптимизация ML: целочисленные пространства поиска Optuna.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "optuna",
     "search-space"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

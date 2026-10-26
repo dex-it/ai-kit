@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-review-step-by-step",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Разбор замечаний ревью по одному пункту с решением оператора: суть и вердикт до решения, правка, коммит и push только по команде, соседние использования механизма - оператору.",
   "author": {
     "name": "Dex Team",
@@ -18,6 +18,6 @@
     "approve",
     "audit"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

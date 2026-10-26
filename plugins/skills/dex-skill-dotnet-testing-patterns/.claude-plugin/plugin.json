@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-dotnet-testing-patterns",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Unit-тесты .NET: проверка поведения вместо вызовов моков, мок, возвращающий мок.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
   "keywords": ["skill", "testing", "xunit", "moq", "dotnet", "unit-tests"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

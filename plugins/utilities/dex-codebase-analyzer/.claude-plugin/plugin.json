@@ -1,6 +1,6 @@
 {
   "name": "dex-codebase-analyzer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Анализ репозитория для архитектурных сессий: быстрый обзор стека, упаковка для LLM context, граф зависимостей. Обёртка над scc / repomix / ast-grep с graceful fallback на Read/Glob/Grep.",
   "author": {
     "name": "Dex Team",
@@ -16,7 +16,7 @@
     "repomix",
     "ast-grep"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/codebase-summary.md",

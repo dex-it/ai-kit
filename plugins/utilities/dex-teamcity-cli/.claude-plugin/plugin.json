@@ -1,6 +1,6 @@
 {
   "name": "dex-teamcity-cli",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "CLI TeamCity: прогоны, агенты, логи сборки через официальный teamcity от JetBrains.",
   "author": {
     "name": "Dex Team",
@@ -15,7 +15,7 @@
     "agents",
     "ci-cd"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/tc-builds.md",

@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-managed-debug",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Runtime-отладка .NET: netcoredbg, dotnet-dump/trace/counters, SOS, managed-дампы, анализ кучи GC, async-стек.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "eventpipe",
     "threadpool-starvation"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

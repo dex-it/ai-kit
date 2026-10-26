@@ -1,6 +1,6 @@
 {
   "name": "dex-architect-dotnet",
-  "version": "3.9.1",
+  "version": "3.9.2",
   "description": "Узел зоны дизайна (дизайн-решение) для .NET: reference architecture match, альтернативы с ASP.NET Core / EF Core / MassTransit / Polly / Serilog, решение с CAP/PACELC, deep dive, fact-check библиотек. Требования/capacity/implementation-план ведёт вызывающая команда /design.",
   "author": {
     "name": "Dex Team",
@@ -17,6 +17,6 @@
     "clean-architecture",
     "ddd"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "dex-bundle-cli-tools",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Бандл CLI-обёрток: VCS и CI (gh, glab, jenkins, teamcity), трекер (jira), Kubernetes (kubectl), данные и очереди (psql, redis-cli, kaf, rabbitmqadmin), облако (aws s3), браузерные тесты (playwright).",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "diagnostics",
     "devops"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

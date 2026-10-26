@@ -1,6 +1,6 @@
 {
   "name": "dex-dotnet-performance",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "Аналитик производительности .NET: профилирование, N+1, медленные запросы, утечки памяти, метрики и трассировка.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "profiling",
     "optimization"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-requirement-quality",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Оракул единицы требований: противоречие с другой единицей, критерием готовности, принятым ADR или инвариантом кода; метод проверки, не наблюдающий результат.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "verification-method",
     "code-review"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

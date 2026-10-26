@@ -51,7 +51,7 @@ EOF
 sudo chmod +x /usr/local/bin/jenkins-cli
 ```
 
-См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md) для полного гайда: SSH-режим, версионная совместимость, troubleshooting.
+См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) для полного гайда: SSH-режим, версионная совместимость, troubleshooting.
 
 ## Установка плагина
 

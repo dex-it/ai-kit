@@ -14,11 +14,11 @@
 
 ```bash
 # в Claude Code
-/plugin marketplace add dex-it/claude-code-marketplace
+/plugin marketplace add dex-it/ai-kit
 
 # в терминале
-git clone https://github.com/dex-it/claude-code-marketplace
-cd claude-code-marketplace
+git clone https://github.com/dex-it/ai-kit
+cd ai-kit
 ./install-bundle/install-bundle.sh auto        # Windows: .\install-bundle\install-bundle.ps1 auto
 ```
 
@@ -191,4 +191,4 @@ gh pr checkout 7                           # HEAD - на head-коммите MR,
 - В чужой MR пишет только с `--post`.
 
 Устройство плагина для того, кто его правит, -
-[components.md](https://github.com/dex-it/claude-code-marketplace/blob/main/plugins/auto/docs/components.md).
+[components.md](https://github.com/dex-it/ai-kit/blob/main/plugins/auto/docs/components.md).

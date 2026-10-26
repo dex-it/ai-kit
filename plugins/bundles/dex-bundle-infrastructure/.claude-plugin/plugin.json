@@ -1,6 +1,6 @@
 {
   "name": "dex-bundle-infrastructure",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "Полный инфраструктурный бандл: базы данных, брокеры сообщений, контейнеры, CI/CD, мониторинг.",
   "author": {
     "name": "Dex Team",
@@ -14,6 +14,6 @@
     "containers",
     "monitoring"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

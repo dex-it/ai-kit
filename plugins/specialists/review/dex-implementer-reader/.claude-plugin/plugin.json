@@ -1,6 +1,6 @@
 {
   "name": "dex-implementer-reader",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "Implementer reader: проба готовности набора требований - чтение корпуса глазами автора кода и список решений об исходе, мере и границе, которые пришлось бы принять самому. Чистый контекст, без следа прогона и журнала решений.",
   "author": {
     "name": "Dex Team",
@@ -14,6 +14,6 @@
     "assumptions",
     "acceptance"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }
