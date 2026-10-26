@@ -339,6 +339,7 @@ YAML в `description` тоже пропускает - рантайм такой 
 | `tests/auto-nodes/run.sh` | `Workflow` в фоне, ожидание циклом `until` в Bash, `--dangerously-skip-permissions`, узлы правят репозиторий | 2 (добавлено) | `--restricted` убирает Bash и отказывает `bypassPermissions` - раннер перестаёт работать |
 | `tests/orchestration/harness.mjs`, `modes/`, `dispatch/`, `skills/` | Bash, `Agent`, `bypassPermissions`, исполнители пакета | 2 (добавлено) | то же; контроль «без скилла» (`dispatch --arm none`) особенно чувствителен: скилл или личные скиллы оператора в листинге сессии портят контроль |
 | `tests/orchestration/wave/wave.py`, `single.py` | `/dex-auto:auto`, Bash, git, `--dangerously-skip-permissions` | 2 (добавлено) | то же |
+| `tests/eval55/run.mjs` | `text`-эксперименты: один ответ модели; `task` и `repo`: инструменты исполнения, правка файлов в песочнице | 1 для `text`, 2 для `task` и `repo` (добавлено) | `--restricted` ломает Bash и `acceptEdits` у кодовых ячеек; изоляцию держит `tests/tools/runners-isolation.test.sh` (статика) и `tests/tools/eval55.test.sh` (аргументы вызова) |
 
 Условия способа 2: все плагины, нужные прогону, подаются `--plugin-dir` (оператор, у которого они стоят только в
 профиле, их в изоляции не получит: для `auto-nodes/run.sh` это `AUTO_NODES_PLUGINS`), а авторизация и модель из
@@ -388,6 +389,8 @@ fixtures/tetris-baseline/
                      решения, оракул через адаптер судьи, эталон с мутантами
 auto-nodes/          сверка узла dex-auto с узлом каталога на кейсах с минами:
                      метод и кейсы в README, run.sh гоняет, score.mjs сводит
+eval55/              стенд замеров принципов миграции на Claude 5.5: раннер run.mjs,
+                     эксперименты E1, E2, E3, E5, E7, E10, пред-регистрация (PREREG.md)
 ```
 
 Маршрутов на фичу может быть несколько - тогда несколько `scenario-*.md` по именам шаблонов.

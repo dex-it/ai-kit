@@ -1,0 +1,14 @@
+{
+  "calibration": "26.10.2026, claude -p 2.1.310, пилот 44 ячейки на develop @ a257dddb, 0,97 USD; haiku - E3, E5, E7, E10; sonnet и opus - E10; sonnet - E2",
+  "costPerCellUsd": {
+    "text": { "haiku": 0.002, "sonnet": 0.03, "opus": 0.07 },
+    "task": { "haiku": 0.0022, "sonnet": 0.028, "opus": 0.0785 },
+    "repo": { "haiku": 0.01, "sonnet": 0.131, "opus": 0.37 }
+  },
+  "measured": ["text.haiku", "task.haiku", "task.sonnet", "task.opus", "repo.sonnet"],
+  "extrapolated": ["text.sonnet", "text.opus", "repo.haiku", "repo.opus"],
+  "extrapolation": "по отношению стоимости тиров на E10: sonnet около 13 раз, opus около 35 раз дороже haiku",
+  "baselineInputTokens": 15000,
+  "uncertainty": 2,
+  "note": "Стоимость ячейки растёт с длиной запроса (E7 на библиотеке из 100 skills вдвое дороже, чем из 10) и числом ходов; repo-ячейки на коротких задачах дешёвые, на длинных могут быть в разы дороже. Верхняя граница - оценка x uncertainty."
+}
