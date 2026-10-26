@@ -75,11 +75,11 @@ n2=$(wc -l < "$tmp/o4/results.jsonl" | tr -d ' ')
 STUB_MODEL=claude-other run run E3 --out "$tmp/o5" --budget 5 --tiers haiku --reps 1 --conditions n05 --parallel 1 >/dev/null 2>&1; code=$?
 { [ "$code" = 1 ] && grep -q 'модель не закреплена' "$tmp/o5/results.jsonl"; } && ok "несовпадение модели - ошибка ячейки" || bad "несовпадение модели не поймано (код $code)"
 
-# 8а. repo-ячейка: песочница - копия коммита, вариант «без правила» применён к CLAUDE.md
+# 8а. repo-ячейка: песочница - копия коммита, вариант «без правила» применён к AGENTS.md
 run run E2 --out "$tmp/o6" --budget 5 --tiers haiku --reps 1 --conditions without-rule --parallel 1 --keep >/dev/null 2>&1; code=$?
 sb=$(ls -d "$tmp"/o6/w/E2-without-rule-* 2>/dev/null | head -1)
-{ [ "$code" = 0 ] && [ -f "$sb/CLAUDE.md" ] && ! grep -q 'Пунктуация в артефактах - ASCII' "$sb/CLAUDE.md" && grep -q 'Структура плагина' "$sb/CLAUDE.md"; } \
-  && ok "repo-ячейка: копия коммита, правило снято, остальной CLAUDE.md на месте" || bad "repo-ячейка (код $code, песочница '$sb')"
+{ [ "$code" = 0 ] && [ -f "$sb/AGENTS.md" ] && ! grep -q 'Пунктуация в артефактах - ASCII' "$sb/AGENTS.md" && grep -q 'Структура плагина' "$sb/AGENTS.md"; } \
+  && ok "repo-ячейка: копия коммита, правило снято, остальной AGENTS.md на месте" || bad "repo-ячейка (код $code, песочница '$sb')"
 
 # 8. каталог внутри репозитория отвергается
 out=$(run run E3 --out "$root/tests/eval55/_x" --budget 1 --tiers haiku --reps 1 2>&1); code=$?

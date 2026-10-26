@@ -609,7 +609,7 @@ function validateAgentFileIsFlat(filepath, findings) {
  * The agent file name must match the frontmatter `name`. Claude Code resolves
  * the agent by its `name`; a divergent file name leaves the file looking like a
  * different agent than the one it declares and breaks the project convention
- * "имя файла агента совпадает с `name`" (CLAUDE.md). Skipped when `name` is
+ * "имя файла агента совпадает с `name`" (AGENTS.md). Skipped when `name` is
  * missing - that is already reported by `frontmatter-required`.
  */
 function validateFileNameMatchesName(filepath, parsed, findings) {
@@ -777,7 +777,7 @@ function validatePhases(markdownBody, findings, bodyOffset = 0) {
  * but are missing one or more links in the cascade: ToolSearch -> WebSearch ->
  * WebFetch. Without all three, fact-check silently degrades to latest-doc
  * (context7 is a deferred MCP tool reachable only via ToolSearch; WebSearch/
- * WebFetch are the offline fallback). See CLAUDE.md "Каскад tools под fact-check".
+ * WebFetch are the offline fallback). See AGENTS.md "Каскад tools под fact-check".
  *
  * Trigger is the `:`-qualified invocation form (`dex-skill-fact-verification:fact-verification`)
  * rather than a bare mention, to distinguish "agent executes fact-check" from
@@ -804,7 +804,7 @@ function validateFactcheckCascade(parsed, findings) {
     findings.push({
       level: ERROR,
       rule: 'factcheck-cascade-incomplete',
-      message: `Agent invokes fact-verification skill but tools is missing cascade link(s): ${missing.join(', ')} - fact-check silently degrades to latest-doc (see CLAUDE.md "Каскад tools под fact-check")`,
+      message: `Agent invokes fact-verification skill but tools is missing cascade link(s): ${missing.join(', ')} - fact-check silently degrades to latest-doc (see AGENTS.md "Каскад tools под fact-check")`,
     });
   }
 }

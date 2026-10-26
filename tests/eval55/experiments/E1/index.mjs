@@ -41,15 +41,15 @@ export default {
   allow: ['Bash(node *)', 'Bash(npm run *)', 'Bash(git diff*)', 'Bash(git status*)'],
   baseline: 'full',
   build() {
-    const md = readFileSync(join(root, 'CLAUDE.md'), 'utf8');
+    const md = readFileSync(join(root, 'AGENTS.md'), 'utf8');
     const secs = sections(md);
     const conds = [
       { id: 'full', prepare() {} },
-      { id: 'empty', prepare(dir) { rmSync(join(dir, 'CLAUDE.md')); } },
+      { id: 'empty', prepare(dir) { for (const f of ['AGENTS.md', 'CLAUDE.md']) rmSync(join(dir, f), { force: true }); } },
       ...secs.map((s, k) => ({
         id: `minus-s${String(k + 1).padStart(2, '0')}`,
         title: s.title,
-        prepare(dir) { const L = md.split('\n'); writeFileSync(join(dir, 'CLAUDE.md'), [...L.slice(0, s.start), ...L.slice(s.end)].join('\n')); },
+        prepare(dir) { const L = md.split('\n'); writeFileSync(join(dir, 'AGENTS.md'), [...L.slice(0, s.start), ...L.slice(s.end)].join('\n')); },
       })),
     ];
     return conds.flatMap((c) => cases.map((k) => ({ cond: c.id, condTitle: c.title, case: k.id, fixture: 'repo', prepare: c.prepare, prompt: k.prompt, graders: k.graders })));

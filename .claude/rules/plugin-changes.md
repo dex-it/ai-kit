@@ -9,7 +9,7 @@ paths:
 
 # Правки каталога: версии, синхронизации, гейт перед коммитом и CI
 
-Грузится, когда Claude читает файл, подходящий под `paths` во frontmatter ([memory](https://code.claude.com/docs/en/memory), «Path-specific rules», сверено 30.07.2026). Общие принципы содержания и конвенции - в корневом [CLAUDE.md](../../CLAUDE.md).
+Грузится, когда Claude читает файл, подходящий под `paths` во frontmatter ([memory](https://code.claude.com/docs/en/memory), «Path-specific rules», сверено 30.07.2026). Общие принципы содержания и конвенции - в корневом [AGENTS.md](../../AGENTS.md).
 
 ## Версионирование при изменениях (semver)
 

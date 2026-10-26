@@ -1,6 +1,6 @@
 # Mod Framework
 
-Нормативный дом четвёртого класса артефакта каталога - **мода**. Skill, специалист и команда меняют то, что модель читает; мод меняет то, что делает и показывает сам Claude Code. Устройство остальных классов - `SKILL_FRAMEWORK.md`, `AGENT_FRAMEWORK.md`, `COMMAND_FRAMEWORK.md`; общие конвенции каталога - [CLAUDE.md](../CLAUDE.md).
+Нормативный дом четвёртого класса артефакта каталога - **мода**. Skill, специалист и команда меняют то, что модель читает; мод меняет то, что делает и показывает сам Claude Code. Устройство остальных классов - `SKILL_FRAMEWORK.md`, `AGENT_FRAMEWORK.md`, `COMMAND_FRAMEWORK.md`; общие конвенции каталога - [AGENTS.md](../AGENTS.md).
 
 ## Что такое мод
 
@@ -24,7 +24,7 @@
 ## Где лежит и как попадает в каталог
 
 - **Дерево** - `mods/<имя>/` в корне репозитория, рядом с `plugins/`. Класс артефакта другой (исполняемый TypeScript, не текст для модели), и общий `mods/tsconfig.json` с контрактом типов покрывает дерево целиком. Форма повторяет `mods/` в репозитории Anthropic.
-- **Имя** - `dex-{name}`, как у утилиты (конвенция именования - [CLAUDE.md](../CLAUDE.md), «Именование»).
+- **Имя** - `dex-{name}`, как у утилиты (конвенция именования - [AGENTS.md](../AGENTS.md), «Именование»).
 - **Категория записи каталога** - `mod`. Признак выводится из содержимого, а не из места: `hooks/hooks.json` с массивом `modules` -> `mod` (ветка стоит до `hooks/` -> `utility`). Держит `catalog-category-mismatch` в `tools/validate-bundle.js`, охват которого включает `mods/` наравне с `plugins/` - вместе с ним мод судят `version-mismatch` и `description-mismatch`.
 - **Витрина** - раздел «Mods» в [README.md](../README.md); плагин, не названный там, роняет `readme-plugin-unnamed`.
 - **Версии** - те же правила, что у плагина: `plugin.json` и `marketplace.json` синхронно, новый мод бампает minor версии каталога ([plugin-changes.md](../.claude/rules/plugin-changes.md)).

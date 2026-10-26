@@ -14,7 +14,7 @@ const REPO_ROOT = process.env.MARKETPLACE_ROOT
 
 const COLORS = { reset: '\x1b[0m', red: '\x1b[31m', yellow: '\x1b[33m', gray: '\x1b[90m', bold: '\x1b[1m' };
 
-// Уровень правила. Норма (CLAUDE.md, «Имя сущности корпуса берётся из словаря») называет имя `к вытеснению` дефектом,
+// Уровень правила. Норма (AGENTS.md, «Имя сущности корпуса берётся из словаря») называет имя `к вытеснению` дефектом,
 // поэтому находка - ошибка и останавливает `npm run validate`: новое имя к вытеснению не проходит в PR молча.
 // Колонка «Синонимы источника» из-под правила выведена (см. blankSourceSynonyms), так что дерево чисто.
 const LEVEL = 'error';
@@ -29,12 +29,12 @@ const DICTIONARY = join(REPO_ROOT, 'docs', 'domain', 'domain-model.md');
 const INDEX_FILE = join(REPO_ROOT, '.claude', 'rules', 'terminology.md');
 const INDEX_MARKER = '**Имена `к вытеснению`**';
 
-// Область: тексты каталога - `.md` под `plugins/`, `docs/` и `.claude/rules/`, корневые `README.md` и `CLAUDE.md`.
+// Область: тексты каталога - `.md` под `plugins/`, `docs/` и `.claude/rules/`, корневые `README.md`, `AGENTS.md` и `CLAUDE.md`.
 // Вне её - записи, где старое имя стоит на своём месте: словарь и индекс (имя там предмет определения), ADR
 // (снимок решения), записи замеров (имя, как оно называлось на момент замера; переписать значит подделать запись),
 // research (слово «раунд» там - раунд эксперимента, не ревизия).
 const ROOTS = ['plugins', 'docs', '.claude/rules'];
-const ROOT_FILES = ['README.md', 'CLAUDE.md'];
+const ROOT_FILES = ['README.md', 'AGENTS.md', 'CLAUDE.md'];
 const SKIP_DIRS = ['docs/adr', 'docs/research', 'plugins/auto/docs/notes'];
 const SKIP_FILES = ['docs/domain/domain-model.md', '.claude/rules/terminology.md'];
 const SOURCE_SYNONYMS_COLUMN = 'Синонимы источника';

@@ -19,7 +19,7 @@ description: Как добавить плагин или поправить су
 
 | Документ | О чём |
 |---|---|
-| [CLAUDE.md](https://github.com/dex-it/ai-kit/blob/main/CLAUDE.md) | Как писать плагины, ревьюить и проверять перед коммитом |
+| [AGENTS.md](https://github.com/dex-it/ai-kit/blob/main/AGENTS.md) | Как писать плагины, ревьюить и проверять перед коммитом |
 | [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md) | Версии (semver), обязательные синхронизации, гейт перед коммитом |
 | [docs-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/docs-changes.md) | Правки документации |
 | [terminology.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/terminology.md) | Заведённые имена; значения - в [словаре](https://github.com/dex-it/ai-kit/blob/main/docs/domain/domain-model.md) |

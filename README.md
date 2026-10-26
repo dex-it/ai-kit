@@ -374,7 +374,7 @@ AI KIT собран из деталей шести видов. Деталь де
 | **Инфраструктура** | `kubernetes`, `rabbitmq`, `kafka`, `elasticsearch`, `redis`, `mongodb`, `gitlab-ci`, `github-actions`, `jenkins`, `teamcity`, `observability` |
 | **ML и Python** | `python-pytorch`, `python-tensorflow`, `python-nlp-transformers`, `python-computer-vision`, `python-ml-optimization`, `python-project-hygiene` |
 
-Перечень сверяется с `.claude-plugin/marketplace.json` прогоном `node tools/validate-readme.js` (входит в `npm run validate` и CI); генератора у таблицы нет. Skill, который едет внутри плагина-владельца (CLAUDE.md, «Структура плагина»), отдельной записи в каталоге не имеет и здесь не перечислен - его называет витрина владельца.
+Перечень сверяется с `.claude-plugin/marketplace.json` прогоном `node tools/validate-readme.js` (входит в `npm run validate` и CI); генератора у таблицы нет. Skill, который едет внутри плагина-владельца (AGENTS.md, «Структура плагина»), отдельной записи в каталоге не имеет и здесь не перечислен - его называет витрина владельца.
 
 </details>
 
@@ -552,6 +552,7 @@ ai-kit/
 ├── assets/                        # Баннеры README
 ├── .claude-plugin/
 │   └── marketplace.json           # Каталог всех плагинов (description и version синхронизирует sync:marketplace)
+├── AGENTS.md
 ├── CLAUDE.md
 ├── CREDENTIALS.md
 └── README.md
@@ -595,7 +596,7 @@ ai-kit/
 
 ## Участие
 
-Хотите добавить плагин или поправить существующий? Начните с [CLAUDE.md](./CLAUDE.md): там правила разработки каталога.
+Хотите добавить плагин или поправить существующий? Начните с [AGENTS.md](./AGENTS.md): там правила разработки каталога.
 
 Пользовательская документация с примерами и каталогом плагинов - [сайт](https://dex-it.github.io/ai-kit/); его страницы лежат в [docs/guide/](./docs/guide/), проект сайта - в [site/](./site/).
 
@@ -608,7 +609,7 @@ ai-kit/
 
 **Правила.** Нормативные тексты лежат рядом с кодом:
 
-- [CLAUDE.md](./CLAUDE.md) - как писать плагины, ревьюить и проверять перед коммитом;
+- [AGENTS.md](./AGENTS.md) - как писать плагины, ревьюить и проверять перед коммитом;
 - [.claude/rules/plugin-changes.md](./.claude/rules/plugin-changes.md) - версии (semver), обязательные синхронизации, гейт перед коммитом;
 - [.claude/rules/docs-changes.md](./.claude/rules/docs-changes.md) - правки документации;
 - [.claude/rules/terminology.md](./.claude/rules/terminology.md) - заведённые имена; значения - в [словаре](./docs/domain/domain-model.md).
