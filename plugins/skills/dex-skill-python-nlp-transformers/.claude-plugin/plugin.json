@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-python-nlp-transformers",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "NLP на трансформерах: пакетная токенизация, прогрев, декодирование при генерации, квантизация для CPU.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "huggingface",
     "quantization"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

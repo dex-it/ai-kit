@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-adr-quality",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Оракул ADR: норма против состояния кода, проверка пункта нормы, опора нормы, дефолт открытого вопроса, источник требования, правка существующего ADR или новый.",
   "author": {
     "name": "Dex Team",
@@ -15,6 +15,6 @@
     "documentation",
     "spec"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

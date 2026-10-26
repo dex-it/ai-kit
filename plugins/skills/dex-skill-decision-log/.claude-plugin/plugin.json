@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-decision-log",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "decision-log конвейера требований: что в него попадает, как требование ссылается на запись, чем он отличается от меток проверок и служебного состояния прогона, что делать при утрате. Общая механика - node-contract, раздел «Журнал решений»; здесь специфика требований: кто ведёт журнал, связь записи с единицей, открытые пункты, поднятие оснований заново при утрате.",
   "author": {
     "name": "Dex Team",
@@ -18,6 +18,6 @@
     "delta-run",
     "audit-trail"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

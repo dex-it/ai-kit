@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-review-evidence",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Процедура ревью: где искать источник намерения и когда ставить intent: n/a, два прохода с разделом «перепроверить» для неуверенных находок.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "review-rigor",
     "investigation"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

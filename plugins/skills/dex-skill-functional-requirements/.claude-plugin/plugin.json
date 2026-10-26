@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-functional-requirements",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Чек-лист правила FR: правило выводится из разобранного сценария, а не напрямую из BR.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "derivation",
     "use-case-basis"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

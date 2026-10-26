@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-post-merge-remediation",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Доставка фикса багов после мерджа на общей ветке и стенде: follow-up ветка вместо правки общей ветки, по багу на коммит корневым первым, порядок выката и откат, выкат по команде оператора, верификация red->green на стенде, регрессия соседей.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "stand-verify",
     "rollout"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

@@ -1,9 +1,9 @@
 {
   "name": "dex-skill-scalability",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Масштабируемость в дизайне: горячая партиция или горячий ключ под нагрузкой с длинным хвостом.",
   "author": { "name": "Dex Team", "email": "mmx@dex-it.ru" },
   "keywords": ["skill", "scalability", "sharding", "hot-partition", "hot-key"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

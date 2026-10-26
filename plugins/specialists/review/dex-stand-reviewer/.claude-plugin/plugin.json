@@ -1,6 +1,6 @@
 {
   "name": "dex-stand-reviewer",
-  "version": "2.6.2",
+  "version": "2.6.3",
   "description": "Узел приёмки слитой фичи на развёрнутом стенде против ТЗ, read-only: привязка образа к merge-коммиту, карта требование -> проба на стенде, параллельные суб-агенты улик, фальсификация находок и утверждений 'выполнено', severity/confidence/scope, отчёт. Точка входа - команда /review-stand, едет в этом же плагине.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "verification",
     "regression"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

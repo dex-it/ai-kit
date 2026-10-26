@@ -1,6 +1,6 @@
 {
   "name": "dex-adr-writer",
-  "version": "3.8.0",
+  "version": "3.8.1",
   "description": "Автор ADR: пишет Architecture Decision Records в формате MADR - драйверы решения, альтернативы, trade-off.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "decisions",
     "documentation"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

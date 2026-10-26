@@ -30,7 +30,7 @@ brew install glab
 ./install-bundle/install-cli-tools.sh glab
 ```
 
-Для self-hosted GitLab: `glab config set --global hostname gitlab.acme.io`. См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md) - auth, multi-host, матрица CLI vs MCP.
+Для self-hosted GitLab: `glab config set --global hostname gitlab.acme.io`. См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) - auth, multi-host, матрица CLI vs MCP.
 
 ## Установка плагина
 

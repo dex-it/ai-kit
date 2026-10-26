@@ -1,9 +1,9 @@
 {
   "name": "dex-skill-change-correlation",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Корреляция симптома с изменениями: окно вокруг момента начала, код по sha на стенде, отсев кандидатов по таймингу и зоне симптома, подтверждение виновника на пути исполнения, git bisect first-parent.",
   "author": { "name": "Dex Team", "email": "mmx@dex-it.ru" },
   "keywords": ["skill", "rca", "change-correlation", "git-bisect", "regression-window", "blame"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

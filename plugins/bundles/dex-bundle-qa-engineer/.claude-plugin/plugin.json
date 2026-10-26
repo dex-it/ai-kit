@@ -1,6 +1,6 @@
 {
   "name": "dex-bundle-qa-engineer",
-  "version": "1.25.0",
+  "version": "1.25.1",
   "description": "Бандл для QA-инженера: тест-анализ, автоматизация (включая E2E на Playwright), активный поиск багов, баг-репорты.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "automation",
     "quality"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

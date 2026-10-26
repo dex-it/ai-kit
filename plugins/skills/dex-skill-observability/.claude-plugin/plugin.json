@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-observability",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Наблюдаемость: OpenTelemetry, метрики, распределённая трассировка, health checks.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
   "keywords": ["skill", "observability", "opentelemetry", "metrics", "tracing"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

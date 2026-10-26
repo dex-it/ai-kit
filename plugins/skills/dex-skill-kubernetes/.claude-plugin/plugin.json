@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-kubernetes",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Kubernetes: проверки liveness и readiness, limits ресурсов .NET, секреты в манифестах.",
   "author": {
     "name": "Dex Team",
@@ -17,6 +17,6 @@
     "hpa",
     "helm"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

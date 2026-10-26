@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-python-tensorflow",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "TensorFlow/Keras: параллельность map во входном конвейере tf.data.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "tf-data",
     "python"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

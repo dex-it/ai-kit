@@ -1,6 +1,6 @@
 {
   "name": "dex-mcp-inspector",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MCP Inspector - тестирование и отладка MCP серверов через интерактивный веб-UI",
   "author": {
     "name": "Dex Team",
@@ -14,7 +14,7 @@
     "mcp-server",
     "model-context-protocol"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/mcp-inspect.md"

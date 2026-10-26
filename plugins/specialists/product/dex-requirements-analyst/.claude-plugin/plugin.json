@@ -1,6 +1,6 @@
 {
   "name": "dex-requirements-analyst",
-  "version": "4.15.0",
+  "version": "4.15.1",
   "description": "Аналитик требований: выводит FR из шагов и расширений сценариев, NFR из бизнес-требований и ограничений среды, у каждой единицы метод проверки.",
   "author": {
     "name": "Dex Team",
@@ -12,6 +12,6 @@
     "analysis",
     "detailing"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

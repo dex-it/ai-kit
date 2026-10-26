@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-dotnet-resilience",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Устойчивость вызовов внешней зависимости .NET: где стоит политика, общий timeout, circuit breaker, фильтр сбоев, видимый fallback, конкурентные промахи кэша.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
   "keywords": ["skill", "resilience", "polly", "retry", "circuit-breaker", "dotnet", "cache"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

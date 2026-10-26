@@ -1,6 +1,6 @@
 {
   "name": "dex-bundle-dotnet-developer",
-  "version": "2.43.0",
+  "version": "2.43.1",
   "description": "Бандл для .NET-разработчика: написание кода, отладка, тесты, code review, EF Core, производительность, интерактивный дизайн .NET-архитектуры.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "developer",
     "coding"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

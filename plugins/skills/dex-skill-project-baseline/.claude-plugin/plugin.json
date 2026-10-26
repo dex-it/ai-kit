@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-project-baseline",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Гейты качества проекта: проверка наличия при первом погружении в контекст, рекомендация завести до правок, фиксация отказа решением проекта.",
   "author": {
     "name": "Dex Team",
@@ -15,6 +15,6 @@
     "ci",
     "scaffold"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

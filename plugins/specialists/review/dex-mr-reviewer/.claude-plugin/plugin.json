@@ -1,6 +1,6 @@
 {
   "name": "dex-mr-reviewer",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Языко-агностичный узел первичного ревью чужого MR/PR: карта изменений, параллельные фокусы, фальсификация находок, severity/confidence/scope, доставка инлайн-тредами через gh/glab. По поручению входа - разметка находок типом в первой строке треда. Точка входа - команда /mr-review, едет в этом же плагине.",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "gitlab",
     "github"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

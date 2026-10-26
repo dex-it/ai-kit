@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-doc-standards",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Документация: требования качества и ограничение цели в документе требований, запись требований полными предложениями.",
   "author": {
     "name": "Dex Team",
@@ -15,6 +15,6 @@
     "prd",
     "spec"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

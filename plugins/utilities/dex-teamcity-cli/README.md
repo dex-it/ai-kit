@@ -41,7 +41,7 @@ teamcity auth login         # interactive - вставите URL и token
 teamcity auth status        # проверка
 ```
 
-См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md) - multi-server, SSO/SAML, scripting через JSON-output, матрица CLI vs MCP.
+См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) - multi-server, SSO/SAML, scripting через JSON-output, матрица CLI vs MCP.
 
 ## Установка плагина
 

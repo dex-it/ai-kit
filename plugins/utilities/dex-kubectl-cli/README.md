@@ -62,10 +62,10 @@ kubectl config set-context --current --namespace=<ns>   # сменить namespa
 ### Безопасность на production-кластерах
 
 - `~/.kube/config` **общий для всех терминалов пользователя** - переключение контекста влияет на все shell'ы, не только на Claude Code.
-- Для прода предпочтительно использовать **read-only kubeconfig**: service account с RBAC, ограниченным до `get` / `list` / `watch` без `create` / `delete` / `patch`. Пример RBAC-манифеста - в [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md).
+- Для прода предпочтительно использовать **read-only kubeconfig**: service account с RBAC, ограниченным до `get` / `list` / `watch` без `create` / `delete` / `patch`. Пример RBAC-манифеста - в [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md).
 - Никогда не делитесь kubeconfig-файлами через чат / коммиты - там bearer-токены или client-cert.
 
-См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md) - multi-cluster setup, OIDC/exec auth, troubleshooting, матрица CLI vs MCP.
+См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) - multi-cluster setup, OIDC/exec auth, troubleshooting, матрица CLI vs MCP.
 
 ## Установка плагина
 

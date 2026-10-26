@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-stand-verification",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Приёмка слитой фичи на развёрнутом стенде против ТЗ: статус пункта по пробе на стенде, а не по коду дельты, временный E2E без опоры на чужие записи, уборка данных пробы на общем стенде.",
   "author": {
     "name": "Dex Team",
@@ -17,6 +17,6 @@
     "e2e",
     "scratch-test"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

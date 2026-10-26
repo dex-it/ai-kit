@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-review-threads",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Доставка ревью в MR/PR: тред на нарушение у его строки, severity первой строкой, overview без пересказа находок, ответ по прежней находке в её тред, resolve после ответа, только свои треды, запись по разрешению.",
   "author": {
     "name": "Dex Team",
@@ -18,6 +18,6 @@
     "merge-request",
     "pull-request"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

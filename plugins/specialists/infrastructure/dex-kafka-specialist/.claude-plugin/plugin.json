@@ -1,6 +1,6 @@
 {
   "name": "dex-kafka-specialist",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Специалист по Apache Kafka: топики, consumer group и lag, партиции, разбор сообщений, диагностика.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "events",
     "consumer"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

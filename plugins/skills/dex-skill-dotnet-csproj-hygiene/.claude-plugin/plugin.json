@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-dotnet-csproj-hygiene",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Гигиена MSBuild csproj: свойства решения в Directory.Build.props, язык и флаги сборки проекта, граф ProjectReference.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
   "keywords": ["skill", "msbuild", "csproj", "langversion", "dotnet"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

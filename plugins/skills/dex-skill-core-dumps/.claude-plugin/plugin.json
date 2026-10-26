@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-core-dumps",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Post-mortem анализ coredump: gcore, coredumpctl, kernel.core_pattern, mismatched libs, контейнеры",
   "author": {
     "name": "Dex Team",
@@ -16,6 +16,6 @@
     "ulimit-core",
     "core-pattern"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

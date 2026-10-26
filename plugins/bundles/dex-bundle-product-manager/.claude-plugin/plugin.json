@@ -1,6 +1,6 @@
 {
   "name": "dex-bundle-product-manager",
-  "version": "1.27.2",
+  "version": "1.27.3",
   "description": "Бандл для продакт-менеджера: бизнес-требования, roadmap, бэклог, анализ метрик.",
   "author": {
     "name": "Dex Team",
@@ -14,6 +14,6 @@
     "backlog",
     "metrics"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

@@ -1,12 +1,12 @@
 {
   "name": "dex-skill-api-testing",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Интеграционные тесты HTTP API: на какой базе их гонять, когда поведение держит настоящая база.",
   "author": {
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
   "keywords": ["skill", "api-testing", "integration-test", "testcontainers", "database"],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

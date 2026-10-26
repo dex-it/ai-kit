@@ -1,6 +1,6 @@
 {
   "name": "dex-implement",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Команда /implement: реализация фичи полным циклом - требования, план правок, код, тесты, саморевью. Стек определяется по манифесту репозитория, написание делегируется кодеру и тестописателю своего стека.",
   "author": {
     "name": "Dex Team",
@@ -13,6 +13,6 @@
     "feature",
     "tdd"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

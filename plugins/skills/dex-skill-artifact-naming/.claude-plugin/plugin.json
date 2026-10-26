@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-artifact-naming",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Конвенция имени артефакта конвейера требований и границы её применения: занятый корпус диктует раскладку сам, разрешение пути сквозным полем, слаг прогона как ключ. Дерево и имена классов - у норматива раскладки.",
   "author": {
     "name": "Dex Team",
@@ -18,6 +18,6 @@
     "conventions",
     "pipeline"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }
