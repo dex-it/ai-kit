@@ -53,6 +53,7 @@ export function grade(g, ctx) {
     case 'file-matches': return one(existsSync(join(ctx.dir, g.path)) && toRe(g).test(readFileSync(join(ctx.dir, g.path), 'utf8')));
     case 'file-not-matches': return one(!existsSync(join(ctx.dir, g.path)) || !toRe(g).test(readFileSync(join(ctx.dir, g.path), 'utf8')));
     case 'file-unchanged': return one(ctx.before.get(g.path) === snapshot(ctx.dir).get(g.path));
+    case 'file-changed': return one(ctx.before.get(g.path) !== snapshot(ctx.dir).get(g.path));
     case 'nothing-changed': { const ch = changedSince(ctx.before, snapshot(ctx.dir)); return one(ch.length === 0, ch.join(', ')); }
     case 'only-changed': {
       const ch = changedSince(ctx.before, snapshot(ctx.dir)).filter((f) => !g.allowed.some((a) => f === a || f.startsWith(a.endsWith('/') ? a : `${a}/`)));

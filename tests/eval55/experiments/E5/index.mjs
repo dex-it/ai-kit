@@ -1,6 +1,6 @@
 // E5 - удержание ограничений при сжатии нормативного текста.
 // Гипотеза: LLM-сжатие сохраняет факты и теряет условия, исключения и границы (R44, R48).
-// Мера - доля удержанных ограничений (ключевые слова условий, статусов и исключений) и длина. Это прокси на уровне токенов:
+// Текстов 10: три исходных и семь абзацев нормативных правил корневого CLAUDE.md (снимок строки на коммите стенда). Мера - доля удержанных ограничений (ключевые слова условий, статусов и исключений) и длина. Это прокси на уровне токенов:
 // выживание слова не доказывает выживание условия, поэтому решающий вывод по E5 требует слепого судьи (PREREG.md); провал прокси однозначен.
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -21,6 +21,33 @@ const CONSTRAINTS = {
   'count-in-norm': [
     ['prescription-class', 'предписани'], ['generator-or-gate', 'генератор|гейт'], ['measurement-class', 'замер'], ['remove-number-test', 'убери число'], ['snapshot', 'снимок'],
     ['commit-or-history', 'git history|сообщени\\w+ коммита'], ['qualitative-form', 'качественн'], ['manual-check', 'ручная'],
+  ],
+  'skill-generic': [
+    ['project-names', 'UpCore|EyeLineData'], ['ide-binding', '\\.junie|\\.cursorrules'], ['stack-api-boundary', 'API стека'], ['product-forbidden', 'конкретного продукта'],
+    ['remove-names-test', 'убери имена'], ['source-mr', 'MR'], ['anti-pattern', '№10'],
+  ],
+  'agent-phases': [
+    ['phases', 'фаз'], ['contract-parts', 'Exit criteria'], ['no-grep', 'grep'], ['no-code-examples', 'примеров кода'], ['bare-mandatory', 'голой пометкой'], ['why-in-goal', 'зачем'],
+  ],
+  'unambiguous-wording': [
+    ['two-readings', 'двумя способами|двум способам'], ['rule-not-applying', 'не применя'], ['contradiction', 'взаимоисключающ'], ['explicit-condition', 'явным условием'],
+    ['good-faith-test', 'добросовестн'], ['defect-not-style', 'не стилистика'], ['wider-than-skip', 'шире'],
+  ],
+  'terminology-dictionary': [
+    ['dictionary-home', 'domain-model'], ['same-change', 'тем же изменением'], ['ousted-marker', 'к вытеснению'], ['open-divergence', 'D-N'], ['ousted-name-rule', 'ousted-name'],
+    ['home-unresolved', 'home-unresolved'], ['sync-command', 'sync:terminology'], ['closed-list', 'Закрытый перечень'],
+  ],
+  'ascii-punctuation': [
+    ['default', 'Дефолт'], ['arrow-ascii', '->'], ['keep-quotes', 'кавычки'], ['box-drawing', 'box-drawing'], ['emoji', 'эмодзи'], ['inline-code-exception', 'inline code'],
+    ['per-file', 'пофайлов'], ['untouched-not-defect', 'не дефект'], ['not-economy', 'не экономия'],
+  ],
+  'readme-absolute-url': [
+    ['absolute', 'абсолютн'], ['delivery-channel', 'канал поставки'], ['anchor', 'якор'], ['sync-condition', 'Синхронность'], ['pin', '@ref'], ['outside-plugins', 'за пределами'],
+    ['git-grep-check', 'git grep'], ['both-anchor-forms', 'двух формах'],
+  ],
+  'bundle-json-home': [
+    ['bundle-json', 'bundle\\.json'], ['not-plugin-json', 'НЕ в'], ['includes', 'includes'], ['dependencies', 'dependencies'], ['unknown-fields', 'неизвестн'],
+    ['union-judged', 'объединение'], ['diverge-rule', 'dependency-also-included'],
   ],
 };
 

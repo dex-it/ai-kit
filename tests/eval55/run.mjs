@@ -8,7 +8,7 @@
  *   node tests/eval55/run.mjs run <E*> --out <каталог> --budget <USD> [опции]
  *   node tests/eval55/run.mjs report <каталог> [<каталог-повтора-базы>]
  *
- * Опции: --tiers haiku,sonnet,opus  --reps 3  --conditions a,b  --cases N  --limit N (первые N ячеек)  --effort medium
+ * Опции: --tiers haiku,sonnet,opus  --reps 3  --conditions a,b  --cases N (первые N кейсов)  --only-cases a,b  --limit N (первые N ячеек)  --effort medium
  *        --cell-cap USD (потолок одного вызова, 2)  --parallel N (2)  --commit REV (для E1, E2; HEAD)  --keep (не удалять песочницы)
  *
  * Прогон платный и не входит в `npm test` / CI. Каталог --out обязан лежать вне репозитория: прогоны не засоряют дерево, а
@@ -28,7 +28,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '../..');
 const TIERS = { haiku: 'claude-haiku-5-5', sonnet: 'claude-sonnet-5-5', opus: 'claude-opus-5-5' };
 const EXPERIMENTS = ['E1', 'E2', 'E3', 'E5', 'E7', 'E10'];
-const GRADER_TYPES = ['output-matches', 'output-not-matches', 'output-equals', 'output-not-equals', 'file-exists', 'file-matches', 'file-not-matches', 'file-unchanged', 'nothing-changed', 'only-changed', 'cmd', 'json-fields'];
+const GRADER_TYPES = ['output-matches', 'output-not-matches', 'output-equals', 'output-not-equals', 'file-exists', 'file-matches', 'file-not-matches', 'file-unchanged', 'file-changed', 'nothing-changed', 'only-changed', 'cmd', 'json-fields'];
 const GIT_SANDBOX_ENV = { GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_PAGER: 'cat' };
 
 function parseArgs(argv) {
@@ -49,6 +49,7 @@ async function cellsOf(id, opt) {
   const mod = await load(id);
   let cells = mod.build({ cases: opt.cases ? Number(opt.cases) : undefined }).map((c) => ({ ...c, exp: id, kind: mod.kind }));
   if (opt.conditions) { const s = new Set(opt.conditions.split(',')); cells = cells.filter((c) => s.has(c.cond)); }
+  if (opt['only-cases']) { const s = new Set(opt['only-cases'].split(',')); cells = cells.filter((c) => s.has(c.case)); }
   if (opt.cases) { const keep = new Set([...new Set(cells.map((c) => c.case))].slice(0, Number(opt.cases))); cells = cells.filter((c) => keep.has(c.case)); }
   return { mod, cells };
 }
@@ -174,6 +175,19 @@ function cmdReport(dirA, dirB) {
       o.push(`| ${exp} | ${p.tier} | ${p.cond} | ${p.base} | ${p.pairs} | ${f2(p.delta)} | ${f2(p.se)} | ${f2(thr)}${b ? '' : ' (без полосы шума)'} | ${Math.abs(p.delta) > thr ? 'да' : 'нет'} |`);
     }
   }
+  // Проверки, на которых условия расходятся внутри кейса: для E2 это нарушение правила (rule-held:*), для E10 - выход за границу.
+  const diff = [];
+  const grp = new Map();
+  for (const r of rows) for (const c of r.checks ?? []) {
+    const k = `${r.exp}|${r.tier}|${r.case}|${c.id}`;
+    const g = grp.get(k) ?? grp.set(k, new Map()).get(k);
+    const a = g.get(r.cond) ?? g.set(r.cond, []).get(r.cond); a.push(c.pass ? 1 : 0);
+  }
+  for (const [k, g] of grp) {
+    const rates = [...g.entries()].map(([cond, xs]) => [cond, xs.reduce((a, b) => a + b, 0) / xs.length, xs.length]);
+    if (new Set(rates.map((x) => x[1])).size > 1) diff.push(`| ${k.split('|').join(' | ')} | ${rates.map(([cond, v, n]) => `${cond} ${f2(v)} (n=${n})`).join('; ')} |`);
+  }
+  if (diff.length) o.push('', '## Проверки, на которых условия расходятся (по кейсу)', '', '| Эксперимент | Тир | Кейс | Проверка | Доля прохождения по условиям |', '|---|---|---|---|---|', ...diff);
   if (dirB) {
     o.push('', '## Полоса шума (два независимых прогона базы)', '', '| Эксперимент | Тир | Условие | \\|A - B\\| | Полоса |', '|---|---|---|---:|---:|');
     for (const b of band) o.push(`| ${b.exp} | ${b.tier} | ${b.cond} | ${f2(b.diff)} | ${f2(b.band)} |`);
@@ -191,7 +205,10 @@ async function cmdSelftest() {
     for (const c of cells) {
       const k = `${c.cond}|${c.case}`; if (keys.has(k)) problems.push(`дубль ${k}`); keys.add(k);
       if (!c.prompt) problems.push(`нет prompt ${k}`);
-      for (const g of c.graders) if (!GRADER_TYPES.includes(g.type)) problems.push(`грейдер ${g.type}`);
+      for (const g of c.graders) {
+        if (!GRADER_TYPES.includes(g.type)) problems.push(`грейдер ${g.type}`);
+        if (g.regex) { try { new RegExp(g.regex, g.flags ?? 'u'); } catch (e) { problems.push(`регулярка ${k}/${g.id ?? g.type}: ${e.message}`); } }
+      }
       if (c.fixture && c.fixture !== 'repo' && !existsSync(c.fixture)) problems.push(`нет фикстуры ${c.fixture}`);
     }
     if (mod.baseline && !cells.some((c) => c.cond === mod.baseline)) problems.push(`база ${mod.baseline} не среди условий`);
