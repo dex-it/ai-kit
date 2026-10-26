@@ -25,7 +25,7 @@ Claude Code - программа Anthropic, в которой вы работа�
 
 ## Какая у каталога лицензия?
 
-GPL v3.0. Текст - в файле [LICENSE](https://github.com/dex-it/claude-code-marketplace/blob/main/LICENSE).
+GPL v3.0. Текст - в файле [LICENSE](https://github.com/dex-it/ai-kit/blob/main/LICENSE).
 
 ## Как поставить плагины на Windows?
 
@@ -37,7 +37,7 @@ GPL v3.0. Текст - в файле [LICENSE](https://github.com/dex-it/claude-
 
 ## Нужны ли API-ключи?
 
-Для самих плагинов нет. Учётные данные нужны MCP-серверам, которые подключаются отдельно: как их настроить - в [CREDENTIALS.md](https://github.com/dex-it/claude-code-marketplace/blob/main/CREDENTIALS.md), готовые конфигурации - в [mcp/README.md](https://github.com/dex-it/claude-code-marketplace/blob/main/mcp/README.md).
+Для самих плагинов нет. Учётные данные нужны MCP-серверам, которые подключаются отдельно: как их настроить - в [CREDENTIALS.md](https://github.com/dex-it/ai-kit/blob/main/CREDENTIALS.md), готовые конфигурации - в [mcp/README.md](https://github.com/dex-it/ai-kit/blob/main/mcp/README.md).
 
 ## Почему не работает вызов без префикса, например `/self-review`?
 

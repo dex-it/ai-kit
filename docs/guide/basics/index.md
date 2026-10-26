@@ -20,7 +20,7 @@ description: Краткая карта механизмов Claude Code - CLAUDE
 | [Специалист (subagent)](/basics/subagents/) | Кто выполнит работу в отдельном контексте | markdown-файл с настройками и телом | `agents/<имя>.md`, ревьюер, дебаггер, архитектор |
 | [Команда](/basics/commands/) | Как запустить работу одним вызовом | `/имя` или `/плагин:имя` | `commands/<имя>.md`, точки входа |
 | [Хук и мод](/basics/hooks-mods/) | Что должно случаться на событие всегда | настройка в JSON или код внутри клиента | Утилиты-нотификаторы и моды-трекеры |
-| [MCP-сервер](/basics/context/#mcp-доступ-к-внешним-системам) | Как достать до внешней системы | процесс или сервис с инструментами | Конфигурации в `mcp/`, [CREDENTIALS.md](https://github.com/dex-it/claude-code-marketplace/blob/main/CREDENTIALS.md) |
+| [MCP-сервер](/basics/context/#mcp-доступ-к-внешним-системам) | Как достать до внешней системы | процесс или сервис с инструментами | Конфигурации в `mcp/`, [CREDENTIALS.md](https://github.com/dex-it/ai-kit/blob/main/CREDENTIALS.md) |
 | [Плагин и маркетплейс](/basics/plugins/) | Как упаковать всё это и доставить другим | каталог с `.claude-plugin/plugin.json`; репозиторий с `marketplace.json` | Весь каталог |
 
 ## Как читать

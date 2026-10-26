@@ -25,7 +25,7 @@ Skill, специалист и команда меняют то, что чита
 - **Адресная установка.** Моды в бандлы ролей не входят: их ставят по решению разработчика.
 - **Мод и утилита.** Утилита запускает отдельный процесс на событие или команду и возвращает текст. Мод работает внутри клиента и может менять интерфейс. В каталоге один плагин не бывает и тем и другим.
 
-Устройство мода для авторов: [MOD_FRAMEWORK.md на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/MOD_FRAMEWORK.md). Сравнение с хуками-командами и Agent SDK: [EXTENSION_MECHANISMS.md на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/EXTENSION_MECHANISMS.md).
+Устройство мода для авторов: [MOD_FRAMEWORK.md на GitHub](https://github.com/dex-it/ai-kit/blob/main/docs/MOD_FRAMEWORK.md). Сравнение с хуками-командами и Agent SDK: [EXTENSION_MECHANISMS.md на GitHub](https://github.com/dex-it/ai-kit/blob/main/docs/EXTENSION_MECHANISMS.md).
 
 ## Пример
 

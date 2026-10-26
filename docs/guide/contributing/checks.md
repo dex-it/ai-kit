@@ -18,7 +18,7 @@ description: Валидаторы и тесты каталога, что зап�
 
 ## CI
 
-На каждый Pull Request GitHub Actions повторяет локальный гейт отдельными шагами по каждому валидатору, чтобы при падении было видно, какой именно сработал. Описание правил - в [VALIDATOR_RULES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/VALIDATOR_RULES.md) и [tools/README.md](https://github.com/dex-it/claude-code-marketplace/blob/main/tools/README.md), фикстуры и прогоны - в [tests/README.md](https://github.com/dex-it/claude-code-marketplace/blob/main/tests/README.md).
+На каждый Pull Request GitHub Actions повторяет локальный гейт отдельными шагами по каждому валидатору, чтобы при падении было видно, какой именно сработал. Описание правил - в [VALIDATOR_RULES.md](https://github.com/dex-it/ai-kit/blob/main/docs/VALIDATOR_RULES.md) и [tools/README.md](https://github.com/dex-it/ai-kit/blob/main/tools/README.md), фикстуры и прогоны - в [tests/README.md](https://github.com/dex-it/ai-kit/blob/main/tests/README.md).
 
 Валидатор судит форму файлов. Что он не видит, проверяется вручную: обобщённость ловушки, отсутствие документации API в skill, имя skill в ссылке.
 

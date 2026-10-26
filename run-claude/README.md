@@ -1,7 +1,7 @@
 # Установка маркетплейс (если еще не установлен)
 
-Скачиваем https://github.com/dex-it/claude-code-marketplace.git
-Запускаем claude из папки claude-code-marketplace
+Скачиваем https://github.com/dex-it/ai-kit.git
+Запускаем claude из папки ai-kit
 1. Набираем /plugin
 2. Add marketpace
 3. Набираем . (текущая папка)
@@ -13,7 +13,7 @@
 PS Можно будет устанавливать прямо из гита, когда опубликуем репу.
 1. /plugin
 2. Add marketplace
-3. dex-it/claude-code-marketplace
+3. dex-it/ai-kit
 После этого claude сам скачает и утановит маркетплейс в папку (USER\.claude\plugins\marketplaces\)
 
 # Локальный запуск Claude Code для проекта
@@ -28,13 +28,13 @@ PS Можно будет устанавливать прямо из гита, к
 
 ```bash
 # Linux/Mac - в корне вашего проекта
-cp -r claude-code-marketplace/run-claude ./
+cp -r ai-kit/run-claude ./
 
 # Windows (PowerShell)
-Copy-Item -Recurse claude-code-marketplace\run-claude .\
+Copy-Item -Recurse ai-kit\run-claude .\
 
 # Windows (CMD)
-xcopy /E /I claude-code-marketplace\run-claude .\run-claude\
+xcopy /E /I ai-kit\run-claude .\run-claude\
 ```
 
 ### Шаг 2: Подготовка конфигурации

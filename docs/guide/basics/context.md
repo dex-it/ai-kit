@@ -19,7 +19,7 @@ description: Как Claude Code помнит проект между сесси�
 
 Главное предупреждение: Claude воспринимает CLAUDE.md как контекст, а не как принудительную настройку. Чтобы действие нельзя было сделать вообще, используйте хук `PreToolUse` ([Хуки и моды](/basics/hooks-mods/)).
 
-В AI KIT: `dex-auto:onboard` дописывает в `CLAUDE.md` вашего проекта блок между маркерами, а ревьюер читает договорённости оттуда как норму ([Автономная работа](/concepts/auto/)). Сам каталог держит правила разработки в [CLAUDE.md репозитория](https://github.com/dex-it/claude-code-marketplace/blob/main/CLAUDE.md).
+В AI KIT: `dex-auto:onboard` дописывает в `CLAUDE.md` вашего проекта блок между маркерами, а ревьюер читает договорённости оттуда как норму ([Автономная работа](/concepts/auto/)). Сам каталог держит правила разработки в [CLAUDE.md репозитория](https://github.com/dex-it/ai-kit/blob/main/CLAUDE.md).
 
 ## MCP: доступ к внешним системам
 
@@ -32,7 +32,7 @@ claude mcp list
 
 Область сервера: local (по умолчанию, только текущий проект, хранится у вас), project (файл `.mcp.json` в корне, коммитится, Claude Code просит подтвердить), user (все ваши проекты). Серверы плагина стартуют, когда плагин включён. Инструменты MCP по умолчанию находятся по требованию, поэтому большое число серверов не раздувает контекст сразу.
 
-В AI KIT готовые конфигурации лежат в [mcp/README.md](https://github.com/dex-it/claude-code-marketplace/blob/main/mcp/README.md), ключи - в [CREDENTIALS.md](https://github.com/dex-it/claude-code-marketplace/blob/main/CREDENTIALS.md). Для диагностики часто хватает CLI-утилит каталога: они легче и используют уже настроенный вход (`/dex-kubectl-cli:kube-pods`, [Утилиты](/catalog/utilities/)).
+В AI KIT готовые конфигурации лежат в [mcp/README.md](https://github.com/dex-it/ai-kit/blob/main/mcp/README.md), ключи - в [CREDENTIALS.md](https://github.com/dex-it/ai-kit/blob/main/CREDENTIALS.md). Для диагностики часто хватает CLI-утилит каталога: они легче и используют уже настроенный вход (`/dex-kubectl-cli:kube-pods`, [Утилиты](/catalog/utilities/)).
 
 ## Почему контекст нужно беречь
 

@@ -3,7 +3,7 @@ title: Добавить плагин
 description: Какой вид плагина выбрать, как назвать, где разместить и что обязательно синхронизировать.
 ---
 
-Короткая памятка. Полные правила - в [CLAUDE.md](https://github.com/dex-it/claude-code-marketplace/blob/main/CLAUDE.md) и [plugin-changes.md](https://github.com/dex-it/claude-code-marketplace/blob/main/.claude/rules/plugin-changes.md).
+Короткая памятка. Полные правила - в [CLAUDE.md](https://github.com/dex-it/ai-kit/blob/main/CLAUDE.md) и [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md).
 
 ## 1. Выберите вид и имя
 
@@ -21,7 +21,7 @@ description: Какой вид плагина выбрать, как назва�
 
 ## 2. Напишите плагин
 
-Сначала прочитайте устройство вида: [Skill](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/SKILL_FRAMEWORK.md), [Agent](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/AGENT_FRAMEWORK.md), [Command](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/COMMAND_FRAMEWORK.md), [Mod](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/MOD_FRAMEWORK.md). Frontmatter skill несёт `name` и `description`; ключевые слова для автоматической активации включаются в `description`, отдельного поля `keywords` у skill нет.
+Сначала прочитайте устройство вида: [Skill](https://github.com/dex-it/ai-kit/blob/main/docs/SKILL_FRAMEWORK.md), [Agent](https://github.com/dex-it/ai-kit/blob/main/docs/AGENT_FRAMEWORK.md), [Command](https://github.com/dex-it/ai-kit/blob/main/docs/COMMAND_FRAMEWORK.md), [Mod](https://github.com/dex-it/ai-kit/blob/main/docs/MOD_FRAMEWORK.md). Frontmatter skill несёт `name` и `description`; ключевые слова для автоматической активации включаются в `description`, отдельного поля `keywords` у skill нет.
 
 ## 3. Внесите в каталог
 
@@ -35,5 +35,5 @@ description: Какой вид плагина выбрать, как назва�
 Прогоните [проверки](/contributing/checks/) и откройте [Pull Request](/contributing/pull-requests/).
 
 :::tip[Если ссылаетесь на документы каталога]
-Из текста артефакта (команды, агента, skill) на `docs/` каталога ссылаться нельзя: в установленный плагин `docs/` не входит. Из `README` плагина документ каталога адресуется абсолютным URL `https://github.com/dex-it/claude-code-marketplace/blob/main/...`, а не относительным путём.
+Из текста артефакта (команды, агента, skill) на `docs/` каталога ссылаться нельзя: в установленный плагин `docs/` не входит. Из `README` плагина документ каталога адресуется абсолютным URL `https://github.com/dex-it/ai-kit/blob/main/...`, а не относительным путём.
 :::

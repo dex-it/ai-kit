@@ -35,7 +35,7 @@ Skill - это markdown-файл `skills/<имя>/SKILL.md` внутри пла�
 
 Skills ставятся поштучно (`claude plugin install dex-skill-kafka@dex-claude-marketplace`) или входят в бандлы. Если skill нужен специалисту, берите бандл: специалист сам skills не подтягивает.
 
-Полное устройство skill для авторов: [SKILL_FRAMEWORK.md на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/SKILL_FRAMEWORK.md).
+Полное устройство skill для авторов: [SKILL_FRAMEWORK.md на GitHub](https://github.com/dex-it/ai-kit/blob/main/docs/SKILL_FRAMEWORK.md).
 
 ## Пример
 

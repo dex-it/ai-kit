@@ -77,8 +77,8 @@
 1. Взять каталог и перейти в его корень. Если клон уже есть, достаточно `git pull`.
 
    ```sh
-   git clone https://github.com/dex-it/claude-code-marketplace.git
-   cd claude-code-marketplace
+   git clone https://github.com/dex-it/ai-kit.git
+   cd ai-kit
    ```
 
    Мод ещё не влит в основную ветку? Переключитесь на его ветку: `git switch feat/mods-session-dispatcher`.
@@ -89,7 +89,7 @@
    claude --plugin-dir mods/dex-session-dispatcher
    ```
 
-   Из другого места укажите полный путь: `claude --plugin-dir /путь/к/claude-code-marketplace/mods/dex-session-dispatcher`. Переменные окружения не нужны (нужен Claude Code 2.1.287 или новее, проверьте: `claude --version`).
+   Из другого места укажите полный путь: `claude --plugin-dir /путь/к/ai-kit/mods/dex-session-dispatcher`. Переменные окружения не нужны (нужен Claude Code 2.1.287 или новее, проверьте: `claude --version`).
 
 3. В открывшейся сессии набрать `/sessions`. Команда должна появиться в подсказке при наборе; если нет, смотрите «Если не заработало».
 

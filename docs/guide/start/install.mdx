@@ -12,10 +12,10 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 Один раз на машину:
 
 ```bash
-claude plugin marketplace add dex-it/claude-code-marketplace
+claude plugin marketplace add dex-it/ai-kit
 ```
 
-Каталог регистрируется под именем `dex-claude-marketplace`: оно нужно в командах установки. Изнутри Claude Code то же делает `/plugin marketplace add dex-it/claude-code-marketplace`.
+Каталог регистрируется под именем `dex-claude-marketplace`: оно нужно в командах установки. Изнутри Claude Code то же делает `/plugin marketplace add dex-it/ai-kit`.
 
 ## 2. Выберите: бандл или один плагин
 
@@ -34,8 +34,8 @@ claude plugin marketplace add dex-it/claude-code-marketplace
 <Tabs syncKey="os">
   <TabItem label="Linux, macOS, WSL">
     ```bash
-    git clone https://github.com/dex-it/claude-code-marketplace.git
-    cd claude-code-marketplace
+    git clone https://github.com/dex-it/ai-kit.git
+    cd ai-kit
 
     ./install-bundle/install-bundle.sh --list                    # все бандлы
     ./install-bundle/install-bundle.sh code-review --dry-run     # что поставится
@@ -44,8 +44,8 @@ claude plugin marketplace add dex-it/claude-code-marketplace
   </TabItem>
   <TabItem label="Windows (PowerShell)">
     ```powershell
-    git clone https://github.com/dex-it/claude-code-marketplace.git
-    cd claude-code-marketplace
+    git clone https://github.com/dex-it/ai-kit.git
+    cd ai-kit
 
     .\install-bundle\install-bundle.ps1 -List                    # все бандлы
     .\install-bundle\install-bundle.ps1 code-review -DryRun     # что поставится
@@ -71,7 +71,7 @@ claude plugin install dex-telegram-notifier@dex-claude-marketplace       # ут�
 Точная команда для каждого плагина есть на его странице в [каталоге](/catalog/).
 
 <Aside type="note" title="Каталог ещё не подключён?">
-Подключить каталог и поставить плагин можно одной командой: `claude plugin install имя --marketplace dex-it/claude-code-marketplace`. Эта форма требует Claude Code 2.1.292 или новее; на более старой версии подключайте каталог отдельной командой выше.
+Подключить каталог и поставить плагин можно одной командой: `claude plugin install имя --marketplace dex-it/ai-kit`. Эта форма требует Claude Code 2.1.292 или новее; на более старой версии подключайте каталог отдельной командой выше.
 </Aside>
 
 ## Область установки
