@@ -20,7 +20,8 @@ description: Как добавить плагин или поправить су
 | Документ | О чём |
 |---|---|
 | [AGENTS.md](https://github.com/dex-it/ai-kit/blob/main/AGENTS.md) | Как писать плагины, ревьюить и проверять перед коммитом |
-| [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md) | Версии (semver), обязательные синхронизации, гейт перед коммитом |
+| [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md) | Версии (semver), обязательные синхронизации |
+| [commit-gate.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/commit-gate.md) | Гейт перед коммитом и CI |
 | [docs-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/docs-changes.md) | Правки документации |
 | [terminology.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/terminology.md) | Заведённые имена; значения - в [словаре](https://github.com/dex-it/ai-kit/blob/main/docs/domain/domain-model.md) |
 | [VALIDATOR_RULES.md](https://github.com/dex-it/ai-kit/blob/main/docs/VALIDATOR_RULES.md) | Реестр правил валидаторов: что ловит каждое |

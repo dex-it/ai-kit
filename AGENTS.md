@@ -139,7 +139,7 @@ description: Ключевые слова для автоматической а�
 
 ### Версии, синхронизации, гейт перед коммитом
 
-Нормативный дом - `.claude/rules/plugin-changes.md` (path-scoped, перечень путей - `paths` в самом файле): таблица semver-бампов и версия каталога, обязательные синхронизации (marketplace.json, витрина README, замкнутость бандла, Skill-ссылки), `npm run validate` и то, что CI не закрывает.
+Нормативный дом - `.claude/rules/plugin-changes.md` (path-scoped, перечень путей - `paths` в самом файле): таблица semver-бампов и версия каталога, обязательные синхронизации (marketplace.json, витрина README, замкнутость бандла, Skill-ссылки), ручное сверх валидатора; `npm run validate`, `npm test` и CI - `.claude/rules/commit-gate.md`.
 
 ## Технологический стек и MCP
 
