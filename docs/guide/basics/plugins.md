@@ -37,10 +37,10 @@ my-plugin/
 }
 ```
 
-Сам каталог называется `dex-claude-marketplace`, а лежит в репозитории `dex-it/claude-code-marketplace`. Подключают по адресу репозитория, ставят по имени каталога:
+Сам каталог называется `dex-claude-marketplace`, а лежит в репозитории `dex-it/ai-kit`. Подключают по адресу репозитория, ставят по имени каталога:
 
 ```bash
-claude plugin marketplace add dex-it/claude-code-marketplace
+claude plugin marketplace add dex-it/ai-kit
 claude plugin install dex-mr-reviewer@dex-claude-marketplace
 ```
 

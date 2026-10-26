@@ -6,7 +6,7 @@
     "name": "Dex Team",
     "email": "mmx@dex-it.ru"
   },
-  "homepage": "https://github.com/dex-it/claude-code-marketplace",
+  "homepage": "https://github.com/dex-it/ai-kit",
   "plugins": [
     {
       "name": "dex-adr-writer",
