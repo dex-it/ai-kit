@@ -610,7 +610,7 @@ ai-kit/
 **Правила.** Нормативные тексты лежат рядом с кодом:
 
 - [AGENTS.md](./AGENTS.md) - как писать плагины, ревьюить и проверять перед коммитом;
-- [.claude/rules/plugin-changes.md](./.claude/rules/plugin-changes.md) - версии (semver), обязательные синхронизации, гейт перед коммитом;
+- [.claude/rules/plugin-changes.md](./.claude/rules/plugin-changes.md) - версии (semver), обязательные синхронизации; [commit-gate.md](./.claude/rules/commit-gate.md) - гейт перед коммитом и CI;
 - [.claude/rules/docs-changes.md](./.claude/rules/docs-changes.md) - правки документации;
 - [.claude/rules/terminology.md](./.claude/rules/terminology.md) - заведённые имена; значения - в [словаре](./docs/domain/domain-model.md).
 
