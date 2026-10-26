@@ -4,7 +4,7 @@ description: >-
   Эталонный валидный агент песочницы - держит базу нулевых находок для раннера правил.
   Триггеры - фикстура агента, база песочницы, прогон правила валидатора, регрессия валидатора.
 tools: Read, Write, Grep, Glob, Skill
-model: haiku
+model: claude-haiku-4-5
 effort: high
 skills:
   - dex-skill-node-contract:node-contract

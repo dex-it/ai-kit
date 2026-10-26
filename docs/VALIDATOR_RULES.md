@@ -63,7 +63,7 @@ guard мёртв - падает `absent`, guard всегда истинен - п
 | `frontmatter-model-missing` | error | нет явного `model` (наследование гонит механику на дорогой сессии) | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#выбор-модели-model) |
 | `frontmatter-model-invalid` | error | `model` не тир и не валидный ID | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#выбор-модели-model) |
 | `frontmatter-effort-invalid` | error | `effort` вне перечня уровней | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#глубина-рассуждения-effort) |
-| `frontmatter-effort-unsupported-model` | error | `effort` при модели, у которой этой оси нет | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#глубина-рассуждения-effort) |
+| `frontmatter-effort-unsupported-model` | error | `effort` при полном ID модели без этой оси (Haiku 4.5 и ранее); алиас `haiku` не судится | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#глубина-рассуждения-effort) |
 | `frontmatter-permissionmode-default` | error | `permissionMode: default` - избыточно | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#self-check-перед-коммитом) |
 | `frontmatter-no-skill-tool` | error | агент грузит skills, но `Skill` нет в `tools` | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#подключение-skills-pre-load-безусловного-императив-условного) |
 | `frontmatter-skills-bare-plugin-name` | error | `skills:` записан голым именем плагина - Claude Code молча пропускает | [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#подключение-skills-pre-load-безусловного-императив-условного) |

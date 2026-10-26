@@ -381,12 +381,14 @@ const MODEL_ID_RE = /^claude-[a-z0-9-]+$/;
 const EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max'];
 
 /**
- * Tiers that do not carry the effort axis at all. The effort docs enumerate the
- * supporting models by name (generations 5 and 4.5-4.8) and no Haiku is among
- * them, so `effort` on a Haiku-tier agent buys nothing: there the cost lever is
- * `model` itself. Full IDs are caught by the same prefix.
+ * Models without the effort axis, judged by exact ID. The effort docs list the
+ * supporting models by name, Haiku 5.5 among them; Haiku 4.5 and earlier Haiku
+ * IDs are not there (platform.claude.com/docs/en/build-with-claude/effort and
+ * code.claude.com/docs/en/model-config, checked 26.10.2026). The alias `haiku`
+ * is not judged: on the Anthropic API it resolves to Haiku 5.5, on other
+ * providers to Haiku 4.5, and the file does not know the provider.
  */
-const EFFORTLESS_MODEL_RE = /^(haiku|claude-haiku)/;
+const EFFORTLESS_MODEL_RE = /^claude-(?:haiku-[1-4](?:-|$)|3(?:-\d+)?-haiku)/;
 
 function validateFrontmatter(parsed, findings, trackNode = false) {
   const fm = parsed.data || {};
@@ -512,7 +514,7 @@ function validateFrontmatter(parsed, findings, trackNode = false) {
       findings.push({
         level: ERROR,
         rule: 'frontmatter-effort-unsupported-model',
-        message: `effort "${fm.effort}" is set on model "${fm.model}" - the haiku tier has no effort axis; drop the field, or move the agent to a tier that has one`,
+        message: `effort "${fm.effort}" is set on model "${fm.model}" - this model has no effort axis (Haiku 5.5 has one); drop the field, or move the agent to a model that has it`,
       });
     }
   }
