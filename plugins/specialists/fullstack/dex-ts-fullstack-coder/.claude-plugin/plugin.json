@@ -1,10 +1,10 @@
 {
   "name": "dex-ts-fullstack-coder",
-  "version": "1.7.0",
-  "description": "TypeScript fullstack specialist: Node.js/Bun backend + React frontend.",
+  "version": "3.3.1",
+  "description": "Fullstack-кодер TypeScript: бэкенд на Node.js/Bun и фронтенд на React, типизация, валидация схем.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "specialist",
@@ -15,6 +15,6 @@
     "express",
     "fastify"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

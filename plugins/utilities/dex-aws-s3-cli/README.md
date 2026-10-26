@@ -44,7 +44,7 @@ aws configure --profile prod   # дополнительный профиль
 aws sts get-caller-identity    # проверить, кто вы сейчас
 ```
 
-Полный гайд (multi-profile, SSO, IAM Roles Anywhere, временные креды через `aws sso login`) и матрица CLI vs MCP - см. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md).
+Полный гайд (multi-profile, SSO, IAM Roles Anywhere, временные креды через `aws sso login`) и матрица CLI vs MCP - см. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md).
 
 ## Установка плагина
 

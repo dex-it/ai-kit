@@ -32,7 +32,7 @@ brew install libpq && brew link --force libpq
 ./install-bundle/install-cli-tools.sh psql
 ```
 
-См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md) - полный гайд по конфигурации (URI vs env, `PGPASSFILE`, SSL, матрица CLI vs MCP).
+См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) - полный гайд по конфигурации (URI vs env, `PGPASSFILE`, SSL, матрица CLI vs MCP).
 
 ## Установка плагина
 

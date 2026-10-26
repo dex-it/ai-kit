@@ -1,10 +1,10 @@
 {
   "name": "dex-rabbitmqadmin-cli",
-  "version": "1.0.1",
-  "description": "RabbitMQ CLI: cluster overview, queues, bindings, test publish via rabbitmqadmin-ng.",
+  "version": "1.0.5",
+  "description": "CLI RabbitMQ: обзор кластера, очереди, привязки, тестовая публикация через rabbitmqadmin-ng.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "utility",
@@ -16,7 +16,7 @@
     "queues",
     "bindings"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/rmq-overview.md",

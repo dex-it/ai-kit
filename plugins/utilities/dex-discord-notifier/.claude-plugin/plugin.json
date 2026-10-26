@@ -1,10 +1,10 @@
 {
   "name": "dex-discord-notifier",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Discord уведомления о событиях Claude Code: завершение задач (Stop), ожидание ответа (Notification), завершение субагентов (SubagentStop), compact контекста (PostCompact). Включает информацию о TODO, последнем сообщении, используемых инструментах и планах.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "discord",
@@ -15,7 +15,7 @@
     "stop",
     "waiting"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": []
 }

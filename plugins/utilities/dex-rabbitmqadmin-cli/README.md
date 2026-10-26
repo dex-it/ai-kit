@@ -32,7 +32,7 @@ sudo install -m 0755 /tmp/rabbitmqadmin /usr/local/bin/rabbitmqadmin
 ./install-bundle/install-cli-tools.sh rabbitmqadmin
 ```
 
-Полный гайд по конфигурации (`~/.rabbitmqadmin.conf` профили, TLS, multi-cluster) и матрица CLI vs MCP - см. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md).
+Полный гайд по конфигурации (`~/.rabbitmqadmin.conf` профили, TLS, multi-cluster) и матрица CLI vs MCP - см. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md).
 
 ## Установка плагина
 

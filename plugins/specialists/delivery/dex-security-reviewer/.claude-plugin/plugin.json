@@ -1,10 +1,10 @@
 {
   "name": "dex-security-reviewer",
-  "version": "1.7.0",
+  "version": "2.3.3",
   "description": "Языко-агностичный агент глубокого анализа безопасности: threat model (акторы/границы доверия/активы), attack paths по OWASP, цепочки эксплойтов, severity по эксплуатируемости цепочки. Частные skills грузятся условно по стеку.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "specialist",
@@ -17,6 +17,6 @@
     "review",
     "language-agnostic"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

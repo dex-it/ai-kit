@@ -1,10 +1,10 @@
 {
   "name": "dex-bundle-architect",
-  "version": "1.13.0",
-  "description": "Bundle for Software Architects: interactive system design (Xu/RESHADED), ADR, diagrams, API design, codebase analysis, security, observability.",
+  "version": "1.31.1",
+  "description": "Бандл для архитектора: интерактивный system design, ADR, диаграммы, проектирование API, анализ кодовой базы, безопасность, наблюдаемость.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "bundle",
@@ -14,6 +14,6 @@
     "adr",
     "diagrams"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

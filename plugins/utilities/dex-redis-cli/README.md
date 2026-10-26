@@ -32,7 +32,7 @@ brew install redis
 ./install-bundle/install-cli-tools.sh redis-cli
 ```
 
-См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md) - конфигурация ACL/TLS, заметки про RESP3, матрица CLI vs MCP.
+См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) - конфигурация ACL/TLS, заметки про RESP3, матрица CLI vs MCP.
 
 ## Установка плагина
 

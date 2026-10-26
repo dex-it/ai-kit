@@ -1,10 +1,10 @@
 {
   "name": "dex-psql-cli",
-  "version": "1.0.1",
-  "description": "PostgreSQL CLI: read-only queries, schema inspection, EXPLAIN plans, locks via psql.",
+  "version": "1.0.5",
+  "description": "CLI PostgreSQL: запросы только на чтение, осмотр схемы, планы EXPLAIN, блокировки через psql.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "utility",
@@ -16,7 +16,7 @@
     "explain",
     "schema"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/psql-query.md",

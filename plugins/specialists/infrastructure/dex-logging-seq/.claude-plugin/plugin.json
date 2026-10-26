@@ -1,10 +1,10 @@
 {
   "name": "dex-logging-seq",
-  "version": "2.4.0",
-  "description": "Seq logging specialist: log analysis, correlation, error tracking, structured logging patterns.",
+  "version": "2.6.2",
+  "description": "Специалист по Seq и структурному логированию: разбор логов, корреляция, поиск ошибок, алерты.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "specialist",
@@ -13,6 +13,6 @@
     "serilog",
     "structured-logging"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

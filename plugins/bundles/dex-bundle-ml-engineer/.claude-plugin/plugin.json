@@ -1,10 +1,10 @@
 {
   "name": "dex-bundle-ml-engineer",
-  "version": "1.4.0",
-  "description": "Bundle for ML Engineers: experiments, model training, debugging, deployment, data pipelines.",
+  "version": "1.10.1",
+  "description": "Бандл для ML-инженера: эксперименты, обучение моделей, отладка, деплой, пайплайны данных.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "bundle",
@@ -14,6 +14,6 @@
     "deep-learning",
     "data-science"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

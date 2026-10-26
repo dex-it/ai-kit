@@ -1,10 +1,10 @@
 {
   "name": "dex-bundle-runtime-diagnostics",
-  "version": "1.1.0",
+  "version": "1.6.1",
   "description": "Bundle для runtime-диагностики .NET-сервисов и native-границы: специалист-диагностик, skills managed/native/perf/tracing/dumps/binary, netcoredbg CLI.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "bundle",
@@ -15,6 +15,6 @@
     "post-mortem",
     "debug"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

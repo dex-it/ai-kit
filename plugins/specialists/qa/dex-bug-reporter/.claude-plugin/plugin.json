@@ -1,10 +1,10 @@
 {
   "name": "dex-bug-reporter",
-  "version": "1.6.0",
-  "description": "Bug reporter: bug reports, defect classification, reproduction steps.",
+  "version": "1.8.1",
+  "description": "Автор баг-репортов: шаги воспроизведения, классификация дефекта, severity с основанием.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "specialist",
@@ -13,6 +13,6 @@
     "defects",
     "reporting"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }

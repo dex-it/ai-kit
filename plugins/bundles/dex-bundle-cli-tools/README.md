@@ -25,28 +25,30 @@
 .\install-bundle\uninstall-bundle.ps1 cli-tools
 ```
 
-## Состав (12)
+## Состав
 
-### VCS & CI/CD (5)
+Полный состав - `bundle.json`: `includes[]` (профиль роли) плюс `dependencies[]` (подтянутое замыканием); ниже - ключевые компоненты роли, не весь перечень.
+
+### VCS & CI/CD
 - `dex-github-cli` -- GitHub Actions runs, PRs, logs (`gh`)
 - `dex-gitlab-cli` -- GitLab pipelines, MRs, job logs (`glab`)
 - `dex-kubectl-cli` -- Kubernetes pods/logs/deployments/events/contexts (`kubectl`)
 - `dex-jenkins-cli` -- Jenkins jobs, builds, console output (REST API)
 - `dex-teamcity-cli` -- TeamCity builds, agents, build logs (REST API)
 
-### Tracker (1)
+### Tracker
 - `dex-jira-cli` -- задачи, JQL-поиск, спринты трекера (`jira`)
 
-### Data & Messaging (4)
+### Data & Messaging
 - `dex-psql-cli` -- PostgreSQL queries/schema/explain/locks (`psql`)
 - `dex-redis-cli` -- Redis info/keys/memory/monitor (`redis-cli`)
 - `dex-kaf-cli` -- Kafka topics/groups/consume/produce ([`kaf`](https://github.com/birdayz/kaf))
 - `dex-rabbitmqadmin-cli` -- RabbitMQ overview/queues/bindings/publish ([`rabbitmqadmin-ng`](https://github.com/rabbitmq/rabbitmqadmin-ng))
 
-### Cloud (1)
+### Cloud
 - `dex-aws-s3-cli` -- AWS S3 ls/info/head/presign (`aws s3` / `s3api`)
 
-### Browser testing (1)
+### Browser testing
 - `dex-playwright-cli` -- Playwright test runner / show-report / codegen / trace viewer / install (`npx playwright`)
 
 ## Установка CLI-бинарей
@@ -66,7 +68,7 @@
 
 Playwright не входит в `install-cli-tools.sh` -- это npm-пакет, не системный бинарь. Зависимость -- Node.js (для `npx`); браузерные движки ставятся через `/pw-install` после `npm i -D @playwright/test` в самом проекте.
 
-См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md) -- установочная матрица, конфигурация (KUBECONFIG, PGPASSFILE, `~/.kaf/config`, `~/.rabbitmqadmin.conf`, `~/.aws/`, ACL/TLS), матрица CLI vs MCP, troubleshooting.
+См. [docs/CLI_UTILITIES.md](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) -- установочная матрица, конфигурация (KUBECONFIG, PGPASSFILE, `~/.kaf/config`, `~/.rabbitmqadmin.conf`, `~/.aws/`, ACL/TLS), матрица CLI vs MCP, troubleshooting.
 
 ## Замечание
 

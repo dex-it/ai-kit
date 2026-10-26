@@ -1,10 +1,10 @@
 {
   "name": "dex-netcoredbg-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Samsung netcoredbg CLI: attach, launch, MI2 batch, dump managed stacks для .NET runtime-диагностики.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "utility",
@@ -15,7 +15,7 @@
     "attach",
     "cli"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0",
   "commands": [
     "./commands/ncdbg-attach.md",

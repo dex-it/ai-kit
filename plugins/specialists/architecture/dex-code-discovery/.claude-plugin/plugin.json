@@ -1,10 +1,10 @@
 {
   "name": "dex-code-discovery",
-  "version": "1.6.1",
-  "description": "Обзорное ревью существующего кода вширь: инвентаризация проблем по топикам, severity с калибровкой под масштаб, результат в docs/discover/.",
+  "version": "2.10.2",
+  "description": "Обзорное ревью существующего кода вширь: инвентаризация проблем по топикам, severity с калибровкой под масштаб, результат в docs/discover/. Точка входа - команда /discover, едет в этом же плагине.",
   "author": {
     "name": "Dex Team",
-    "email": "admin@dex.ru"
+    "email": "mmx@dex-it.ru"
   },
   "keywords": [
     "specialist",
@@ -14,6 +14,6 @@
     "audit",
     "code-quality"
   ],
-  "repository": "https://github.com/dex-it/claude-code-marketplace",
+  "repository": "https://github.com/dex-it/ai-kit",
   "license": "GPL-3.0"
 }
