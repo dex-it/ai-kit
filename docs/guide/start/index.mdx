@@ -12,10 +12,10 @@ import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 1. **Подключите каталог** (один раз)
 
    ```bash
-   claude plugin marketplace add dex-it/claude-code-marketplace
+   claude plugin marketplace add dex-it/ai-kit
    ```
 
-   То же изнутри Claude Code: `/plugin marketplace add dex-it/claude-code-marketplace`.
+   То же изнутри Claude Code: `/plugin marketplace add dex-it/ai-kit`.
 
 2. **Поставьте бандл `code-review`**
 
@@ -24,15 +24,15 @@ import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
    <Tabs syncKey="os">
      <TabItem label="Linux, macOS, WSL">
        ```bash
-       git clone https://github.com/dex-it/claude-code-marketplace.git
-       cd claude-code-marketplace
+       git clone https://github.com/dex-it/ai-kit.git
+       cd ai-kit
        ./install-bundle/install-bundle.sh code-review
        ```
      </TabItem>
      <TabItem label="Windows (PowerShell)">
        ```powershell
-       git clone https://github.com/dex-it/claude-code-marketplace.git
-       cd claude-code-marketplace
+       git clone https://github.com/dex-it/ai-kit.git
+       cd ai-kit
        .\install-bundle\install-bundle.ps1 code-review
        ```
      </TabItem>

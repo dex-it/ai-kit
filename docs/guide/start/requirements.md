@@ -32,8 +32,8 @@ description: Версия Claude Code, git, jq, платформы и что т�
 | `gh`, `glab` или MCP-сервер хостинга | Публикация находок в MR или PR и открытие PR |
 | Node.js | Плагин `dex-playwright-cli` и MCP-серверы, запускаемые через npx |
 | Claude Code 2.1.287 или новее | Моды: [Моды](/catalog/mods/) |
-| API-ключи | Для MCP-интеграций: список в [CREDENTIALS.md на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/CREDENTIALS.md) |
+| API-ключи | Для MCP-интеграций: список в [CREDENTIALS.md на GitHub](https://github.com/dex-it/ai-kit/blob/main/CREDENTIALS.md) |
 
 ## Откуда берутся плагины
 
-Плагины загружает сам Claude Code из каталога `dex-it/claude-code-marketplace` на GitHub. Клон репозитория нужен скрипту установки, чтобы прочитать состав бандла.
+Плагины загружает сам Claude Code из каталога `dex-it/ai-kit` на GitHub. Клон репозитория нужен скрипту установки, чтобы прочитать состав бандла.

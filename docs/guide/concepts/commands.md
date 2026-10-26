@@ -34,7 +34,7 @@ description: Как устроена команда каталога, чем о�
 
 Команды над CLI (`/dex-kubectl-cli:kube-pods`) живут в утилитах: каждая - тонкая обёртка над одной программой.
 
-Полное устройство команды для авторов: [COMMAND_FRAMEWORK.md на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/COMMAND_FRAMEWORK.md).
+Полное устройство команды для авторов: [COMMAND_FRAMEWORK.md на GitHub](https://github.com/dex-it/ai-kit/blob/main/docs/COMMAND_FRAMEWORK.md).
 
 ## Ограничения и частые ошибки
 

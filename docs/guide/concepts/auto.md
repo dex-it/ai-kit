@@ -31,4 +31,4 @@ description: Плагин dex-auto - как устроено ведение за
 
 ## Границы
 
-Плагин не пушит без `--pr` и не делает merge. Код чужого MR при ревью он не меняет. Требует `git`, `python3` и, для PR, канал к хостингу. Подробности и все флаги: [README плагина на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/plugins/auto/dex-auto/README.md).
+Плагин не пушит без `--pr` и не делает merge. Код чужого MR при ревью он не меняет. Требует `git`, `python3` и, для PR, канал к хостингу. Подробности и все флаги: [README плагина на GitHub](https://github.com/dex-it/ai-kit/blob/main/plugins/auto/dex-auto/README.md).

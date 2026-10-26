@@ -1115,7 +1115,7 @@ function validateLinkEscapesPlugin(text, filepath, findings, where = '') {
 // (`docs/discover/README.md` как выход агента в проекте пользователя), не покрыт ни в одной форме -
 // он адресует чужой корпус.
 const CATALOG_DOCS_LINK_FORMS = [
-  /https?:\/\/github\.com\/dex-it\/claude-code-marketplace\/\S*?\/docs\/[^\s)\]]+/g,
+  /https?:\/\/github\.com\/dex-it\/(?:ai-kit|claude-code-marketplace)\/\S*?\/docs\/[^\s)\]]+/g,
   /\]\((?:\.{1,2}\/)*docs\/[^)\s]+\)/g,
 ];
 

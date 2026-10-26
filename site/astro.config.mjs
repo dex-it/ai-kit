@@ -24,7 +24,7 @@ const resolveFromSite = {
 };
 
 // Astro не добавляет base к корневым ссылкам в Markdown. Авторы пишут `/start/install/`,
-// плагин дописывает `/claude-code-marketplace` ко всем таким ссылкам и картинкам.
+// плагин дописывает `/ai-kit` ко всем таким ссылкам и картинкам.
 const withBase = (url) =>
   typeof url === 'string' && url.startsWith('/') && !url.startsWith('//') && url !== BASE && !url.startsWith(`${BASE}/`)
     ? `${BASE}${url}`

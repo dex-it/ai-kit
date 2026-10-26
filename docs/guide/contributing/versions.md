@@ -15,7 +15,7 @@ description: Как поднимать версию плагина и катал
 | Новые ловушки в skill, новая категория ловушек | minor |
 | Правка `description`, ключевых слов, опечатка | patch |
 
-Это краткая выдержка; полная таблица - в [plugin-changes.md](https://github.com/dex-it/claude-code-marketplace/blob/main/.claude/rules/plugin-changes.md#версионирование-при-изменениях-semver).
+Это краткая выдержка; полная таблица - в [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md#версионирование-при-изменениях-semver).
 
 ## Две версии одного плагина
 
@@ -34,4 +34,4 @@ npm run sync:marketplace -- --check # только показать расхож
 
 ## Снять или переименовать плагин
 
-Установщики снятые плагины не удаляют, поэтому снятие или переименование требует строки в таблице `Renamed and removed plugins` файла [install-bundle/README.md](https://github.com/dex-it/claude-code-marketplace/blob/main/install-bundle/README.md) тем же Pull Request.
+Установщики снятые плагины не удаляют, поэтому снятие или переименование требует строки в таблице `Renamed and removed plugins` файла [install-bundle/README.md](https://github.com/dex-it/ai-kit/blob/main/install-bundle/README.md) тем же Pull Request.

@@ -29,7 +29,7 @@ description: "Агенты с узкой ролью: как устроены, ч
 
 Специалист без нужных ему skills запустится, но будет работать без них, поэтому ставьте его бандлом. Все специалисты по областям - в [каталоге](/catalog/specialists/).
 
-Полное устройство агента для авторов: [AGENT_FRAMEWORK.md на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/AGENT_FRAMEWORK.md).
+Полное устройство агента для авторов: [AGENT_FRAMEWORK.md на GitHub](https://github.com/dex-it/ai-kit/blob/main/docs/AGENT_FRAMEWORK.md).
 
 ## Пример
 

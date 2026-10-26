@@ -76,7 +76,7 @@ git switch -c feature/csv-export
 
 ## Чем кончается прогон
 
-Первая строка ответа называет исход. Что довести не удалось, названо статусом с причиной. Подробности и все флаги - в [README плагина на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/plugins/auto/dex-auto/README.md).
+Первая строка ответа называет исход. Что довести не удалось, названо статусом с причиной. Подробности и все флаги - в [README плагина на GitHub](https://github.com/dex-it/ai-kit/blob/main/plugins/auto/dex-auto/README.md).
 
 ## Дальше
 

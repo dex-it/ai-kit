@@ -40,5 +40,5 @@ description: Команды над kubectl, psql, rabbitmqadmin, kaf и друг
 
 ## Дальше
 
-- Руководство по установке бинарей, настройке и сравнению CLI с MCP: [CLI_UTILITIES.md на GitHub](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/CLI_UTILITIES.md).
+- Руководство по установке бинарей, настройке и сравнению CLI с MCP: [CLI_UTILITIES.md на GitHub](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md).
 - Расследовать инцидент по уликам: [Разобрать инцидент на стенде](/scenarios/incident/).

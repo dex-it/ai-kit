@@ -56,7 +56,7 @@ claude plugin uninstall dex-dotnet-coder
 
 ## Снятые и переименованные плагины
 
-Установщики снятые плагины не удаляют: переименованный или снятый плагин остаётся у вас и продолжает загружаться по имени. Такие плагины удаляются вручную через `claude plugin uninstall`. Что снято и чем заменено - в таблице «Renamed and removed plugins» файла [install-bundle/README.md](https://github.com/dex-it/claude-code-marketplace/blob/main/install-bundle/README.md).
+Установщики снятые плагины не удаляют: переименованный или снятый плагин остаётся у вас и продолжает загружаться по имени. Такие плагины удаляются вручную через `claude plugin uninstall`. Что снято и чем заменено - в таблице «Renamed and removed plugins» файла [install-bundle/README.md](https://github.com/dex-it/ai-kit/blob/main/install-bundle/README.md).
 
 ## Убрать каталог
 

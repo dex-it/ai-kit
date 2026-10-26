@@ -23,7 +23,7 @@ description: Что делать, если установка не прошла,
 
 ```bash
 claude plugin marketplace list
-claude plugin marketplace add dex-it/claude-code-marketplace
+claude plugin marketplace add dex-it/ai-kit
 ```
 
 ## Плагин поставлен, но команды не видно
@@ -47,7 +47,7 @@ claude plugin marketplace add dex-it/claude-code-marketplace
 
 ## Старые или переименованные плагины продолжают загружаться
 
-Установщики снятые плагины не удаляют. `./install-bundle/sync-plugins.sh` (в PowerShell - `sync-plugins.ps1`) называет поставленные плагины, которых в каталоге клона больше нет, и команду снятия (сам он ничего не снимает). Замену ищите по имени в таблице «Renamed and removed plugins» файла [install-bundle/README.md](https://github.com/dex-it/claude-code-marketplace/blob/main/install-bundle/README.md) и удалите вручную: `claude plugin uninstall <имя>`.
+Установщики снятые плагины не удаляют. `./install-bundle/sync-plugins.sh` (в PowerShell - `sync-plugins.ps1`) называет поставленные плагины, которых в каталоге клона больше нет, и команду снятия (сам он ничего не снимает). Замену ищите по имени в таблице «Renamed and removed plugins» файла [install-bundle/README.md](https://github.com/dex-it/ai-kit/blob/main/install-bundle/README.md) и удалите вручную: `claude plugin uninstall <имя>`.
 
 ## После удаления бандла пропали плагины другого бандла
 
@@ -55,7 +55,7 @@ claude plugin marketplace add dex-it/claude-code-marketplace
 
 ## Мод ничего не показывает
 
-Моды требуют Claude Code 2.1.287 или новее. На более старой версии мод ставится, но ничего не делает. Для трекеров PR и MR нужен доступ к хостингу: у GitHub-мода это залогиненный `gh` либо токен в `GH_TOKEN`; сессия должна быть открыта в клоне репозитория. Подробности - в README мода: [dex-github-pr-tracker](https://github.com/dex-it/claude-code-marketplace/blob/main/mods/dex-github-pr-tracker/README.md).
+Моды требуют Claude Code 2.1.287 или новее. На более старой версии мод ставится, но ничего не делает. Для трекеров PR и MR нужен доступ к хостингу: у GitHub-мода это залогиненный `gh` либо токен в `GH_TOKEN`; сессия должна быть открыта в клоне репозитория. Подробности - в README мода: [dex-github-pr-tracker](https://github.com/dex-it/ai-kit/blob/main/mods/dex-github-pr-tracker/README.md).
 
 ## Команда над CLI говорит, что программы нет
 

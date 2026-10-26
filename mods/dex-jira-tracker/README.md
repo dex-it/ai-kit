@@ -34,7 +34,7 @@ jira init                                                # тип установ
 jira me                                                  # проверка: назвал вас
 ```
 
-Получение токена - в [CREDENTIALS.md](https://github.com/dex-it/claude-code-marketplace/blob/main/CREDENTIALS.md). Нет jira-cli или вход не настроен - в транскрипте будет одна строка с причиной и командой, а строка над вводом не рисуется, пока вы не вызвали `/jira`.
+Получение токена - в [CREDENTIALS.md](https://github.com/dex-it/ai-kit/blob/main/CREDENTIALS.md). Нет jira-cli или вход не настроен - в транскрипте будет одна строка с причиной и командой, а строка над вводом не рисуется, пока вы не вызвали `/jira`.
 
 ## Посмотреть локально, без установки
 
@@ -43,8 +43,8 @@ jira me                                                  # проверка: н�
 1. Взять каталог и перейти в его корень. Если клон уже есть, достаточно `git pull`.
 
    ```sh
-   git clone https://github.com/dex-it/claude-code-marketplace.git
-   cd claude-code-marketplace
+   git clone https://github.com/dex-it/ai-kit.git
+   cd ai-kit
    ```
 
    Мод ещё не влит в основную ветку? Переключитесь на его ветку: `git switch feat/mods-jira-tracker`.
@@ -57,7 +57,7 @@ jira me                                                  # проверка: н�
    claude --plugin-dir mods/dex-jira-tracker
    ```
 
-   Из другого места укажите полный путь: `claude --plugin-dir /путь/к/claude-code-marketplace/mods/dex-jira-tracker`. Переменные окружения не нужны (нужен Claude Code 2.1.287 или новее, проверьте: `claude --version`). Работать можно в любой папке: Jira мод читает через jira-cli, а репозиторий нужен только кнопкам «взять в работу» и «сдать».
+   Из другого места укажите полный путь: `claude --plugin-dir /путь/к/ai-kit/mods/dex-jira-tracker`. Переменные окружения не нужны (нужен Claude Code 2.1.287 или новее, проверьте: `claude --version`). Работать можно в любой папке: Jira мод читает через jira-cli, а репозиторий нужен только кнопкам «взять в работу» и «сдать».
 
 4. В открывшейся сессии набрать `/jira`. Команда должна появиться в подсказке при наборе; если нет, смотрите «Если не заработало».
 
@@ -235,7 +235,7 @@ claude -p "/jira list" --plugin-dir mods/dex-jira-tracker
 
 Формы вывода jira-cli сняты с jira-cli 1.7.0 на Jira Server 9.2. `issue list --raw` - собственная плоская структура jira-cli (`issueType`, `assignee.displayName` и ничего больше о человеке, `comment.total` всегда 0), `issue view --raw` - тело REST. Если у вашей версии формы иные, разбор в `hooks/jira.ts` и фикстуры в `tests/jira.test.ts` - то, что надо править.
 
-Относительные импорты внутри мода идут **с расширением `.ts`**, решения живут в `.ts` без `$`, а `.tsx` держит только отрисовку и точку входа. Контракт типов - `mods/types/claude-code.d.ts`, пишет движок (как получить свежий - в MOD_FRAMEWORK.md) и руками не правится. Устройство класса, инструментарий и self-check - [MOD_FRAMEWORK.md](https://github.com/dex-it/claude-code-marketplace/blob/main/docs/MOD_FRAMEWORK.md).
+Относительные импорты внутри мода идут **с расширением `.ts`**, решения живут в `.ts` без `$`, а `.tsx` держит только отрисовку и точку входа. Контракт типов - `mods/types/claude-code.d.ts`, пишет движок (как получить свежий - в MOD_FRAMEWORK.md) и руками не правится. Устройство класса, инструментарий и self-check - [MOD_FRAMEWORK.md](https://github.com/dex-it/ai-kit/blob/main/docs/MOD_FRAMEWORK.md).
 
 ## Лицензия
 
