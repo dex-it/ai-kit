@@ -26,6 +26,7 @@
     "test:activation:agents": "node tools/run-activation.js --agents --model haiku",
     "metrics:propagation": "node tools/propagation-cost.js",
     "metrics:run": "node tools/run-telemetry.js",
+    "measure:context": "node tools/measure-context.js",
     "test:hooks": "bash tests/hooks/ledger.test.sh && bash tests/hooks/finish.test.sh && bash tests/hooks/verify.test.sh",
     "test:tracks": "node tests/tracks/run.mjs",
     "typecheck:mods": "tsc -p mods && tsc -p mods/tsconfig.tests.json",
