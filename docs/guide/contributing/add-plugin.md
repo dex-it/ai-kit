@@ -3,7 +3,7 @@ title: Добавить плагин
 description: Какой вид плагина выбрать, как назвать, где разместить и что обязательно синхронизировать.
 ---
 
-Короткая памятка. Полные правила - в [CLAUDE.md](https://github.com/dex-it/ai-kit/blob/main/CLAUDE.md) и [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md).
+Короткая памятка. Полные правила - в [AGENTS.md](https://github.com/dex-it/ai-kit/blob/main/AGENTS.md) и [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md).
 
 ## 1. Выберите вид и имя
 

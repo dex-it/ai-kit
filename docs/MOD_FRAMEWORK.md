@@ -24,7 +24,7 @@
 ## Где лежит и как попадает в каталог
 
 - **Дерево** - `mods/<имя>/` в корне репозитория, рядом с `plugins/`. Класс артефакта другой (исполняемый TypeScript, не текст для модели), и общий `mods/tsconfig.json` с контрактом типов покрывает дерево целиком. Форма повторяет `mods/` в репозитории Anthropic.
-- **Имя** - `dex-{name}`, как у утилиты (конвенция именования - [CLAUDE.md](../CLAUDE.md), «Именование»).
+- **Имя** - `dex-{name}`, как у утилиты (конвенция именования - [AGENTS.md](../AGENTS.md), «Именование»).
 - **Категория записи каталога** - `mod`. Признак выводится из содержимого, а не из места: `hooks/hooks.json` с массивом `modules` -> `mod` (ветка стоит до `hooks/` -> `utility`). Держит `catalog-category-mismatch` в `tools/validate-bundle.js`, охват которого включает `mods/` наравне с `plugins/` - вместе с ним мод судят `version-mismatch` и `description-mismatch`.
 - **Витрина** - раздел «Mods» в [README.md](../README.md); плагин, не названный там, роняет `readme-plugin-unnamed`.
 - **Версии** - те же правила, что у плагина: `plugin.json` и `marketplace.json` синхронно, новый мод бампает minor версии каталога ([plugin-changes.md](../.claude/rules/plugin-changes.md)).

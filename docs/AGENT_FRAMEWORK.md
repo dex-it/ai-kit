@@ -837,7 +837,7 @@ skills:
 
 ## Рецепты ролей
 
-Типы из CLAUDE.md (Analyst, Diagnostician, Creator, Designer, Operator, Planner, Reviewer) - **рецепты композиции**, не контракты. Стартовая точка.
+Типы из AGENTS.md (Analyst, Diagnostician, Creator, Designer, Operator, Planner, Reviewer) - **рецепты композиции**, не контракты. Стартовая точка.
 
 ### Analyst
 ```text

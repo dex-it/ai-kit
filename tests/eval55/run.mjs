@@ -12,7 +12,7 @@
  *        --cell-cap USD (потолок одного вызова, 2)  --parallel N (2)  --commit REV (для E1, E2; HEAD)  --keep (не удалять песочницы)
  *
  * Прогон платный и не входит в `npm test` / CI. Каталог --out обязан лежать вне репозитория: прогоны не засоряют дерево, а
- * CLAUDE.md репозитория не попадает в предков песочницы. Среду оператора раннер не пускает: --restricted (инструментов нет)
+ * CLAUDE.md и AGENTS.md репозитория не попадают в предков песочницы. Среду оператора раннер не пускает: --restricted (инструментов нет)
  * либо --setting-sources project (инструменты нужны) вместе с --strict-mcp-config; метод - tests/README.md, «Среда прогона раннеров».
  * Модель закреплена полным идентификатором и сверяется с modelUsage ответа; несовпадение - ошибка ячейки. Метод и решающие
  * правила - README.md и PREREG.md рядом.
@@ -115,7 +115,7 @@ async function cmdRun(id, opt) {
   if (!opt.out || !opt.budget) throw new Error('run требует --out <каталог> и --budget <USD>');
   const out = resolve(opt.out);
   if (out === ROOT || out.startsWith(ROOT + sep)) throw new Error('--out внутри репозитория');
-  for (let d = out; d !== dirname(d); d = dirname(d)) if (existsSync(join(d, 'CLAUDE.md'))) throw new Error(`CLAUDE.md на пути песочницы: ${d}`);
+  for (let d = out; d !== dirname(d); d = dirname(d)) for (const f of ['CLAUDE.md', 'AGENTS.md']) if (existsSync(join(d, f))) throw new Error(`${f} на пути песочницы: ${d}`);
   mkdirSync(out, { recursive: true });
   const tiers = (opt.tiers ?? 'haiku,sonnet,opus').split(',');
   const reps = Number(opt.reps ?? 3);

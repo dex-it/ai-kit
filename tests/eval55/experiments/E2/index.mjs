@@ -1,7 +1,7 @@
 // E2 - снятие правил по одному: с правилом / без правила на кейсе, где правило должно сработать.
 // Гипотеза: часть правил закрывает сбои, которых на 5.5 уже нет; снятие безопасно, где сбой не воспроизводится (R14, R04).
 // Затравка из одного правила (ASCII-пунктуация). Перед платной серией правил должно быть около 20, из перечней сабзадач
-// #10, #11, #36; правило добавляется записью в RULES: префикс строки в CLAUDE.md и кейс с проверкой.
+// #10, #11, #36; правило добавляется записью в RULES: префикс строки в AGENTS.md и кейс с проверкой.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,10 +37,10 @@ export default {
   allow: ['Bash(node *)', 'Bash(npm run *)', 'Bash(git diff*)', 'Bash(git status*)'],
   baseline: 'with-rule',
   build() {
-    const md = readFileSync(join(root, 'CLAUDE.md'), 'utf8');
+    const md = readFileSync(join(root, 'AGENTS.md'), 'utf8');
     return RULES.flatMap((r) => ['with-rule', 'without-rule'].map((cond) => ({
       cond, case: r.id, fixture: 'repo', prompt: r.prompt, graders: r.graders,
-      prepare: cond === 'without-rule' ? (dir) => writeFileSync(join(dir, 'CLAUDE.md'), without(md, r.bulletPrefix)) : () => {},
+      prepare: cond === 'without-rule' ? (dir) => writeFileSync(join(dir, 'AGENTS.md'), without(md, r.bulletPrefix)) : () => {},
     })));
   },
 };
