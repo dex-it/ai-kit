@@ -69,13 +69,7 @@
 **Каскад tools под fact-check.** Агент с фазой Fact Verification (грузит `dex-skill-fact-verification:fact-verification`) обязан нести в `tools` весь каскад: `ToolSearch` **и** `WebSearch, WebFetch`. Нет звена - каскад молча деградирует до latest-доки; ловит `npm run validate:agents` (`factcheck-cascade-incomplete`). Почему именно эти три и что ломается без каждого - [AGENT_FRAMEWORK.md](docs/AGENT_FRAMEWORK.md#fact-verification-и-ответ-второй-стороны) («Tools для каскада»).
 
 ### Frontmatter skills
-```yaml
----
-name: skill-name
-description: Ключевые слова для автоматической активации
----
-```
-> **Важно:** `keywords` не поддерживается в skills - ключевые слова включать в `description`. Это единственное поле, которое ловит валидатор. Перечень валидных полей не дублируем: нормативный дом - [SKILL_FRAMEWORK.md](docs/SKILL_FRAMEWORK.md) (там же дата сверки с документацией).
+`keywords` в skills не поддерживается - ключевые слова в `description`; ловит `frontmatter-forbidden`. Форма frontmatter и перечень валидных полей - [SKILL_FRAMEWORK.md](docs/SKILL_FRAMEWORK.md) (там же дата сверки с документацией).
 
 ## Механизмы композиции в Claude Code
 
