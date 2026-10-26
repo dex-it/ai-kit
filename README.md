@@ -15,12 +15,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/dex-it/claude-code-marketplace/actions/workflows/validate-agents.yml"><img alt="Validate Plugins" src="https://github.com/dex-it/claude-code-marketplace/actions/workflows/validate-agents.yml/badge.svg"></a>
+  <a href="https://github.com/dex-it/ai-kit/actions/workflows/validate-agents.yml"><img alt="Validate Plugins" src="https://github.com/dex-it/ai-kit/actions/workflows/validate-agents.yml/badge.svg"></a>
   <a href="./LICENSE"><img alt="Лицензия: GPL v3.0" src="https://img.shields.io/badge/license-GPL%20v3.0-blue.svg"></a>
 </p>
 
 <p align="center">
-  <a href="https://dex-it.github.io/claude-code-marketplace/"><b>Сайт документации</b></a> |
+  <a href="https://dex-it.github.io/ai-kit/"><b>Сайт документации</b></a> |
   <a href="#быстрый-старт">Быстрый старт</a> |
   <a href="#что-вы-получите">Что вы получите</a> |
   <a href="#от-идеи-до-pr">От идеи до PR</a> |
@@ -31,6 +31,8 @@
   <a href="#участие">Участие</a>
 </p>
 
+> Проект раньше назывался `claude-code-marketplace` и жил в [dex-it/claude-code-marketplace](https://github.com/dex-it/claude-code-marketplace). Теперь он здесь, в `dex-it/ai-kit`, а документация - на [dex-it.github.io/ai-kit](https://dex-it.github.io/ai-kit/). Каталог в Claude Code по-прежнему называется `dex-claude-marketplace`, поэтому команды установки `плагин@dex-claude-marketplace` не меняются.
+
 ---
 
 ## Быстрый старт
@@ -40,16 +42,16 @@
 **1. Подключите AI KIT** (один раз; для Claude Code это маркетплейс - источник плагинов):
 
 ```bash
-claude plugin marketplace add dex-it/claude-code-marketplace
+claude plugin marketplace add dex-it/ai-kit
 ```
 
-То же изнутри Claude Code: `/plugin marketplace add dex-it/claude-code-marketplace`.
+То же изнутри Claude Code: `/plugin marketplace add dex-it/ai-kit`.
 
 **2. Поставьте бандл** `code-review` (нужны `git`, `claude` и `jq`):
 
 ```bash
-git clone https://github.com/dex-it/claude-code-marketplace.git
-cd claude-code-marketplace
+git clone https://github.com/dex-it/ai-kit.git
+cd ai-kit
 ./install-bundle/install-bundle.sh code-review
 ```
 
@@ -508,7 +510,7 @@ Skills         памятки по стекам и темам                   
 <summary><b>Структура репозитория</b></summary>
 
 ```
-claude-code-marketplace/
+ai-kit/
 ├── plugins/
 │   ├── skills/                    # Level 1: базы знаний
 │   │   ├── dex-skill-dotnet-ef-core/
@@ -595,7 +597,7 @@ claude-code-marketplace/
 
 Хотите добавить плагин или поправить существующий? Начните с [CLAUDE.md](./CLAUDE.md): там правила разработки каталога.
 
-Пользовательская документация с примерами и каталогом плагинов - [сайт](https://dex-it.github.io/claude-code-marketplace/); его страницы лежат в [docs/guide/](./docs/guide/), проект сайта - в [site/](./site/).
+Пользовательская документация с примерами и каталогом плагинов - [сайт](https://dex-it.github.io/ai-kit/); его страницы лежат в [docs/guide/](./docs/guide/), проект сайта - в [site/](./site/).
 
 1. Форкните репозиторий и создайте ветку от `develop`.
 2. Прочитайте устройство артефакта, который правите ([Agent](./docs/AGENT_FRAMEWORK.md), [Skill](./docs/SKILL_FRAMEWORK.md), [Command](./docs/COMMAND_FRAMEWORK.md), [Mod](./docs/MOD_FRAMEWORK.md)).
