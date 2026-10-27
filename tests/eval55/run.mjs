@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Стенд замеров eval55: прогон экспериментов E1, E2, E3, E5, E7, E10 на тирах Claude 5.5.
+ * Стенд замеров eval55: прогон экспериментов E1, E1b, E2, E3, E5, E7, E10 на тирах Claude 5.5.
  *
  *   node tests/eval55/run.mjs list
  *   node tests/eval55/run.mjs selftest                      # без платных вызовов: наборы строятся, грейдеры известны
@@ -31,7 +31,7 @@ import { ROOT, resolveCommit } from './lib/repo.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TIERS = { haiku: 'claude-haiku-5-5', sonnet: 'claude-sonnet-5-5', opus: 'claude-opus-5-5' };
-const EXPERIMENTS = ['E1', 'E2', 'E3', 'E5', 'E7', 'E10'];
+const EXPERIMENTS = ['E1', 'E1b', 'E2', 'E3', 'E5', 'E7', 'E10'];
 const GRADER_TYPES = ['output-matches', 'output-not-matches', 'output-equals', 'output-not-equals', 'file-exists', 'file-matches', 'file-not-matches', 'file-unchanged', 'file-changed', 'nothing-changed', 'only-changed', 'cmd', 'json-fields'];
 const GIT_SANDBOX_ENV = { GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null', GIT_PAGER: 'cat' };
 
@@ -283,6 +283,7 @@ async function cmdSelftest(opt) {
     }
     if (mod.baseline && !cells.some((c) => c.cond === mod.baseline)) problems.push(`база ${mod.baseline} не среди условий`);
     problems.push(...(mod.selfcheck?.({ commit }) ?? []).map((x) => `ограничение не найдено в исходном тексте: ${x}`));
+    problems.push(...(mod.audit?.({ commit }) ?? []));
     console.log(`${problems.length ? 'FAIL' : 'ok  '} ${id}: ячеек ${cells.length}, условий ${new Set(cells.map((c) => c.cond)).size}, кейсов ${new Set(cells.map((c) => c.case)).size}${problems.length ? ' - ' + problems.slice(0, 5).join('; ') : ''}`);
     if (problems.length) bad = 1;
   }
