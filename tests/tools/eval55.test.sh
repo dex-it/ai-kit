@@ -174,8 +174,8 @@ sb() { ls -d "$tmp"/b1/w/E1b-"$1"-site-deploy-* 2>/dev/null | head -1; }
 pr=docs/guide/contributing/pull-requests.md
 b=$(sb bank); n=$(sb none); h=$(sb home)
 { [ "$code" = 0 ] && [ -d "$b/.memory-bank" ] && grep -q 'memory-bank' "$b/AGENTS.md" \
-  && [ ! -e "$n/.memory-bank" ] && ! grep -q 'memory-bank' "$n/AGENTS.md" && ! grep -q 'Тегов и GitHub Releases нет' "$n/$pr" \
-  && [ ! -e "$h/.memory-bank" ] && ! grep -q 'memory-bank' "$h/AGENTS.md" && grep -q 'Тегов и GitHub Releases нет' "$h/$pr" \
+  && [ ! -e "$n/.memory-bank" ] && ! grep -q 'memory-bank' "$n/AGENTS.md" && ! grep -q 'Тегов и GitHub Rel''eases нет' "$n/$pr" \
+  && [ ! -e "$h/.memory-bank" ] && ! grep -q 'memory-bank' "$h/AGENTS.md" && grep -q 'Тегов и GitHub Rel''eases нет' "$h/$pr" \
   && [ ! -e "$b/tests/eval55" ] && [ ! -e "$n/tests/eval55" ] && [ ! -e "$h/tests/eval55" ] && [ -f "$b/AGENTS.md" ]; } \
   && ok "E1b: bank - банк и указатель; none - ни банка, ни указателя, ни фактов; home - факты в pull-requests.md, без банка; стенда в песочнице нет" || bad "E1b: состав песочниц (код $code; '$b' '$n' '$h')"
 STUB_MODE=idle run run E1b --out "$tmp/b2" --budget 5 --tiers haiku --reps 1 --conditions bank --parallel 3 >/dev/null 2>&1; code=$?
