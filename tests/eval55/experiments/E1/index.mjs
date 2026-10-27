@@ -342,5 +342,5 @@ export default {
       prepare(dir) { c.prepare(dir); k.seed?.(dir); },
     })));
   },
-  check: ({ commit }) => checkConditions(commit),
+  audit: ({ commit }) => checkConditions(commit),
 };

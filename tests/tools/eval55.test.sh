@@ -30,7 +30,7 @@ chmod +x "$tmp/bin/claude"
 run() { PATH="$tmp/bin:$PATH" STUB_LOG="${STUB_LOG:-$tmp/log}" node "$R" "$@"; }
 
 # 1. наборы строятся
-out=$(run selftest 2>&1) && ok "selftest: наборы строятся, грейдеры известны, ограничения E5 есть в исходных текстах" || bad "selftest" "$out"
+out=$(run selftest 2>&1) && ok "selftest: наборы строятся, грейдеры известны, ограничения E5 есть в исходных текстах, факты E1b в банке и в home есть, вне банка их нет" || bad "selftest" "$out"
 
 # 1б. контроль наборов E1 без модели: нетронутая песочница не проходит проверки кейса, эталонное решение проходит все (около двух минут: песочница на кейс - git archive коммита)
 out=$(run controls E1 2>&1) && ok "controls E1: каждый кейс не решён без правки и решается эталоном" || bad "controls E1" "$(echo "$out" | grep -v '^ok')"
@@ -170,6 +170,35 @@ ha=$(grep -o '"inputsHash": "[0-9a-f]*"' "$tmp/bl/A/meta.json" | head -1); hb=$(
 ca=$(grep -o '"repoCommit": "[0-9a-f]*"' "$tmp/bl/A/meta.json" | head -1); cb=$(grep -o '"repoCommit": "[0-9a-f]*"' "$tmp/bl/B/meta.json" | head -1)
 { [ "$code" = 0 ] && [ "$na" = 2 ] && [ "$nb" = 2 ] && [ -n "$ha" ] && [ "$ha" = "$hb" ] && [ "$ca" = "$cb" ] && echo "$out" | grep -qF '| E10 | haiku | role | 2 | 2 |' && ! grep -q 'ПРЕДУПРЕЖДЕНИЕ' <<<"$out"; } \
   && ok "baseline: серии A и B (только база) на одном коммите и входах, полоса шума в выводе" || bad "baseline (код $code, A $na, B $nb)" "$out"
+
+# 8е. E1b (банк против дома): состав песочниц трёх условий и то, что нетронутая песочница не проходит ни одного кейса
+: > "$tmp/log"; run run E1b --out "$tmp/b1" --budget 5 --tiers haiku --reps 1 --only-cases site-deploy --parallel 1 --keep >/dev/null 2>&1; code=$?
+sb() { ls -d "$tmp"/b1/w/E1b-"$1"-site-deploy-* 2>/dev/null | head -1; }
+pr=docs/guide/contributing/pull-requests.md
+b=$(sb bank); n=$(sb none); h=$(sb home)
+{ [ "$code" = 0 ] && [ -d "$b/.memory-bank" ] && grep -q 'memory-bank' "$b/AGENTS.md" \
+  && [ ! -e "$n/.memory-bank" ] && ! grep -q 'memory-bank' "$n/AGENTS.md" && ! grep -q 'Тегов и GitHub Rel''eases нет' "$n/$pr" \
+  && [ ! -e "$h/.memory-bank" ] && ! grep -q 'memory-bank' "$h/AGENTS.md" && grep -q 'Тегов и GitHub Rel''eases нет' "$h/$pr" \
+  && [ ! -e "$b/tests/eval55" ] && [ ! -e "$n/tests/eval55" ] && [ ! -e "$h/tests/eval55" ] && [ -f "$b/AGENTS.md" ]; } \
+  && ok "E1b: bank - банк и указатель; none - ни банка, ни указателя, ни фактов; home - факты в pull-requests.md, без банка; стенда в песочнице нет" || bad "E1b: состав песочниц (код $code; '$b' '$n' '$h')"
+STUB_MODE=idle run run E1b --out "$tmp/b2" --budget 5 --tiers haiku --reps 1 --conditions bank --parallel 3 >/dev/null 2>&1; code=$?
+python3 - "$tmp/b2/results.jsonl" <<'PY' && ok "E1b: бездействие не проходит ни один из 10 кейсов (и зависимые, и контрольные)" || bad "E1b: нетронутая песочница прошла кейс"
+import json,sys
+rows=[json.loads(l) for l in open(sys.argv[1])]
+assert len(rows)==10, len(rows)
+assert not [r['case'] for r in rows if r.get('error') or r['full']], [r['case'] for r in rows if r['full']]
+PY
+node --input-type=module - "$root" <<'JS' && ok "E1b: ответ засчитывается по полям JSON, неверное поле не гасит верное" || bad "E1b: грейдеры зависимых задач"
+const { default: e } = await import(`${process.argv[2]}/tests/eval55/experiments/E1b/index.mjs`);
+const { gradeAll } = await import(`${process.argv[2]}/tests/eval55/lib/graders.mjs`);
+const g = (c) => e.build({ commit: 'HEAD' }).find((x) => x.cond === 'bank' && x.case === c).graders;
+const run = (c, out) => gradeAll(g(c), { dir: '.', before: new Map(), output: out }).map((r) => r.pass);
+const ok = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+if (!ok(run('release-merge', 'Слить так.\n```json\n{"merge_method": "merge", "develop_after_merge": "keep", "precedent_pr": 6}\n```'), [true, true, true])) throw new Error('верный ответ');
+if (!ok(run('release-merge', '{"merge_method": "squash", "develop_after_merge": "keep", "precedent_pr": 6}'), [false, true, true])) throw new Error('неверный способ слияния');
+if (!ok(run('ref-repo-by-date', '{"2026-10-23": "dex-it/ai-kit", "2026-10-25": "dex-it/ai-kit"}'), [false, true])) throw new Error('репозиторий по дате');
+if (!ok(run('release-tag', 'тег нужен'), [false, false])) throw new Error('ответ без JSON');
+JS
 
 # 9. отчёт
 out=$(run report "$tmp/o1" "$tmp/o1" 2>&1); echo "$out" | grep -q 'Полоса шума' && echo "$out" | grep -q '| E10 | haiku | scope-line |' && ok "report: таблицы и полоса шума" || bad "report" "$out"
