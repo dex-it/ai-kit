@@ -229,8 +229,8 @@ const cases = [
   { id: 'new-term',
     prompt: `В ${SKILL} добавь в конец чек-листа пункт про «${TERM}» при старте сервиса: ситуация и чем кончится, в формате остальных пунктов. Термин «${TERM}» в корпусе новый. Доведи изменения до состояния, готового к коммиту.`,
     graders: [
-      { type: 'file-matches', id: 'item-added', path: SKILL, regex: '^- .*прогрев\\w* кэш', flags: 'miu' },
-      { type: 'file-matches', id: 'dictionary-row', path: DOMAIN, regex: '^\\| *прогрев\\w* кэш\\w* *\\|', flags: 'miu' },
+      { type: 'file-matches', id: 'item-added', path: SKILL, regex: '^- .*прогрев[а-яё]* кэш', flags: 'miu' },
+      { type: 'file-matches', id: 'dictionary-row', path: DOMAIN, regex: '^\\| *прогрев[а-яё]* кэш[а-яё]* *\\|', flags: 'miu' },
       { type: 'cmd', id: 'terminology-valid', run: ['node', 'tools/validate-terminology.js'] },
       VALIDATE_SKILLS,
     ],
