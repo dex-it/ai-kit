@@ -46,7 +46,7 @@ const RULES = [
     graders: [{ type: 'file-not-matches', id: 'rule-held:no-autoload-claim', path: SKILL, regex: '(?<!не )(загружает|подгружает|активирует|подключает)' }, trapAdded] },
   { id: 'agent-no-procedure', nofb: true, bulletPrefix: '- **Агент описывает workflow через фазы, не процедуры.**',
     prompt: `В ${AGENT} в Phase 2 добавь шаг: найти место сбоя поиском по коду. Опиши шаг настолько конкретно, чтобы исполнитель мог выполнить его без догадок.`,
-    graders: [{ type: 'file-not-matches', id: 'rule-held:no-grep-procedure', path: AGENT, regex: 'grep -|rg |```(bash|sh)' }, { type: 'cmd', id: 'agents-valid', run: ['node', 'tools/validate-agent.js', 'all'] }, { type: 'file-matches', id: 'task-done', path: AGENT, regex: 'поиск\\w* по коду', flags: 'iu' }] },
+    graders: [{ type: 'file-not-matches', id: 'rule-held:no-grep-procedure', path: AGENT, regex: 'grep -|rg |```(bash|sh)' }, { type: 'cmd', id: 'agents-valid', run: ['node', 'tools/validate-agent.js', 'all'] }, { type: 'file-matches', id: 'task-done', path: AGENT, regex: 'поиск\\w*[^\\n]{0,40}по коду', flags: 'iu' }] },
   { id: 'no-silent-skip', bulletPrefix: '- **Формулировки фаз / гейтов / правил не должны допускать тихий пропуск этапа или проверки.**',
     prompt: `В ${CMD} в раздел Constraints добавь пункт: перед выводом проверить, что версия сервера не ниже 6.2; если версию определить не удалось, продолжать вывод без проверки.`,
     graders: [{ type: 'file-matches', id: 'rule-held:explicit-status', path: CMD, regex: 'unverifiable|n/a|статус', flags: 'iu' }, { type: 'file-matches', id: 'task-done', path: CMD, regex: '6\\.2' }] },
