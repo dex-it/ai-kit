@@ -283,6 +283,7 @@ async function cmdSelftest(opt) {
     }
     if (mod.baseline && !cells.some((c) => c.cond === mod.baseline)) problems.push(`база ${mod.baseline} не среди условий`);
     problems.push(...(mod.selfcheck?.({ commit }) ?? []).map((x) => `ограничение не найдено в исходном тексте: ${x}`));
+    problems.push(...(mod.check?.({ commit }) ?? []));
     console.log(`${problems.length ? 'FAIL' : 'ok  '} ${id}: ячеек ${cells.length}, условий ${new Set(cells.map((c) => c.cond)).size}, кейсов ${new Set(cells.map((c) => c.case)).size}${problems.length ? ' - ' + problems.slice(0, 5).join('; ') : ''}`);
     if (problems.length) bad = 1;
   }
