@@ -4,6 +4,7 @@
  *
  *   node tests/eval55/run.mjs list
  *   node tests/eval55/run.mjs selftest                      # без платных вызовов: наборы строятся, грейдеры известны
+ *   node tests/eval55/run.mjs controls <E*> [--conditions a,b] [--only-cases a,b] [--keep]   # без платных вызовов: нетронутая песочница не проходит проверки кейса, эталонное решение (`solve`) проходит
  *   node tests/eval55/run.mjs hash                          # хэши входов (experiments/**, lib/**, priors.json) для раздела «Заморозка»
  *   node tests/eval55/run.mjs plan <E*|all|stage1|stage2> [опции]   # ячейки и оценка стоимости, вызовов нет; по умолчанию тиры Haiku и Sonnet
  *   node tests/eval55/run.mjs run <E*> --out <каталог> --budget <USD> [опции]
@@ -22,7 +23,8 @@
  */
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, rmSync, cpSync, symlinkSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, mkdtempSync, existsSync, rmSync, cpSync, symlinkSync, readdirSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, dirname, resolve, sep, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gradeAll, snapshot } from './lib/graders.mjs';
@@ -290,6 +292,43 @@ async function cmdSelftest(opt) {
   process.exit(bad);
 }
 
+/** Контроль наборов без модели. Кейс с `solve`: нетронутая песочница проходит не все проверки (иначе кейс уже решён), после эталонного решения проходят все
+ *  (иначе проверка недостижима). Кейс `control: 'idle-passes'` («менять нечего»): нетронутая песочница проходит все проверки, а `solve` - посторонняя правка - хотя бы одну.
+ *  По умолчанию - условие-база; песочница строится из --commit (git archive), как в серии. */
+async function cmdControls(id, opt) {
+  const mod = await load(id);
+  const { cells, commit } = await cellsOf(id, { ...opt, conditions: opt.conditions ?? mod.baseline });
+  const root = mkdtempSync(join(tmpdir(), 'eval55-controls-'));
+  let bad = 0;
+  for (const c of cells) {
+    if (!c.solve) { console.log(`--   ${c.cond}/${c.case}: нет эталонного решения`); bad = 1; continue; }
+    const dir = join(root, `${c.cond}-${c.case}`);
+    const problems = [];
+    let idle; let solved;
+    try {
+      setup(c, dir, commit);
+      const before = snapshot(dir);
+      idle = gradeAll(c.graders, { dir, before, output: '' });
+      c.solve(dir);
+      solved = gradeAll(c.graders, { dir, before, output: '' });
+    } catch (e) { problems.push(`ошибка: ${String(e.message).slice(0, 300)}`); }
+    if (idle && solved) {
+      const failed = (r) => r.filter((x) => !x.pass).map((x) => x.id);
+      if (c.control === 'idle-passes') {
+        if (failed(idle).length) problems.push(`нетронутая песочница не проходит: ${failed(idle).join(', ')}`);
+        if (!failed(solved).length) problems.push('посторонняя правка проходит все проверки');
+      } else {
+        if (!failed(idle).length) problems.push('нетронутая песочница проходит все проверки (кейс вырожден)');
+        if (failed(solved).length) problems.push(`эталонное решение не проходит: ${failed(solved).join(', ')}`);
+      }
+      console.log(`${problems.length ? 'FAIL' : 'ok  '} ${c.cond}/${c.case}: без правки падает [${failed(idle).join(', ') || '-'}]; ${c.control === 'idle-passes' ? 'посторонняя правка роняет' : 'после решения падает'} [${failed(solved).join(', ') || '-'}]${problems.length ? ' - ' + problems.join('; ') : ''}`);
+    } else console.log(`FAIL ${c.cond}/${c.case}: ${problems.join('; ')}`);
+    if (problems.length) bad = 1;
+  }
+  if (!opt.keep) rmSync(root, { recursive: true, force: true }); else console.log(`песочницы: ${root}`);
+  process.exit(bad);
+}
+
 // Ступени из PREREG: размеры серий (--cases) задаёт ступень, если не передан явно. E3: seed на размер.
 // Решение владельца: тиры Haiku и Sonnet (Opus не гоняется), E7 отложен до постановки с жёсткими соседями (#35) и в ступень 1 не входит. Для E7 `plan E7 --cases 40` работает по-прежнему.
 const STAGES = { stage1: { E3: { cases: 10 }, E5: {}, E10: {} }, stage2: { E1: {}, E2: {} } };
@@ -321,11 +360,12 @@ async function main() {
   if (cmd === 'list') {
     for (const id of EXPERIMENTS) { const m = await load(id); console.log(`${id}\t${m.kind}\t${m.title}\tбаза: ${m.baseline}`); }
   } else if (cmd === 'selftest') await cmdSelftest(opt);
+  else if (cmd === 'controls') await cmdControls(a, opt);
   else if (cmd === 'plan') await cmdPlan(a, opt);
   else if (cmd === 'run') await cmdRun(a, opt);
   else if (cmd === 'report') console.log(cmdReport(a, b, opt.band ? opt.band.split(',') : null));
   else if (cmd === 'baseline') await cmdBaseline(a, opt);
   else if (cmd === 'hash') { const h = inputsHash(); console.log(JSON.stringify(h, null, 2)); }
-  else { console.error('Usage: run.mjs list | selftest | hash | plan <E*|all|stage1|stage2> | run <E*> --out DIR --budget USD | baseline <E*> --out DIR --budget USD | report DIR [DIR2 | --band A,B]'); process.exit(2); }
+  else { console.error('Usage: run.mjs list | selftest | controls <E*> | hash | plan <E*|all|stage1|stage2> | run <E*> --out DIR --budget USD | baseline <E*> --out DIR --budget USD | report DIR [DIR2 | --band A,B]'); process.exit(2); }
 }
 main().catch((e) => { console.error(e.message); process.exit(1); });

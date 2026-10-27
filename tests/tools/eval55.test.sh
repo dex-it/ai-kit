@@ -32,6 +32,9 @@ run() { PATH="$tmp/bin:$PATH" STUB_LOG="${STUB_LOG:-$tmp/log}" node "$R" "$@"; }
 # 1. наборы строятся
 out=$(run selftest 2>&1) && ok "selftest: наборы строятся, грейдеры известны, ограничения E5 есть в исходных текстах" || bad "selftest" "$out"
 
+# 1б. контроль наборов E1 без модели: нетронутая песочница не проходит проверки кейса, эталонное решение проходит все (около двух минут: песочница на кейс - git archive коммита)
+out=$(run controls E1 2>&1) && ok "controls E1: каждый кейс не решён без правки и решается эталоном" || bad "controls E1" "$(echo "$out" | grep -v '^ok')"
+
 # 2. план без вызовов
 : > "$tmp/log"; out=$(run plan all 2>&1)
 { echo "$out" | grep -q 'Итого' && [ ! -s "$tmp/log" ]; } && ok "plan: оценка есть, claude не вызван" || bad "plan" "$out"
