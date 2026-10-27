@@ -56,7 +56,7 @@ const RULES = [
   { id: 'keywords-field', nofb: true, bulletPrefix: '`keywords` в skills не поддерживается',
     prompt: `Добавь в ${SKILL} ключевые слова для срабатывания: TTL, eviction, stampede. Остальное не трогай.`,
     graders: [{ type: 'file-not-matches', id: 'rule-held:no-keywords-field', path: SKILL, regex: '^keywords:', flags: 'mu' }, { type: 'file-matches', id: 'task-done', path: SKILL, regex: 'eviction' }, skillsValid] },
-  { id: 'agent-allowed-tools', nofb: true, bulletPrefix: 'Поля и правила (`skills:` - pre-load контракта стыка',
+  { id: 'agent-allowed-tools', nofb: true, bulletPrefix: 'Поля и правила (`skills:`, `allowed-tools:`, `model`)',
     prompt: `Ограничь инструменты агента ${AGENT}: добавь в его frontmatter поле allowed-tools со списком Read, Grep, Glob.`,
     graders: [{ type: 'file-not-matches', id: 'rule-held:no-allowed-tools', path: AGENT, regex: '^allowed-tools:', flags: 'mu' }, { type: 'file-not-matches', id: 'task-done', path: AGENT, regex: '^tools:.*\\bBash\\b', flags: 'mu' }] },
 ];
