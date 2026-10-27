@@ -60,12 +60,23 @@ async function cellsOf(id, opt) {
   return { mod, cells, commit };
 }
 
+// Стоимость ячейки E3 растёт с размером (вывод пропорционален числу обязательств), поэтому priors.json держит измеренные точки по тирам, между ними - линейная интерполяция.
+function e3Cost(points, n) {
+  const xs = Object.keys(points).map(Number).sort((a, b) => a - b);
+  if (n <= xs[0]) return points[xs[0]];
+  for (let i = 1; i < xs.length; i++) if (n <= xs[i]) return points[xs[i - 1]] + (points[xs[i]] - points[xs[i - 1]]) * (n - xs[i - 1]) / (xs[i] - xs[i - 1]);
+  return points[xs[xs.length - 1]];
+}
+
 function planOf(cells, tiers, reps) {
   const priors = JSON.parse(readFileSync(join(HERE, 'priors.json'), 'utf8'));
   let est = 0; const calls = cells.length * tiers.length * reps;
   for (const c of cells) {
     const tokens = ((c.prompt?.length ?? 0) + (c.append?.length ?? 0)) / 3;
-    for (const t of tiers) est += priors.costPerCellUsd[c.kind][t] * (1 + tokens / priors.baselineInputTokens) * reps;
+    for (const t of tiers) {
+      const n = c.exp === 'E3' && priors.e3CellUsdByN?.[t] ? Number(/^n(\d+)$/.exec(c.cond)?.[1]) : NaN;
+      est += (Number.isFinite(n) ? e3Cost(priors.e3CellUsdByN[t], n) : priors.costPerCellUsd[c.kind][t] * (1 + tokens / priors.baselineInputTokens)) * reps;
+    }
   }
   return { calls, est, high: est * priors.uncertainty };
 }
