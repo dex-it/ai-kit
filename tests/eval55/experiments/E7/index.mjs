@@ -1,17 +1,17 @@
 // E7 - выбор skill при росте библиотеки: 10/30/100 skills в листинге.
 // Гипотеза: различимые описания держат точность, но ошибки выбора растут с размером библиотеки (R21, R22).
 // Это однократный выбор по листингу (прокси), а не активация через Skill tool в живой сессии: живую активацию меряет tools/run-activation.js.
-// Библиотека - реальные skills каталога на коммите прогона, кейсы - tests/activation/cases.json.
+// Библиотека - реальные skills каталога на коммите прогона, кейсы - tests/activation/cases.json на нём же.
+// Отложен (решение владельца): пилот не различил размеры, нужна постановка с жёсткими соседями в листинге (#35); набор не усложнялся и не гонялся.
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 import { rng, shuffle } from '../../lib/rng.mjs';
+import { exportAt } from '../../lib/repo.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SIZES = [10, 30, 100];
 
-function catalog() {
+function catalog(root) {
   const out = [];
   const walk = (d) => {
     for (const e of readdirSync(d)) {
@@ -35,8 +35,10 @@ export default {
   title: 'Выбор skill при росте библиотеки',
   kind: 'text',
   baseline: 'lib010',
-  build({ cases: limit } = {}) {
-    const lib = catalog();
+  build({ cases: limit, commit = 'HEAD' } = {}) {
+    // Библиотека и кейсы - с коммита прогона, а не из рабочего дерева.
+    const root = exportAt(commit, ['plugins/*SKILL.md', 'plugins/*/.claude-plugin/plugin.json', 'tests/activation/cases.json']);
+    const lib = catalog(root);
     const ids = new Set(lib.map((s) => s.id));
     const all = JSON.parse(readFileSync(join(root, 'tests/activation/cases.json'), 'utf8')).filter((c) => ids.has(c.expect));
     const picked = shuffle(all, rng(7)).slice(0, limit ?? 20);

@@ -110,6 +110,64 @@ writeFileSync(join(d, 'a.md'), '- пункт\n- TTL\n'); const r1 = gradeAll(g, 
 if (!r1[0].pass || !r1[1].pass) throw new Error('после правки без нарушения обе проверки должны пройти');
 JS
 
+# 8б2. E2, кейсы `-nofb`: у модели нет Bash (вывода валидаторов нет), у остальных кейсов Bash есть
+: > "$tmp/log"; run run E2 --out "$tmp/o7" --budget 5 --tiers haiku --reps 1 --conditions with-rule --only-cases agent-allowed-tools-nofb,agent-allowed-tools --parallel 1 >/dev/null 2>&1
+{ grep -qx 'Read,Write,Edit,Glob,Grep' "$tmp/log" && grep -qx 'Read,Write,Edit,Glob,Grep,Bash' "$tmp/log"; } && ok "E2 -nofb: инструменты без Bash, у обычного кейса Bash на месте" || bad "E2 -nofb: набор инструментов" "$(grep -n -- 'Read,' "$tmp/log")"
+
+# 8в. разрыв «рабочее дерево / --commit»: состав корневого файла и условий E1, E2 определяет коммит серии, а не рабочее дерево.
+# Временный репозиторий: коммит c1 (AGENTS.md репозитория), c2 (+ раздел «Только в коммите»), в рабочем дереве поверх c2 - раздел «Только в дереве».
+g="$tmp/repo"; mkdir -p "$g"; cp "$root/AGENTS.md" "$g/AGENTS.md"; printf '@AGENTS.md\n' > "$g/CLAUDE.md"
+gc() { git -C "$g" -c user.name=t -c user.email=t@t -c commit.gpgsign=false "$@"; }
+git -C "$g" init -q && gc add -A && gc commit -qm c1; c1=$(git -C "$g" rev-parse HEAD)
+printf '\n## Только в коммите\nCOMMIT-MARK\n' >> "$g/AGENTS.md"; gc commit -qam c2; c2=$(git -C "$g" rev-parse HEAD)
+printf '\n## Только в дереве\nWORKTREE-MARK\n' >> "$g/AGENTS.md"
+grun() { PATH="$tmp/bin:$PATH" STUB_LOG=/dev/null EVAL55_REPO="$g" node "$R" "$@"; }
+conds() { grun plan E1 --tiers haiku --reps 1 "$@" 2>&1 | awk -F'|' '$2 ~ /E1/ {gsub(/ /, "", $4); print $4}'; }
+n1=$(conds --commit "$c1"); n2=$(conds --commit "$c2"); nh=$(conds)
+{ [ -n "$n1" ] && [ "$n2" = "$((n1 + 1))" ] && [ "$nh" = "$n2" ]; } && ok "E1: число условий определяет коммит (c1 $n1, c2 $n2, по умолчанию HEAD $nh), а не рабочее дерево" || bad "E1: условия не следуют за --commit (c1 '$n1', c2 '$n2', HEAD '$nh')"
+last=$(printf 'minus-s%02d' "$((n2 - 2))")
+grun run E1 --out "$tmp/g1" --budget 5 --tiers haiku --reps 1 --conditions "$last" --only-cases redis-trap --parallel 1 --keep --commit "$c2" >/dev/null 2>&1
+sb=$(ls -d "$tmp"/g1/w/E1-"$last"-redis-trap-* 2>/dev/null | head -1)
+{ [ -n "$sb" ] && ! grep -q 'WORKTREE-MARK' "$sb/AGENTS.md" && ! grep -q 'COMMIT-MARK' "$sb/AGENTS.md" && grep -q 'Структура плагина' "$sb/AGENTS.md"; } \
+  && ok "E1: раздел снят из текста коммита, содержимого рабочего дерева в песочнице нет" || bad "E1: песочница собрана не из --commit ('$sb')"
+grun run E2 --out "$tmp/g2" --budget 5 --tiers haiku --reps 1 --conditions without-rule --only-cases ascii-punctuation --parallel 1 --keep >/dev/null 2>&1
+sb=$(ls -d "$tmp"/g2/w/E2-without-rule-ascii-punctuation-* 2>/dev/null | head -1)
+{ [ -n "$sb" ] && grep -q 'COMMIT-MARK' "$sb/AGENTS.md" && ! grep -q 'WORKTREE-MARK' "$sb/AGENTS.md" && ! grep -q 'Пунктуация в артефактах - ASCII' "$sb/AGENTS.md"; } \
+  && ok "E2: без правила - текст с коммита (HEAD), не из рабочего дерева" || bad "E2: условие собрано не из коммита ('$sb')"
+grep -q "\"repoCommit\": \"$c2\"" "$tmp/g2/meta.json" && ok "meta.json: записан полный хэш коммита серии" || bad "meta.json без хэша коммита серии" "$(cat "$tmp/g2/meta.json")"
+out=$(grun run E2 --out "$tmp/g2" --budget 5 --tiers haiku --reps 1 --commit "$c1" 2>&1); code=$?
+{ [ "$code" != 0 ] && echo "$out" | grep -q 'серия E2 начата'; } && ok "продолжение серии на другом коммите отвергнуто" || bad "серия продолжена на другом коммите (код $code)" "$out"
+out=$(grun run E1 --out "$tmp/g3" --budget 1 --tiers haiku --reps 1 --commit deadbeefdeadbeef 2>&1); code=$?
+{ [ "$code" != 0 ] && echo "$out" | grep -q 'нет такого коммита'; } && ok "неизвестный --commit - ошибка, не молчаливый HEAD" || bad "неизвестный --commit принят" "$out"
+
+# 8г. полоса шума по двум независимым сериям: max(|A - B|, 2 SE разности средних); считается на известных числах
+node --input-type=module - "$tmp" <<'JS'
+import { mkdirSync, writeFileSync } from 'node:fs';
+const [, , t] = process.argv;
+const row = (tier, rep, score) => JSON.stringify({ exp: 'E10', cond: 'role', case: 'k' + rep, tier, rep, score, full: score === 1, cost: 0.01, checks: [] });
+const mk = (dir, hash, h, s) => {
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(`${dir}/results.jsonl`, [...h.map((x, i) => row('haiku', i, x)), ...s.map((x, i) => row('sonnet', i, x))].join('\n') + '\n');
+  writeFileSync(`${dir}/meta.json`, JSON.stringify({ baselines: { E10: 'role' }, runs: [{ exp: 'E10', repoCommit: 'c', inputsHash: hash }] }));
+};
+mk(`${t}/nA`, 'h', [1, 0, 1, 1], [0, 0, 0, 0]);
+mk(`${t}/nB`, 'h', [1, 1, 1, 1], [1, 1, 1, 1]);
+mk(`${t}/nC`, 'other', [1, 1, 1, 1], [1, 1, 1, 1]);
+JS
+out=$(run report "$tmp/nA" "$tmp/nB" 2>&1)
+{ echo "$out" | grep -qF '| E10 | haiku | role | 4 | 4 | 0.75 | 1.00 | 0.25 | 0.50 | 0.50 |' && echo "$out" | grep -qF '| E10 | sonnet | role | 4 | 4 | 0.00 | 1.00 | 1.00 | 0.00 | 1.00 |'; } \
+  && ok "полоса шума: max(|A-B|, 2 SE) на известных числах (0.50 по SE, 1.00 по разности)" || bad "полоса шума считается неверно" "$out"
+out=$(run report "$tmp/nA" "$tmp/nC" 2>&1); echo "$out" | grep -q 'ПРЕДУПРЕЖДЕНИЕ' && ok "report: серии с разными входами стенда - предупреждение" || bad "report не предупредил о разных входах" "$out"
+out=$(run report "$tmp/nB" --band "$tmp/nA,$tmp/nB" 2>&1); echo "$out" | grep -qF '| E10 | haiku | role | 4 | 4 |' && ok "report --band: полоса из отдельной пары базовых серий" || bad "report --band" "$out"
+
+# 8д. baseline: две независимые базовые серии на одном коммите (A и B), общий бюджет, полоса в выводе
+out=$(run baseline E10 --out "$tmp/bl" --budget 5 --tiers haiku --reps 1 --cases 2 --parallel 1 2>&1); code=$?
+na=$(wc -l < "$tmp/bl/A/results.jsonl" | tr -d ' '); nb=$(wc -l < "$tmp/bl/B/results.jsonl" | tr -d ' ')
+ha=$(grep -o '"inputsHash": "[0-9a-f]*"' "$tmp/bl/A/meta.json" | head -1); hb=$(grep -o '"inputsHash": "[0-9a-f]*"' "$tmp/bl/B/meta.json" | head -1)
+ca=$(grep -o '"repoCommit": "[0-9a-f]*"' "$tmp/bl/A/meta.json" | head -1); cb=$(grep -o '"repoCommit": "[0-9a-f]*"' "$tmp/bl/B/meta.json" | head -1)
+{ [ "$code" = 0 ] && [ "$na" = 2 ] && [ "$nb" = 2 ] && [ -n "$ha" ] && [ "$ha" = "$hb" ] && [ "$ca" = "$cb" ] && echo "$out" | grep -qF '| E10 | haiku | role | 2 | 2 |' && ! grep -q 'ПРЕДУПРЕЖДЕНИЕ' <<<"$out"; } \
+  && ok "baseline: серии A и B (только база) на одном коммите и входах, полоса шума в выводе" || bad "baseline (код $code, A $na, B $nb)" "$out"
+
 # 9. отчёт
 out=$(run report "$tmp/o1" "$tmp/o1" 2>&1); echo "$out" | grep -q 'Полоса шума' && echo "$out" | grep -q '| E10 | haiku | scope-line |' && ok "report: таблицы и полоса шума" || bad "report" "$out"
 

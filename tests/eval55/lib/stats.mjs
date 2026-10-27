@@ -47,14 +47,17 @@ export function paired(rows, base) {
   return out;
 }
 
-/** Полоса шума: два независимых прогона одной и той же базы; на ячейку (exp, tier, cond) - |A - B| и 2 SE разности средних. */
+/** Полоса шума: два независимых прогона одной и той же базы; на ячейку (exp, tier, cond) - max(|A - B|, 2 SE разности средних).
+ *  SE разности средних = sqrt(SE_A^2 + SE_B^2) по ячейкам (кейс x повтор) каждой серии; он включает разброс между кейсами, поэтому полоса консервативна. */
 export function noise(rowsA, rowsB) {
   const a = new Map(summarize(rowsA).map((s) => [`${s.exp}|${s.tier}|${s.cond}`, s]));
   const out = [];
   for (const s of summarize(rowsB)) {
     const x = a.get(`${s.exp}|${s.tier}|${s.cond}`);
     if (!x) continue;
-    out.push({ exp: s.exp, tier: s.tier, cond: s.cond, diff: Math.abs(x.score - s.score), band: Math.max(Math.abs(x.score - s.score), 2 * Math.hypot(x.scoreSe || 0, s.scoreSe || 0)) });
+    const diff = Math.abs(x.score - s.score);
+    const se2 = 2 * Math.hypot(x.scoreSe || 0, s.scoreSe || 0);
+    out.push({ exp: s.exp, tier: s.tier, cond: s.cond, nA: x.n, nB: s.n, a: x.score, b: s.score, diff, se2, band: Math.max(diff, se2) });
   }
   return out;
 }
