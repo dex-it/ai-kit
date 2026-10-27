@@ -32,6 +32,9 @@ run() { PATH="$tmp/bin:$PATH" STUB_LOG="${STUB_LOG:-$tmp/log}" node "$R" "$@"; }
 # 1. наборы строятся
 out=$(run selftest 2>&1) && ok "selftest: наборы строятся, грейдеры известны, ограничения E5 есть в исходных текстах, факты E1b в банке и в home есть, вне банка их нет" || bad "selftest" "$out"
 
+# 1б. контроль наборов E1 без модели: нетронутая песочница не проходит проверки кейса, эталонное решение проходит все (около двух минут: песочница на кейс - git archive коммита)
+out=$(run controls E1 2>&1) && ok "controls E1: каждый кейс не решён без правки и решается эталоном" || bad "controls E1" "$(echo "$out" | grep -v '^ok')"
+
 # 2. план без вызовов
 : > "$tmp/log"; out=$(run plan all 2>&1)
 { echo "$out" | grep -q 'Итого' && [ ! -s "$tmp/log" ]; } && ok "plan: оценка есть, claude не вызван" || bad "plan" "$out"
@@ -125,7 +128,7 @@ grun() { PATH="$tmp/bin:$PATH" STUB_LOG=/dev/null EVAL55_REPO="$g" node "$R" "$@
 conds() { grun plan E1 --tiers haiku --reps 1 "$@" 2>&1 | awk -F'|' '$2 ~ /E1/ {gsub(/ /, "", $4); print $4}'; }
 n1=$(conds --commit "$c1"); n2=$(conds --commit "$c2"); nh=$(conds)
 { [ -n "$n1" ] && [ "$n2" = "$((n1 + 1))" ] && [ "$nh" = "$n2" ]; } && ok "E1: число условий определяет коммит (c1 $n1, c2 $n2, по умолчанию HEAD $nh), а не рабочее дерево" || bad "E1: условия не следуют за --commit (c1 '$n1', c2 '$n2', HEAD '$nh')"
-last=$(printf 'minus-s%02d' "$((n2 - 2))")
+last=$(printf 'minus-s%02d' "$((n2 - 5))")  # условия: full, empty, minus-sNN по разделам, затем no-overview, minimal, terminology-pointer
 grun run E1 --out "$tmp/g1" --budget 5 --tiers haiku --reps 1 --conditions "$last" --only-cases redis-trap --parallel 1 --keep --commit "$c2" >/dev/null 2>&1
 sb=$(ls -d "$tmp"/g1/w/E1-"$last"-redis-trap-* 2>/dev/null | head -1)
 { [ -n "$sb" ] && ! grep -q 'WORKTREE-MARK' "$sb/AGENTS.md" && ! grep -q 'COMMIT-MARK' "$sb/AGENTS.md" && grep -q 'Структура плагина' "$sb/AGENTS.md"; } \
