@@ -62,7 +62,7 @@
 
 ### Frontmatter агентов
 
-Поля и правила (`skills:` - pre-load контракта стыка полной формой `dex-skill-node-contract:node-contract` (не голым именем плагина, иначе не резолвится; отсутствие поля ловит `frontmatter-skills-missing`); условные trap-skill грузятся императивно через Skill tool в фазах; `allowed-tools:` не поддерживается; явный `model` по характеру суждения, не `inherit`; выбор opus/sonnet/haiku) - нормативный дом [AGENT_FRAMEWORK.md](docs/AGENT_FRAMEWORK.md#выбор-модели-model) (чеклист frontmatter + раздел «Стоимость: `model` и `effort`»).
+Поля и правила (`skills:`, `allowed-tools:`, `model`) - нормативный дом [AGENT_FRAMEWORK.md](docs/AGENT_FRAMEWORK.md#выбор-модели-model) (чеклист frontmatter + раздел «Стоимость: `model` и `effort`»).
 
 **`model` - потолок, `effort` - override сессии**: вниз - для механической работы, вверх - только с названной в теле причиной, сомневаешься - не ставь. Значения, дефолты, оговорки по моделям и провайдерам - [AGENT_FRAMEWORK.md](docs/AGENT_FRAMEWORK.md#глубина-рассуждения-effort).
 
@@ -79,7 +79,7 @@
 | ---- | -------- | -------- |
 | command -> skill | ✓ | `Skill` в `allowed-tools` команды, вызов в теле |
 | agent -> skill | ✓ | условный: `Skill` tool в frontmatter, императивный вызов в фазе (`{plugin}:{skill}`). Безусловный process-skill: pre-load через `skills:` во frontmatter |
-| agent -> agent | ✓ | `Agent` tool - спавн субагента. Глубина рекурсии не задокументирована |
+| agent -> agent | ✓ | `Agent` tool - спавн субагента; глубина по умолчанию до трёх слоёв ([sub-agents](https://code.claude.com/docs/en/sub-agents), 27.10.2026) |
 | skill -> skill | косвенно | автоматической загрузки по имени в теле нет - API нет. Рабочий путь: тело предписывает исполнителю (главному потоку либо агенту с `Skill` в `tools`) явно вызвать `Skill` `{plugin}:{skill}` - тул есть у исполнителя, не у скилла. Прецедент: `dex-skill-artifact-review` (`SKILL.md:41`) |
 | skill -> agent | косвенно | тот же механизм, что и `skill -> skill`: спавнит главный поток, исполняя текст скилла - тул есть у исполнителя, не у скилла |
 | command -> agent | ✓ на практике | команда-делегат: тело команды поручает работу агенту. Команда, ведущая порядок работ, несёт `Agent` в `allowed-tools`: её тело исполняет главный поток, и канал к оператору есть только у него. Фан-аут внутри одной работы - в агенте, не в команде |
