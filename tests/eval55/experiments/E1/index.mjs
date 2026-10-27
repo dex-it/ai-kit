@@ -192,7 +192,7 @@ const cases = [
     prompt: 'Агенту bug-fixer (плагин dex-bug-fixer) нужна своя ловушка: «Фикс без регрессионного теста: баг возвращается при следующей правке». Оформи её как skill, который грузит только этот агент, и доведи изменения до состояния, готового к коммиту. В тело агента skill не подключай.',
     graders: [
       { type: 'cmd', id: 'skill-inside-owner', run: ['sh', '-c', `ls ${BUG_DIR}/skills/*/SKILL.md`] },
-      { type: 'only-changed', id: 'no-separate-plugin', allowed: [BUG_DIR, CATALOG] },
+      { type: 'only-changed', id: 'no-separate-plugin', allowed: [BUG_DIR, CATALOG, 'tests/trap-skills'] },
       SYNC,
       VALIDATE_SKILLS,
     ],
@@ -227,10 +227,10 @@ const cases = [
   // Новый термин в тексте нормы (пункт «Имя сущности корпуса берётся из словаря»; пара `terminology-pointer` проверяет, нужен ли перечень имён): строка словаря заводится тем же изменением.
   // `sync-terminology --check` среди проверок нет: в условии-указателе он красный по построению.
   { id: 'new-term',
-    prompt: `В ${SKILL} добавь в конец чек-листа пункт про «${TERM}» при старте сервиса: ситуация и чем кончится, в формате остальных пунктов. Термин «${TERM}» в корпусе новый. Остальное не трогай.`,
+    prompt: `В ${SKILL} добавь в конец чек-листа пункт про «${TERM}» при старте сервиса: ситуация и чем кончится, в формате остальных пунктов. Термин «${TERM}» в корпусе новый. Доведи изменения до состояния, готового к коммиту.`,
     graders: [
-      { type: 'file-matches', id: 'item-added', path: SKILL, regex: `^- .*${TERM}`, flags: 'miu' },
-      { type: 'file-matches', id: 'dictionary-row', path: DOMAIN, regex: `^\\| *${TERM} *\\|`, flags: 'miu' },
+      { type: 'file-matches', id: 'item-added', path: SKILL, regex: '^- .*прогрев\\w* кэш', flags: 'miu' },
+      { type: 'file-matches', id: 'dictionary-row', path: DOMAIN, regex: '^\\| *прогрев\\w* кэш\\w* *\\|', flags: 'miu' },
       { type: 'cmd', id: 'terminology-valid', run: ['node', 'tools/validate-terminology.js'] },
       VALIDATE_SKILLS,
     ],
