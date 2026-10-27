@@ -1,14 +1,13 @@
 // E1 - абляция разделов корневого файла: полный / без каждого раздела H2 / пустой.
 // Гипотеза: обзорные разделы не влияют на решаемость, но стоят шагов и денег (R01, R03).
-// Среда - копия репозитория на коммите прогона (git archive); `.claude/rules/` остаются на месте. Дорогой эксперимент:
+// Среда - копия репозитория на коммите прогона (git archive); корневой файл условий читается с него же; `.claude/rules/` остаются на месте. Дорогой эксперимент:
 // одна ячейка - сессия с инструментами на крупном дереве. Кейсов 10: две правки по описанию (redis-keyword, redis-trap),
 // одна правка команды с версией и семь починок засеянных нарушений, проверка каждого - команда валидатора или синхронизации (`cmd`), а не текст ответа.
 // Засев делает prepare в песочнице; перед кейсом проверено, что без правки его `cmd` падает.
 import { readFileSync, writeFileSync, appendFileSync, rmSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
+import { rootNorm } from '../../lib/repo.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const SKILL = 'plugins/skills/dex-skill-redis/skills/redis/SKILL.md';
 const REDIS_PJ = 'plugins/skills/dex-skill-redis/.claude-plugin/plugin.json';
 const AGENT = 'plugins/specialists/delivery/dex-bug-fixer/agents/bug-fixer.md';
@@ -84,8 +83,9 @@ export default {
   tools: ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash'],
   allow: ['Bash(node *)', 'Bash(npm run *)', 'Bash(git diff*)', 'Bash(git status*)'],
   baseline: 'full',
-  build() {
-    const md = readFileSync(join(root, 'AGENTS.md'), 'utf8');
+  // Состав корневого файла и разделов-условий берётся с коммита прогона (`commit`), тем же, из которого собрана песочница.
+  build({ commit = 'HEAD' } = {}) {
+    const md = rootNorm(commit);
     const secs = sections(md);
     const conds = [
       { id: 'full', prepare() {} },
