@@ -1,6 +1,6 @@
 # Пред-регистрация стенда eval55
 
-Записано 26.10.2026; платных серий по гипотезам не было, пилоты проверяют каркас и чувствительность наборов. Статус: **проект, не утверждён владельцем** (ворота ◆1 эпика [#7](https://github.com/dex-it/ai-kit/issues/7)). Метод и раннер - [README.md](README.md). Образец формы - `docs/research/skill-form-vector-vs-solution/PREREG-blind.md`.
+Записано 26.10.2026; платных серий по гипотезам не было, пилоты проверяют каркас и чувствительность наборов. Статус: **утверждён владельцем 27.10.2026, ступень 1 заморожена** (раздел «Заморозка»; ворота ◆1 эпика [#7](https://github.com/dex-it/ai-kit/issues/7)). Метод и раннер - [README.md](README.md). Образец формы - `docs/research/skill-form-vector-vs-solution/PREREG-blind.md`.
 
 После утверждения: хэши входов (`experiments/**`, `lib/**`, `priors.json`) записываются в раздел «Заморозка»; изменение порога, метрики или правила остановки после первого прогона оформляется записью в «Отклонения от плана» с датой и причиной, а не правкой текста выше.
 
@@ -100,11 +100,50 @@
 
 ## Заморозка
 
-Не заполнено (ждёт утверждения).
+27.10.2026, утверждено владельцем (потолок и состав - раздел «Бюджет»). Ступень 1 (E3, E5, E10) заморожена на коммите `5fa04b1c` (клиент `claude` 2.1.311): ниже SHA-256 входов (`node tests/eval55/run.mjs hash`, поле `files`). Входы E1, E1b и E2 заморозятся записью в «Отклонения от плана» перед первой серией ступени 2 (их наборы доделываются в #49 и #50); E7 отложен. Порог, метрика или правило остановки после первого прогона меняются только записью в «Отклонения от плана».
+
+```
+666132d3b381903d652fe3a5c4649bfbe0562d49cce80d7a4a190dcabc3ec05d  experiments/E10/fixtures/bug/README.md
+eca163a75c2fe01d0519640e11b3a6909c72a64fb7df6ca9ab324d6b0c842639  experiments/E10/fixtures/bug/package.json
+90869763245aacb2b896620b6e9300d5c8bf48b650efd904d3a5576bb92312a2  experiments/E10/fixtures/bug/src/legacy.js
+9c9b6eb481fd04b74c134b77f93080eb787573f16623828c529afb75dae56289  experiments/E10/fixtures/bug/src/stats.js
+3e4b9f350bd3e0b7fea7cadf249e352adafb2fece6cfe64c8dae16dcf49babb6  experiments/E10/fixtures/bug/test/stats.test.js
+666132d3b381903d652fe3a5c4649bfbe0562d49cce80d7a4a190dcabc3ec05d  experiments/E10/fixtures/clean/README.md
+eca163a75c2fe01d0519640e11b3a6909c72a64fb7df6ca9ab324d6b0c842639  experiments/E10/fixtures/clean/package.json
+90869763245aacb2b896620b6e9300d5c8bf48b650efd904d3a5576bb92312a2  experiments/E10/fixtures/clean/src/legacy.js
+16fb0f10d60c86603006051ae43cdd38e6693d28eb6abd5b953bc96114105353  experiments/E10/fixtures/clean/src/stats.js
+3e4b9f350bd3e0b7fea7cadf249e352adafb2fece6cfe64c8dae16dcf49babb6  experiments/E10/fixtures/clean/test/stats.test.js
+5faaec84e0c6977f57830502faabd6d59ad25867daf6de9ae9ef8dc7a0f5b109  experiments/E10/fixtures/lib/CHANGELOG.md
+81e3ea965cbfa36c9bb6b35b44bcba7d5701f51d4c582ffe1a825cdd9f669d1e  experiments/E10/fixtures/lib/README.md
+eca163a75c2fe01d0519640e11b3a6909c72a64fb7df6ca9ab324d6b0c842639  experiments/E10/fixtures/lib/package.json
+f90cae1ff00a4fe5df80d194215e12b3200cae002cc7385b43cfca388754d6ce  experiments/E10/fixtures/lib/src/format.js
+90869763245aacb2b896620b6e9300d5c8bf48b650efd904d3a5576bb92312a2  experiments/E10/fixtures/lib/src/legacy.js
+53966d2bd1c494d6b6afe89d66bf99c1f953dd0794d09f7d268b8f14e846d715  experiments/E10/fixtures/lib/src/stats.js
+0b56c486d2b8701b80217aef02febf75dd2f86449e1a6a99ebe6442d6cb202ea  experiments/E10/fixtures/lib/test/format.test.js
+1da9637b8e639d44e358b6f95fdc15ab0407f6f7d6112fdb6b2adaa2a54aa605  experiments/E10/fixtures/lib/test/stats.test.js
+e5aa50f2b39f17ca42e7c08b3c1595dbd5ec29bdee32e7bc89159a1ab51b1a2d  experiments/E10/index.mjs
+4fcb2624dfaf854c17abef13a97e69393516e0c884e7b6e2977a2c3754af981f  experiments/E3/index.mjs
+485f1ceb106379c0c93b4fb6652985fb39030f3ee4ab8e0a294a3ef7f4a4b7e9  experiments/E5/index.mjs
+5428b03ec177730a6a8e2186d8a4ea8bfe277582700fb9f15d57fef669e7eb95  experiments/E5/texts/agent-phases.md
+fd363b6b4ea143a10d003746e4004cecb0202ac852db5870221986acebfad54e  experiments/E5/texts/ascii-punctuation.md
+14a500750d0000bcda8a22b5ac81f3bb869575aaa4a1d1af2ea6e6f55464d1de  experiments/E5/texts/bundle-closure.md
+7f83bc470731cfd97561b61d2ba853e27f7121b40e1b2a7f62b3ee62615db62b  experiments/E5/texts/bundle-json-home.md
+c0b049f9e1c5476a97f5389ae0b63341a85b1218a34602a64d688a551f535f2c  experiments/E5/texts/count-in-norm.md
+d63735d1966aa95eb5f9a161191992abb1e20309a9545b09991dfc0fa980fc85  experiments/E5/texts/gate-loopholes.md
+8fa2d67ca6dc8d26a24a3ff16544ed29e9aa161df6a3348343a62ae8b2cfe378  experiments/E5/texts/readme-absolute-url.md
+2ea11998a981864b34ec319455ac2a309907be73bdaa6472d2d671fa774fc528  experiments/E5/texts/skill-generic.md
+c4f6c104bce0f923f168d1a8c106ca4782bc1dc67f8f855df51c3cb1d8bf4034  experiments/E5/texts/terminology-dictionary.md
+7867c3e2fea579f02b8afab861a40704b4173f4691edf2d2ebf52c58f9461eca  experiments/E5/texts/unambiguous-wording.md
+bfba851fe5bf94cdab223e134de6e3d6b7f1bb692f8b0843d5e643ebe0756391  lib/graders.mjs
+792c8af416107ec2c342ac1e31c46ea3fb63667c13d870cad6fbe0ca951c98d0  lib/repo.mjs
+fb73db623ed87c53340643847d9e2d42ad9f3b74df4371d17902be61884c4e3f  lib/rng.mjs
+19754657755a268d3c28c9591f5559adc1d5c9a76ad3d177ca0463f771a4f0ac  lib/stats.mjs
+4433b38027e8d3811f6934b6d822353da7aa4bc882481420feab4a3b334ee9a9  priors.json
+```
 
 ## Отклонения от плана
 
-Проект ещё не заморожен; записи ниже фиксируют усложнение наборов после пилота 1 (требование раздела «Гипотезы и метрики»: усложнение записывается).
+Записи до заморозки (26.10.2026) фиксируют усложнение наборов после пилота 1 (требование раздела «Гипотезы и метрики»: усложнение записывается).
 
 - 26.10.2026, E10: к условиям `no-scope` и `scope-line` добавлены `role` и `role-scope-line` (роль «старший инженер» в `--append-system-prompt`), база серии `role`. Причина: без роли контроль не проигрывал ни на одном из 15 кейсов (1,00 на Haiku), встроенный промт Claude Code держит объём.
 - 26.10.2026, E3: размеры 5-40 расширены до 5-160, виды агрегата чередуются (шесть), условия переименованы `n05` -> `n005` и т. д. (база `n005`), число seed задаётся `--cases`. Причина: Haiku держал 1,00 на 40 одинаковых суммах и на 160 агрегатах трёх видов.
@@ -119,3 +158,4 @@
 - 27.10.2026, E7: набор не менялся, серия не гонялась (отложен решением владельца до новой постановки, [#35](https://github.com/dex-it/ai-kit/issues/35)); в ступень 1 не входит.
 - 27.10.2026, E1: наборы кейсов не менялись (задачи #49, #50).
 - 27.10.2026, E1b (#50): добавлен эксперимент `experiments/E1b` (условия `none`, `bank`, `home`; база серии `bank`), в `run.mjs` - запись в `EXPERIMENTS` и вызов `audit` в `selftest`. Серия не гонялась. Проверка кейсов на вырожденность (1,64 USD, README стенда): `release-merge` дополнен полем `precedent_pr` (без него `none` решал его угадыванием). Из списка #12 заменена задача «PR фичи сливается squash»: факт читается в `tests/README.md`.
+- 27.10.2026, полоса шума E10 (база `role`, два независимых прогона A и B на коммите `2ea3d156`, `claude` 2.1.311, Haiku и Sonnet, 90 ячеек каждый, 2,23 и 2,17 USD): Haiku 0,77 против 0,75, |A - B| = 0,03, полоса 0,11; Sonnet 0,51 против 0,52, |A - B| = 0,01, полоса 0,14. Разность условий E10 меньше полосы своего тира не засчитывается как эффект. Прогон B повторяет A в пределах полосы - это же сквозной повтор ворот ◆1. Полосы E3, E5 и E1 отдельно не мерились; для них действует полоса E10 как верхняя оценка шума по тиру, пока серия ступени не даст своей.
