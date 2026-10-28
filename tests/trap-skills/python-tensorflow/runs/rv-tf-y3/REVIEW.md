@@ -1,0 +1,15 @@
+src/shelfwatch/keras_train.py:15 - абсолютный путь к данным в домашнем каталоге автора (/home/dmitry/...), игнорирует DATA_DIR из paths.py; у остальных и в CI load_frame упадёт с FileNotFoundError - major
+src/shelfwatch/keras_train.py:17 - set_global_policy("mixed_float16") при импорте модуля: любой импорт (в т.ч. сервисом и тестами) меняет политику всего процесса; выход модели при этом float16 - minor
+src/shelfwatch/keras_train.py:37 - выходной Dense с softmax под mixed_float16 считается в float16 (нужен dtype="float32"), вероятности теряют точность, возможны нули/NaN в loss - major
+src/shelfwatch/keras_train.py:81 - from_logits=True, а модель на выходе уже отдаёт softmax (стр. 37): двойной softmax, градиенты сглажены, модель недообучается, качество заметно ниже; то же на стр. 98 - blocker
+src/shelfwatch/keras_train.py:55 - для обучения batch() вызван раньше shuffle(64): перемешиваются целые батчи, а не строки, состав батчей одинаков во всех эпохах; плюс нет prefetch - GPU простаивает в ожидании входа - major
+src/shelfwatch/keras_train.py:90 - map(augment) без num_parallel_calls (пункт дисциплины): аугментация идёт в одном потоке и тормозит обучение; нужен num_parallel_calls=tf.data.AUTOTUNE - major
+src/shelfwatch/keras_train.py:62 - shuffle(buffer_size=16) до take(n): буфер 16 почти не перемешивает, "случайная" выборка - это первые ~n строк файла, пробы смещены - minor
+src/shelfwatch/keras_train.py:69 - standardize не используется и содержит ошибки: print срабатывает только при трассировке, if len(x) > 1000 молча обрезает строки (теряются данные, разные формы дают ретрейсинг) - minor
+src/shelfwatch/keras_train.py:94 - модель создана и скомпилирована вне strategy.scope(), внутри scope компилируется повторно: переменные не зеркалируются, на нескольких GPU обучение идёт неверно или падает, "несколько GPU" не работает - blocker
+src/shelfwatch/keras_train.py:90 - batch 256 фиксирован, не масштабируется на число реплик MirroredStrategy: на нескольких GPU эффективный батч на реплику мал, ускорения нет - minor
+src/shelfwatch/keras_train.py:103 - EarlyStopping(monitor="val_loss") при fit без validation_data: val_loss не существует, коллбек только предупреждает и не срабатывает, всегда 100 эпох и переобучение; val_df не используется; нет restore_best_weights - blocker
+src/shelfwatch/keras_train.py:105 - валидация "на глаз" по первым 512 строкам val_df без метрик accuracy/loss на всей валидации; качество модели не измеряется - minor
+src/shelfwatch/keras_train.py:107 - сохранение сабклассной модели SkuNet в .h5: формат не поддерживает subclassed-модели, а у SkuNet/ResidualBlock нет get_config - save падает или модель не загрузится в сервисе; нужен .keras/SavedModel и get_config - blocker
+src/shelfwatch/keras_train.py:46 - проверка пропусков через assert: исчезает при python -O, в обучение попадут NaN - minor
+tests/test_keras_train.py:6 - только форма выхода пустой модели: не покрыты make_dataset, train, сохранение/загрузка, ошибки выше пройдут незамеченными - minor
