@@ -22,11 +22,11 @@ description: Linux syscall и event tracing - strace, bpftrace JSON output, bcc 
 ### JSON-output для агента
 Плохо: парсить human-output bpftrace регэкспом
 Правильно: `bpftrace -f json -e '...'` - NDJSON стрим, легко парсится агентом
-Почему: human-output меняется от версии. JSON-output стабилен начиная с bpftrace 0.16+
+Почему: human-output меняется от версии. JSON-output - NDJSON, но его правили до 0.27 (CHANGELOG) - сверь версию
 
 ### Privileges на проде
 Плохо: запускать bpftrace под пользовательской ролью, ожидая работы
-Правильно: либо `sudo bpftrace`, либо процессу выдан CAP_BPF + CAP_PERFMON (kernel 5.8+), либо `--unprivileged` ограниченный режим
+Правильно: либо `sudo bpftrace`, либо процессу выдан CAP_BPF + CAP_PERFMON (kernel 5.8+)
 Почему: eBPF загрузка программ в ядро требует привилегий. Без них bpftrace `permission denied` на attach probe
 
 ### Kernel headers vs BTF
@@ -63,7 +63,7 @@ description: Linux syscall и event tracing - strace, bpftrace JSON output, bcc 
 ### ltrace вместо современных альтернатив
 Плохо: рекомендовать `ltrace` для трассировки library calls
 Правильно: для современных бинарей `bpftrace` с uprobe; для отдельной библиотеки - `LD_PRELOAD` обёртка
-Почему: ltrace последний релиз 2019, плохо работает с современными PLT-релоками и LTO; multi-threaded поведение нестабильно
+Почему: ltrace: релизы 0.8.0 и 0.8.1 вышли в 09.2025 (gitlab.com/cespedes/ltrace, теги); работа с PLT-релоками, LTO и потоками не сверена
 
 ### SystemTap при наличии eBPF
 Плохо: для глубокой трассировки выбирать SystemTap
@@ -74,8 +74,8 @@ description: Linux syscall и event tracing - strace, bpftrace JSON output, bcc 
 
 ### Forgot detach
 Плохо: `strace -p <PID>` через Ctrl+C - процесс остаётся в `T (stopped)` состоянии
-Правильно: Ctrl+C корректно detach'ит при modern strace (5.0+); проверка `cat /proc/<PID>/status | grep State` после; если stuck - `kill -CONT <PID>`
-Почему: ptrace при abnormal terminate может оставить tracee в SIGSTOP; современный strace ловит SIGINT и detach'ит, старые версии нет
+Правильно: Ctrl+C завершает трассировку, процесс продолжает работу (man strace); проверка `cat /proc/<PID>/status | grep State` после; если stuck - `kill -CONT <PID>`
+Почему: ptrace при abnormal terminate может оставить tracee в SIGSTOP
 
 ### Одновременный strace и gdb
 Плохо: пытаться `strace -p <PID>` когда уже attached gdb

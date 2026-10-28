@@ -1,0 +1,8 @@
+docker exec <ctr> sh -c 'ps aux | grep -i dotnet | head; tail -n 15 /work/logs/worker.log; which dotnet-stack dotnet-dump dotnet-trace gdb strace'
+docker exec <ctr> sh -c 'cd /tmp; ls /root/.dotnet/tools; top -H -b -n1 -p 11 | head -20; cat /proc/11/status | grep -i threads; timeout 60 /root/.dotnet/tools/dotnet-dump collect -p 11 -o /tmp/d.dmp 2>&1 | tail -3'
+docker exec <ctr> sh -c 'cd /tmp; /root/.dotnet/tools/dotnet-dump analyze /tmp/d.dmp -c "threads" -c "clrstack -all" -c "syncblk" -c "exit" 2>&1 | head -120'
+docker exec <ctr> sh -c 'cd /tmp; /root/.dotnet/tools/dotnet-dump analyze /tmp/d.dmp -c "threadpool" -c "dumpasync" -c "exit" 2>&1 | head -40; grep -c "Hang>b__0" /dev/null; sed -n 1,10p /work/logs/worker.log; ls /work/src /tmp/src/orders-worker 2>&1; nl -ba /work/src/*/Program.cs | sed -n 20,70p'
+docker exec <ctr> sh -c 'nl -ba /work/src/Program.cs | sed -n 1,80p; cat /work/app/*.runtimeconfig.json; env | grep -i DOTNET'
+docker exec <ctr> sh -c 'tr "\0" "\n" </proc/11/environ | grep ORDERS; grep -n "class PriceClient" -A12 /work/src/Program.cs'
+docker exec <ctr> sh -c 'grep -n "class PriceClient" -A12 /work/src/Program.cs'
+[Write] <lab>/REPORT.md

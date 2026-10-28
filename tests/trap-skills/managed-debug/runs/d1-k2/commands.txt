@@ -1,0 +1,51 @@
+[Read] <run>/discipline/SKILL-binary-inspection.md
+[Read] <run>/discipline/SKILL-core-dumps.md
+[Read] <run>/discipline/SKILL-managed-debug.md
+[Read] <run>/discipline/SKILL-native-debug.md
+[Read] <run>/discipline/SKILL-perf-profiling.md
+[Read] <run>/discipline/SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'ps -eLo pid,tid,stat,wchan:20,pcpu,comm | head -50; tail -15 /work/logs/worker.log; which dotnet-stack dotnet-dump dotnet-counters strace gdb'
+docker exec <ctr> sh -c 'cd /tmp && export PATH=$PATH:/root/.dotnet/tools; timeout 60 dotnet-counters collect -p 11 --counters System.Runtime --refresh-interval 2 --format csv -o /tmp/c.csv --duration 00:00:08 >/dev/null 2>&1; grep -iE "threadpool|lock-cont" /tmp/c.csv | tail -8; dotnet-dump collect -p 11 -o /tmp/w.dmp --type Mini 2>&1 | tail -2'
+docker exec <ctr> sh -c 'cd /tmp && export PATH=$PATH:/root/.dotnet/tools; ls -la /tmp/w.dmp; dotnet-dump analyze /tmp/w.dmp -c "clrthreads" -c "syncblk" -c "exit" 2>&1 | head -40'
+docker exec <ctr> sh -c 'cd /tmp && export PATH=$PATH:/root/.dotnet/tools; dotnet-dump collect -p 11 -o /tmp/f.dmp --type Full >/dev/null 2>&1; dotnet-dump analyze /tmp/f.dmp -c "setthread 7" -c "clrstack" -c "setthread 12" -c "clrstack" -c "syncblk" -c "threadpool" -c "exit" 2>&1 | head -80'
+docker exec <ctr> sh -c 'cd /work; grep -n "Hang\|\.Wait()\|\.Result" -r src | head; grep -rn -i "maxthreads\|SetMaxThreads\|ThreadPool" src *.json *.config /work/*.json 2>/dev/null | head; ls /work; cat /proc/11/environ | tr "\0" "\n" | grep -i -E "dotnet|thread"; rm -f /tmp/*.dmp'
+docker exec <ctr> sh -c 'cd /work; grep -n "Hang\|\.Wait()\|\.Result\|SetMaxThreads\|SetMinThreads" -r src | head; ls /work /work/src; rm -f /tmp/*.dmp'
+docker exec <ctr> sh -c 'sed -n 30,70p /work/src/Program.cs; sed -n 110,120p /work/src/Program.cs'
+cat > <lab>/REPORT.md <<'EOF'
+# Симптом
+orders-worker (dotnet, PID 11) жив, но `processed=40` в /work/logs/worker.log не растёт, `inflight` растёт (102 → 584 за 20 с), CPU ~0%, rss стабилен.
+
+# Причина
+Голодание (starvation) пула потоков .NET: пул ограничен 8 рабочими потоками (`ORDERS_MAX_WORKERS`, по умолчанию 8; /work/src/Program.cs:37-39), и все 8 заблокированы синхронным ожиданием асинхронного вызова (sync-over-async, `GetPriceAsync(sku).Result`, Program.cs:117, вызывается из Task.Run в Program.cs:46). Продолжение `await Task.Delay(30)` должно выполниться в том же пуле, свободных потоков нет, и задачи ждут друг друга бесконечно.
+
+# Улики
+1. Потоки процесса в ожидании (`ps -eLo pid,tid,stat,wchan:20,comm`): все `.NET TP Worker` в `futex_wait`, CPU 0.0.
+2. Метрики (`dotnet-counters collect -p 11 --counters System.Runtime`):
+   - `ThreadPool Thread Count,Metric,8`
+   - `ThreadPool Queue Length,Metric,793 → 841 → 889` (растёт)
+   - `ThreadPool Completed Work Item Count (Count / 2 sec),Rate,0`
+3. `dotnet-dump analyze` (полный дамп) → `clrstack` у воркеров (потоки 7 и 12, остальные аналогично):
+   ```
+   System.Threading.Monitor.ObjWait(Int32, System.Object)
+   System.Threading.Tasks.Task.SpinThenBlockingWait(...)
+   System.Threading.Tasks.Task.InternalWaitCore(...)
+   Modes+<>c__DisplayClass3_1.<Hang>b__0()
+   System.Threading.Tasks.Task`1[[System.Decimal...]].InnerInvoke()
+   System.Threading.ThreadPoolWorkQueue.Dispatch()
+   ```
+4. `dotnet-dump analyze ... -c threadpool`:
+   ```
+   Workers Total:    8
+   Workers Running:  8
+   Workers Idle:     0
+   Worker Min Limit: 4
+   Worker Max Limit: 8
+   ```
+5. `syncblk`: удерживаемых мониторов нет, значит это не взаимоблокировка на lock, а исчерпание пула.
+
+# Что предлагаю
+- Срочно: перезапустить сервис (потоки сами не освободятся). Дамп/метрики сняты, очередь в памяти будет потеряна. Нужно решить, можно ли переобработать заказы.
+- Исправление в коде (за владельцами сервиса): убрать `.Result` и сделать обработчик асинхронным (`await GetPriceAsync(...)`).
+- Конфигурация: поднять `ORDERS_MAX_WORKERS` (orders-worker.env) только как временную меру, потому что при достаточной нагрузке потоки закончатся снова.
+- Мониторинг: алерт на `ThreadPool Queue Length` растёт при `Completed Work Item Count` = 0, и на стоящий `processed` при растущем `inflight`.
+EOF

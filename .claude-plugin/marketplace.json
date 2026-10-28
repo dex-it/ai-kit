@@ -1436,7 +1436,7 @@
       "name": "dex-skill-bdd-gherkin",
       "source": "./plugins/skills/dex-skill-bdd-gherkin",
       "description": "Норматив жанра исполняемых примеров - карта примеров Example Mapping, синтаксис Gherkin, структура файла, стиль шага, тег трассировки на FR, граница «пример против теста»",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1452,7 +1452,7 @@
       "name": "dex-skill-binary-inspection",
       "source": "./plugins/skills/dex-skill-binary-inspection",
       "description": "Бинарный анализ - binutils (objdump, addr2line, c++filt), дизассемблирование и cross-arch, Rizin JSON, LIEF Python API, ilspycmd для .NET",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1485,7 +1485,7 @@
       "name": "dex-skill-business-analysis-29148",
       "source": "./plugins/skills/dex-skill-business-analysis-29148",
       "description": "Норматив этапа бизнес-анализа (ISO/IEC/IEEE 29148 §6.2): состав Business requirements specification, разделы BRD, атрибуты бизнес-требования, мера успеха MOE, режим сбора interactive/autonomous, поиск конфликта целей, стадии готовности артефакта, вход и выход этапа",
-      "version": "4.6.0",
+      "version": "4.6.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1565,7 +1565,7 @@
       "name": "dex-skill-core-dumps",
       "source": "./plugins/skills/dex-skill-core-dumps",
       "description": "Post-mortem анализ coredump: gcore, coredumpctl, kernel.core_pattern, mismatched libs, контейнеры",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1614,7 +1614,7 @@
       "name": "dex-skill-defect-classification",
       "source": "./plugins/skills/dex-skill-defect-classification",
       "description": "Разметка находок ревью MR и саморевью типом по схеме классификации дефектов - гейт по поручению, единица - находка, закрытая схема типов на характеристиках качества продукта, независимость типа от критичности, схема проекта по адресу вместо встроенной, выход разметки",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1890,7 +1890,7 @@
       "name": "dex-skill-idea-forming",
       "source": "./plugins/skills/dex-skill-idea-forming",
       "description": "Этап формирования идеи до конвейера BRD: замыкание сырой мысли в идею с названной проблемой, носителем, базой сравнения, ценностью и самым рискованным допущением; методика подбирается по дефициту идеи - по одной за раз, не каталогом",
-      "version": "1.3.4",
+      "version": "1.3.5",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2006,7 +2006,7 @@
       "name": "dex-skill-managed-debug",
       "source": "./plugins/skills/dex-skill-managed-debug",
       "description": "Runtime-отладка .NET: netcoredbg, dotnet-dump/trace/counters, SOS, managed-дампы, анализ кучи GC, async-стек.",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2023,7 +2023,7 @@
       "name": "dex-skill-merge-conflict-resolution",
       "source": "./plugins/skills/dex-skill-merge-conflict-resolution",
       "description": "Протокол подтягивания базовой ветки и разрешения конфликтов merge/rebase без тихой потери стороны: якоря и точка отката, превью без записи, семантические конфликты без маркеров, ours/theirs в rebase, переезды, генерируемое, верификация обеих дельт. Команда /resolve-conflicts.",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2130,7 +2130,7 @@
       "name": "dex-skill-opportunity-canvas",
       "source": "./plugins/skills/dex-skill-opportunity-canvas",
       "description": "Норматив жанра идеи - one-pager и opportunity canvas, шесть полей из десяти у Паттона, статус идеи, переход «принято -> фича» и метрика как MOE, граница «вне конвейера»",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2164,7 +2164,7 @@
       "name": "dex-skill-perf-profiling",
       "source": "./plugins/skills/dex-skill-perf-profiling",
       "description": "Linux sampling-профилирование: perf record/script, FlameGraph, on-CPU vs off-CPU, JIT-символы Java",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2477,7 +2477,7 @@
       "name": "dex-skill-review-evidence",
       "source": "./plugins/skills/dex-skill-review-evidence",
       "description": "Процедура ревью: где искать источник намерения и когда ставить intent: n/a, два прохода с разделом «перепроверить» для неуверенных находок.",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2639,7 +2639,7 @@
       "name": "dex-skill-syscall-tracing",
       "source": "./plugins/skills/dex-skill-syscall-tracing",
       "description": "Linux syscall и event tracing: strace, bpftrace JSON output, bcc-tools (execsnoop/opensnoop/funclatency/memleak)",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2656,7 +2656,7 @@
       "name": "dex-skill-system-requirements-29148",
       "source": "./plugins/skills/dex-skill-system-requirements-29148",
       "description": "Норматив этапа системных требований (ISO/IEC/IEEE 29148 §6.4) - состав SRS по §9.6, атрибуты FR и NFR, метод верификации и MOP, охват фичи, целевая стадия, вход и выход",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2686,7 +2686,7 @@
       "name": "dex-skill-test-coverage",
       "source": "./plugins/skills/dex-skill-test-coverage",
       "description": "Контракт покрытия для тест-агентов и агентов, пишущих тесты инлайн - branch coverage по diff-scope, порог >= 75%, деградация метрики и недостижимость явным статусом наверх",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2776,7 +2776,7 @@
       "name": "dex-skill-use-cases-cockburn",
       "source": "./plugins/skills/dex-skill-use-cases-cockburn",
       "description": "Норматив жанра use case по Cockburn - уровни цели, основной ход и расширения, минимальные гарантии, правила записи шага, связь с FR своей фичи, вход и выход",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "skill",
       "keywords": [
         "skill",
