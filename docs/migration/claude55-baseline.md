@@ -46,17 +46,19 @@
 
 | Группа | Skills | КБ | Ср. КБ | references, КБ | description ср./макс. | Запретов/КБ | Капс | Просьб перепроверки | Длинных предл., % | Контрольные наборы | Крупнейшие, КБ |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| S1 Контекст проекта и нормы репозитория | 14 | 138 | 9,8 | 38 | 428/497 | 0,09 | 0 | 0 | 33 | 6/14 | project-rulebook 36,5, project-docs-map 24,9, docs-layout 15,8 |
-| S2 Мета-нормы: письмо, ревью артефактов, делегирование | 8 | 162 | 20,3 | 107 | 438/498 | 0,12 | 0 | 4 | 25 | 2/8 | node-contract 48,2, optimize-for-llm 44,6, artifact-review 37,7 |
-| S3 Требования, продукт и планирование | 18 | 164 | 9,1 | 0 | 370/489 | 0,07 | 1 | 0 | 29 | 10/18 | business-analysis-29148 31,5, idea-forming 29,8, system-requirements-29148 21,2 |
-| S4 Архитектура, API и проектирование | 12 | 38 | 3,2 | 0 | 373/483 | 0 | 0 | 0 | 21 | 10/12 | architecture-definition-42010 12,8, interface-definition-openapi 11,6, api-spec-quality 2,1 |
-| S5 Ревью, качество и тесты | 9 | 41 | 4,6 | 23 | 401/496 | 0,02 | 0 | 0 | 18 | 7/9 | defect-classification 14,3, test-coverage 6,6, merge-conflict-resolution 5,3 |
-| S6 Отладка и диагностика | 11 | 51 | 4,6 | 0 | 342/422 | 0,02 | 0 | 0 | 63 | 11/11 | managed-debug 7,8, syscall-tracing 7,2, shared-stand-safety 7,1 |
-| S7 .NET | 9 | 9 | 1 | 0 | 303/394 | 0 | 0 | 0 | 28 | 9/9 | dotnet-ef-core 1,5, dotnet-resilience 1,4, dotnet-api-development 1,4 |
-| S8 TypeScript, веб и автоматизация тестов | 5 | 6 | 1,2 | 0 | 291/356 | 0 | 0 | 0 | 33 | 5/5 | ts-vitest-jest 2,2, playwright 1,6, api-testing 0,9 |
-| S9 Python и ML | 6 | 5 | 0,8 | 0 | 238/334 | 0 | 0 | 0 | 17 | 6/6 | python-nlp-transformers 1,5, python-project-hygiene 1, python-pytorch 0,6 |
-| S10 Инфраструктура и CI/CD | 10 | 9 | 0,9 | 0 | 272/358 | 0 | 0 | 0 | 25 | 10/10 | kafka 1,3, mongodb 1,2, redis 1 |
-| Итого | 102 | 623 | 6,1 | 0 | 356/498 | 0,07 | 1 | 4 | 29 | - | - |
+| S1 Контекст проекта и нормы репозитория | 14 | 138 | 9,8 | 38 | 428/497 | 0,09 | 0 | 0 | 24 (было 33) | 6/14 | project-rulebook 36,5, project-docs-map 24,9, docs-layout 15,8 |
+| S2 Мета-нормы: письмо, ревью артефактов, делегирование | 8 | 162 | 20,3 | 107 | 438/498 | 0,12 | 0 | 4 | 21 (было 25) | 2/8 | node-contract 48,2, optimize-for-llm 44,6, artifact-review 37,7 |
+| S3 Требования, продукт и планирование | 18 | 164 | 9,1 | 0 | 370/489 | 0,07 | 1 | 0 | 17 (было 29) | 10/18 | business-analysis-29148 31,5, idea-forming 29,8, system-requirements-29148 21,2 |
+| S4 Архитектура, API и проектирование | 12 | 38 | 3,2 | 0 | 373/483 | 0 | 0 | 0 | 7 (было 21) | 10/12 | architecture-definition-42010 12,8, interface-definition-openapi 11,6, api-spec-quality 2,1 |
+| S5 Ревью, качество и тесты | 9 | 41 | 4,6 | 23 | 401/496 | 0,02 | 0 | 0 | 12 (было 18) | 7/9 | defect-classification 14,3, test-coverage 6,6, merge-conflict-resolution 5,3 |
+| S6 Отладка и диагностика | 11 | 51 | 4,6 | 0 | 342/422 | 0,02 | 0 | 0 | 1 (было 63) | 11/11 | managed-debug 7,8, syscall-tracing 7,2, shared-stand-safety 7,1 |
+| S7 .NET | 9 | 9 | 1 | 0 | 303/394 | 0 | 0 | 0 | 2 (было 28) | 9/9 | dotnet-ef-core 1,5, dotnet-resilience 1,4, dotnet-api-development 1,4 |
+| S8 TypeScript, веб и автоматизация тестов | 5 | 6 | 1,2 | 0 | 291/356 | 0 | 0 | 0 | 0 (было 33) | 5/5 | ts-vitest-jest 2,2, playwright 1,6, api-testing 0,9 |
+| S9 Python и ML | 6 | 5 | 0,8 | 0 | 238/334 | 0 | 0 | 0 | 5 (было 17) | 6/6 | python-nlp-transformers 1,5, python-project-hygiene 1, python-pytorch 0,6 |
+| S10 Инфраструктура и CI/CD | 10 | 9 | 0,9 | 0 | 272/358 | 0 | 0 | 0 | 3 (было 25) | 10/10 | kafka 1,3, mongodb 1,2, redis 1 |
+| Итого | 102 | 623 | 6,1 | 0 | 356/498 | 0,07 | 1 | 4 | 16 (было 29) | - | - |
+
+Колонка «Длинных предл., %» пересчитана 28.10.2026 ([#69](https://github.com/dex-it/ai-kit/issues/69)) на том же дереве `0f146b6f`: граница предложения теперь строка Markdown (заголовок без точки, пункт списка и строка с меткой `Плохо:`, `Правильно:`, `Почему:` не склеиваются; жёсткий перенос внутри фразы склеивается). В скобках - значение при замере (прежний счёт воспроизводится тем же скриптом до правки). Остальные колонки не менялись.
 
 ## Агенты по группам
 
