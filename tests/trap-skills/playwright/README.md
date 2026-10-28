@@ -79,3 +79,14 @@ Skill tool в фазе: `test-automator` (sonnet; Playwright / E2E, `[справ
 
 Норма письма (`dex-skill-norm-writing`): носитель меньше, чем до правки, пункты - одно предложение без решения.
 Рез через `dex-skill-optimize-for-llm` не вызывался (`Skill` в сессии исполнителя группы нет) - `unverifiable`.
+
+### Заход S8 (#22): сверка фактов (прогонов нет)
+
+Сверено 28.10.2026 (Playwright 1.63.0 в `_projects/shopdesk`: исходники `playwright-core` и `npx playwright test --help`; playwright.dev/docs/debug, /locators, /auth, /api/class-page; Microsoft Learn, "Run Linux GUI apps with WSL"):
+- `PWDEBUG=1` подтверждён: `--debug` описан в `--help` как "Shortcut for PWDEBUG=1 ... --headed --workers=1"; на странице docs/debug форма `--debug`, `PWDEBUG=1` там не описан.
+- `page.pause()` по docs требует headed ("requires Playwright to be started in a headed mode"): в теле не было, добавлено.
+- В описании Inspector (docs/debug) нет "snapshot DOM" и "evaluation panel" - есть пошаговое исполнение, выбор и правка локаторов, журнал actionability; недокументированное снято.
+- **Ошибка в W13**: "cryptic ошибка 'no DISPLAY' / segfault" неверна для 1.63.0: `playwright-core` для Chromium, Firefox и WebKit подменяет лог запуска на явное сообщение "Looks like you launched a headed browser without having a XServer running. Set either 'headless: true' or use 'xvfb-run <your-playwright-app>'". Тело исправлено.
+- **Ошибка в W13**: "WSLg (Win 11) / X-сервер (Win 10)" - по Microsoft Learn GUI-приложения в WSL 2 доступны на Windows 10 с сборки 19044 и на Windows 11; X-сервер нужен только на старых Windows 10. Исправлено в теле и в `docs/CLI_UTILITIES.md` (копия факта).
+- Локаторы и `storageState` (W1, W7): docs/locators приоритет role, затем label, text, test id; CSS/XPath "not recommended"; docs/auth - setup-проект и `storageState` "eliminates the need to authenticate in every test", оговорка: подходит тестам без серверного состояния. Расхождений нет.
+Не проверено прогоном: W12, W13 (нет браузера и WSL); пункт W13 после правки почти дословно повторяет то, что печатает сам Playwright - снятие обсуждается (см. PR), без прогона не применено.

@@ -1,0 +1,110 @@
+diff --git a/web/src/components/OrdersPage.tsx b/web/src/components/OrdersPage.tsx
+index 7b2aa7f..6e2704d 100644
+--- a/web/src/components/OrdersPage.tsx
++++ b/web/src/components/OrdersPage.tsx
+@@ -14,10 +14,23 @@ export function OrdersPage() {
+   const [loadFailed, setLoadFailed] = useState(false);
+   const [actionError, setActionError] = useState<string | null>(null);
+   const [expandedId, setExpandedId] = useState<string | null>(null);
++  const [query, setQuery] = useState('');
+ 
+   useEffect(() => {
+-    getOrders().then(setOrders, () => setLoadFailed(true));
+-  }, []);
++    let ignore = false;
++    setLoadFailed(false);
++    getOrders(query.trim()).then(
++      (result) => {
++        if (!ignore) setOrders(result);
++      },
++      () => {
++        if (!ignore) setLoadFailed(true);
++      },
++    );
++    return () => {
++      ignore = true;
++    };
++  }, [query]);
+ 
+   async function handleCancel(id: string) {
+     setActionError(null);
+@@ -32,10 +45,15 @@ export function OrdersPage() {
+   return (
+     <section>
+       <h1>Мои заказы</h1>
++      <label>
++        Поиск заказов
++        <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
++      </label>
+       {loadFailed && <p role="alert">Не удалось загрузить заказы</p>}
+       {actionError && <p role="alert">{actionError}</p>}
+       {orders === null && !loadFailed && <p>Загрузка...</p>}
+-      {orders !== null && orders.length === 0 && <p>У вас пока нет заказов</p>}
++      {orders !== null && orders.length === 0 && query.trim() === '' && <p>У вас пока нет заказов</p>}
++      {orders !== null && orders.length === 0 && query.trim() !== '' && <p>Ничего не найдено</p>}
+       {orders !== null && orders.length > 0 && (
+         <ul className="orders">
+           {orders.map((order) => (
+diff --git a/web/src/components/__tests__/OrdersPage.test.tsx b/web/src/components/__tests__/OrdersPage.test.tsx
+index c74b0b5..ccc6ba8 100644
+--- a/web/src/components/__tests__/OrdersPage.test.tsx
++++ b/web/src/components/__tests__/OrdersPage.test.tsx
+@@ -1,4 +1,5 @@
+-import { render, screen } from '@testing-library/react';
++import { render, screen, waitFor } from '@testing-library/react';
++import userEvent from '@testing-library/user-event';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import type { Order } from '../../types';
+ import { OrdersPage } from '../OrdersPage';
+@@ -58,4 +59,51 @@ describe('OrdersPage', () => {
+ 
+     expect(await screen.findByText('Не удалось загрузить заказы')).toBeInTheDocument();
+   });
++
++  it('searches orders on every change of the query', async () => {
++    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
++      const q = new URL(String(input), 'http://localhost').searchParams.get('q') ?? '';
++      const found = orders.filter((order) => order.items.some((item) => item.title.toLowerCase().includes(q.toLowerCase())));
++      return jsonResponse(found);
++    });
++    vi.stubGlobal('fetch', fetchMock);
++    const user = userEvent.setup();
++
++    render(<OrdersPage />);
++    expect(await screen.findByText('Заказ #1002')).toBeInTheDocument();
++
++    await user.type(screen.getByLabelText('Поиск заказов'), 'чайник');
++
++    await waitFor(() => expect(screen.queryByText('Заказ #1002')).not.toBeInTheDocument());
++    expect(screen.getByText('Заказ #1003')).toBeInTheDocument();
++    expect(fetchMock).toHaveBeenLastCalledWith('/api/orders?q=%D1%87%D0%B0%D0%B9%D0%BD%D0%B8%D0%BA', expect.anything());
++  });
++
++  it('shows the full list again when the query is cleared', async () => {
++    const fetchMock = vi.fn(async () => jsonResponse(orders));
++    vi.stubGlobal('fetch', fetchMock);
++    const user = userEvent.setup();
++
++    render(<OrdersPage />);
++    expect(await screen.findByText('Заказ #1002')).toBeInTheDocument();
++
++    await user.type(screen.getByLabelText('Поиск заказов'), 'чай');
++    await user.clear(screen.getByLabelText('Поиск заказов'));
++
++    await waitFor(() => expect(fetchMock).toHaveBeenLastCalledWith('/api/orders', expect.anything()));
++    expect(await screen.findByText('Заказ #1003')).toBeInTheDocument();
++  });
++
++  it('shows a message when nothing matches the query', async () => {
++    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse([])));
++    const user = userEvent.setup();
++
++    render(<OrdersPage />);
++    await screen.findByText('У вас пока нет заказов');
++
++    await user.type(screen.getByLabelText('Поиск заказов'), 'кофемолка');
++
++    expect(await screen.findByText('Ничего не найдено')).toBeInTheDocument();
++    expect(screen.queryByText('У вас пока нет заказов')).not.toBeInTheDocument();
++  });
+ });
