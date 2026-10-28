@@ -1,0 +1,13 @@
+{
+ "cli": "2.1.311",
+ "model": "claude-haiku-5-5",
+ "skills": [],
+ "mcp": [],
+ "cost": 0.012056840000000001,
+ "subtype": "success",
+ "turns": 8,
+ "is_error": false,
+ "skill_tool_calls": 0,
+ "bash_calls": 6,
+ "reads_outside": []
+}

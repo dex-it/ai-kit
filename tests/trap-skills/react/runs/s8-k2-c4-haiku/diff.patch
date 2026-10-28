@@ -1,0 +1,117 @@
+diff --git a/web/src/components/OrdersPage.tsx b/web/src/components/OrdersPage.tsx
+index 7b2aa7f..de0ac3e 100644
+--- a/web/src/components/OrdersPage.tsx
++++ b/web/src/components/OrdersPage.tsx
+@@ -14,10 +14,24 @@ export function OrdersPage() {
+   const [loadFailed, setLoadFailed] = useState(false);
+   const [actionError, setActionError] = useState<string | null>(null);
+   const [expandedId, setExpandedId] = useState<string | null>(null);
++  const [query, setQuery] = useState('');
+ 
+   useEffect(() => {
+-    getOrders().then(setOrders, () => setLoadFailed(true));
+-  }, []);
++    // Ответ на устаревший запрос не должен перетереть результат последнего ввода.
++    let ignore = false;
++    setLoadFailed(false);
++    getOrders(query).then(
++      (list) => {
++        if (!ignore) setOrders(list);
++      },
++      () => {
++        if (!ignore) setLoadFailed(true);
++      },
++    );
++    return () => {
++      ignore = true;
++    };
++  }, [query]);
+ 
+   async function handleCancel(id: string) {
+     setActionError(null);
+@@ -32,10 +46,16 @@ export function OrdersPage() {
+   return (
+     <section>
+       <h1>Мои заказы</h1>
++      <label className="search">
++        Поиск заказов
++        <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} />
++      </label>
+       {loadFailed && <p role="alert">Не удалось загрузить заказы</p>}
+       {actionError && <p role="alert">{actionError}</p>}
+       {orders === null && !loadFailed && <p>Загрузка...</p>}
+-      {orders !== null && orders.length === 0 && <p>У вас пока нет заказов</p>}
++      {orders !== null && orders.length === 0 && (
++        <p>{query.trim() ? 'Ничего не найдено' : 'У вас пока нет заказов'}</p>
++      )}
+       {orders !== null && orders.length > 0 && (
+         <ul className="orders">
+           {orders.map((order) => (
+diff --git a/web/src/components/__tests__/OrdersPage.test.tsx b/web/src/components/__tests__/OrdersPage.test.tsx
+index c74b0b5..b3c650c 100644
+--- a/web/src/components/__tests__/OrdersPage.test.tsx
++++ b/web/src/components/__tests__/OrdersPage.test.tsx
+@@ -1,4 +1,5 @@
+ import { render, screen } from '@testing-library/react';
++import userEvent from '@testing-library/user-event';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+ import type { Order } from '../../types';
+ import { OrdersPage } from '../OrdersPage';
+@@ -58,4 +59,39 @@ describe('OrdersPage', () => {
+ 
+     expect(await screen.findByText('Не удалось загрузить заказы')).toBeInTheDocument();
+   });
++
++  it('searches orders on the server as the user types', async () => {
++    const fetchMock = vi.fn(async (input: string) => {
++      const q = new URL(input, 'http://localhost').searchParams.get('q') ?? '';
++      return jsonResponse(orders.filter((order) => order.items.some((item) => item.title.toLowerCase().includes(q))));
++    });
++    vi.stubGlobal('fetch', fetchMock);
++
++    render(<OrdersPage />);
++    expect(await screen.findByText('Заказ #1002')).toBeInTheDocument();
++
++    await userEvent.type(screen.getByLabelText('Поиск заказов'), 'чайник');
++
++    expect(fetchMock).toHaveBeenLastCalledWith('/api/orders?q=%D1%87%D0%B0%D0%B9%D0%BD%D0%B8%D0%BA', expect.anything());
++    expect(await screen.findByText('Заказ #1003')).toBeInTheDocument();
++    expect(screen.queryByText('Заказ #1002')).not.toBeInTheDocument();
++  });
++
++  it('shows the full list again when the query is cleared', async () => {
++    vi.stubGlobal(
++      'fetch',
++      vi.fn(async (input: string) => (input === '/api/orders' ? jsonResponse(orders) : jsonResponse([]))),
++    );
++
++    render(<OrdersPage />);
++    const search = screen.getByLabelText('Поиск заказов');
++    await userEvent.type(search, 'zzz');
++    expect(await screen.findByText('Ничего не найдено')).toBeInTheDocument();
++
++    await userEvent.clear(search);
++
++    expect(await screen.findByText('Заказ #1002')).toBeInTheDocument();
++    expect(screen.getByText('Заказ #1003')).toBeInTheDocument();
++    expect(screen.queryByText('Ничего не найдено')).not.toBeInTheDocument();
++  });
+ });
+diff --git a/web/src/styles.css b/web/src/styles.css
+index 79bfdd3..ca9358a 100644
+--- a/web/src/styles.css
++++ b/web/src/styles.css
+@@ -38,6 +38,13 @@ body {
+   border-bottom: 1px solid #d0d7de;
+ }
+ 
++.search {
++  display: flex;
++  gap: 8px;
++  align-items: center;
++  margin-bottom: 16px;
++}
++
+ .status {
+   color: #57606a;
+ }

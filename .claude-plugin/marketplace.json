@@ -2227,7 +2227,7 @@
       "name": "dex-skill-playwright",
       "source": "./plugins/skills/dex-skill-playwright",
       "description": "E2E на Playwright: локаторы по роли и подписи вместо CSS, вход без формы в каждом тесте, отладка через Inspector, headed в WSL.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2727,8 +2727,8 @@
     {
       "name": "dex-skill-ts-vitest-jest",
       "source": "./plugins/skills/dex-skill-ts-vitest-jest",
-      "description": "Unit-тесты на Vitest/Jest: фабрика мока и hoisting, мок модуля против spy, проверка вызовов мока вместо результата.",
-      "version": "2.2.1",
+      "description": "Unit-тесты на Vitest/Jest: фабрика мока и hoisting, переменная вне фабрики и vi.hoisted.",
+      "version": "2.3.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2919,7 +2919,7 @@
       "name": "dex-ts-tester",
       "source": "./plugins/specialists/fullstack/dex-ts-tester",
       "description": "Test writer node for TypeScript/JavaScript: Vitest/Jest, mocks, fake timers, isolation. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "3.10.1",
+      "version": "3.11.0",
       "category": "specialist",
       "keywords": [
         "specialist",
