@@ -208,3 +208,89 @@
 Не менялись, причина: `react` (K2: Sonnet M1 4/4 и 4/4, Haiku 1/4 и 4/4 - skill держит место на Haiku; факты react.dev о `memo` и `Object.is` сверены), `ts-nodejs-api` (K1 N12: контроль 0/3 и 0/2 группы 2.3, со skill 3/3), `api-testing` (формулировка про InMemory и Sqlite сверена с Microsoft Learn: InMemory транзакции игнорирует, SQLite поддерживает; уточнение стоило бы роста текста), `description` у четырёх из пяти.
 
 Ждёт решения или серии: снятие W13 `playwright` (после исправления почти дословно повторяет сообщение Playwright; без WSL и браузера кейса нет, `unverifiable`); R7 `react` на стороне ревью (не перемерялось, контроль группы 2.3 0/2 держит пункт); `react` и `ts-nodejs-api` на Haiku K1 (K2 на Haiku показал выигрыш skill, K1 на Haiku не гонялся); Jest-половина V1 (Jest нет в проекте, но по Jest 30.5 docs проверка out-of-scope переменных и префикс `mock` задокументированы - в тело не добавлено, рост); K3RN (ложные срабатывания на верных тестах) для оставшегося V1 не нужен; правило "снятие V3 и V10" отклоняется от моей же записи до прогонов Haiku (см. README ts-vitest-jest): откат за владельцем.
+
+## Журнал правки: S9 (#23), Python и ML
+
+Текст шести skills не менялся: каждый уже сведён прошлым заходом (#291, группа 4.5) к 1-4 пунктам-названиям с фактом версии, где он есть; снимать нечего без платной серии с полосой шума, а добавлять запрещено. Версии плагинов не поднимались. Вклад захода - сверка фактов с первоисточником и перепроверка пользы со skill и без: `tests/trap-skills/_s9-recheck/README.md` (Sonnet 5.5 medium, 32 прогона, 2,52 USD из потолка 3 USD, 28.10.2026, клиент 2.1.311; n = 2-3 на плечо, полосы шума нет, судья - я).
+
+| Файл | Строка (начало) | Категория | Решение | Основание | Δ байт | Δ строк |
+|---|---|---|---|---|---:|---:|
+| python-project-hygiene `SKILL.md` | весь чек-лист (4 пункта) | Сжатие (уже сделано) | Без правки: со skill 12/12 единиц, без skill 2/12 | P2, P12; H4, H9, H10, H11 | 0 | 0 |
+| python-pytorch `SKILL.md` | "`loss.item()` на каждом батче" | Правило с фактом версии | Без правки: 3/3 против 0/3; факт сверен | P2; T4 | 0 | 0 |
+| python-tensorflow `SKILL.md` | "`map` в `tf.data` без" | Пункт-название | Без правки: 3/3 против 0/3 по ключу | P2; F7 | 0 | 0 |
+| python-nlp-transformers `SKILL.md` | 4 пункта + N9 | Правило с фактом версии | Без правки: 15/15 против 3/15; оба факта версий сверены запуском | P2; N1, N6, N9, N15, N16 | 0 | 0 |
+| python-computer-vision `SKILL.md` | "`Resize` одним числом" | Пункт-название | Без правки: 1/2 против 0/2 (слабо), факт сверен запуском | P2; V3 | 0 | 0 |
+| python-ml-optimization `SKILL.md` | "`suggest_int` на диапазоне" | Пункт-название | Без правки: 2/2 против 0/2 по ключу | P2; O4 | 0 | 0 |
+
+Размер группы до и после: 4 870 байт, 67 строк (`SKILL.md` шести skills: 1007/13, 647/10, 516/10, 1488/14, 569/10, 643/10), `description` без изменений.
+
+**Сверка фактов** (28.10.2026; "запуск" - установленные пакеты в окружении Python 3.12, `uv`):
+
+| Утверждение в skill | Источник и результат |
+|---|---|
+| `loss.item()` синхронизирует CPU с GPU (python-pytorch) | PyTorch Performance Tuning Guide, страница v2.14.0 (Last Updated 09.07.2025): среди операций, требующих синхронизации, перечислено `cuda_tensor.item()`. Сверено по документации; влияние на скорость не мерилось (нет GPU) |
+| С transformers 5.15 прогрев задаёт `warmup_steps` (целое или доля из [0, 1)), поля `warmup_ratio` нет (python-nlp-transformers) | Запуск: transformers 5.14.0 - `warmup_ratio` в сигнатуре `TrainingArguments` есть; 5.15.0 и 5.21.0 - нет; `warmup_steps=0.1` на 1000 шагов даёт 100. Документация v5.14.0 / v5.15.0 / v5.21.0 совпадает. Версия "5.15" подтверждена |
+| `torch.ao.quantization` (в том числе `quantize_dynamic`) deprecated в torch 2.14 | Запуск: torch 2.14.1, `-W error` - `DeprecationWarning: torch.ao.quantization is deprecated and will be removed in 2.10` (текст предупреждения сам называет 2.10, уже прошедшую; в skill этого срока нет). Документация 2.14 (quantization): "migrate to use torchao eager mode `quantize_` API instead" |
+| `Resize` одним числом на неквадратных кадрах (python-computer-vision) | Запуск: torchvision 0.29.1, `Resize(224)` на 640x480 даёт 298x224, на 480x640 - 224x298; документация: "smaller edge of the image will be matched to this number" |
+| `suggest_int` на диапазоне в сотни значений (python-ml-optimization) | Optuna 5.0.0, документация `Trial.suggest_int`: параметры `step` и `log`, при `step != 1` `log` недоступен. Пункт - название ситуации без числового утверждения; сверять нечего |
+| `map` в `tf.data` без `num_parallel_calls` (python-tensorflow) | Руководство tf.data performance (страница TF 2.16.1, обновлена 15.08.2024): параллельность `map` задаётся `num_parallel_calls`, `tf.data.AUTOTUNE`; пример 0,492 с без параметра и 0,364 с с ним. Нюанс не из руководства, из исходника `tensorflow/python/data/ops/options.py` (master): `OptimizationOptions.map_parallelization` - "parallelize stateless map transformations. If None, defaults to True", то есть чистый `map` может распараллеливаться оптимизатором сам; аугментации со случайными операциями не чистые. Запуском не проверено (TensorFlow не ставился); пункт оставлен как есть |
+| `ignore_missing_imports`, `filterwarnings`, `--cov-fail-under`, аудит зависимостей (python-project-hygiene) | mypy 2.4.0, config file: `ignore_missing_imports` по умолчанию `False`, секции `[mypy-модуль]`; pytest, capture-warnings: `error` первой строкой `filterwarnings`; pytest-cov, config: `--cov-fail-under` "Fail if the total coverage is less than MIN"; pypa/pip-audit README: `pip-audit -r requirements.txt`, источник по умолчанию PyPI. Страница PyPI pip-audit не загрузилась |
+
+Не сверено: в телах skills нет утверждений о Keras 3, `torch.compile`, Transformers v5 помимо `warmup_steps`; пункты про них сняты прошлым заходом. Дрейф версий - T29 (#37).
+
+**Ждёт серии (подготовлено, не применено).** (1) Haiku 5.5 medium, те же шесть кейсов, наборы `y`, `z`: оценка около $0,02-0,04 за прогон по `tests/eval55/priors.json` (haiku repo-ячейка 0,0094 USD), 32 прогона около 1 USD; команда: `G45_WORK=<вне репозитория> bash tests/trap-skills/_projects/shelfwatch/run-group-4-5.sh <rv-pt|rv-tf|rv-cv|rv-opt|rv-hyg|rv-nlp> <набор> <N> [SKILL.md]` с заменой `--model` в раннере на `claude-haiku-5-5`. (2) Снятие общей строки "Пункт называет ситуацию, которую изменение проверяет." из шести skills (-101 байт и -2 строки на skill, около 600 байт на группу): строка общая для 48 skills и закрыта формой SKILL_FRAMEWORK; нужен третий плечо в серии `y`/`z` (те же кейсы, 6 x 3 прогона около 1,5 USD на Sonnet) и полоса шума, которой у собственной пробы нет. (3) Добор третьего прогона RV-CV и RV-OPT (около 0,5 USD), чтобы V3 и O4 стояли на n = 3. (4) Активация (`node tools/run-activation.js --runs 3`) - нужна только при правке `description`; не правилась.
+
+## Журнал правки: S7 (#21), .NET-skills
+
+Текст 9 skills (`dotnet-api-development`, `-async-patterns`, `-code-quality`, `-csproj-hygiene`, `-ef-core`, `-logging`, `-resilience`, `-testing-patterns`, `-validation`) не менялся, `description` тоже, версии плагинов не поднимались. Причина: после сжатия по свидетельству (группы 2.1, 2.2, #291) каждый skill - от одного до шести пунктов-названий (0,7-1,5 КБ, всего 9 КБ), общих описаний технологии и повторов в них нет; сверка фактов с первоисточником расхождений не нашла; парная проба на Sonnet 5.5 не дала основания для снятия или переноса. Размер группы: 9 КБ до и после, 0 байт, 0 строк. Записей рубрики о снятом или добавленном нет: категории "Снять", "Сжать", "Перенос" не применялись.
+
+### Сверка фактов (28.10.2026, Microsoft Learn и документация библиотек)
+
+| Утверждение skill | Источник (дата правки страницы) | Вердикт |
+|---|---|---|
+| `ef-core`: `DateTime` без явного типа в Npgsql 6+ - `timestamptz`, пишется `Kind=Utc`; в `timestamp` пишутся Local/Unspecified | npgsql.org/doc/types/datetime: UTC -> `timestamptz`, Local/Unspecified -> `timestamp`, не-UTC в `timestamptz` бросает; чтение `timestamptz` -> Utc, `timestamp` -> Unspecified; умолчание EF-провайдера 6.0 - `timestamptz` (по сводке поиска, страница release-notes 6.0 не открывалась, страница мапинга EF вернула 404) | подтверждено; "прочитанное помечается `Utc`" в `timestamp` - действие value converter, а не поведение провайдера по умолчанию: формулировка skill об итоге конвертера, не проверена отдельной пробой, не менялась (E4 держит) |
+| `ef-core`: soft-delete + required FK: FK в БД без каскада, зависимые удаляет код, разрыв связи не бросает исключение | learn.microsoft.com/ef/core/saving/cascade-delete (2025-10-30): таблица "required, dependents loaded": `ClientCascade` и `Cascade` - EF удаляет зависимых при разрыве; `Restrict`, `NoAction`, `ClientSetNull` - `InvalidOperationException`; FK для `ClientCascade` без `ON DELETE CASCADE`; Warning: "Do not configure cascade delete in the database when soft-deleting" | подтверждено; формулировка skill - это `ClientCascade`, имя в тексте не названо, не добавлялось (рост байт без свидетельства) |
+| `ef-core`: `HasQueryFilter` и required-связь | learn.microsoft.com/ef/core/querying/filters (2026-06-24): required navigation + фильтр -> `INNER JOIN`, родитель пропадает; второй `HasQueryFilter` перезаписывает первый, именованные фильтры - с EF Core 10 | согласуется; "нетранслируемое условие" на странице не упомянуто, не проверено |
+| `code-quality`: `AnalysisMode` в проекте при bulk-категориях в `.editorconfig` | learn.microsoft.com/dotnet/fundamentals/code-analysis/configuration-options (2026-02-13): при `AnalysisMode`/`AnalysisLevel` bulk-опции `dotnet_analyzer_diagnostic` игнорируются; категория действует только на правила, включённые по умолчанию; совет - `AnalysisMode<Category>` | подтверждено |
+| `code-quality`: режим NuGet-аудита не покрывает транзитивные | learn.microsoft.com/nuget/concepts/auditing-packages (2026-07-07): `NuGetAuditMode` по умолчанию `all` при `net10.0` и выше, иначе `direct`; NU1903 - high | подтверждено; граница по TFM уже в `dex-dotnet-quality-auditor` (Phase 0, Phase 2, "Fact-check дефолта"), в skill не дублировалась: один факт - один дом |
+| `resilience`: общий timeout вызова, timeout на попытку, circuit breaker, фильтр сбоев | learn.microsoft.com/dotnet/core/resilience/http-resilience (2026-03-30): порядок rate limiter, total 30 с, retry (3, exp+jitter, 2 с), breaker (10 %, 100, 30 с, 5 с), attempt 10 с; один handler без стопки; `TimeoutRejectedException`, не `TimeoutException` | согласуется |
+| `resilience`: `IMemoryCache.GetOrCreate(Async)` не атомарен | learn.microsoft.com/aspnet/core/performance/caching/memory (2026-10-27): "Multiple requests might discover the cached key value is empty", "several threads repopulating" (о заполнении колбэком); атомарность `GetOrCreate` прямо не названа; зонд 10.10.2026 в `_projects/pricing/README.md` | подтверждено зондом, документация подтверждает косвенно; про `Lazy` в фабрике документация молчит, не сверено |
+| `resilience`: `HybridCache` - один вызов фабрики на ключ | learn.microsoft.com/aspnet/core/performance/caching/hybrid (2026-10-13): один конкурентный вызов на ключ в пределах экземпляра, не между экземплярами | подтверждено |
+| `validation`: `SetInheritanceValidator` вместо `When(x is Subtype)` | docs.fluentvalidation.net, "Inheritance": метод есть, с FluentValidation 9.2; каждый подтип добавляется явно | подтверждено; `MaximumLength`, `RuleForEach` отдельно не открывались |
+| `logging`: уровни и scope | learn.microsoft.com/dotnet/core/extensions/logging (2026-03-30): Information - "general flow", Debug - "debugging and development", Warning - "abnormal or unexpected events"; scope виден только провайдерам с `IncludeScopes` (Console, AzureAppServices, ApplicationInsights) | согласуется; оговорка о провайдерах в skill не вынесена: Serilog/Seq ведут scope своим обогащением, кейс RV-L1 держится |
+| `api-development`: создание ресурса - 201 с `Location` | learn.microsoft.com/aspnet/core/web-api/action-return-types: `CreatedAtAction` даёт 201 и `Location`, `ActionResult<T>.Result`, `ProducesResponseType(201)` (по сводке поиска) | согласуется |
+| `async-patterns`: у `File.ReadAllLines` есть асинхронный API | learn.microsoft.com/dotnet/api/system.io.file.readalllinesasync: метод есть (.NET Core 2.0+, по сводке поиска; в .NET Framework нет) | подтверждено для .NET Core и выше |
+| `csproj-hygiene`: `CopyLocalLockFileAssemblies` в библиотеке | learn.microsoft.com/dotnet/core/project-sdk/msbuild-props (по сводке поиска, страница не открывалась): по умолчанию false у библиотек | согласуется, не сверено по странице |
+| `testing-patterns`, `csproj-hygiene` (кроме выше), `async-patterns` (кроме выше) | - | пункты - названия ситуаций без числовых или версионных утверждений, сверять нечего |
+
+### Парная проба на Sonnet 5.5: текущий skill против без skill
+
+Протокол и команды - `tests/trap-skills/_s7-route/README.md`. Кейс ревью каждого набора, по одному прогону на плечо (`w` - со skill из `develop`, `z` - без), `claude-sonnet-5-5` medium, CLI 2.1.311, засчитывание по ключу кейса вручную. Полосы шума нет (n=1), судьи нет: слабое доказательство.
+
+| Набор, кейс | Ключевых единиц | Со skill | Без skill | Что дал skill |
+|---|---:|---:|---:|---|
+| code-quality, RV-Q | 9 | 8 | 6 | Q2 (`AnalysisMode` при bulk-категориях), Q8 (аудит без транзитивных); Q5 не поднят ни в одном плече (склейка с Q9 в одной строке, как в прошлых прогонах) |
+| resilience, RV-S | 10 | 9 | 8 | S7 (timeout попытки больше срока вызывающего); S1 не поднят ни в одном плече |
+| logging, RV-L1 | 8 | 8 | 7 | L20 (контекст в каждой строке вместо `BeginScope`) |
+| validation, RV-V | 9 | 9 | 9 | ничего: все ловушки пойманы без skill |
+| async-patterns, RV-A (billing) | 8 | 8 | 7 | A4 (`Task.Run` над `ReadAllLines`) |
+| api-development, RV-A (pricing) | 19 | 19 | 14 | D1, D3, D9, D10, D18 (логика в action, `IActionResult`, `[Route]`, 201 с `Location`, enum без описания); D11, D12, D14 без skill засчитаны мягко по одной общей находке о схеме маршрутов |
+| csproj-hygiene, RV-C | 11 | 11 | 11 | ничего |
+| testing-patterns, RV-T | 7 | 7 | 6 | T3 (мок возвращает мок) |
+| Итого | 81 | 79 | 68 | |
+
+Приманки (P): провалов нет ни в одном плече. Пограничный случай `rv-s-w1`: находка о стандартном handler батч-клиента ("10 с на попытку короче пачки, повторы POST") по сути - S8, запроса `Idempotency-Key` нет, как провал не засчитана.
+
+Все различия лежат в пунктах, которые skill называет прямо; skill не сужал охват (единицы вне skill - ключи кейса, приманки - не страдают). `validation` и `csproj-hygiene` в этой пробе выигрыша не дали (оба плеча 9/9 и 11/11): это сигнал, но не основание снимать при n=1, без Haiku и без кейсов кода (G3, G-P). `ef-core` не перепроверялся: у набора нет раннера, кейсы E1-E7 собирались вручную.
+
+Различимость `description` (`route.mjs`, 10 skills, 20 реплик): Haiku 5.5 - 100/100 (5 прогонов), Sonnet 5.5 - 20/20 (1 прогон). `dotnet-testing-patterns` и `ts-vitest-jest` не путаются (реплики с Jest/Vitest и с xunit/Moq разведены обоими тирами), поэтому признак стека в `description` не добавлялся; в обоих описаниях стек назван первым словом (".NET unit-тесты", "Vitest/Jest unit-тесты").
+
+Расход платных вызовов: 2,940 USD из 3 (парная проба: со skill 1,235 + без skill 1,204 = 2,439; различимость: Haiku 0,056, Sonnet 0,445).
+
+### Не применено, ждёт серии (платной) или решения
+
+- Снятие `dotnet-validation` (0,8 КБ) и `dotnet-csproj-hygiene` (1,0 КБ): в пробе выигрыша нет (9/9 и 11/11 в обоих плечах). Условие по эпику: нет измеримого выигрыша на обоих тирах - снять по протоколу `tests/trap-skills/removed/`, для этого нужны Haiku и Sonnet, 3 прогона на ячейку, кейсы кода и ревью (G3, RV-V, RV0; G-P, RV-C, RV0) и пересчёт состава бандлов и потребителей. Оценка по `tests/eval55/priors.json` (repo-ячейка: Sonnet 0,153, Haiku 0,0094 USD): 2 skills x 3 кейса x 2 плеча x 3 прогона = 36 ячеек на тир, около 5,5 USD Sonnet и 0,34 USD Haiku. Команды - раннеры из `tests/trap-skills/_projects/billing/run-group-2-1.sh` и `pricing/run-group-2-2.sh` с `--model claude-haiku-5-5` (модель зашита в раннер, меняется строкой `--model`), множества `w`/`z`, номера 1-3.
+- Перепроверка `ef-core` (кейсы E1-E7, `dotnet-ef-core/README.md`, входы в `inputs/`): раннера нет, нужна сборка запуска по `prompt-plain.md`; 7 кейсов x 2 плеча x 3 прогона на Sonnet по 0,153 - около 6,4 USD, на Haiku около 0,4 USD.
+- Остальные семь наборов: повтор пробы до n=3 на каждом тире для полосы шума (E10 Haiku 0,11, Sonnet 0,14) - Sonnet 16 прогонов x 2 x 0,153 около 4,9 USD, Haiku около 0,3 USD. Кейсы кода (`g-*`) этой пробой не затронуты.
+- E7 на паре `dotnet-testing-patterns` / `ts-vitest-jest` и рост библиотеки до 30 и 100 skills: не гонялся (E7 отложен решением владельца, #35).
+- `NuGetAuditMode` по TFM, `ClientCascade` по имени, оговорка о провайдерах scope: возможное добавление фактов в skills; не вносилось без свидетельства пользы и при нулевом росте.
