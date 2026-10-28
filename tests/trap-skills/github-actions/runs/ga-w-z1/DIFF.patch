@@ -1,0 +1,176 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+new file mode 100644
+index 0000000..a94d267
+--- /dev/null
++++ b/.github/workflows/ci.yml
+@@ -0,0 +1,133 @@
++name: CI
++
++on:
++  pull_request:
++  push:
++    branches: [main]
++
++concurrency:
++  group: ci-${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
++
++permissions:
++  contents: read
++
++env:
++  DOTNET_NOLOGO: true
++  DOTNET_CLI_TELEMETRY_OPTOUT: true
++  IMAGE: registry.example.com/depot/api
++
++jobs:
++  test:
++    name: test (${{ matrix.os }})
++    runs-on: ${{ matrix.os }}
++    strategy:
++      fail-fast: false
++      matrix:
++        os: [ubuntu-latest, windows-latest]
++    steps:
++      - uses: actions/checkout@v4
++
++      - uses: actions/setup-dotnet@v4
++        with:
++          global-json-file: global.json
++          dotnet-version: 8.0.x
++
++      - run: dotnet restore Depot.sln
++
++      - run: dotnet build Depot.sln -c Release --no-restore
++
++      # Contracts используют и Windows-клиенты: гоняем на обеих ОС.
++      - name: Test (Contracts)
++        run: >
++          dotnet test Depot.sln -c Release --no-build
++          --filter "Category=Contracts"
++          --logger "trx;LogFileName=contracts.trx"
++          --collect:"XPlat Code Coverage"
++          --results-directory TestResults/contracts
++
++      # Интеграционным тестам нужен Docker (Testcontainers, Postgres): только Linux.
++      - name: Test (Integration)
++        if: runner.os == 'Linux'
++        run: >
++          dotnet test Depot.sln -c Release --no-build
++          --filter "Category=Integration"
++          --logger "trx;LogFileName=integration.trx"
++          --collect:"XPlat Code Coverage"
++          --results-directory TestResults/integration
++
++      - name: Upload test results and coverage
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: test-results-${{ matrix.os }}
++          path: TestResults/
++          if-no-files-found: warn
++
++  format:
++    name: format (report only)
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++
++      - uses: actions/setup-dotnet@v4
++        with:
++          global-json-file: global.json
++          dotnet-version: 8.0.x
++
++      - run: dotnet restore Depot.sln
++
++      # Замечаний пока 300+: отчёт делаем, но не блокируем (continue-on-error).
++      - name: dotnet format
++        continue-on-error: true
++        run: dotnet format Depot.sln --no-restore --verify-no-changes --report format-report
++
++      - name: Upload format report
++        if: always()
++        uses: actions/upload-artifact@v4
++        with:
++          name: format-report
++          path: format-report/
++          if-no-files-found: ignore
++
++  license-check:
++    needs: test
++    uses: ci-shared/.github/.github/workflows/license-check.yml@v2
++
++  image:
++    name: build and push image
++    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
++    needs: [test, license-check]
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4
++
++      - uses: docker/setup-buildx-action@v3
++
++      - uses: docker/login-action@v3
++        with:
++          registry: registry.example.com
++          username: ${{ secrets.REGISTRY_USER }}
++          password: ${{ secrets.REGISTRY_PASSWORD }}
++
++      - uses: docker/build-push-action@v6
++        with:
++          context: .
++          push: true
++          tags: |
++            ${{ env.IMAGE }}:${{ github.sha }}
++            ${{ env.IMAGE }}:latest
++
++  deploy-stage:
++    name: deploy to stage
++    needs: image
++    runs-on: ubuntu-latest
++    concurrency:
++      group: deploy-stage
++      cancel-in-progress: false
++    steps:
++      # GITHUB_TOKEN не даёт запускать workflow в другом репозитории: нужен токен с правом actions:write на dex/depot-infra.
++      - name: Dispatch deploy.yml in dex/depot-infra
++        env:
++          GH_TOKEN: ${{ secrets.DEPOT_INFRA_TOKEN }}
++        run: gh workflow run deploy.yml --repo dex/depot-infra
+diff --git a/.github/workflows/pr-size.yml b/.github/workflows/pr-size.yml
+new file mode 100644
+index 0000000..c21ec18
+--- /dev/null
++++ b/.github/workflows/pr-size.yml
+@@ -0,0 +1,31 @@
++name: PR size label
++
++# pull_request_target: у PR из форков токен под pull_request только на чтение, метку поставить нельзя.
++# Код PR не выкачиваем и не запускаем, используем только числа из события.
++on:
++  pull_request_target:
++    types: [opened, synchronize, reopened]
++
++permissions:
++  contents: read
++  pull-requests: write
++
++jobs:
++  label:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Set size label
++        env:
++          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
++          PR: ${{ github.event.pull_request.number }}
++          CHANGED: ${{ github.event.pull_request.additions + github.event.pull_request.deletions }}
++        run: |
++          if [ "$CHANGED" -lt 50 ]; then label=size/S
++          elif [ "$CHANGED" -lt 300 ]; then label=size/M
++          else label=size/L
++          fi
++          for l in size/S size/M size/L; do
++            [ "$l" = "$label" ] || gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label "$l" || true
++          done
++          gh label create "$label" --repo "$GITHUB_REPOSITORY" || true
++          gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label "$label"

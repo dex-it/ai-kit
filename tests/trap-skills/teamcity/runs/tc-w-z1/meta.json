@@ -1,0 +1,12 @@
+{
+ "id": "tc-w-z1",
+ "started_utc": "2026-10-28T10:40:41Z",
+ "finished_utc": "2026-10-28T10:42:39Z",
+ "repo_head": "db1c971315c22484522e27879346127328a88e26",
+ "project_files_dirty": 0,
+ "discipline": [],
+ "cli": "2.1.311",
+ "model": "claude-sonnet-5-5",
+ "cost_usd": "0.281136",
+ "result": "success"
+}
