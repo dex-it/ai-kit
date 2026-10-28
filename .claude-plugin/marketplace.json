@@ -1275,7 +1275,7 @@
       "name": "dex-rulebook-miner",
       "source": "./plugins/specialists/review/dex-rulebook-miner",
       "description": "Добыча свода правил проекта из истории ревью: оркестратор ведёт окно и запись, read-only сборщики разбирают источники, каждое правило стоит на дословной цитате и якоре. Норматив жанра, ловушки добычи и оракул приёмки свода едут скиллами этого же плагина. Точка входа - команда /rulebook.",
-      "version": "3.0.2",
+      "version": "3.0.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1549,7 +1549,7 @@
       "name": "dex-skill-completeness-mapping",
       "source": "./plugins/skills/dex-skill-completeness-mapping",
       "description": "Completeness-gate карты потребителей при сквозной правке - найти всех читателей/писателей данных и всех вызывающих/ветки до «сторона готова»",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1660,7 +1660,7 @@
       "name": "dex-skill-docs-layout",
       "source": "./plugins/skills/dex-skill-docs-layout",
       "description": "Целевая раскладка корпуса документации проекта - дерево docs/, куда кладётся каждый жанр, минимум обязательного по размеру фичи, схема идентификаторов и блоки номеров за фичей, развёртывание заготовки в пустом проекте",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2304,7 +2304,7 @@
       "name": "dex-skill-project-docs-map",
       "source": "./plugins/skills/dex-skill-project-docs-map",
       "description": "Карта документации проекта - где лежат требования, BRD, ADR, спеки, корпус уровня 0 и счётчики номеров; файл путей .docs_layout (ключи product, domain, root, adr, specs, counter), поиск и запись при его отсутствии, статус при недостижимом корпусе",
-      "version": "2.6.3",
+      "version": "2.6.4",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2590,7 +2590,7 @@
       "name": "dex-skill-stack-registry",
       "source": "./plugins/skills/dex-skill-stack-registry",
       "description": "Канонический реестр стеков и правило загрузки skills по стеку×теме для общих агентов",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "category": "skill",
       "keywords": [
         "skill",
