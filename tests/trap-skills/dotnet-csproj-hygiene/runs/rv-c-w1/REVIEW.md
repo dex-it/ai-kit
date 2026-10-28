@@ -1,0 +1,18 @@
+tools/Directory.Build.props:1 - файл в tools/ перекрывает корневой Directory.Build.props (нет Import через GetPathOfFileAbove): утилита теряет TargetFramework/Nullable/ImplicitUsings решения, из-за чего в Program.cs пришлось руками дописывать using, а новые tools-проекты тихо соберутся с другими настройками - major
+tools/Pricing.ExportCli/Pricing.ExportCli.csproj:4 - TargetFramework продублирован из решения без названной причины; смена TFM в корне разведёт сборку и запуск утилиты - minor
+tools/Pricing.ExportCli/Pricing.ExportCli.csproj:6 - ManagePackageVersionsCentrally=false отключает центральное управление версиями ради одного пакета; версии CsvHelper в утилите и библиотеке разойдутся - major
+tools/Pricing.ExportCli/Pricing.ExportCli.csproj:9 - CsvHelper Version="33.*" плавающая и дублирует транзитивную зависимость от Pricing.Exports: сборка невоспроизводима, возможен конфликт с 33.0.3 - major
+tools/Pricing.ExportCli/Program.cs:14 - утилита выгружает захардкоженный демо-товар из пустого InMemoryStore, а не реальный прайс: на стенде всегда получится файл из одной строки "Молоко" - blocker
+src/Pricing.Exports/Pricing.Exports.csproj:3 - TargetFramework, Nullable, ImplicitUsings (строки 3, 5, 6) скопированы из корневого Directory.Build.props; при изменении настроек решения проект разойдётся с ним - minor
+src/Pricing.Exports/Pricing.Exports.csproj:4 - LangVersion=preview расходится с решением: библиотека для внешней команды собирается на нестабильных возможностях языка и может перестать собираться у потребителей или на другом SDK - major
+src/Pricing.Exports/Pricing.Exports.csproj:10 - OutputPath в artifacts/exports не покрыт .gitignore (там только bin/) и ломает единую раскладку вывода: артефакты сборки попадут в коммиты - minor
+src/Pricing.Exports/Pricing.Exports.csproj:11 - CopyLocalLockFileAssemblies=true в библиотеке копирует все зависимости в вывод, раздувая его и создавая дубли сборок у потребителей - major
+src/Pricing.Exports/Pricing.Exports.csproj:15 - Microsoft.Extensions.Http.Resilience не используется в коде экспортёра: лишняя зависимость у пакета для маркетплейсов - minor
+src/Pricing.Exports/Pricing.Exports.csproj:16 - Roslynator.Analyzers без PrivateAssets="all" попадёт зависимостью в пакет Pricing.Exports и в проекты потребителей - minor
+src/Pricing.Exports/Pricing.Exports.csproj:21 - ссылка на Pricing.Infrastructure (непакуемый, тянет FrameworkReference AspNetCore) в публикуемой библиотеке: экспортёру нужны только Application/Domain; пакет для маркетплейсов получит лишние зависимости или не восстановится - blocker
+src/Pricing.Exports/PriceListExporter.cs:16 - CultureInfo.CurrentCulture: формат decimal зависит от локали процесса (89,9 или 89.9), фид получит разные файлы на разных хостах; нужна InvariantCulture - major
+src/Pricing.Exports/PriceListExporter.cs:18 - заголовок CSV строится из PriceRow ("Sku;Name;Category;Price"), а по задаче нужно "sku;name;category;price"; Category пишется именем enum - потребитель фида не распарсит формат - major
+src/Pricing.Exports/PriceListExporter.cs:15 - ListAsync(0, int.MaxValue) грузит весь каталог в память разом, архивные отфильтровываются уже после загрузки; на большом каталоге рост памяти - minor
+src/Pricing.Contracts/QuoteContracts.cs:9 - удалён публичный GrandTotal: breaking change для потребителей, не перешедших на Total, получат ошибку компиляции при обновлении - major
+src/Pricing.Contracts/Pricing.Contracts.csproj:5 - удаление публичного API при бампе 1.3.0 -> 1.4.0 нарушает SemVer: потребители с диапазоном 1.x получат поломку без предупреждения, нужна 2.0.0 - major
+src/Pricing.Exports/PriceListExporter.cs:1 - для экспортёра нет тестов (формат, культура, архивные товары); регрессии формата фида не поймаются - minor
