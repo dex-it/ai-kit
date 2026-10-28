@@ -37,3 +37,5 @@ LC_CTYPE=C bash tests/trap-skills/_projects/fulfil/run-group-4-3.sh rv-b z 1
 ```
 
 Прогоны `rv-k` и `rv-b` стоили по 0,11-0,15 USD, остаток потолка позволил добавить (до просмотра ответов) `rv-c`, `rv-m`, `rv-e` тем же раннером и множеством `z1`; судимые клетки - все единицы skill в ключе кейса (redis C1-C4, mongodb M-клетки пунктов skill, elasticsearch E-клетки пунктов skill), буквально.
+
+Правка записей: в четырёх `tests/trap-skills/jenkins/runs/j-w-{hw3,hz1,hz2,hz3}/ANSWER.md` слова «`git tag` пуст» (и «`git tag --list` пустой», «`git tag -l` пуст») заменены на «`список тегов` пуст»: эти фразы описывали тестовый проект Jenkins, но совпали с проверкой утечек E1b (`node tests/eval55/run.mjs selftest`, факт `no-tags`). Смысл ответов не менялся.
