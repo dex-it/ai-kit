@@ -1,6 +1,6 @@
 ---
 name: ts-vitest-jest
-description: Vitest/Jest unit-тесты - мок модуля не подхватывается или переменная в фабрике мока недоступна из-за hoisting vi.mock/jest.mock. Активируется при vitest, jest, vi.mock, jest.mock, vi.hoisted, mock, hoisting, unit test, Cannot access before initialization
+description: Vitest/Jest unit-тесты - мок модуля не подхватывается или переменная в фабрике недоступна из-за hoisting. Активируется при vitest, jest, vi.mock, jest.mock, vi.hoisted, mock, hoisting, фабрика мока, unit test, Cannot access before initialization
 ---
 
 # Vitest / Jest - ловушки unit-тестирования
