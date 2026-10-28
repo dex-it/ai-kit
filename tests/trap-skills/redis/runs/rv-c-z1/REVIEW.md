@@ -1,0 +1,15 @@
+src/Fulfil/Caching/ApiKeyRateLimiter.cs:26 - на каждый запрос к /api создаётся и закрывается новый ConnectionMultiplexer вместо внедрённого singleton: рукопожатие с Redis на каждый запрос, исчерпание сокетов и высокая задержка под нагрузкой - blocker
+src/Fulfil/Caching/ApiKeyRateLimiter.cs:30 - INCR и EXPIRE неатомарны: если процесс упадёт между ними, у счётчика не будет TTL и ключ будет заблокирован навсегда (429 вечно) - major
+src/Fulfil/Caching/ApiKeyRateLimiter.cs:34 - значение X-Api-Key пишется в лог целиком: секрет утекает в логи - major
+src/Fulfil/Caching/ApiKeyRateLimiter.cs:28 - лимит считается по любой присланной строке без проверки ключа: произвольные ключи плодят счётчики в Redis, а сбой Redis даёт 500 на весь /api (нет обработки ошибок/fail-open) - minor
+src/Fulfil/Caching/PriceCache.cs:180 - Math.Round(price) отбрасывает копейки: из кэша отдаётся неверная цена (19.99 -> 20) - blocker
+src/Fulfil/Caching/PriceCache.cs:190 - цена кладётся без TTL, а вебхук price-changed ничего не инвалидирует: устаревшая цена остаётся в кэше навсегда - blocker
+src/Fulfil/Caching/PriceCache.cs:178 - ключ равен голому sku без префикса, а sku приходит из URL: запрос /products/lock:stock/price или rate:<key> читает чужие ключи (FormatException -> 500), а совпадение имён портит данные - major
+src/Fulfil/Caching/PriceEndpoints.cs:211 - обработчик /internal/price-changed только пишет в лог и не удаляет ключ в кэше, плюс эндпоинт без аутентификации и вне /api (без лимита): любой может слать вызовы; кэш не обновляется - major
+src/Fulfil/Caching/RedisLock.cs:280 - блокировка берётся без TTL: если реплика упала до Release, пересчёт остатков остановится на всех репликах навсегда - blocker
+src/Fulfil/Caching/RedisLock.cs:285 - Release удаляет ключ без сверки токена (токен хранится, но не проверяется): после истечения/потери блокировки реплика снимает чужую и две реплики считают одновременно - major
+src/Fulfil/Caching/CartStore.cs:62 - read-modify-write корзины одним JSON без CAS/транзакции: параллельные SetItem/SetPromo теряют обновления друг друга - major
+src/Fulfil/Caching/MailJobQueue.cs:115 - очередь писем на pub/sub: сообщение не хранится, при неработающем/переподключающемся воркере письма теряются, а при нескольких репликах каждое письмо отправляется N раз; нужен List/Stream с подтверждением - blocker
+src/Fulfil/Caching/MailJobQueue.cs:123 - fire-and-forget `_ = HandleAsync` без ретраев и ограничения параллелизма: упавшая отправка только логируется, письмо пропадает - major
+src/Fulfil/Caching/RedisConnection.cs:252 - PriceCache требует IPriceSource, но реализация нигде не зарегистрирована: DI не сможет создать PriceCache, /products/{sku}/price упадёт с 500 (а при ValidateOnBuild - падение старта) - major
+src/Fulfil/Caching/StockRecalculatorJob.cs:333 - остаток перезаписывается Set("stock") суммой движений без учёта параллельных резервов/списаний заказов и по одному UpdateOne на SKU при полном проходе по stock_movements раз в минуту: гонки с заказами и растущая нагрузка на Mongo - minor

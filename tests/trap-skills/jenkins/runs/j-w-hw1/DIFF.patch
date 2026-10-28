@@ -1,0 +1,147 @@
+diff --git a/Jenkinsfile b/Jenkinsfile
+new file mode 100644
+index 0000000..79b52e4
+--- /dev/null
++++ b/Jenkinsfile
+@@ -0,0 +1,141 @@
++// Пайплайн Depot (DPT-22). Multibranch-job; PR из форков тоже собираются.
++
++@Library('depot-pipeline-lib@v1.4.0') _
++
++def image = 'registry.example.com/depot/api'
++
++// Агент с постоянным workspace: сохраняем каталог, но чистим состояние от прошлых сборок.
++def checkoutClean() {
++    checkout scm
++    sh 'git clean -ffdx'
++}
++
++pipeline {
++    // Агент выбирается на каждой стадии: approval не должен держать executor сутки.
++    agent none
++
++    options {
++        disableConcurrentBuilds()
++        timeout(time: 90, unit: 'MINUTES')
++    }
++
++    stages {
++        stage('Build') {
++            agent { label 'dotnet-linux' }
++            steps {
++                checkoutClean()
++                sh 'dotnet build Depot.sln -c Release'
++            }
++        }
++
++        stage('Test') {
++            // Провал одной ветки обесценивает остальные - останавливаем вторую сразу.
++            failFast true
++            parallel {
++                stage('Unit') {
++                    agent { label 'dotnet-linux' }
++                    steps {
++                        checkoutClean()
++                        sh 'dotnet test tests/Depot.Api.Tests --filter "Category=Contracts" --logger "trx;LogFileName=unit.trx" --results-directory TestResults/unit'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/unit/*.trx'
++                        }
++                    }
++                }
++                stage('Integration') {
++                    // Testcontainers поднимает Postgres в Docker на агенте.
++                    agent { label 'dotnet-linux' }
++                    steps {
++                        checkoutClean()
++                        sh 'dotnet test tests/Depot.Api.Tests --filter "Category=Integration" --logger "trx;LogFileName=integration.trx" --results-directory TestResults/integration'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/integration/*.trx'
++                        }
++                    }
++                }
++            }
++        }
++
++        stage('Image') {
++            agent { label 'dotnet-linux' }
++            steps {
++                checkoutClean()
++                sh 'git fetch --tags --force'
++                script {
++                    // Наибольший semver-тег по числам, а не по алфавиту (v1.10.0 > v1.9.3).
++                    // Берутся только стабильные теги vX.Y.Z.
++                    def latest = sh(returnStdout: true,
++                        script: 'git tag -l "v*" | grep -E "^v[0-9]+\\.[0-9]+\\.[0-9]+\$" | sort -V | tail -n 1').trim()
++                    if (!latest) {
++                        error 'В репозитории нет semver-тегов vX.Y.Z'
++                    }
++                    env.IMAGE_TAG = "${latest}-${env.BUILD_NUMBER}"
++                }
++                sh "docker build -t ${image}:${env.IMAGE_TAG} ."
++                script {
++                    // Push только для main: PR (в том числе из форков) не получают registry-creds.
++                    if (env.BRANCH_NAME == 'main') {
++                        withCredentials([usernamePassword(credentialsId: 'registry-creds',
++                                usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
++                            sh 'echo "$REG_PASS" | docker login registry.example.com -u "$REG_USER" --password-stdin'
++                            sh "docker push ${image}:${env.IMAGE_TAG}"
++                            sh 'docker logout registry.example.com'
++                        }
++                    }
++                }
++            }
++        }
++
++        stage('Deploy stage') {
++            agent { label 'dotnet-linux' }
++            when {
++                branch 'main'
++                beforeAgent true
++            }
++            steps {
++                checkoutClean()
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env stage'
++                }
++            }
++        }
++
++        stage('Approve prod') {
++            agent none
++            when {
++                branch 'main'
++                beforeAgent true
++            }
++            steps {
++                // Лид подтверждает деплой вручную; ждём до 72 часов (ответ может прийти на следующий день).
++                timeout(time: 72, unit: 'HOURS') {
++                    input message: "Деплоить ${env.IMAGE_TAG} на prod?", ok: 'Деплоить'
++                }
++            }
++        }
++
++        stage('Deploy prod') {
++            agent { label 'dotnet-linux' }
++            when {
++                branch 'main'
++                beforeAgent true
++            }
++            steps {
++                checkoutClean()
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env prod'
++                }
++            }
++        }
++    }
++
++    post {
++        always {
++            notifySlack(currentBuild.currentResult)
++        }
++    }
++}

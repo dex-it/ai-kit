@@ -1,0 +1,235 @@
+diff --git a/deploy/k8s/00-namespace.yaml b/deploy/k8s/00-namespace.yaml
+new file mode 100644
+index 0000000..e73613b
+--- /dev/null
++++ b/deploy/k8s/00-namespace.yaml
+@@ -0,0 +1,4 @@
++apiVersion: v1
++kind: Namespace
++metadata:
++  name: depot
+diff --git a/deploy/k8s/api.yaml b/deploy/k8s/api.yaml
+new file mode 100644
+index 0000000..c568062
+--- /dev/null
++++ b/deploy/k8s/api.yaml
+@@ -0,0 +1,140 @@
++apiVersion: apps/v1
++kind: Deployment
++metadata:
++  name: depot-api
++  namespace: depot
++  labels:
++    app: depot-api
++spec:
++  replicas: 3
++  strategy:
++    type: RollingUpdate
++    rollingUpdate:
++      maxUnavailable: 0
++      maxSurge: 1
++  selector:
++    matchLabels:
++      app: depot-api
++  template:
++    metadata:
++      labels:
++        app: depot-api
++    spec:
++      imagePullSecrets:
++        - name: regcred
++      terminationGracePeriodSeconds: 30
++      securityContext:
++        runAsNonRoot: true
++        runAsUser: 1654
++        seccompProfile:
++          type: RuntimeDefault
++      topologySpreadConstraints:
++        - maxSkew: 1
++          topologyKey: kubernetes.io/hostname
++          whenUnsatisfiable: ScheduleAnyway
++          labelSelector:
++            matchLabels:
++              app: depot-api
++      containers:
++        - name: api
++          image: registry.example.com/depot/api:1.4.0
++          ports:
++            - name: http
++              containerPort: 8080
++          envFrom:
++            - secretRef:
++                name: depot-config
++          # Миграции идут до приёма трафика (холодный старт до 35 с, p95):
++          # до успеха startupProbe остальные пробы не работают, даём до 150 с.
++          startupProbe:
++            tcpSocket:
++              port: http
++            periodSeconds: 5
++            failureThreshold: 30
++          # Liveness не ходит в БД: недоступность Postgres не должна перезапускать поды.
++          livenessProbe:
++            tcpSocket:
++              port: http
++            periodSeconds: 10
++            failureThreshold: 3
++          # /health проверяет БД: при её недоступности под выводится из Service, но не перезапускается.
++          readinessProbe:
++            httpGet:
++              path: /health
++              port: http
++            periodSeconds: 5
++            timeoutSeconds: 3
++            failureThreshold: 3
++          lifecycle:
++            preStop:
++              exec:
++                command: ["sleep", "5"]
++          # Рабочий набор ~300 МБ; запас под GC и пики. CPU-limit не занижен: throttling вредит .NET на старте.
++          resources:
++            requests:
++              cpu: 100m
++              memory: 384Mi
++            limits:
++              cpu: "1"
++              memory: 768Mi
++          securityContext:
++            allowPrivilegeEscalation: false
++            readOnlyRootFilesystem: true
++            capabilities:
++              drop: ["ALL"]
++          volumeMounts:
++            - name: tmp
++              mountPath: /tmp
++      volumes:
++        - name: tmp
++          emptyDir: {}
++---
++apiVersion: v1
++kind: Service
++metadata:
++  name: depot-api
++  namespace: depot
++  labels:
++    app: depot-api
++spec:
++  selector:
++    app: depot-api
++  ports:
++    - name: http
++      port: 80
++      targetPort: http
++---
++# Еженедельный drain нод не должен оставлять меньше двух реплик.
++apiVersion: policy/v1
++kind: PodDisruptionBudget
++metadata:
++  name: depot-api
++  namespace: depot
++spec:
++  minAvailable: 2
++  selector:
++    matchLabels:
++      app: depot-api
++---
++apiVersion: networking.k8s.io/v1
++kind: Ingress
++metadata:
++  name: depot-api
++  namespace: depot
++spec:
++  ingressClassName: nginx
++  tls:
++    - hosts:
++        - depot.example.com
++      secretName: depot-tls
++  rules:
++    - host: depot.example.com
++      http:
++        paths:
++          - path: /
++            pathType: Prefix
++            backend:
++              service:
++                name: depot-api
++                port:
++                  name: http
+diff --git a/deploy/k8s/worker.yaml b/deploy/k8s/worker.yaml
+new file mode 100644
+index 0000000..b4a6bdf
+--- /dev/null
++++ b/deploy/k8s/worker.yaml
+@@ -0,0 +1,53 @@
++apiVersion: apps/v1
++kind: Deployment
++metadata:
++  name: depot-worker
++  namespace: depot
++  labels:
++    app: depot-worker
++spec:
++  # Ровно один экземпляр: два обработают очередь дважды.
++  replicas: 1
++  # Recreate: старый под останавливается до старта нового, двух экземпляров одновременно не будет.
++  strategy:
++    type: Recreate
++  selector:
++    matchLabels:
++      app: depot-worker
++  template:
++    metadata:
++      labels:
++        app: depot-worker
++    spec:
++      imagePullSecrets:
++        - name: regcred
++      securityContext:
++        runAsNonRoot: true
++        runAsUser: 1654
++        seccompProfile:
++          type: RuntimeDefault
++      containers:
++        - name: worker
++          image: registry.example.com/depot/api:1.4.0
++          args: ["--worker"]
++          envFrom:
++            - secretRef:
++                name: depot-config
++          resources:
++            requests:
++              cpu: 100m
++              memory: 384Mi
++            limits:
++              cpu: "1"
++              memory: 768Mi
++          securityContext:
++            allowPrivilegeEscalation: false
++            readOnlyRootFilesystem: true
++            capabilities:
++              drop: ["ALL"]
++          volumeMounts:
++            - name: tmp
++              mountPath: /tmp
++      volumes:
++        - name: tmp
++          emptyDir: {}
+diff --git a/deploy/secret.example.yaml b/deploy/secret.example.yaml
+new file mode 100644
+index 0000000..1b08813
+--- /dev/null
++++ b/deploy/secret.example.yaml
+@@ -0,0 +1,14 @@
++# Шаблон, НЕ применяется вместе с deploy/k8s/. Реальные значения в репозиторий не коммитить.
++# Создать вручную (значения stage - в docs/stage-values.md):
++#   kubectl -n depot create secret generic depot-config \
++#     --from-literal=ConnectionStrings__Default='...' \
++#     --from-literal=Auth__ApiKey='...'
++apiVersion: v1
++kind: Secret
++metadata:
++  name: depot-config
++  namespace: depot
++type: Opaque
++stringData:
++  ConnectionStrings__Default: "<заполнить>"
++  Auth__ApiKey: "<заполнить>"
