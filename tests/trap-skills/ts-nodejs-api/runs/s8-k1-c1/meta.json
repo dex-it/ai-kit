@@ -1,0 +1,13 @@
+{
+ "cli": "2.1.311",
+ "model": "claude-sonnet-5-5",
+ "skills": [],
+ "mcp": [],
+ "cost": 0.18316700000000002,
+ "subtype": "success",
+ "turns": 11,
+ "is_error": false,
+ "skill_tool_calls": 0,
+ "bash_calls": 8,
+ "reads_outside": []
+}

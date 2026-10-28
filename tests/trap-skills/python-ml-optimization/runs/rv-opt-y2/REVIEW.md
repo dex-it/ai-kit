@@ -1,0 +1,17 @@
+src/shelfwatch/tune.py:68 - objective возвращает train-accuracy последней эпохи, val не используется вообще (аргумент val мёртвый); Optuna максимизирует переобучение, выбранные гиперпараметры не обобщаются - blocker
+src/shelfwatch/tune.py:71 - `except Exception: return 1.0` при direction=maximize: любой упавший trial (OOM, NaN, баг) получает наилучший скор 1.0 и становится «победителем», ошибки замалчиваются - blocker
+src/shelfwatch/tune.py:60 - suggest_int("hidden_dim", 10, 1000) линейно по диапазону в сотни значений: поиск тратит trials на близкие неотличимые ширины; нужен step (например 32/64) или log=True/категории - major
+src/shelfwatch/tune.py:59 - suggest_float("lr", 0.0001, 0.1) без log=True: ~90% выборок приходится на lr>0.01, малые значения почти не исследуются, поиск смещён - major
+src/shelfwatch/tune.py:77 - storage жёстко прописан как sqlite по личному пути /home/dmitry/...: на другой машине/CI упадёт, нет study_name/load_if_exists, повторный запуск упрётся в дубликат или смешает исследования; sqlite плохо переносит параллельные воркеры - major
+src/shelfwatch/tune.py:39 - градиентная аккумуляция: loss не делится на accum_steps (эффективный lr в 4 раза больше) и хвостовые градиенты последнего неполного окна не применяются, а переходят в первый шаг следующей эпохи - major
+src/shelfwatch/tune.py:67 - 50 эпох на trial × 100 trials без pruning/MedianPruner и без отчёта промежуточных значений trial.report: заведомо плохие конфигурации доучиваются до конца, время подбора раздувается - major
+src/shelfwatch/tune.py:21 - num_workers=0 (и нет pin_memory/persistent_workers): сбор батчей идёт в главном процессе — это и есть причина 60% времени в DataLoader, GPU простаивает - major
+src/shelfwatch/tune.py:104 - torch.compile(model) ускоряет только вычисление модели, а по заявленному профилю 60% уходит в DataLoader: выигрыш ограничен ~40% шага, плюс затраты на компиляцию; корень (загрузка данных) не тронут - major
+src/shelfwatch/tune.py:91 - GridSearchCV по 3^6=729 комбинациям × cv=3 = 2187 обучений (n_estimators до 800), без early stopping и без бюджета: часы/дни счёта, n_jobs=-1 к тому же съест всю память/CPU; нужен RandomizedSearch или Optuna - major
+src/shelfwatch/tune.py:109 - mode="max-autotune" для коротких прогонов по 2-3 минуты: автотюнинг ядер компилируется дольше, чем окупается, инференс станет медленнее без компиляции - major
+src/shelfwatch/tune.py:119 - data-dependent ветвление `if x.abs().sum() > 1e4` в compile: graph break и синхронизация GPU→CPU на каждом вызове, обе ветки не фьюзятся, возможны перекомпиляции; нужен torch.where/cond или маршрутизация вне компилируемого графа - major
+src/shelfwatch/tune.py:99 - profile_training: docstring (стр. 95) «GPU загружена на 99%, значит узких мест нет» неверен (загрузка ≠ эффективность, а MR сам сообщает о 60% в DataLoader); профилируется 100 эпох без schedule/warmup и with_stack — огромный trace.json и искажённые первые шаги - minor
+src/shelfwatch/tune.py:42 - `.item()` на каждом шаге форсирует синхронизацию GPU→CPU и тормозит конвейер; копить на устройстве и вызывать .item() раз за эпоху - minor
+src/shelfwatch/tune.py:35 - `.to(DEVICE)` без non_blocking=True (и без pin_memory в загрузчике): копирования синхронные - minor
+src/shelfwatch/tune.py:64 - нет фиксации seed и torch.manual_seed/sampler seed: trials невоспроизводимы, сравнение конфигураций шумное - minor
+tests/test_tune.py:9 - покрыт только make_loader; objective, run_epoch, аккумуляция, обработка ошибок и роутер не проверены - minor
