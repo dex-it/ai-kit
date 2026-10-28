@@ -1,0 +1,13 @@
+[Read] <run>/discipline/SKILL-binary-inspection.md
+[Read] <run>/discipline/SKILL-core-dumps.md
+[Read] <run>/discipline/SKILL-managed-debug.md
+[Read] <run>/discipline/SKILL-native-debug.md
+[Read] <run>/discipline/SKILL-perf-profiling.md
+[Read] <run>/discipline/SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'ps -eo pid,stat,nlwp,pcpu,cmd | grep -i dotnet; tail -n 15 /work/logs/worker.log; which dotnet-stack dotnet-dump dotnet-counters dotnet-trace gdb strace netcoredbg'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; cd /tmp; timeout 20 dotnet-counters collect -p 11 --counters System.Runtime --refresh-interval 2 --format csv -o /tmp/c.csv >/dev/null 2>&1; grep -iE "threadpool|lock-cont|cpu-usage" /tmp/c.csv | tail -n 12; for t in 11/task/*; do echo $t $(cat /proc/$t/comm) $(cut -d" " -f3 /proc/$t/stat) $(cat /proc/$t/wchan); done'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; cd /tmp; rm -f /tmp/d.dmp; dotnet-dump collect -p 11 -o /tmp/d.dmp --type Mini >/dev/null 2>&1; ls /tmp/d.dmp; printf "clrthreads\nsyncblk\nthreadpool\nclrstack -all\nexit\n" | timeout 120 dotnet-dump analyze /tmp/d.dmp 2>&1 | head -150'
+docker exec <ctr> sh -c 'grep -rn "" /work/src --include=Program.cs | sed -n "35,60p"; ls /work/src /work/src/*; tail -n 2 /work/logs/worker.log'
+docker exec <ctr> sh -c 'tr "\0" "\n" </proc/11/environ | grep ORDERS; grep -n -B3 -A12 "class PriceClient" /work/src/Program.cs'
+docker exec <ctr> sh -c 'grep -n -A14 "class PriceClient" /work/src/Program.cs; grep -n ORDERS /work/src/* ; ls /work'
+[Write] <lab>/REPORT.md

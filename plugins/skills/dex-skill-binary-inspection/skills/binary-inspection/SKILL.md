@@ -62,10 +62,10 @@ description: Бинарный анализ - binutils (objdump, addr2line, c++fi
 
 ## objdump и cross-arch
 
-### objdump для cross-arch без --target
-Плохо: `objdump -d arm64-binary.so` на x86_64 машине - неверный disassembly
-Правильно: `objdump --target=elf64-aarch64-little -d arm64-binary.so`; либо `aarch64-linux-gnu-objdump`
-Почему: objdump без `-target` использует host architecture для decode. Для cross-arch нужен явный target или cross-binutils
+### objdump для cross-arch
+Плохо: `objdump -d arm64-binary.so` на x86_64 машине без ARM - «file format not recognized»
+Правильно: `aarch64-linux-gnu-objdump -d` или binutils-multiarch; `objdump -i` - список форматов
+Почему: ISA берётся из ELF. `--target` - лишь BFD-формат (`elf64-littleaarch64`), ISA не выбирает (binutils 2.40 multiarch разобрал x86-64 ELF и без него)
 
 > Анализ coredump с символами по Build-ID и debuginfod - см. dex-skill-core-dumps.
 > Backtrace и работа с символами в attached-debugger (GDB / LLDB) - см. dex-skill-native-debug.
