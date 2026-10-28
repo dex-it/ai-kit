@@ -105,9 +105,28 @@ function parse(text) {
 }
 
 // Длинные предложения: предложение - не менее 3 слов; код и строки таблиц в счёт не идут.
+// Границу задаёт строка Markdown, а не точка: заголовок без точки, пункт списка и строка с меткой
+// ("Плохо:", "Правильно:", "Почему:") - отдельные блоки; строка с жёстким переносом, продолжающая
+// незаконченную фразу, приклеивается к предыдущей.
+const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+/;
+const LABEL = /^\p{Lu}[^\s:]{0,30}(?: [^\s:]+){0,2}:\s/u;
+function proseBlocks(body) {
+  const blocks = [];
+  let cur = null;
+  const flush = () => { if (cur !== null) blocks.push(cur); cur = null; };
+  for (const raw of body.replace(/```[\s\S]*?```/g, '\n').split('\n')) {
+    const line = raw.trim();
+    if (!line || /^#{1,6}\s/.test(line) || /\|.*\|/.test(line)) { flush(); continue; }
+    const item = LIST_ITEM.test(line);
+    const text = line.replace(LIST_ITEM, '').replace(/^>\s*/, '');
+    if (cur !== null && !item && !LABEL.test(text) && !/[.!?]$/.test(cur)) cur += ` ${text}`;
+    else { flush(); cur = text; }
+  }
+  flush();
+  return blocks;
+}
 function sentenceStats(body) {
-  const prose = body.replace(/```[\s\S]*?```/g, '').replace(/\|.*\|/g, '');
-  const sents = prose.replace(/\s+/g, ' ').split(/(?<=[.!?])\s+/).filter((s) => s.split(' ').filter(Boolean).length >= 3);
+  const sents = proseBlocks(body).flatMap((b) => b.replace(/\s+/g, ' ').split(/(?<=[.!?])\s+/)).filter((s) => s.split(' ').filter(Boolean).length >= 3);
   const lens = sents.map((s) => s.split(' ').filter(Boolean).length);
   return { sentences: lens.length, long: lens.filter((n) => n > 25).length };
 }
