@@ -1,6 +1,6 @@
 {
   "name": "dex-skill-review-evidence",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Процедура ревью: где искать источник намерения и когда ставить intent: n/a, два прохода с разделом «перепроверить» для неуверенных находок.",
   "author": {
     "name": "Dex Team",
