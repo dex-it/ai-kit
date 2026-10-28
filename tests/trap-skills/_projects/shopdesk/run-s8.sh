@@ -13,10 +13,14 @@ d="$SP"; while [[ $d != / ]]; do [[ -e $d/CLAUDE.md ]] && { echo "CLAUDE.md на
 [[ -e $HOME/.claude/CLAUDE.md ]] && { echo "есть ~/.claude/CLAUDE.md"; exit 1; }
 P="$T/_projects/shopdesk"
 case_="$1"; set_="$2"; idx="$3"; shift 3; skills=("$@")
+# Тир исполнителя: по умолчанию sonnet; RUN_TIER=haiku - claude-haiku-5-5, id прогона получает суффикс -haiku (добавлено в заходе S8, #22).
+TIER="${RUN_TIER:-sonnet}"; TIER_SFX=""; [[ $TIER == sonnet ]] || TIER_SFX="-$TIER"
+declare -A MODELS=([sonnet]=claude-sonnet-5-5 [haiku]=claude-haiku-5-5)
+MODEL=${MODELS[$TIER]:?unknown tier $TIER}
 declare -A SK=([k2]=react [k1]=ts-nodejs-api)
 declare -A TASK=([k2]=docs/tasks/SD-12-order-search.md [k1]=docs/tasks/SD-11-order-payment.md)
 declare -A MINES=([k2]=K2 [k1]=K1)
-b=main; sk=${SK[$case_]:?unknown case $case_}; id="s8-$case_-$set_$idx"
+b=main; sk=${SK[$case_]:?unknown case $case_}; id="s8-$case_-$set_$idx${TIER_SFX}"
 if [[ $set_ == c && ${#skills[@]} -gt 0 ]]; then echo "набор c - контроль, скилл не подаётся"; exit 1; fi
 if [[ $set_ == s && ${#skills[@]} -eq 0 ]]; then echo "набор s требует skill-file"; exit 1; fi
 W=$SP/w/$id; rm -rf "$W"; mkdir -p "$W" "$SP/log" "$SP/tpl"
@@ -36,7 +40,7 @@ ${sline}Задача - ${TASK[$case_]}. Выполни её в рабочем д
 Зависимости установлены (node_modules), внешней сети нет; доступны git, npm run typecheck, npm test, npx tsc, npx vitest, npx playwright (браузеры Playwright не установлены).
 Ограничения: не вызывай Skill tool; не читай и не пиши вне каталога репозитория${outside}. В ответе - список изменённых файлов и 2-3 строки о решениях."
 cd "$DIR"
-claude -p "$PROMPT" --model claude-sonnet-5-5 --effort medium --restricted --strict-mcp-config \
+claude -p "$PROMPT" --model "$MODEL" --effort medium --restricted --strict-mcp-config \
   --no-session-persistence --disable-slash-commands --permission-mode acceptEdits --max-budget-usd 1 --max-turns 150 \
   --settings "$SP/sandbox.json" --tools Read,Write,Edit,Glob,Grep,Bash --allowed-tools Read,Write,Edit,Glob,Grep,Bash "${add[@]}" \
   --output-format stream-json --verbose > "$SP/log/$id.jsonl" 2>"$SP/log/$id.err"
