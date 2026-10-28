@@ -1614,7 +1614,7 @@
       "name": "dex-skill-defect-classification",
       "source": "./plugins/skills/dex-skill-defect-classification",
       "description": "Разметка находок ревью MR и саморевью типом по схеме классификации дефектов - гейт по поручению, единица - находка, закрытая схема типов на характеристиках качества продукта, независимость типа от критичности, схема проекта по адресу вместо встроенной, выход разметки",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2023,7 +2023,7 @@
       "name": "dex-skill-merge-conflict-resolution",
       "source": "./plugins/skills/dex-skill-merge-conflict-resolution",
       "description": "Протокол подтягивания базовой ветки и разрешения конфликтов merge/rebase без тихой потери стороны: якоря и точка отката, превью без записи, семантические конфликты без маркеров, ours/theirs в rebase, переезды, генерируемое, верификация обеих дельт. Команда /resolve-conflicts.",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2477,7 +2477,7 @@
       "name": "dex-skill-review-evidence",
       "source": "./plugins/skills/dex-skill-review-evidence",
       "description": "Процедура ревью: где искать источник намерения и когда ставить intent: n/a, два прохода с разделом «перепроверить» для неуверенных находок.",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2686,7 +2686,7 @@
       "name": "dex-skill-test-coverage",
       "source": "./plugins/skills/dex-skill-test-coverage",
       "description": "Контракт покрытия для тест-агентов и агентов, пишущих тесты инлайн - branch coverage по diff-scope, порог >= 75%, деградация метрики и недостижимость явным статусом наверх",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "skill",
       "keywords": [
         "skill",
