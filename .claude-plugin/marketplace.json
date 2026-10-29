@@ -106,7 +106,7 @@
       "name": "dex-backlog-manager",
       "source": "./plugins/specialists/product/dex-backlog-manager",
       "description": "Менеджер бэклога: ведение бэклога на уровне эпиков, приоритизация, груминг и refinement.",
-      "version": "1.4.2",
+      "version": "1.4.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -119,7 +119,7 @@
       "name": "dex-bdd-author",
       "source": "./plugins/specialists/product/dex-bdd-author",
       "description": "Составитель исполняемых примеров - карта примеров до кода, .feature на Gherkin с тегом трассировки на FR, красная карточка уходит наверх, а не закрывается догадкой",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -401,7 +401,7 @@
       "name": "dex-business-analyst",
       "source": "./plugins/specialists/product/dex-business-analyst",
       "description": "Бизнес-аналитик: формализует идею в BRD - цели сторон с мерой успеха, стейкхолдеры, риски, эпики.",
-      "version": "5.18.4",
+      "version": "5.18.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -597,7 +597,7 @@
       "name": "dex-domain-analyst",
       "source": "./plugins/specialists/product/dex-domain-analyst",
       "description": "Доменный аналитик: ведёт словарь продукта (ubiquitous language) и конституцию проекта - инварианты и сквозные меры с методом проверки.",
-      "version": "1.3.3",
+      "version": "1.3.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -784,7 +784,7 @@
       "name": "dex-implementer-reader",
       "source": "./plugins/specialists/review/dex-implementer-reader",
       "description": "Implementer reader: проба готовности набора требований - чтение корпуса глазами автора кода и список решений об исходе, мере и границе, которые пришлось бы принять самому. Чистый контекст, без следа прогона и журнала решений.",
-      "version": "2.6.1",
+      "version": "2.6.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1106,7 +1106,7 @@
       "name": "dex-pm-metrics-analyst",
       "source": "./plugins/specialists/product/dex-pm-metrics-analyst",
       "description": "Аналитик продуктовых метрик: KPI, критерии успеха, OKR, воронки и когорты, решения на данных.",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1132,7 +1132,7 @@
       "name": "dex-process-modeler",
       "source": "./plugins/specialists/product/dex-process-modeler",
       "description": "Моделировщик процессов: BPMN 2.0, диаграммы AS-IS и TO-BE, дорожки, поиск точек автоматизации.",
-      "version": "1.5.4",
+      "version": "1.5.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1215,7 +1215,7 @@
       "name": "dex-requirements-analyst",
       "source": "./plugins/specialists/product/dex-requirements-analyst",
       "description": "Аналитик требований: выводит FR из шагов и расширений сценариев, NFR из бизнес-требований и ограничений среды, у каждой единицы метод проверки.",
-      "version": "4.15.1",
+      "version": "4.15.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1262,7 +1262,7 @@
       "name": "dex-roadmap-planner",
       "source": "./plugins/specialists/product/dex-roadmap-planner",
       "description": "Планировщик roadmap: стратегия развития продукта, планирование релизов и кварталов, OKR.",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2933,7 +2933,7 @@
       "name": "dex-use-case-writer",
       "source": "./plugins/specialists/product/dex-use-case-writer",
       "description": "Составитель сценариев использования по Cockburn - основной ход, расширения с терминалом, минимальные гарантии по каждому провальному исходу; разворачивает FR своей фичи, требований не заводит",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2948,7 +2948,7 @@
       "name": "dex-usecase-analyst",
       "source": "./plugins/specialists/product/dex-usecase-analyst",
       "description": "Usecase analyst: разбор BR в сценарии UC - актор и его цель, предусловия, основной ход, расширения с исходом у каждой ветки. Составитель сценариев зоны требований.",
-      "version": "2.7.1",
+      "version": "2.7.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2961,7 +2961,7 @@
       "name": "dex-user-story-analyst",
       "source": "./plugins/specialists/product/dex-user-story-analyst",
       "description": "Аналитик user stories: нарезка сценариев на истории и написание критериев приёмки в форме Given-When-Then.",
-      "version": "5.3.3",
+      "version": "5.3.4",
       "category": "specialist",
       "keywords": [
         "specialist",
