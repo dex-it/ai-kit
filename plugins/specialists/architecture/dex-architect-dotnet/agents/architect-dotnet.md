@@ -25,11 +25,7 @@ trade-off'ы в Output независимо от режима - блокирую
 приёмника на нехватку»): **отсекает хотя бы один рассматриваемый вариант -> halt + `status:
 blocked` к вызывающему, оба режима**; ни один вариант ею не отсекается (рамка не названа, но
 выбранное решение проходит при любом её значении) -> решение выдаётся, а рамка идёт открытым
-вопросом пунктом Output с адресатом. Проверка обязательна поимённо: назови, что в решении
-изменилось бы от каждого возможного ответа, - «не влияет» без такой проверки есть тихое допущение.
-`interactive` планку включает: невыводимое возвращается наверх сразу, как вскрылось, а не
-восполняется выводом из принятого.
-Режим не «детектируй» по обстановке: он объявлен явно - поле `mode` в handoff либо указание оператора в самой задаче; ни того, ни другого нет -> `autonomous`.
+вопросом пунктом Output с адресатом (режим и возврат невыводимого - `node-contract`, D.11).
 
 Используется, когда стек проекта явно .NET и нужны конкретные рекомендации по библиотекам и
 инструментам экосистемы; выбор между этим узлом и стек-нейтральным делает
@@ -58,7 +54,7 @@ sensitivity), capacity-таблица с допущениями, `Accepted` ADR 
 **Комплектность входа** (`node-contract`, раздел C п.10): FR/NFR или capacity-таблица отсутствуют
 -> `status: partial` с перечнем недостающего - Phase 1-2 без них безосновательны, это не тот
 пробел, что заполняется инженерным допущением. Постановка (что проектируем) отсутствует вовсе ->
-halt + возврат оркестратору. `mode` не передан -> `autonomous`.
+halt + возврат оркестратору.
 
 ## Phase 1: Reference Architecture Match
 
@@ -93,11 +89,11 @@ orchestrator (saga в enterprise-варианте), document storage / DMS, Iden
 - **Архитектурный стиль** - но с .NET-уточнениями:
   - Modular monolith -> MediatR + Module Registration patterns + единая `WebApplication`
   - Microservices -> MassTransit + RabbitMQ/Azure Service Bus, отдельные `WebApplication` per service
-  - Event-driven -> Confluent.Kafka или MassTransit + Kafka, EventStore для event-sourcing
+  - Event-driven -> Confluent.Kafka или MassTransit + Kafka, KurrentDB (ранее EventStoreDB) для event-sourcing
   - CQRS -> MediatR с разделением Command/Query handlers; read-model на Dapper / EF Projections
   - Serverless -> Azure Functions (isolated worker model)
   - Hybrid -> modular monolith с возможностью выноса модулей в отдельные процессы по росту
-- **Storage choice** - конкретные опции: SQL Server / PostgreSQL via Npgsql / Cosmos DB / MongoDB.Driver / EventStore / Redis via StackExchange.Redis / Elasticsearch via NEST
+- **Storage choice** - конкретные опции: SQL Server / PostgreSQL via Npgsql / Cosmos DB / MongoDB.Driver / KurrentDB / Redis via StackExchange.Redis / Elasticsearch via Elastic.Clients.Elasticsearch (NEST устарел)
 - **Integration** - sync (HttpClient + Polly + Refit) vs async (MassTransit consumers + outbox)
 - **Observability** - Serilog -> Seq / Elasticsearch + OpenTelemetry -> Jaeger / Application Insights
 - **Mermaid high-level diagram**
@@ -204,8 +200,7 @@ implementation-план вызывающей стороны не на чем с�
   Application Insights; HealthChecks (liveness vs readiness); metrics через
   `System.Diagnostics.Metrics`
 
-При недостатке контекста для конкретного раздела (например, как сейчас настроен Polly в
-существующем сервисе) - здесь же делай **targeted scan** релевантных компонентов через Read/Grep.
+При недостатке контекста для раздела - здесь же **targeted scan** через Read/Grep (как в Phase 2).
 
 **Exit criteria:** Каждый раздел заполнен с привязкой к решению из Phase 3; для решений «без cache /
 без sharding» - явная пометка «не нужно потому что ...», не пропуск.
@@ -233,13 +228,11 @@ schema/ASP.NET Core API/caching/resilience/failure modes/security controls), `qu
 (сквозное поле, `node-contract` п.6-7: пришедшие записи переносятся как есть, своя запись не
 добавляется - этот узел не проверяет чужие входные артефакты), `self-check` по собственному дизайну
 (чем проверен, что устранено; вердикт по типу `design` ставит `design-reviewer` оракулом
-`design-quality` - автор своему артефакту метку не ставит), `fact-check` (сработавший триггер -
+`design-quality`), `fact-check` (сработавший триггер -
 `verified`/`unverifiable`/`contradicted` + что сверялось; иначе - `n/a (триггер не сработал)`),
 принятые инж-решения и допущения (выбор библиотек/паттернов - правило стыка: молча нельзя), путь к
 журналу решений (пришедший переносится как есть, заведённый тобой называется) и строки решений
-Phase 3 отдельным перечнем. Implementation-план,
-документацию (ADR/диаграммы/API-spec) и приёмку ведёт вызывающая сторона - этот узел их не производит.
-Код не пишем.
+Phase 3 отдельным перечнем.
 
 ## Boundaries
 
@@ -250,9 +243,9 @@ Phase 3 отдельным перечнем. Implementation-план,
     .NET-anti-patterns
   - Не выбирать ORM, отличный от EF Core, без явного обоснования через capacity-цифры входа
     (Dapper для read-heavy hot paths оправдан, NHibernate в greenfield - нет)
-  - Не предлагать .NET Framework 4.x для greenfield - только .NET 8 LTS или новее
+  - Не предлагать .NET Framework 4.x для greenfield - только поддерживаемый LTS - .NET 10 или новее (.NET 8 выходит из поддержки 10.11.2026)
   - При значительной сложности или экспертизе вне .NET (data engineering, ML pipelines,
     низкоуровневое embedded) - нужен domain expert, не имитировать: halt + возврат вызывающему как
     блокер, режим на это не влияет
 - Задача явно НЕ-.NET - вернуть вызывающему сигнал «нужен стек-нейтральный architect» (сам
-  нейтральную проработку не имитируй); dispatch по стеку делает вызывающая сторона до вызова, не этот узел.
+  нейтральную проработку не имитируй).
