@@ -610,7 +610,7 @@
       "name": "dex-dotnet-coder",
       "source": "./plugins/specialists/dotnet/dex-dotnet-coder",
       "description": "Кодер .NET: пишет код и реализует фичи по требованиям, следует конвенциям проекта, отдаёт статус build/test.",
-      "version": "4.4.1",
+      "version": "4.4.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -667,7 +667,7 @@
       "name": "dex-dotnet-tester",
       "source": "./plugins/specialists/dotnet/dex-dotnet-tester",
       "description": "Test writer node for .NET: unit tests, xUnit, Moq, Arrange-Act-Assert, test patterns. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "4.9.2",
+      "version": "4.9.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -680,7 +680,7 @@
       "name": "dex-ef-specialist",
       "source": "./plugins/specialists/dotnet/dex-ef-specialist",
       "description": "Специалист по Entity Framework Core: миграции, запросы, DbContext, конфигурация маппинга, оптимизация.",
-      "version": "2.6.1",
+      "version": "2.6.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2879,7 +2879,7 @@
       "name": "dex-test-analyst",
       "source": "./plugins/specialists/qa/dex-test-analyst",
       "description": "Тест-аналитик: разбор требований, тест-дизайн, тест-кейсы и сценарии, анализ покрытия.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2892,7 +2892,7 @@
       "name": "dex-test-automator",
       "source": "./plugins/specialists/qa/dex-test-automator",
       "description": "Автоматизатор тестов: UI, API, интеграционные и unit-тесты, Selenium и Playwright, фреймворки автоматизации.",
-      "version": "2.4.3",
+      "version": "2.4.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2905,7 +2905,7 @@
       "name": "dex-ts-fullstack-coder",
       "source": "./plugins/specialists/fullstack/dex-ts-fullstack-coder",
       "description": "Fullstack-кодер TypeScript: бэкенд на Node.js/Bun и фронтенд на React, типизация, валидация схем.",
-      "version": "3.3.1",
+      "version": "3.3.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2919,7 +2919,7 @@
       "name": "dex-ts-tester",
       "source": "./plugins/specialists/fullstack/dex-ts-tester",
       "description": "Test writer node for TypeScript/JavaScript: Vitest/Jest, mocks, fake timers, isolation. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "3.11.0",
+      "version": "3.11.1",
       "category": "specialist",
       "keywords": [
         "specialist",
