@@ -79,15 +79,16 @@ export default {
   // Текст корневого файла берётся с коммита прогона (`commit`), тем же, из которого собрана песочница.
   build({ commit = 'HEAD' } = {}) {
     const md = rootNorm(commit);
-    const cases = RULES.flatMap((r) => [{ ...r, case: r.id }, ...(r.nofb ? [{ ...r, case: `${r.id}-nofb`, ...NO_BASH }] : [])]);
+    const cases = RULES.filter((r) => md.split('\n').some((l) => l.startsWith(r.bulletPrefix))).flatMap((r) => [{ ...r, case: r.id }, ...(r.nofb ? [{ ...r, case: `${r.id}-nofb`, ...NO_BASH }] : [])]);
     return cases.flatMap((r) => ['with-rule', 'without-rule'].map((cond) => ({
       cond, case: r.case, fixture: 'repo', prompt: r.prompt, graders: r.graders, tools: r.tools, allow: r.allow,
       prepare: cond === 'without-rule' ? (dir) => writeFileSync(join(dir, 'AGENTS.md'), without(md, r.bulletPrefix)) : () => {},
     })));
   },
-  // Самопроверка набора: у каждого правила в AGENTS.md ровно одна строка с префиксом.
+  // Самопроверка набора: у каждого правила в AGENTS.md не больше одной строки с префиксом. Правило, которого на коммите нет (корень сокращён 29.10.2026,
+  // #85), в набор не попадает: снимать нечего; серия по прежним правилам берёт прежний --commit.
   selfcheck({ commit = 'HEAD' } = {}) {
     const lines = rootNorm(commit).split('\n');
-    return [...new Set(RULES.map((r) => r.bulletPrefix))].filter((p) => lines.filter((l) => l.startsWith(p)).length !== 1);
+    return [...new Set(RULES.map((r) => r.bulletPrefix))].filter((p) => lines.filter((l) => l.startsWith(p)).length > 1);
   },
 };
