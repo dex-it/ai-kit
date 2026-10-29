@@ -108,6 +108,17 @@ const minimal = (md) => {
   return out.join('\n');
 };
 
+// minimal-plus (29.10.2026, серия Sonnet): к minimal добавлены две единицы, чья потеря дала провалы - размещение skill («Структура плагина») и пункт словаря («Чек-лист»).
+const PLUS_BLOCK = '**Скилл, потребители которого'; const PLUS_BULLET = '- **Имя сущности корпуса берётся из словаря';
+const minimalPlus = (md) => {
+  const L = md.split('\n'); const m = minimal(md).split('\n');
+  const [i, j] = blockAt(L, PLUS_BLOCK); const b = L.find((l) => l.startsWith(PLUS_BULLET));
+  if (!b) throw new Error('E1: нет единицы «Имя сущности корпуса» в чек-листе');
+  const k = m.findIndex((l) => l.startsWith('## Механизмы композиции'));
+  const trim = (a) => { while (a.length && a[a.length - 1].trim() === '') a = a.slice(0, -1); return a; };
+  return [...m.slice(0, k), '## Структура плагина', '', ...trim(L.slice(i, j)), '', ...m.slice(k), b, ''].join('\n');
+};
+
 // Пара к `full` для перечня имён: `.claude/rules/terminology.md` (грузится каждую сессию, генерируется из словаря) заменён указателем.
 // `sync-terminology --check` в такой песочнице красный по построению: кейсы, чьи проверки его зовут, условие искажают (в проверках E1 его нет).
 const TERMINOLOGY_FILE = '.claude/rules/terminology.md';
@@ -290,8 +301,11 @@ function buildConditions(md) {
       title: s.title,
       prepare(dir) { const L = md.split('\n'); writeFileSync(join(dir, 'AGENTS.md'), [...L.slice(0, s.start), ...L.slice(s.end)].join('\n')); },
     })),
-    { id: 'no-overview', title: 'без обзорных единиц', prepare(dir) { writeFileSync(join(dir, 'AGENTS.md'), noOverview(md)); } },
-    { id: 'minimal', title: 'минимальный корень', prepare(dir) { writeFileSync(join(dir, 'AGENTS.md'), minimal(md)); } },
+    ...(secs.some((x) => x.title.startsWith(OVERVIEW_SECTIONS[0])) ? [ // составные условия определены для корня до сокращения (29.10.2026); на сокращённом корне их нет, серия берёт прежний --commit
+      { id: 'no-overview', title: 'без обзорных единиц', prepare(dir) { writeFileSync(join(dir, 'AGENTS.md'), noOverview(md)); } },
+      { id: 'minimal', title: 'минимальный корень', prepare(dir) { writeFileSync(join(dir, 'AGENTS.md'), minimal(md)); } },
+      { id: 'minimal-plus', title: 'минимальный корень плюс размещение skill и словарь', prepare(dir) { writeFileSync(join(dir, 'AGENTS.md'), minimalPlus(md)); } },
+    ] : []),
     { id: 'terminology-pointer', title: 'terminology.md - указатель', prepare(dir) { writeFileSync(join(dir, TERMINOLOGY_FILE), TERMINOLOGY_POINTER); } },
   ];
   return { conds };
@@ -327,6 +341,8 @@ function checkConditions(commit) {
   const no = sizes['no-overview']; const mn = sizes.minimal;
   if (no && !(no.length < md.length && !no.includes('## Уровень продукта') && no.includes('## Конвенции') && no.includes('**Практические правила:**') && no.includes('**Скилл, потребители которого'))) problems.push('no-overview: состав не тот');
   if (mn && !(no && mn.length < no.length && mn.includes('## Конвенции') && !mn.includes('## Каталог плагинов') && MINIMAL_KEEP.every((p) => mn.includes(p)))) problems.push('minimal: состав не тот');
+  const mp = sizes['minimal-plus'];
+  if (mp && !(mn && mp.length > mn.length && mp.length < md.length && mp.includes(PLUS_BLOCK) && mp.includes(PLUS_BULLET) && MINIMAL_KEEP.every((p) => mp.includes(p)))) problems.push('minimal-plus: состав не тот');
   return problems;
 }
 
@@ -347,3 +363,4 @@ export default {
   },
   audit: ({ commit }) => checkConditions(commit),
 };
+export { minimalPlus };
