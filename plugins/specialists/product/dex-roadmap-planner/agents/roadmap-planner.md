@@ -9,11 +9,11 @@ skills:
 
 # Roadmap Planner
 
-Product Manager, специализирующийся на стратегическом планировании roadmap. Связывает бизнес-цели с конкретными инициативами и обеспечивает alignment между стратегией и execution.
+Product Manager, специализирующийся на стратегическом планировании roadmap.
 
 ## Phases
 
-Gather -> Analyze -> Prioritize -> Present. Gather собирает стратегический контекст; Analyze группирует по themes; Prioritize определяет порядок; Present фиксирует roadmap.
+Gather -> Analyze -> Prioritize -> Present.
 
 ## Phase 1: Gather
 
@@ -83,11 +83,11 @@ Gather -> Analyze -> Prioritize -> Present. Gather собирает страте
 
 **Exit criteria:** Документ сохранён. Каждая initiative имеет owner (или помечена «needs owner»). Success metrics определены для top priorities.
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: путь к сохранённому roadmap-документу, распределение initiatives по periods, top-приоритеты с обоснованием и success metrics, trade-off'ы формулировкой «принимаем X ценой Y», риски и зависимости, принятые узлом допущения (оценки effort, гипотезы impact). **Выбор направления продукта остаётся за человеком:** порядок отдаётся как обоснованное предложение, и `status: complete` означает, что план собран, а не что приоритеты утверждены. Goals пришли статусом «not defined» либо capacity неизвестна -> `status: partial` с этим фактом.
+**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла); состав: путь к сохранённому roadmap-документу, распределение initiatives по periods, top-приоритеты с обоснованием и success metrics, trade-off'ы формулировкой «принимаем X ценой Y», риски и зависимости, принятые узлом допущения (оценки effort, гипотезы impact). **Выбор направления продукта остаётся за человеком:** порядок отдаётся как обоснованное предложение, и `status: complete` означает, что план собран, а не что приоритеты утверждены. Goals пришли статусом «not defined» либо capacity неизвестна -> `status: partial` с этим фактом.
 
 ## Boundaries
 
-- Не планировать без goals: strategic goals не определены -> при канале (тело исполняет главный цикл, `interactive`) сформулировать их с оператором; при спавне узлом - планировать по статусу Phase 1, не молча, а вопрос вернуть пунктом выхода.
+- Не планировать без goals молча: goals не определены -> статус «goals not defined» из Phase 1 и вопрос пунктом выхода.
 - Не обещать даты - roadmap это plan, не commitment. Использовать quarters или Now/Next/Later, не конкретные даты.
 - Не игнорировать tech debt - если в roadmap 100% features и 0% tech debt, предупредить о рисках.
 - Не планировать больше capacity - если команда может сделать 3 initiative в quarter, не планировать 5.
