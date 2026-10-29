@@ -4200,7 +4200,8 @@ const SCENARIOS = [
       expect: ({ result, calls }) => [
         ['ревью идёт, итог не держит', labelsOf(calls).includes('review:first') && result.status === 'complete'],
         ['строка degraded с причиной', degOf(result).includes(line)],
-        ['ревьюеру сказано, что дерево не подготовлено', promptOf(calls, 'review:first').includes(`Дерево к сборке не подготовлено: ${line.replace('подготовка дерева: ', '')}.`)],
+        ['ревьюеру сказано, что дерево не подготовлено', promptOf(calls, 'review:first').includes('Дерево к сборке не подготовлено.')],
+        ['причины провала в промптах судей нет', ['review:first', 'falsify+coverage'].every(l => !promptOf(calls, l).includes(line.replace('подготовка дерева: ', '')))],
       ] })),
   { name: 'R100 каталог не на head_sha -> подготовка не вызывается', track: 'review', args: reviewArgs,
     responses: { 'ctx:subject': { ...ctxMr, at_head: false, missing: 'HEAD на ccc' }, 'review:first': revMr, 'falsify+coverage': falOk },

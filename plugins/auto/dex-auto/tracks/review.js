@@ -346,7 +346,8 @@ const prep = ctx.at_head ? await node('подготовка дерева', `${PR
 if (ctx.at_head) trail.push({ step: '1-tree', doer: 'general-purpose', status: prep ? prep.status : 'null', prepare: prep ? prep['prepare-status'] : null })
 const prepLack = !ctx.at_head ? '' : !prep || prep.status === 'blocked' ? lack(prep, 'узел подготовки дерева') : prep['prepare-status'] === 'failed' ? prep.prepare_log || 'причина не названа' : ''
 if (prepLack) degraded.push(`подготовка дерева: ${prepLack}`)
-const TREE_PREP = !ctx.at_head ? '' : prepLack ? ` Дерево к сборке не подготовлено: ${prepLack}.`
+// Вывод установки - текст из скриптов правки: в промпты судей не идёт, оператору - строкой degraded.
+const TREE_PREP = !ctx.at_head ? '' : prepLack ? ' Дерево к сборке не подготовлено.'
   : ` Сборка: ${prep.build_cmd || 'нет'}; тесты: ${prep.test_cmd || 'нет'}${prep['prepare-status'] === 'done' ? `; зависимости поставлены (${prep.prepare_cmd}) - установку не повторяй` : ''}.`
 
 phase('Review')
