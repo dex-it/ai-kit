@@ -12,7 +12,7 @@
       "name": "dex-adr-writer",
       "source": "./plugins/specialists/architecture/dex-adr-writer",
       "description": "Автор ADR: пишет Architecture Decision Records в формате MADR - драйверы решения, альтернативы, trade-off.",
-      "version": "3.8.1",
+      "version": "3.8.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -26,7 +26,7 @@
       "name": "dex-api-designer",
       "source": "./plugins/specialists/architecture/dex-api-designer",
       "description": "Проектировщик API: REST, GraphQL, gRPC, OpenAPI, AsyncAPI, контракты, версионирование, формат ошибки.",
-      "version": "3.7.2",
+      "version": "3.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -41,7 +41,7 @@
       "name": "dex-architect",
       "source": "./plugins/specialists/architecture/dex-architect",
       "description": "System design узел зоны дизайна (дизайн-решение): reference architecture match, альтернативы, решение с CAP/PACELC, deep dive. Требования/capacity/implementation-план ведёт вызывающая команда /design. Стек-нейтральный.",
-      "version": "4.11.1",
+      "version": "4.11.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -59,7 +59,7 @@
       "name": "dex-architect-dotnet",
       "source": "./plugins/specialists/architecture/dex-architect-dotnet",
       "description": "Узел зоны дизайна (дизайн-решение) для .NET: reference architecture match, альтернативы с ASP.NET Core / EF Core / MassTransit / Polly / Serilog, решение с CAP/PACELC, deep dive, fact-check библиотек. Требования/capacity/implementation-план ведёт вызывающая команда /design.",
-      "version": "3.9.2",
+      "version": "3.9.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -543,7 +543,7 @@
       "name": "dex-diagram-creator",
       "source": "./plugins/specialists/architecture/dex-diagram-creator",
       "description": "Автор архитектурных диаграмм: C4, sequence, ER, state, flowchart в Mermaid, PlantUML, Structurizr DSL, D2.",
-      "version": "1.7.1",
+      "version": "1.7.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -572,7 +572,7 @@
       "name": "dex-doc-writer",
       "source": "./plugins/specialists/product/dex-doc-writer",
       "description": "Технический писатель: спеки, руководства, README, release notes, описания архитектуры и API.",
-      "version": "1.8.1",
+      "version": "1.8.2",
       "category": "specialist",
       "keywords": [
         "specialist",
