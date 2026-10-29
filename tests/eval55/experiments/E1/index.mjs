@@ -199,7 +199,7 @@ const cases = [
     solve(dir) {
       mkdirSync(join(dir, BUG_DIR, 'skills/regression-test'), { recursive: true });
       writeFileSync(join(dir, BUG_DIR, 'skills/regression-test/SKILL.md'), NEW_SKILL);
-      edit(dir, `${BUG_DIR}/.claude-plugin/plugin.json`, (t) => replaceOnce(t, '"version": "1.13.3"', '"version": "1.14.0"'));
+      edit(dir, `${BUG_DIR}/.claude-plugin/plugin.json`, (t) => replaceOnce(t, '"version": "1.13.4"', '"version": "1.14.0"'));
       syncCatalog(dir);
     } },
   // Rename агента (раздел «Имя агента», правило в `.claude/rules/plugin-changes.md`): major плагина, директория и `name` плагина прежние, карта `ALLOWED_PRELOAD_SKILLS` правится.

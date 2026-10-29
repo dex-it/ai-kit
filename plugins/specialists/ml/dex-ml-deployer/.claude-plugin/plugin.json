@@ -1,6 +1,6 @@
 {
   "name": "dex-ml-deployer",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Деплой ML-моделей: экспорт в ONNX и TFLite, serving через FastAPI, квантизация, контейнеризация.",
   "author": {
     "name": "Dex Team",
