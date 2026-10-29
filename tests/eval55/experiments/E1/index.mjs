@@ -219,7 +219,7 @@ const cases = [
       writeFileSync(join(dir, BDD_AGENT_NEW), replaceOnce(text, '\nname: bdd-author\n', '\nname: gherkin-author\n'));
       rmSync(join(dir, BDD_AGENT));
       edit(dir, BDD_CMD, (t) => t.split('dex-bdd-author:bdd-author').join('dex-bdd-author:gherkin-author'));
-      edit(dir, BDD_PJ, (t) => replaceOnce(t, '"version": "1.0.2"', '"version": "2.0.0"'));
+      edit(dir, BDD_PJ, (t) => replaceOnce(t, t.match(/"version": "[^"]*"/)[0], '"version": "2.0.0"'));
       edit(dir, 'tools/validate-agent.js', (t) => replaceOnce(t, "new Set(['bdd-author'])", "new Set(['gherkin-author'])"));
       edit(dir, 'README.md', (t) => replaceOnce(t, '| dex-bdd-author | bdd-author |', '| dex-bdd-author | gherkin-author |'));
       syncCatalog(dir);
