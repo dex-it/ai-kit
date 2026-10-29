@@ -119,7 +119,7 @@
       "name": "dex-bdd-author",
       "source": "./plugins/specialists/product/dex-bdd-author",
       "description": "Составитель исполняемых примеров - карта примеров до кода, .feature на Gherkin с тегом трассировки на FR, красная карточка уходит наверх, а не закрывается догадкой",
-      "version": "1.0.3",
+      "version": "1.0.2",
       "category": "specialist",
       "keywords": [
         "specialist",
