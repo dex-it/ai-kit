@@ -961,7 +961,7 @@
       "name": "dex-ml-deployer",
       "source": "./plugins/specialists/ml/dex-ml-deployer",
       "description": "Деплой ML-моделей: экспорт в ONNX и TFLite, serving через FastAPI, квантизация, контейнеризация.",
-      "version": "1.5.2",
+      "version": "1.5.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -974,7 +974,7 @@
       "name": "dex-ml-experimenter",
       "source": "./plugins/specialists/ml/dex-ml-experimenter",
       "description": "ML-экспериментатор: разведочный анализ данных, feature engineering, baseline-модели, качество данных.",
-      "version": "1.6.4",
+      "version": "1.6.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1000,7 +1000,7 @@
       "name": "dex-model-trainer",
       "source": "./plugins/specialists/ml/dex-model-trainer",
       "description": "Тренер моделей: пайплайны обучения на PyTorch, TensorFlow, scikit-learn, HuggingFace, метрики и артефакты.",
-      "version": "1.6.3",
+      "version": "1.6.4",
       "category": "specialist",
       "keywords": [
         "specialist",
