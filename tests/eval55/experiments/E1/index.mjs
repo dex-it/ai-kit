@@ -51,6 +51,9 @@ const sh = (dir, ...cmd) => { // команда эталонного решен�
 const syncCatalog = (dir) => sh(dir, 'node', 'tools/sync-marketplace.js');
 const edit = (dir, path, fn) => { const p = join(dir, path); writeFileSync(p, fn(readFileSync(p, 'utf8'))); };
 const replaceOnce = (t, from, to) => { if (!t.includes(from)) throw new Error(`solve: нет фрагмента: ${from}`); return t.replace(from, to); };
+// Версия плагина в solve и засеве не зашита литералом: любой патч-бамп плагина другой правкой не ломает кейсы.
+const VER = /"version": "(\d+)\.(\d+)\.(\d+)"/;
+const bumpVer = (t, part, by = 1) => { if (!VER.test(t)) throw new Error('solve: нет версии'); return t.replace(VER, (_, a, b, c) => `"version": "${part === 'major' ? `${+a + by}.0.0` : part === 'minor' ? `${a}.${+b + by}.0` : `${a}.${b}.${+c + by}`}"`); };
 
 function sections(md) { // [{title, start, end}] по заголовкам H2; вне fence
   const lines = md.split('\n');
@@ -142,7 +145,7 @@ const cases = [
     ],
     solve(dir) {
       edit(dir, SKILL, (t) => replaceOnce(t, 'Активируется при redis,', 'Активируется при Redlock, redis,'));
-      edit(dir, REDIS_PJ, (t) => replaceOnce(t, '"version": "1.2.1"', '"version": "1.2.2"'));
+      edit(dir, REDIS_PJ, (t) => bumpVer(t, 'patch'));
       syncCatalog(dir);
     } },
   { id: 'redis-trap', prompt: `В ${SKILL} добавь в конец чек-листа пункт про забытый TTL у кэш-ключей: ситуация и чем кончится, в формате остальных пунктов. Остальное не трогай.`,
@@ -170,7 +173,7 @@ const cases = [
   { id: 'fix-ousted-name', seed: add(SKILL, SEED_OUSTED), solve: unadd(SKILL, SEED_OUSTED),
     prompt: 'Валидация терминологии падает на skill redis. Найди причину и исправь по правилам каталога.',
     graders: [{ type: 'cmd', id: 'terminology-valid', run: ['node', 'tools/validate-terminology.js'] }, KEPT, { type: 'file-matches', id: 'item-kept', path: SKILL, regex: 'TTL' }] },
-  { id: 'sync-after-version', seed: sub(REDIS_PJ, '"version": "1.2.1"', '"version": "1.2.5"'), solve: syncCatalog,
+  { id: 'sync-after-version', seed: (dir) => { const p = join(dir, REDIS_PJ); writeFileSync(p, bumpVer(readFileSync(p, 'utf8'), 'patch', 4)); }, solve: syncCatalog,
     prompt: 'В plugin.json skill redis версия уже поднята вручную. Доведи каталог до согласованного состояния, остальное не трогай.',
     graders: [SYNC, { type: 'file-matches', id: 'version-kept', path: REDIS_PJ, regex: '"version":\\s*"1\\.2\\.5"' }] },
   { id: 'command-description', prompt: 'В команде redis-info замени description на «Состояние Redis-сервера через INFO, только чтение» и доведи изменения до состояния, готового к коммиту.',
@@ -182,7 +185,7 @@ const cases = [
     ],
     solve(dir) {
       edit(dir, CLI_CMD, (t) => replaceOnce(t, 'description: Состояние Redis-сервера через INFO\n', 'description: Состояние Redis-сервера через INFO, только чтение\n'));
-      edit(dir, CLI_PJ, (t) => replaceOnce(t, '"version": "1.0.4"', '"version": "1.0.5"'));
+      edit(dir, CLI_PJ, (t) => bumpVer(t, 'patch'));
       syncCatalog(dir);
     } },
 
@@ -199,7 +202,7 @@ const cases = [
     solve(dir) {
       mkdirSync(join(dir, BUG_DIR, 'skills/regression-test'), { recursive: true });
       writeFileSync(join(dir, BUG_DIR, 'skills/regression-test/SKILL.md'), NEW_SKILL);
-      edit(dir, `${BUG_DIR}/.claude-plugin/plugin.json`, (t) => replaceOnce(t, '"version": "1.13.4"', '"version": "1.14.0"'));
+      edit(dir, `${BUG_DIR}/.claude-plugin/plugin.json`, (t) => bumpVer(t, 'minor'));
       syncCatalog(dir);
     } },
   // Rename агента (раздел «Имя агента», правило в `.claude/rules/plugin-changes.md`): major плагина, директория и `name` плагина прежние, карта `ALLOWED_PRELOAD_SKILLS` правится.
@@ -219,7 +222,7 @@ const cases = [
       writeFileSync(join(dir, BDD_AGENT_NEW), replaceOnce(text, '\nname: bdd-author\n', '\nname: gherkin-author\n'));
       rmSync(join(dir, BDD_AGENT));
       edit(dir, BDD_CMD, (t) => t.split('dex-bdd-author:bdd-author').join('dex-bdd-author:gherkin-author'));
-      edit(dir, BDD_PJ, (t) => replaceOnce(t, t.match(/"version": "[^"]*"/)[0], '"version": "2.0.0"'));
+      edit(dir, BDD_PJ, (t) => bumpVer(t, 'major'));
       edit(dir, 'tools/validate-agent.js', (t) => replaceOnce(t, "new Set(['bdd-author'])", "new Set(['gherkin-author'])"));
       edit(dir, 'README.md', (t) => replaceOnce(t, '| dex-bdd-author | bdd-author |', '| dex-bdd-author | gherkin-author |'));
       syncCatalog(dir);
