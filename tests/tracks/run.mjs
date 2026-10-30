@@ -4585,7 +4585,7 @@ const SCENARIOS = [
         ['поля скелетника', fields('scaffold', 'scaffolder')],
         ['скелетник: запись без замены, без model', agentTools('scaffolder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('scaffolder'))],
         ['скелетник: baseline по норме, стек по реестру, smoke-тест, лок, свой трейлер, без бизнес-кода и слоёв', ['`dex-skill-project-baseline:project-baseline`', '`dex-skill-stack-registry:stack-registry`', 'smoke-тест', 'лок-файл', 'трейлером `Dex-Auto-Onboard: scaffold`', 'Бизнес-код, архитектурный стиль и разбиение на слои'].every(t => agentBody('scaffolder').includes(t))],
-        ['составитель: карта - только невидимое из имени и манифеста, запреты - только отслеживаемые git', ['чьё назначение не видно из имени и манифеста', '`guards` - путь из `git ls-files`'].every(t => agentBody('onboarder').includes(t))],
+        ['составитель: карта - только невидимое из имени и манифеста, запреты - только отслеживаемые git', ['корень корпуса - всегда', 'когда назначение не видно из\n     имени и манифеста', '`guards` - отслеживаемый git путь'].every(t => agentBody('onboarder').includes(t))],
         ['составитель: карта, правила - документы-нормы, запреты по улике; правил из кода не выводит', ['`map`', '`rules`', '`guards`', 'Правило из кода не выводишь'].every(t => agentBody('onboarder').includes(t))],
         ['предмет входа - блок в обоих файлах', ['onboarder', 'corpus-checker'].every(n => agentBody(n).includes('<!-- >>> shared: onboard-subject -->'))],
         ['составитель: запись без замены продукта', agentTools('onboarder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('onboarder'))],
