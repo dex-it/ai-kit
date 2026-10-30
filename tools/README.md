@@ -538,6 +538,7 @@ npm run metrics:run -- --session <id>
 npm run measure:context                                  # таблицы Markdown
 npm run measure:context -- --json > before.json          # машинный вывод, вход для --diff
 node tools/measure-context.js --diff before.json after.json
+node tools/measure-context.js --prohibitions [--list]    # слова-запреты по областям; --list - каждое вхождение (файл:строка)
 ```
 
-`--diff` печатает изменившиеся показатели и разность по файлам; байты и чистый прирост строк совпадают с `git diff --numstat` по тем же файлам. Опорная точка миграции на Claude 5.5 - [docs/migration/claude55-baseline.md](../docs/migration/claude55-baseline.md).
+`--diff` печатает изменившиеся показатели и разность по файлам; байты и чистый прирост строк совпадают с `git diff --numstat` по тем же файлам. `--prohibitions` считает слова-запреты и капс по областям (агенты, skills и их `references/`, команды, прочее в `plugins/`, `docs/` без `research/`, `guide/`, `superpowers/`, `migration/`, корень, `.claude/rules/`) по всему тексту файла; проверка - `tests/tools/measure-context.test.sh`. Опорная точка миграции на Claude 5.5 - [docs/migration/claude55-baseline.md](../docs/migration/claude55-baseline.md).
