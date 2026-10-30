@@ -76,11 +76,11 @@ argument-hint: [описание аргументов] (опционально)
 
 **Обязательно:**
 
-- `description` - поле срабатывания: команда сидит в листинге skills под тем же капом и бюджетом (числа - [SKILL_FRAMEWORK.md](SKILL_FRAMEWORK.md#бюджет-листинга-description-может-не-дойти-до-модели)); одно предложение, различимое от соседей.
+- `description` - поле срабатывания; одно предложение, различимое от соседей. Попадание команд в листинг skills и его бюджет **не задокументировано явно**: страница skills (сверено 30.10.2026, Claude Code 2.1.314) говорит «A file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and work the same way», файлу команды оставляет поля frontmatter кроме `name` и `paths`, а при `disable-model-invocation: true` описание в контекст не попадает. Вывод о листинге - по аналогии и по коду 2.1.311 ([SKILL_FRAMEWORK.md](SKILL_FRAMEWORK.md#бюджет-листинга-description-может-не-дойти-до-модели), там числа бюджета и капа), `/doctor` и `/context` на копии каталога не запускались, вклад описаний команд не измерен. Решение: существующие команды не мигрируют и флага не получают до замера.
 
 **Опционально:**
 
-- `allowed-tools` - **преаппрув на ход, а не ограничение**: «It does not restrict which tools are available: every tool remains callable», и грант снимается со следующим сообщением ([skills](https://code.claude.com/docs/en/skills), сверено 02.09.2026; страница скиллов - адрес и для команд: «A file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and work the same way», там же). Ограничивает только `disallowed-tools` - «Tools removed from Claude's available pool while this skill is active» (там же). Отсюда: перечень в `allowed-tools` ничего не доказывает о том, чего команда не делает
+- `allowed-tools` - **преаппрув на ход, а не ограничение**: «It does not restrict which tools are available: every tool remains callable», и грант снимается со следующим сообщением ([skills](https://code.claude.com/docs/en/skills), сверено 02.09.2026; страница скиллов - адрес и для команд, цитата в `description`). Ограничивает только `disallowed-tools` - «Tools removed from Claude's available pool while this skill is active» (там же). Отсюда: перечень в `allowed-tools` ничего не доказывает о том, чего команда не делает
 - `argument-hint` - подсказка что передать: `[stack-trace]`, `[migration-name]`, `[story-id]`
 
 ### Тело команды
@@ -130,7 +130,7 @@ argument-hint: [описание аргументов] (опционально)
 - Bash-скрипты с конкретными командами (Claude знает `dotnet build`, `docker ps`, `git diff`)
 - Справочники error codes (`CS0246 - тип не найден`) - Claude это знает
 - Справочники PromQL / KQL / SQL запросов - Claude сгенерирует под стек
-- Примеры вывода на 50+ строк с ASCII-таблицами - достаточно описать формат
+- Примеры вывода на 50+ строк, ASCII-таблицы и дашборды с рамками - достаточно описать формат («Output: таблица метрик (endpoint, P95, calls/min), топ-3 медленных, alerts, рекомендации»)
 - Туториалы «как работает технология» - Claude знает
 - Литерал пути записи артефакта, место которого задаёт раскладка проекта: команда называет ключ (`{ключ adr}/...`) и оставляет разрешение процедуре; норма и границы - [AGENT_FRAMEWORK.md](AGENT_FRAMEWORK.md#тело-фазы-что-писать-и-что-нельзя)
 
@@ -159,21 +159,11 @@ argument-hint: [описание аргументов] (опционально)
 
 - **Команда** может **вызвать агента** (команда-делегат): `/dotnet-quality-audit` -> dotnet-quality-auditor. Команда, которая сама ведёт порядок работ - раздаёт работы разным ролям и держит гейты оператора, - несёт `Agent` в `allowed-tools` (`/feature`, `/implement`, `/mr-review`): её тело исполняет главный поток, и канал к оператору есть только у него (см. [SKILL_FRAMEWORK.md](SKILL_FRAMEWORK.md#норма-каталога-оркестрация---у-главного-потока-исполнение---в-агенте)). Спавн суб-агентов внутри одной работы - в агенте, не в команде: фан-аут по фокусам ревью или осям приёмки принадлежит исполнителю
 - **Команда** технически **может** загрузить skill - вызовом в теле (`Skill` в `allowed-tools` лишь снимает запрос доступа; см. таблицу композиции в AGENTS.md). Но **по дизайну не стоит**: skill-проверки - признак многофазного workflow, а это работа агента, не команды
-- Если команде нужны skill-проверки (скан по чек-листу, дедупликация находок, structured-отчёт) - это сигнал, что она должна быть агентом; команда тогда становится тонким делегатом к нему (`/dotnet-quality-audit` -> `dotnet-quality-auditor`)
 - Команда может **дополнять агента**: агент `dotnet-coder` реализует workflow, а команда `/build` - отдельное быстрое действие из того же плагина
 
 ## Анти-паттерны
 
-### 1. Bash-скрипт вместо цели
-
-```markdown
-sln=$(find . -maxdepth 2 -name "*.sln" | head -n 1)
-dotnet build "$sln" --configuration Release
-```
-
-Неправильно. Claude найдёт и соберёт проект сам. Опиши цель, не процедуру.
-
-### 2. Справочник error codes
+### 1. Справочник error codes
 
 ```markdown
 - CS0246 - тип не найден, проверить using
@@ -183,7 +173,7 @@ dotnet build "$sln" --configuration Release
 
 Неправильно. Claude знает все error codes C# из training data. Если есть специфичная для проекта ловушка (например, «CS0246 на наших internal пакетах = сломался NuGet feed») - это skill, не команда.
 
-### 3. Справочник запросов
+### 2. Справочник запросов
 
 ```markdown
 # Request rate
@@ -193,10 +183,6 @@ histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))
 ```
 
 Неправильно. Claude знает PromQL. Опиши какие метрики нужны и в каком формате, Claude сгенерирует запросы.
-
-### 4. Развёрнутый output template на 50+ строк
-
-Таблицы ASCII-art, дашборды с рамками - это не нужно расписывать построчно. Достаточно: «Output: таблица метрик (endpoint, P95, calls/min), топ-3 медленных, alerts, рекомендации».
 
 ## Пример: /build в парадигме фреймворка
 
