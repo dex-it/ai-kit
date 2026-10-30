@@ -33,7 +33,7 @@
 
 **`model` - потолок, `effort` - override сессии**: вниз - для механической работы, вверх - только с названной в теле причиной, сомневаешься - не ставь. Значения, дефолты, оговорки по моделям и провайдерам - [AGENT_FRAMEWORK.md](docs/AGENT_FRAMEWORK.md#глубина-рассуждения-effort).
 
-**Каскад tools под fact-check.** Агент с фазой Fact Verification (грузит `dex-skill-fact-verification:fact-verification`) обязан нести в `tools` весь каскад: `ToolSearch` **и** `WebSearch, WebFetch`. Нет звена - каскад молча деградирует до latest-доки; ловит `npm run validate:agents` (`factcheck-cascade-incomplete`). Почему именно эти три и что ломается без каждого - [AGENT_FRAMEWORK.md](docs/AGENT_FRAMEWORK.md#fact-verification-и-ответ-второй-стороны) («Tools для каскада»).
+**Каскад tools под fact-check.** Агент с фазой Fact Verification (грузит `dex-skill-fact-verification:fact-verification`) обязан нести в `tools` весь каскад: `ToolSearch` **и** `WebSearch, WebFetch`. Нет звена - каскад молча деградирует до latest-доки; ловит `npm run validate:agents` (`factcheck-cascade-incomplete`). Почему именно эти три и что ломается без каждого - [AGENT_FRAMEWORK.md](docs/AGENT_FRAMEWORK.md#reviewer) («Tools для каскада»).
 
 ### Frontmatter skills
 `keywords` в skills не поддерживается - ключевые слова в `description`; ловит `frontmatter-forbidden`. Форма frontmatter и перечень валидных полей - [SKILL_FRAMEWORK.md](docs/SKILL_FRAMEWORK.md) (там же дата сверки с документацией).
