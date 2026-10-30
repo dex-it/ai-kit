@@ -542,3 +542,16 @@ node tools/measure-context.js --prohibitions [--list]    # слова-запре
 ```
 
 `--diff` печатает изменившиеся показатели и разность по файлам; байты и чистый прирост строк совпадают с `git diff --numstat` по тем же файлам. `--prohibitions` считает слова-запреты и капс по областям (агенты, skills и их `references/`, команды, прочее в `plugins/`, `docs/` без `research/`, `guide/`, `superpowers/`, `migration/`, корень, `.claude/rules/`) по всему тексту файла; проверка - `tests/tools/measure-context.test.sh`. Опорная точка миграции на Claude 5.5 - [docs/migration/claude55-baseline.md](../docs/migration/claude55-baseline.md).
+
+---
+
+## description-listing.js
+
+Бюджет листинга и различимость `description` skills, агентов и команд. Измерение, не валидатор: порогов и кодов возврата «нарушено» нет, в реестр валидаторов не входит. Мера - знаки; близость - косинус TF-IDF по токенам (лексическая, смысл не доказывает): список пар - вход для ручной классификации. Разбор среза - [docs/migration/claude55-descriptions.md](../docs/migration/claude55-descriptions.md).
+
+```bash
+npm run measure:listing                     # суммы, максимум, распределение, число длинных описаний
+npm run measure:listing -- --pairs=0.4      # пары с близостью не ниже порога
+npm run measure:listing -- --bundles        # листинг при установке одного бандла
+npm run measure:listing -- --json           # машинный вывод
+```
