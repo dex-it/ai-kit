@@ -193,7 +193,7 @@ const MIN_TRIGGER_KEYWORDS = 10;
  * marker: adding a process skill requires a deliberate edit here plus review,
  * so the exemption can't be abused to slip an under-built skill through. The
  * `<!-- skill-type: process -->` marker in the body is for human readers only -
- * this allowlist is the source of truth. See docs/SKILL_FRAMEWORK.md "Типы skill".
+ * this allowlist is the source of truth. See docs/SKILL_FRAMEWORK.md "Два типа skill".
  */
 const PROCESS_SKILLS = new Set([
   'project-baseline',

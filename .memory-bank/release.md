@@ -7,3 +7,4 @@
 - Настройка репозитория не защищает от ошибки: на 2026-10-26 включены все три способа слияния (`gh api repos/dex-it/ai-kit --jq '{squash:.allow_squash_merge,merge:.allow_merge_commit,rebase:.allow_rebase_merge}'`). Защита ветки `main` не прочитана: нужен admin.
 - Тегов и GitHub Releases нет (`git tag`, `gh release list` пусты); версия каталога - `version` в `.claude-plugin/marketplace.json`, `main` - канал поставки (`AGENTS.md`, «Адрес документа каталога из README плагина»).
 - Версии и их синхронизация - `.claude/rules/plugin-changes.md`; ветка и PR в `develop` - `docs/guide/contributing/pull-requests.md`. Здесь не повторяются.
+- Перед PR `develop` -> `main`: `npm run check:drift` (сроки сверки - сигнал; находки пути, раздела, числа - исправить) и решение о прогоне E2 (`tests/eval55`, платный) на текущей модели: правила без перепроверки на 5.5 копят долг.

@@ -391,6 +391,7 @@ fixtures/tetris-baseline/
                      решения, оракул через адаптер судьи, эталон с мутантами
 auto-nodes/          сверка узла dex-auto с узлом каталога на кейсах с минами:
                      метод и кейсы в README, run.sh гоняет, score.mjs сводит
+tools/               фикстурные проверки скриптов tools/ (npm run test:tools); check-drift.test.sh - npm run check:drift
 eval55/              стенд замеров принципов миграции на Claude 5.5: раннер run.mjs,
                      эксперименты E1, E2, E3, E5, E7, E10, пред-регистрация (PREREG.md)
 ```
