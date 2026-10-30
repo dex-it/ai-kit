@@ -59,7 +59,7 @@
       "name": "dex-architect-dotnet",
       "source": "./plugins/specialists/architecture/dex-architect-dotnet",
       "description": "Узел зоны дизайна (дизайн-решение) для .NET: reference architecture match, альтернативы с ASP.NET Core / EF Core / MassTransit / Polly / Serilog, решение с CAP/PACELC, deep dive, fact-check библиотек. Требования/capacity/implementation-план ведёт вызывающая команда /design.",
-      "version": "3.9.3",
+      "version": "3.9.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -149,7 +149,7 @@
       "name": "dex-bug-fixer",
       "source": "./plugins/specialists/delivery/dex-bug-fixer",
       "description": "Пакетная ремедиация найденных тестировщиком багов после мерджа: интейк находок, триаж и приоритет, подтверждение причины по одному, фикс на источнике через follow-up MR, верификация red->green на стенде, регрессия соседей; финиш на локальных коммитах без push.",
-      "version": "1.13.4",
+      "version": "1.13.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -584,7 +584,7 @@
       "name": "dex-docker-specialist",
       "source": "./plugins/specialists/infrastructure/dex-docker-specialist",
       "description": "Специалист по Docker: контейнеры и образы, docker-compose, multi-stage сборка, health checks, оптимизация.",
-      "version": "1.8.2",
+      "version": "1.8.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -667,7 +667,7 @@
       "name": "dex-dotnet-tester",
       "source": "./plugins/specialists/dotnet/dex-dotnet-tester",
       "description": "Test writer node for .NET: unit tests, xUnit, Moq, Arrange-Act-Assert, test patterns. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "4.9.3",
+      "version": "4.9.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1119,7 +1119,7 @@
       "name": "dex-postgresql-specialist",
       "source": "./plugins/specialists/infrastructure/dex-postgresql-specialist",
       "description": "Специалист по PostgreSQL: разбор запросов и EXPLAIN, индексы, тюнинг, vacuum, репликация, диагностика.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1228,7 +1228,7 @@
       "name": "dex-requirements-reviewer",
       "source": "./plugins/specialists/review/dex-requirements-reviewer",
       "description": "Ревью и согласование чужого готового набора требований (BRD/stories) как документа: дефекты единицы и дефекты набора против источника, фальсификация находок, severity, правки автору без мутации документа.",
-      "version": "2.2.4",
+      "version": "2.2.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2919,7 +2919,7 @@
       "name": "dex-ts-tester",
       "source": "./plugins/specialists/fullstack/dex-ts-tester",
       "description": "Test writer node for TypeScript/JavaScript: Vitest/Jest, mocks, fake timers, isolation. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "3.11.1",
+      "version": "3.11.2",
       "category": "specialist",
       "keywords": [
         "specialist",
