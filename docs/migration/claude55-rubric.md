@@ -884,3 +884,19 @@
 8. `model` и `effort`: [#33](https://github.com/dex-it/ai-kit/issues/33); пять узлов без модели в скрипте (`corpus-checker`, `onboarder`, `recorder`, `scaffolder`, `skeptic`) ждут серии (`docs/migration/claude55-models.md`), здесь не менялись.
 
 Итого ждёт серий: около 34 USD по оценке (до 68) при полной программе (пункты 1, 2, 4, 5, 7) и ещё 3,7 USD (до 7,3) за пункт 3 после решения владельца. Сводка предназначена для задачи сбора серий (#88).
+
+## Журнал правки: T36 (#36), запреты и принуждение
+
+Заход 30.10.2026, `develop` @ `8d6f2107`, 0 USD. Классификация всех слов-запретов в агентах, skills (с `references/`) и командах - [claude55-prohibitions.md](claude55-prohibitions.md); счётчик - `node tools/measure-context.js --prohibitions [--list]`. Правка ручная, применено только то, что не зависит от прогона.
+
+Доли (152 строки): а 11 (7%), б 15 (10%), в 82 (54%), г 44 (29%). Вхождений в агентах, skills, `references/` и командах 161 -> 145.
+
+| Файл | Строка (начало) | Категория | Решение | Основание | Δ байт | Δ строк |
+|---|---|---|---|---|---:|---:|
+| 11 операторов (`teamcity`, `docker`, `elasticsearch`, `kafka`, `kubernetes`, `seq-logging`, `mongodb`, `grafana`, `postgresql`, `rabbitmq`, `redis`), `requirements-reviewer` | "Ожидание подтверждения = зависание, запрещено." | в, дубль другого дома | Снято | `node-contract` D.11 (предзагружен): "ожидание запрещено вовсе"; тот же абзац требует "не выполнять, в Output - подготовленная команда" | -86 у каждого | 0 |
+| `architect-dotnet`, `dotnet-test-writer`, `ts-test-writer` | "(правило стыка: ..., молча нельзя)" | в, дубль другого дома | Снято "молча нельзя", ссылка на правило стыка осталась | `node-contract`: "молча нельзя ни в одном режиме" | -25 у каждого | 0 |
+| `bug-fixer` | обзор фаз: "полный прогон, push запрещён" | б, дубль внутри тела | Снято "push запрещён" | Gate on push в Phase 6 стоит выше по тексту и остаётся | -23 | 0 |
+
+Итог (`measure:context --diff`): -1 130 байт, 0 строк; постоянный слой (`description`, корневые файлы) не менялся. Версии (patch): `dex-architect-dotnet` 3.9.4, `dex-bug-fixer` 1.13.5, `dex-dotnet-tester` 4.9.4, `dex-ts-tester` 3.11.2, `dex-cicd-teamcity` 2.6.3, `dex-docker-specialist` 1.8.3, `dex-elasticsearch-specialist` 1.7.3, `dex-kafka-specialist` 1.7.3, `dex-kubernetes-specialist` 1.7.3, `dex-logging-seq` 2.6.4, `dex-mongodb-specialist` 1.7.3, `dex-monitoring-grafana` 2.6.3, `dex-postgresql-specialist` 1.7.3, `dex-rabbitmq-specialist` 1.7.3, `dex-redis-specialist` 1.7.3, `dex-requirements-reviewer` 2.2.5.
+
+Не применено, ждёт серии: **E2 по 20 правилам агентов** (перечень, оценка и команда в `claude55-prohibitions.md`): 120 ячеек на тир, Haiku 1,1 USD (до 2,3), Sonnet 18,4 USD (до 36,7); набор правил агентов в `tests/eval55/experiments/E2` не собран. **E12 ждёт серии**: 10 пар запрет/положительная форма x 3 тира x 3 повтора, около 9,0 USD (до 17,9), модуля `E12` в стенде нет; нормы о форме правил в `AGENT_FRAMEWORK.md` и `SKILL_FRAMEWORK.md` не менялись. Принуждение (hook или ask-правило клиента) на деструктивные операции операторов и outward-действия `bug-fixer`: решение владельца (меняет поведение у всех). Новых правил валидатора не заведено: находок, выражаемых статической проверкой каталога, нет.

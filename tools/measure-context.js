@@ -19,6 +19,7 @@
  *   node tools/measure-context.js --json           # машинный вывод (вход для --diff)
  *   node tools/measure-context.js --top=5          # крупнейших файлов на группу (по умолчанию 3)
  *   node tools/measure-context.js --diff a.json b.json
+ *   node tools/measure-context.js --prohibitions [--list] [--json]  # слова-запреты по областям; --list - каждое вхождение
  */
 
 import { readdirSync, readFileSync, existsSync, lstatSync } from 'node:fs';
@@ -350,10 +351,77 @@ function diff(aPath, bPath) {
   return o.join('\n');
 }
 
+// ---------- слова-запреты по областям (--prohibitions) ----------
+
+// Область = тип файла, где слово стоит. Счёт по всему тексту файла (frontmatter включён), в отличие от `prohibitions`
+// выше, который считает только тело. Категория слова нужна, чтобы отличать формы запрета друг от друга в таблице.
+const PROHIBITION_KINDS = [
+  ['нельзя', word('нельзя', 'giu')],
+  ['запрещ*', word(`запрещ${W}*`, 'giu')],
+  ['никогда', word('никогда', 'giu')],
+  ['не делай и др.', word('не\\s+(?:делай|добавляй|пиши|трогай|меняй|правь|создавай)', 'giu')],
+  ['ни в коем', word('ни\\s+в\\s+коем', 'giu')],
+];
+const DOCS_SKIP = /^docs\/(research|guide|superpowers|migration)\//;
+
+function prohibitionArea(path) {
+  const p = rel(path);
+  if (!p.endsWith('.md')) return null;
+  if (p.startsWith('plugins/')) {
+    if (/\/agents\/[^/]+\.md$/.test(p)) return 'agents';
+    if (/\/commands\/[^/]+\.md$/.test(p)) return 'commands';
+    if (/\/SKILL\.md$/.test(p)) return 'skills';
+    if (/\/skills\/[^/]+\/references\//.test(p)) return 'skills-references';
+    return 'plugins-other';
+  }
+  if (p.startsWith('docs/')) return DOCS_SKIP.test(p) ? null : 'docs';
+  if (p.startsWith('.claude/rules/')) return 'rules';
+  if (!p.includes('/')) return 'root';
+  return null;
+}
+
+const PROHIBITION_AREAS = ['agents', 'skills', 'skills-references', 'commands', 'plugins-other', 'docs', 'root', 'rules'];
+
+function scanProhibitions() {
+  const areas = Object.fromEntries(PROHIBITION_AREAS.map((a) => [a, { files: 0, filesWith: 0, total: 0, caps: 0, kinds: Object.fromEntries(PROHIBITION_KINDS.map(([k]) => [k, 0])) }]));
+  const hits = [];
+  const roots = ['plugins', 'docs', '.claude/rules'].map((d) => join(REPO_ROOT, d));
+  const rootFiles = existsSync(REPO_ROOT) ? readdirSync(REPO_ROOT).map((f) => join(REPO_ROOT, f)).filter((f) => lstatSync(f).isFile()) : [];
+  for (const f of [...rootFiles, ...roots.flatMap((d) => walk(d))].sort()) {
+    const area = prohibitionArea(f);
+    if (!area) continue;
+    const a = areas[area];
+    a.files += 1;
+    let fileHits = 0;
+    read(f).split('\n').forEach((line, i) => {
+      const kinds = PROHIBITION_KINDS.map(([k, re]) => [k, (line.match(re) || []).length]).filter(([, c]) => c > 0);
+      const caps = (line.match(CAPS) || []).length;
+      a.caps += caps;
+      if (!kinds.length) return;
+      for (const [k, c] of kinds) { a.kinds[k] += c; a.total += c; fileHits += c; }
+      hits.push({ area, path: rel(f), line: i + 1, kinds: kinds.map(([k]) => k), text: line.trim() });
+    });
+    if (fileHits) a.filesWith += 1;
+  }
+  return { commit: git(['rev-parse', 'HEAD']), areas, total: sum(Object.values(areas).map((a) => a.total)), hits };
+}
+
+function renderProhibitions(r, list) {
+  const kinds = PROHIBITION_KINDS.map(([k]) => k);
+  const o = ['# Слова-запреты по областям', '', `Коммит: \`${r.commit ? r.commit.slice(0, 8) : 'не git-дерево'}\`. Счёт вхождений слов целиком файла (регистр не важен); \`docs/\` без \`research/\`, \`guide/\`, \`superpowers/\`, \`migration/\`.`, ''];
+  o.push(table(['Область', 'Файлов', 'С запретами', 'Всего', ...kinds, 'Капс'], [...PROHIBITION_AREAS.map((a) => { const x = r.areas[a]; return [a, x.files, x.filesWith, x.total, ...kinds.map((k) => x.kinds[k]), x.caps]; }),
+    ['Итого', ...[ 'files', 'filesWith', 'total' ].map((k) => sum(Object.values(r.areas).map((x) => x[k]))), ...kinds.map((k) => sum(Object.values(r.areas).map((x) => x.kinds[k]))), sum(Object.values(r.areas).map((x) => x.caps))]]));
+  if (list) o.push('', ...r.hits.map((h) => `${h.path}:${h.line}\t${h.kinds.join('+')}\t${h.text}`));
+  return o.join('\n');
+}
+
 // ---------- CLI ----------
 
 const argv = process.argv.slice(2);
-if (argv[0] === '--diff') {
+if (argv.includes('--prohibitions')) {
+  const r = scanProhibitions();
+  console.log(argv.includes('--json') ? JSON.stringify(r, null, 2) : renderProhibitions(r, argv.includes('--list')));
+} else if (argv[0] === '--diff') {
   if (argv.length !== 3) { console.error('Usage: measure-context.js --diff before.json after.json'); process.exit(2); }
   console.log(diff(argv[1], argv[2]));
 } else {
