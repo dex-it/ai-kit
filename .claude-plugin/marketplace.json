@@ -76,7 +76,7 @@
       "name": "dex-auto",
       "source": "./plugins/auto/dex-auto",
       "description": "Автономные треки под открытую цель - feature и bugfix (до локальных коммитов) и ревью чужого MR/PR либо своей ветки до MR (read-only, треды в MR по санкции), фиксация истины - дельта корпуса проекта на ветке цели со сверкой против кода, вход проекта - корпус, уровень 0 и порядок работы в CLAUDE.md: ledger вне рабочего дерева, Workflow-скрипт на трек с потолками петель и схемами выхода узлов, сдача исхода скриптом finish.sh, сторожа SessionStart (возобновление по открытой цели) и Stop (терминал цели). Команды /onboard (вход проекта в агентскую работу), /goal (подготовка цели из тикета, спеки или симптома; для feature - проба черновика на домыслы) и /auto (прогон трека, возобновление с верификации).",
-      "version": "9.8.0",
+      "version": "9.8.1",
       "category": "specialist",
       "keywords": [
         "autonomous",
@@ -414,7 +414,7 @@
       "name": "dex-cicd-github",
       "source": "./plugins/specialists/infrastructure/dex-cicd-github",
       "description": "Специалист по GitHub Actions: workflow, matrix-сборки, деплой, переиспользуемые workflow.",
-      "version": "2.5.2",
+      "version": "2.5.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -441,7 +441,7 @@
       "name": "dex-cicd-jenkins",
       "source": "./plugins/specialists/infrastructure/dex-cicd-jenkins",
       "description": "Специалист по Jenkins: Jenkinsfile, декларативные пайплайны, shared libraries, multibranch.",
-      "version": "2.5.2",
+      "version": "2.5.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -455,7 +455,7 @@
       "name": "dex-cicd-teamcity",
       "source": "./plugins/specialists/infrastructure/dex-cicd-teamcity",
       "description": "Специалист по TeamCity: конфигурации сборки, агенты, build chains, артефакты, диагностика.",
-      "version": "2.6.2",
+      "version": "2.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -483,7 +483,7 @@
       "name": "dex-codebase-analyzer",
       "source": "./plugins/utilities/dex-codebase-analyzer",
       "description": "Анализ репозитория для архитектурных сессий: быстрый обзор стека, упаковка для LLM context, граф зависимостей. Обёртка над scc / repomix / ast-grep с graceful fallback на Read/Glob/Grep.",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "utility",
       "keywords": [
         "utility",
@@ -636,7 +636,7 @@
       "name": "dex-dotnet-quality-auditor",
       "source": "./plugins/specialists/dotnet/dex-dotnet-quality-auditor",
       "description": "Аудит гигиены качества .NET-проекта: анализаторы, warning-профиль, NuGet security audit, NSDepCop, CI-gates. Отчёт «есть / нет / настроить».",
-      "version": "2.5.3",
+      "version": "2.5.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -693,7 +693,7 @@
       "name": "dex-elasticsearch-specialist",
       "source": "./plugins/specialists/infrastructure/dex-elasticsearch-specialist",
       "description": "Специалист по Elasticsearch: индексирование, поисковые запросы, агрегации, mapping, здоровье кластера.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -878,7 +878,7 @@
       "name": "dex-kafka-specialist",
       "source": "./plugins/specialists/infrastructure/dex-kafka-specialist",
       "description": "Специалист по Apache Kafka: топики, consumer group и lag, партиции, разбор сообщений, диагностика.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -891,7 +891,7 @@
       "name": "dex-knowledge-extractor",
       "source": "./plugins/utilities/dex-knowledge-extractor",
       "description": "Авторский плагин: работает в клоне репозитория маркетплейса. Pipeline извлечения уроков из чужих MR/PR в маркетплейс: /mr-collect собирает review-комментарии, /mr-analyze обобщает в предложения для skills/agents, /mr-apply применяет с self-review и валидацией.",
-      "version": "3.9.1",
+      "version": "3.9.2",
       "category": "utility",
       "keywords": [
         "utility",
@@ -921,7 +921,7 @@
       "name": "dex-kubernetes-specialist",
       "source": "./plugins/specialists/infrastructure/dex-kubernetes-specialist",
       "description": "Специалист по Kubernetes: Deployment, Service, Ingress, поды и HPA, сеть, масштабирование, диагностика.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -934,7 +934,7 @@
       "name": "dex-logging-seq",
       "source": "./plugins/specialists/infrastructure/dex-logging-seq",
       "description": "Специалист по Seq и структурному логированию: разбор логов, корреляция, поиск ошибок, алерты.",
-      "version": "2.6.3",
+      "version": "2.6.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1013,7 +1013,7 @@
       "name": "dex-mongodb-specialist",
       "source": "./plugins/specialists/infrastructure/dex-mongodb-specialist",
       "description": "Специалист по MongoDB: запросы, индексы, aggregation pipeline, replica set, диагностика и оптимизация.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1026,7 +1026,7 @@
       "name": "dex-monitoring-grafana",
       "source": "./plugins/specialists/infrastructure/dex-monitoring-grafana",
       "description": "Специалист по Grafana и Prometheus: дашборды, алерты, метрики, PromQL, диагностика.",
-      "version": "2.6.2",
+      "version": "2.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1160,7 +1160,7 @@
       "name": "dex-rabbitmq-specialist",
       "source": "./plugins/specialists/infrastructure/dex-rabbitmq-specialist",
       "description": "Специалист по RabbitMQ: очереди и exchange, consumers, dead-letter, MassTransit, диагностика.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1202,7 +1202,7 @@
       "name": "dex-redis-specialist",
       "source": "./plugins/specialists/infrastructure/dex-redis-specialist",
       "description": "Специалист по Redis: кэширование, pub/sub, структуры данных, TTL, анализ памяти, диагностика.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
