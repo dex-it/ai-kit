@@ -1,5 +1,5 @@
 ---
-description: Аудит гигиены качества .NET-проекта — анализаторы, warning-профиль, NuGet audit, NSDepCop, CI-gates. Отчёт «есть / нет / настроить».
+description: Аудит гигиены качества .NET-проекта - анализаторы, warning-профиль, NuGet audit, NSDepCop, CI-gates. Отчёт «есть / нет / настроить».
 allowed-tools: Read, Grep, Glob, Bash
 argument-hint: "[путь к проекту/решению, опционально]"
 ---
@@ -10,11 +10,11 @@ argument-hint: "[путь к проекту/решению, опциональн
 
 ## Goal
 
-Провести аудит по фазам агента `dotnet-quality-auditor`: Context Gathering → Direct Analysis → Skill-Based Scan → Report. На выходе — actionable-картина «что настроено / чего нет / как настроить».
+Провести аудит по фазам агента `dotnet-quality-auditor`: Context Gathering -> Direct Analysis -> Skill-Based Scan -> Report. На выходе - actionable-картина «что настроено / чего нет / как настроить».
 
 ## Input
 
-Аргумент — путь к репозиторию / решению. Если не передан — текущая рабочая директория.
+Аргумент - путь к репозиторию / решению. Если не передан - текущая рабочая директория.
 
 ## Output
 
