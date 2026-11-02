@@ -33,7 +33,7 @@ mods/dex-<имя>/
 
 Хук - функция `($, e, next)`: `$` - разрешённые эффекты (`$.process.run`, `$.http.fetch`, `$.ui.*`, `$.store`, `$.clock`), `e` - событие, `next` - продолжение цепочки. Моды вкладываются как middleware. Точка входа экспортирует `register(on, options)`: `on` регистрирует хуки, `options` - значения полей `userConfig`.
 
-Реальный образец: `mods/dex-github-pr-tracker/`. Начало `hooks/register.tsx` — это карта: какие события мод слушает (`session.start`, `ui.render`, `command.run`, `prompt.submit`, `tool.call`, `turn.complete`) и что на каждое делает. Решения и тексты вынесены в `.ts` без `$` (`args.ts`, `github.ts`, `poll.ts`, `text.ts`), и именно они покрыты тестами в `tests/`.
+Реальный образец: `mods/dex-github-pr-tracker/`. Начало `hooks/register.tsx` - это карта: какие события мод слушает (`session.start`, `ui.render`, `command.run`, `prompt.submit`, `tool.call`, `turn.complete`) и что на каждое делает. Решения и тексты вынесены в `.ts` без `$` (`args.ts`, `github.ts`, `poll.ts`, `text.ts`), и именно они покрыты тестами в `tests/`.
 
 ### userConfig
 
@@ -73,7 +73,7 @@ mods/dex-<имя>/
 | живой прогон | `claude -p "/<команда>" --plugin-dir mods/<имя>` | загрузку модуля и путь до ответа |
 | живая сессия | `claude --plugin-dir mods/<имя>` | отрисовку, таймеры, кнопки |
 
-Контракт типов `mods/types/claude-code.d.ts` — копия деклараций, которые пишет сам движок; при обновлении клиента его перегенерируют (как - в MOD_FRAMEWORK, раздел «Инструментарий»).
+Контракт типов `mods/types/claude-code.d.ts` - копия деклараций, которые пишет сам движок; при обновлении клиента его перегенерируют (как - в MOD_FRAMEWORK, раздел «Инструментарий»).
 
 ## Оформление в каталоге
 
