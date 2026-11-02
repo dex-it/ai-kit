@@ -63,6 +63,7 @@ export default defineConfig({
       social: [{ icon: 'github', label: 'GitHub', href: REPO }],
       editLink: { baseUrl: `${REPO}/edit/develop/site/` },
       customCss: ['./src/styles/theme.css'],
+      components: { Head: './src/components/Head.astro' },
       lastUpdated: false,
       // Страницы лежат вне src/content/docs: без этого Starlight не обработает в них
       // врезки (:::tip) и ссылки у заголовков.
