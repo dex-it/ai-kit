@@ -9,27 +9,21 @@ description: Что происходит при запуске команды - 
 
 Пример из каталога: `/dex-mr-reviewer:mr-review owner/repo#42`.
 
-```text
-Вы
- | /dex-mr-reviewer:mr-review owner/repo#42
- v
-Команда-вход (в вашей сессии, главный поток)
- |  - читает аргумент, при его отсутствии спрашивает
- |  - ведёт порядок шагов, держит остановки на вашем решении
- |  - передаёт узлам вниз только указатели (ссылку и SHA), не пересказ кода
- | Agent: dex-mr-reviewer:mr-reviewer   (+ security-reviewer, если diff задевает границу доверия)
- v
-Агент-узел (свой контекст, фазы 0..12)
- |  - pre-load: dex-skill-node-contract:node-contract (контракт стыка)
- |  - по ходу фаз: Skill -> профильные skills стека и темы
- |  - наружу: status + именованные поля + принятые решения
- | Skill: dex-skill-review-evidence, dex-skill-<стек>-*, ...
- v
-Skills (текст в контекст агента, исполняют его)
- ^
- | возврат: complete | blocked | partial
- |
-Команда -> вам: вердикт и находки; публикация в MR только после вашей команды "пушь"
+```mermaid
+sequenceDiagram
+  actor U as Вы
+  participant C as Команда-вход
+  participant A as Агент-узел
+  participant S as Skills
+  U->>C: /dex-mr-reviewer:mr-review owner/repo#42
+  Note over C: ведёт порядок шагов, спрашивает вас,<br/>передаёт узлам указатели, а не код
+  C->>A: Agent: mr-reviewer, при нужде security-reviewer
+  Note over A: свой контекст, фазы 0-12,<br/>pre-load node-contract
+  A->>S: Skill: профильные skills стека и темы
+  S-->>A: ловушки и правила в контекст агента
+  A-->>C: status complete, blocked или partial, поля, решения
+  C-->>U: вердикт и находки
+  Note over U,C: в MR пишется только после вашей команды пушь
 ```
 
 Что здесь важно:
@@ -43,22 +37,17 @@ Skills (текст в контекст агента, исполняют его)
 
 ## Кто кого вызывает
 
-```text
-                    +-----------------------+
-                    |   Команда-вход        |  /design /implement /test /feature ...
-                    +-----------+-----------+
-                                | Agent (один или несколько узлов по шагам)
-          +---------------------+-----------------------+
-          v                     v                       v
-   +-------------+      +--------------+       +---------------+
-   | Узел-исполн.|      | Оркестратор  |       | Судья         |
-   | (coder,     |      | (mr-reviewer,|       | (design-      |
-   |  test-writer)|     |  rulebook-   |       |  reviewer,    |
-   +------+------+      |  orchestr.)  |       |  оракулы)     |
-          |             +------+-------+       +-------+-------+
-          | Skill              | Agent: сборщики       | Skill: оракул качества
-          v                    v read-only             v requirement-quality, plan-quality
-       Skills            параллельные фокусы        вердикт -> метка quality-checks
+```mermaid
+flowchart TD
+  C["Команда-вход<br/>/design /implement /test /feature"]
+  C -->|Agent| X["Исполнитель<br/>coder, test-writer"]
+  C -->|Agent| O["Оркестратор<br/>mr-reviewer, rulebook-orchestrator"]
+  C -->|Agent| J["Судья<br/>design-reviewer, оракулы"]
+  X -->|Skill| S1["Skills стека и темы"]
+  O -->|Agent| R["Сборщики и фокусы проверки"]
+  O -->|Skill| S2["Skills ревью"]
+  J -->|Skill| Q["Оракул качества<br/>requirement-quality, plan-quality"]
+  Q --> V["Вердикт, метка quality-checks"]
 ```
 
 Три роли узлов:
@@ -79,22 +68,29 @@ Skills (текст в контекст агента, исполняют его)
 
 `dex-auto` отличается тем, что порядок работы задаёт не текст агента, а скрипт.
 
-```text
-/dex-auto:onboard   -> tracks/onboard.js   вход проекта: корпус документов, блок в CLAUDE.md
-/dex-auto:goal      -> (проба tracks/goal.js) цель: что считать готовым, граница, вид
-/dex-auto:auto      -> tracks/feature.js | bugfix.js | review.js
-                          |  после complete: tracks/record.js (фиксация истины в корпусе)
-                          |  с --pr:        tracks/deliver.js (push и PR)
+```mermaid
+flowchart TD
+  ON["/dex-auto:onboard"] --> T1["tracks/onboard.js<br/>вход проекта: корпус, блок в CLAUDE.md"]
+  GO["/dex-auto:goal"] --> T2["проба tracks/goal.js<br/>цель: критерий готово, граница, вид"]
+  AU["/dex-auto:auto"] --> T3["tracks/feature.js<br/>tracks/bugfix.js<br/>tracks/review.js"]
+  T3 -->|после complete| T4["tracks/record.js<br/>фиксация истины в корпусе"]
+  T3 -.->|с флагом --pr| T5["tracks/deliver.js<br/>push и PR"]
 ```
 
 Как идёт трек `feature` ([компоненты плагина](https://github.com/dex-it/ai-kit/blob/main/plugins/auto/docs/components.md)):
 
-```text
-подготовка дерева -> контекст R/I -> designer (проектирование, без коммитов)
-  -> coder x верификация (до 3 попыток)
-  -> снимок мест правки -> reviewer (саморевью) -> skeptic (фальсификация серьёзных находок)
-  -> правка по находкам (до 2 петель) -> сверка правки
-  -> record: запись изменения в корпус -> [--pr] deliver
+```mermaid
+flowchart TD
+  F["feature.js"] --> F1["подготовка дерева и контекст R/I"]
+  F1 --> F2["designer: проектирование, без коммитов"]
+  F2 --> F3["coder и верификация, до 3 попыток"]
+  F3 --> F4["снимок мест правки"]
+  F4 --> F5["reviewer: саморевью"]
+  F5 --> F6["skeptic: фальсификация серьёзных находок"]
+  F6 --> F7["правка по находкам, до 2 петель"]
+  F7 --> F8["сверка правки"]
+  F8 --> F9["record: запись изменения в корпус"]
+  F9 -.->|с флагом --pr| F10["deliver: push и PR"]
 ```
 
 Отличия от обычной команды:

@@ -7,9 +7,21 @@ description: Как из манифестов складывается ката�
 
 ## Три манифеста и одна витрина
 
+```mermaid
+flowchart TD
+  MP[".claude-plugin/marketplace.json<br/>список плагинов и версия каталога"]
+  PJ["plugin.json каждого плагина<br/>имя, версия, витрина"]
+  BJ["bundle.json бандла<br/>includes, dependencies, authorOnly"]
+  RD["README.md<br/>витрина для людей"]
+  MP -->|source ведёт на| PJ
+  PJ -->|npm run sync:marketplace копирует описание и версию| MP
+  BJ -->|имена компонентов должны быть в| MP
+  RD -.->|сверяет validate-readme| MP
+```
+
 | Файл | Что хранит | Кто пишет |
 |---|---|---|
-| `.claude-plugin/marketplace.json` | единственный источник истины по составу: список плагинов (`name`, `source`, `description`, `version`, `category`, `keywords`) и версия самого каталога | руками добавляется запись; `description` и `version` генерирует `npm run sync:marketplace` |
+| `.claude-plugin/marketplace.json` | главный источник истины по составу (README - второй носитель, его сверяет валидатор): список плагинов (`name`, `source`, `description`, `version`, `category`, `keywords`) и версия самого каталога | руками добавляется запись; `description` и `version` генерирует `npm run sync:marketplace` |
 | `<плагин>/.claude-plugin/plugin.json` | манифест плагина: имя, версия, витрина (`description`), автор, ключевые слова, лицензия; у мода `userConfig`, у `dex-auto` `workflows` | автор плагина |
 | `<бандл>/bundle.json` | `includes[]` - профиль роли, `dependencies[]` - подтянутое замыканием, `authorOnly[]` - плагины только для локального клона автора | автор бандла |
 | `README.md` в корне | витрина для людей: таблицы плагинов по видам, перечень skills по темам | руками, генератора нет |
@@ -37,7 +49,7 @@ description: Как из манифестов складывается ката�
 | Правка описания, ключевых слов, опечатка | patch |
 | Переименование плагина или агента, изменение формата выхода агента | major |
 
-Расхождение версий `plugin.json` и `marketplace.json` ловит правило `version-mismatch`, расхождение подвала README с версией каталога - `readme-version-drift`. Эти проверки существуют потому, что версия «забывается» чаще всего.
+Расхождение версий `plugin.json` и `marketplace.json` ловит правило `version-mismatch` (предупреждение), расхождение подвала README с версией каталога - `readme-version-drift` (ошибка). Эти проверки существуют потому, что версия «забывается» чаще всего.
 
 ## Как определяется вид плагина
 

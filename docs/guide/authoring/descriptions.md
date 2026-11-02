@@ -69,8 +69,9 @@ description: Как поле description решает, выберут ли skill
 ## Проверить
 
 ```bash
-npm run measure:listing              # бюджет, пары похожих описаний
-node tools/description-listing.js --pairs=0.4
+npm run measure:listing                           # бюджет листинга
+node tools/description-listing.js --pairs=0.4     # пары похожих описаний
+node tools/description-listing.js --bundles       # листинг при установке бандла
 npm run test:activation:agents       # платный: видимость агента
 ```
 

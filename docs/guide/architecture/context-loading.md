@@ -68,7 +68,7 @@ description: Что попадает в контекст всегда, что п
 | `/doctor` | оценку стоимости листинга и крупнейших вкладчиков |
 | `/skill-doctor` | стоимость и частоту вызова каждого skill |
 
-Последние три - команды самого Claude Code ([документация skills](https://code.claude.com/docs/en/skills), сверка по нормативному документу репозитория от 30.10.2026).
+Последние три - команды самого Claude Code ([документация skills](https://code.claude.com/docs/en/skills), сверка от 30.10.2026 записана в [claude55-descriptions.md](https://github.com/dex-it/ai-kit/blob/develop/docs/migration/claude55-descriptions.md), раздел 1).
 
 Для авторов каталога в репозитории есть свои замеры: `npm run measure:context` (постоянный слой и предзагрузка) и `npm run measure:listing` (бюджет листинга, пары похожих описаний, бандлы). Это измерения, а не валидаторы: они ничего не блокируют.
 

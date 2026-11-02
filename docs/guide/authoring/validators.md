@@ -32,7 +32,7 @@ ERROR [trap-empty] Trap skill has neither a checklist item nor an H3 trap - noth
 | Правило | Что значит | Как исправить |
 |---|---|---|
 | `frontmatter-forbidden` | поле вне перечня платформы (чаще `keywords`) | убрать поле, ключевые слова перенести в `description` после «Активируется при» |
-| `description-short` / `description-no-activation` / `description-few-keywords` | нет якоря технологии или меньше 10 активаторов | дописать технологию и аспекты по формуле ([Как писать description](/authoring/descriptions/)) |
+| `description-short` / `description-no-activation` / `description-few-keywords` | описание короче 50 знаков / нет фразы «Активируется при» / меньше 10 активаторов; якорь технологии валидатор не проверяет, это на вашей совести | дописать технологию и аспекты по формуле ([Как писать description](/authoring/descriptions/)) |
 | `description-long` (предупреждение), `description-too-long`, `description-exceeds-claude-limit` | описание длиннее 500, 750 или 1536 знаков | срезать точки входа, оставить аспекты |
 | `trap-empty` | нет ни одного пункта чек-листа и ни одной ловушки | добавить пункты-ситуации |
 | `trap-missing-triad` | раздел H3 без «Плохо / Правильно / Почему» | либо вернуть пункт в чек-лист, либо дописать триаду; для process-skill - зарегистрировать его в `PROCESS_SKILLS` |
@@ -49,21 +49,21 @@ ERROR [trap-empty] Trap skill has neither a checklist item nor an H3 trap - noth
 |---|---|---|
 | `frontmatter-required` | нет `name`, `description` или `tools` | добавить |
 | `frontmatter-forbidden` | поле `allowed-tools` | у агентов поле называется `tools` |
-| `frontmatter-model-missing` | нет явного `model` | выбрать тир по характеру суждения ([Модель и effort](/practices/models-effort/)); `inherit` не годится |
+| `frontmatter-model-missing` | нет явного `model` | выбрать тир по характеру суждения ([Модель и effort](/practices/models-effort/)); значение `inherit` валидатор пропускает, но норма его не допускает |
 | `frontmatter-effort-unsupported-model` | `effort` указан при модели без этой оси | убрать `effort` или сменить модель |
 | `frontmatter-description-no-triggers` | в описании нет слова «Триггеры» | дописать симптомы по формуле |
-| `frontmatter-no-skill-tool` | агент грузит skills, а `Skill` нет в `tools` | добавить `Skill` |
+| `frontmatter-no-skill-tool` | в `tools` нет `Skill` (проверяется у всех агентов, кроме узлов трека) | добавить `Skill` |
 | `frontmatter-skills-missing` | не предзагружен контракт стыка | `skills: [dex-skill-node-contract:node-contract]` в полной форме |
 | `frontmatter-skills-bare-plugin-name` | в `skills:` голое имя плагина | форма `{plugin}:{skill}`, иначе платформа пропустит запись молча |
 | `frontmatter-skills-not-preloadable` | в `skills:` условный skill | условные skills грузятся в фазе через `Skill`, а не в предзагрузке |
 | `no-phases`, `phase-missing-goal`, `phase-missing-exit` | нет фаз, цели или критерия завершения | оформить `## Phase N: Имя` с `**Goal:**` и `**Exit criteria:**` |
 | `phase-non-observable-exit` | критерий вроде «агент понял» | заменить наблюдаемым артефактом или внешним фактом |
-| `phase-procedural-body` | тело фазы - процедура (команды, код) | переписать в контракт: цель, результат, критерий |
+| `phase-procedural-body` | в фазе нумерованный список из 4 и более пунктов - признак процедуры | переписать в контракт: цель, результат, критерий |
 | `phase-mandatory-tail` | после `**Mandatory:** yes` стоит пояснение | пометка голая; причину несут Goal и Exit criteria |
 | `glued-attribute-block` | атрибуты фазы слиплись в один абзац | пустая строка между атрибутами |
 | `handoff-input-missing`, `handoff-output-missing` | нет `**Input (handoff):**` или `**Output (handoff):**` в теле | объявить сигнатуру; образец внутри блока кода не засчитывается |
 | `judge-without-write` | агент пишет метку `quality-checks`, но нет `Write`/`Edit` | добавить инструмент |
-| `factcheck-cascade-incomplete` | есть фаза проверки фактов, но каскад инструментов неполон | `ToolSearch`, `WebSearch` и `WebFetch` вместе |
+| `factcheck-cascade-incomplete` | агент вызывает skill `dex-skill-fact-verification:fact-verification`, но каскад инструментов неполон | `ToolSearch`, `WebSearch` и `WebFetch` вместе |
 | `agent-file-name-mismatch`, `agent-file-nested` | файл не совпадает с `name` или лежит в подкаталоге `agents/` | переименовать, поднять файл в `agents/` |
 
 ## Команды
@@ -85,7 +85,7 @@ ERROR [trap-empty] Trap skill has neither a checklist item nor an H3 trap - noth
 | `dependency-not-pulled` | запись в `dependencies[]` никто не называет | убрать лишнюю запись или перенести в `includes[]` |
 | `dependency-also-included` | плагин стоит в обоих списках | оставить в `includes[]` |
 | `include-not-in-marketplace` | компонент бандла отсутствует в `marketplace.json` | добавить запись или исправить имя |
-| `version-mismatch` | версия в `plugin.json` и `marketplace.json` разная | выровнять; `npm run sync:marketplace` |
+| `version-mismatch` (предупреждение) | версия в `plugin.json` и `marketplace.json` разная | выровнять; `npm run sync:marketplace` |
 | `description-mismatch` | витрина в двух манифестах разная | править в `plugin.json`, затем `npm run sync:marketplace` |
 | `description-not-russian` | витрина без кириллицы | написать по-русски по телу плагина |
 | `catalog-category-mismatch` | `category` не соответствует содержимому | вывести из состава: `agents/` - specialist, `skills/` - skill и так далее |
@@ -103,7 +103,7 @@ ERROR [trap-empty] Trap skill has neither a checklist item nor an H3 trap - noth
 
 ## Если вы автор нового правила валидатора
 
-Новое или переименованное правило требует: строку в `docs/VALIDATOR_RULES.md`, директорию с фикстурой `tools/__fixtures__/<валидатор>/<правило>/`, а при новом валидаторе - строку в `package.json` и шаг в CI. Иначе падают `rule-not-documented` и `rule-registry-stale` мета-проверки. Подробности - в [Тестировать изменения](/authoring/testing/).
+Новое или переименованное правило требует: строку в `docs/VALIDATOR_RULES.md`, директорию с фикстурой `tools/__fixtures__/<валидатор>/<правило>/`, а при новом валидаторе - строку в `package.json` и шаг в CI. Иначе мета-проверка падает: `rule-not-documented` (правило без строки реестра), `rule-registry-stale` (строка про несуществующее правило), `rule-untested` (нет фикстуры), `rule-section-missing` (строка в чужом разделе реестра). Подробности - в [Тестировать изменения](/authoring/testing/).
 
 ## Если сообщение непонятно
 
