@@ -9,6 +9,7 @@ import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 
 | Хочу | Ставлю | Запускаю |
 |---|---|---|
+| [Разобраться в незнакомом проекте](/scenarios/research/) | `architect` | `/dex-codebase-analyzer:codebase-summary`, `/dex-code-discovery:discover`, `/dex-architect:review-arch` |
 | [Проверить свою ветку перед push](/scenarios/review-before-push/) | `code-review` | `/dex-self-reviewer:self-review` |
 | [Отревьюить чужой MR или PR](/scenarios/review-others/) | `code-review` | `/dex-mr-reviewer:mr-review` |
 | [Разобрать полученное ревью](/scenarios/handle-review/) | `dotnet-developer` или `ts-fullstack` | `/dex-review-planner:review-plan` |
@@ -17,8 +18,11 @@ import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 | [Собрать требования к фиче](/scenarios/requirements/) | `system-analyst` | `/dex-business-analyst:feature`, `/dex-requirements-reviewer:feature-check` |
 | [Спроектировать решение](/scenarios/design/) | `architect` | `/dex-architect:design` |
 | [Реализовать фичу и добрать тесты](/scenarios/implement/) | `dotnet-developer` или `ts-fullstack` | `/dex-implement:implement`, `/dex-test:test` |
+| [Принять фичу на стенде](/scenarios/accept-on-stand/) | `qa-engineer`, `code-review` или `bug-lifecycle` | `/dex-stand-reviewer:review-stand` |
 | [Отдать задачу целиком](/scenarios/auto/) | `auto` | `/dex-auto:onboard`, `/dex-auto:goal`, `/dex-auto:auto` |
 | [Смотреть кластер, БД и очереди из чата](/scenarios/diagnostics/) | `cli-tools` | `/dex-kubectl-cli:kube-pods`, `/dex-psql-cli:psql-query`, `/dex-rabbitmqadmin-cli:rmq-queues` |
+
+Как этапы складываются в цепочку от идеи до приёмки на стенде, показано на странице [Путь типовой задачи](/scenarios/lifecycle/). Выбрать бандл по роли помогает [Что поставить](/start/choose/).
 
 Бандл ставится из клона репозитория: `./install-bundle/install-bundle.sh <имя>`. Как это сделать - в разделе [Установка](/start/install/).
 
