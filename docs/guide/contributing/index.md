@@ -8,7 +8,7 @@ description: Как добавить плагин или поправить су
 ## Путь изменения
 
 1. Форкните репозиторий и создайте ветку от `develop`.
-2. Прочитайте устройство того, что правите: [skill](https://github.com/dex-it/ai-kit/blob/main/docs/SKILL_FRAMEWORK.md), [агент](https://github.com/dex-it/ai-kit/blob/main/docs/AGENT_FRAMEWORK.md), [команда](https://github.com/dex-it/ai-kit/blob/main/docs/COMMAND_FRAMEWORK.md), [мод](https://github.com/dex-it/ai-kit/blob/main/docs/MOD_FRAMEWORK.md).
+2. Выберите вид единицы и пройдите руководство по нему: [Разработка плагинов](/authoring/). Прочитайте устройство того, что правите: [skill](https://github.com/dex-it/ai-kit/blob/main/docs/SKILL_FRAMEWORK.md), [агент](https://github.com/dex-it/ai-kit/blob/main/docs/AGENT_FRAMEWORK.md), [команда](https://github.com/dex-it/ai-kit/blob/main/docs/COMMAND_FRAMEWORK.md), [мод](https://github.com/dex-it/ai-kit/blob/main/docs/MOD_FRAMEWORK.md).
 3. Внесите изменение и синхронизируйте всё, что нужно: [Добавить плагин](/contributing/add-plugin/), [Версии](/contributing/versions/).
 4. Прогоните [проверки](/contributing/checks/).
 5. Откройте Pull Request в `develop`: [Pull Request](/contributing/pull-requests/).

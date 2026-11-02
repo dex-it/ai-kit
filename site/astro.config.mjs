@@ -77,7 +77,7 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Начать',
-          items: ['start', 'start/requirements', 'start/install', 'start/first-run', 'start/update-remove'],
+          items: ['start', 'start/day-one', 'start/requirements', 'start/choose', 'start/install', 'start/first-run', 'start/update-remove'],
         },
         {
           label: 'Основы',
@@ -98,6 +98,8 @@ export default defineConfig({
           collapsed: true,
           items: [
             { slug: 'scenarios', label: 'Все сценарии' },
+            'scenarios/lifecycle',
+            'scenarios/research',
             'scenarios/review-before-push',
             'scenarios/review-others',
             'scenarios/handle-review',
@@ -106,8 +108,25 @@ export default defineConfig({
             'scenarios/requirements',
             'scenarios/design',
             'scenarios/implement',
+            'scenarios/accept-on-stand',
             'scenarios/auto',
             'scenarios/diagnostics',
+          ],
+        },
+        {
+          label: 'Практики',
+          collapsed: true,
+          items: [
+            { slug: 'practices', label: 'Обзор' },
+            'practices/task-formulation',
+            'practices/choose-executor',
+            'practices/context',
+            'practices/models-effort',
+            'practices/rules-form',
+            'practices/scope-done',
+            'practices/secrets-stand',
+            'practices/safe-review',
+            'practices/mistakes',
           ],
         },
         {
@@ -136,6 +155,37 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Архитектура',
+          collapsed: true,
+          items: [
+            { slug: 'architecture', label: 'Обзор' },
+            'architecture/levels',
+            'architecture/call-flow',
+            'architecture/context-loading',
+            'architecture/catalog-assembly',
+            'architecture/stack-loading',
+            'architecture/corpus-glossary',
+            'architecture/rule-layers',
+            'architecture/validation-chain',
+          ],
+        },
+        {
+          label: 'Разработка плагинов',
+          collapsed: true,
+          items: [
+            { slug: 'authoring', label: 'С чего начать' },
+            'authoring/skill',
+            'authoring/agent',
+            'authoring/command',
+            'authoring/plugin-bundle',
+            'authoring/mod',
+            'authoring/mcp',
+            'authoring/descriptions',
+            'authoring/validators',
+            'authoring/testing',
+          ],
+        },
+        {
           label: 'Участие',
           items: [
             'contributing',
@@ -146,7 +196,7 @@ export default defineConfig({
             'contributing/docs-site',
           ],
         },
-        { label: 'Вопросы', items: ['faq', 'faq/troubleshooting'] },
+        { label: 'Вопросы', items: ['faq', 'faq/troubleshooting', 'faq/glossary'] },
       ],
     }),
   ],
