@@ -2146,7 +2146,7 @@
       "name": "dex-skill-optimize-for-llm",
       "source": "./plugins/skills/dex-skill-optimize-for-llm",
       "description": "Переписать инструкцию (CLAUDE.md, agent, SKILL.md, команду, prompt) для модели кратко и однозначно: срезать воду и дубли, оставить механизм/условие/исход, сохранить нормативную силу и грабли, выстроить информационную архитектуру и поле срабатывания.",
-      "version": "1.16.5",
+      "version": "1.17.0",
       "category": "skill",
       "keywords": [
         "skill",
