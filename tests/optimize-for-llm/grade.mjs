@@ -3,6 +3,7 @@
 // финального текста: вердикт здесь вход сверки, не приговор.
 //
 //   node grade.mjs <корень рабочего дерева прогона> [O-01 O-05 ...]
+//   node grade.mjs --prepare <корень> [O-01 O-05 ...]   - разложить входы кейсов по дереву, дом рядом (O-06, O-10)
 //
 // Дерево: <корень>/c01/<файл>, ... Исходники берутся из inputs/ рядом с этим скриптом.
 // Без перечня идут все кейсы; перечень нужен частичному прогону (правка одного правила
@@ -10,12 +11,13 @@
 //
 // Коды возврата: 0 - дословная половина пройдена, 1 - провал кейса, 2 - неверный вызов либо
 // перечни кейса разошлись со своим входом (набор сломан, вердикты по нему недействительны).
-import { readFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = process.argv[2];
+const PREPARE = process.argv[2] === '--prepare';
+const ROOT = PREPARE ? process.argv[3] : process.argv[2];
 if (!ROOT) {
   console.error('нужен путь к рабочему дереву прогона');
   process.exit(2);
@@ -111,6 +113,7 @@ const CASES = [
   },
   {
     id: 'O-06', out: 'c06/migration-writer.md', src: 'in-04b-migration-agent.md',
+    house: { src: 'in-04a-project-rules.md', to: 'c06/project-rules.md' }, // контекст, не правится
     mines: [ONLY('выкат'), 'pg_stat_user_tables'],
     cut: ['цена ошибки заметно выше', 'dotnet tool install --global dotnet-ef',
           'Здесь агент пишет два метода', 'Почему mandatory'],
@@ -143,6 +146,10 @@ const CASES = [
   },
   {
     id: 'O-10', out: 'c10/release-track.md', src: 'in-08b-release-track.md',
+    // Дом лежит рядом как `references/channel-registry.md`. Прогон без него недействителен: правило «дом
+    // сверяется до реза» при нечитаемом доме запрещает рез, и кейс проваливается всегда (так четыре
+    // прогона 2026-10-28 дали ПРОВАЛ O-10 по неполному входу, а не по скиллу).
+    house: { src: 'in-08a-channel-registry.md', to: 'c10/references/channel-registry.md' },
     // Адрес дома - мина, а не рез: пересказ уносится вместе с указателем, и выход, где норма
     // исчезла целиком, от правильного отличается только наличием этой строки. Терминал ветки
     // привязан к месту: та же формула стоит в Exit шага 2, и срез Fallback скрывался бы им.
@@ -213,11 +220,22 @@ const CASES = [
   },
 ];
 
-const only = process.argv.slice(3);
+const only = process.argv.slice(PREPARE ? 4 : 3);
 const RUN = only.length ? CASES.filter((c) => only.includes(c.id)) : CASES;
 if (only.length && RUN.length !== only.length) {
   console.error(`неизвестный кейс: ${only.filter((id) => !CASES.some((c) => c.id === id)).join(' ')}`);
   process.exit(2);
+}
+
+if (PREPARE) {
+  for (const c of RUN) {
+    for (const [from, to] of [[c.src, c.out], ...(c.house ? [[c.house.src, c.house.to]] : [])]) {
+      mkdirSync(dirname(join(ROOT, to)), { recursive: true });
+      copyFileSync(join(HERE, 'inputs', from), join(ROOT, to));
+      console.log(`${c.id}: ${to}`);
+    }
+  }
+  process.exit(0);
 }
 
 // Перечень кейса и его вход - две половины одного контракта, и расходятся они молча: пункт
@@ -260,7 +278,12 @@ if (broken.length) {
 }
 
 let failures = 0;
+const invalid = [];
 for (const c of RUN) {
+  if (c.house && !existsSync(join(ROOT, c.house.to))) {
+    invalid.push(`${c.id}: нет дома ${c.house.to} - вход неполный, прогон недействителен (разложи: --prepare)`);
+    continue;
+  }
   let after;
   try {
     after = readFileSync(join(ROOT, c.out), 'utf8');
@@ -306,7 +329,12 @@ for (const c of RUN) {
   for (const h of zero) console.log(`         дельта ${h} = 0 при непустом обязательном резе в этой половине`);
   if (c.note) console.log(`         (${c.note})`);
 }
-console.log(`\nДословная половина: ${RUN.length - failures}/${RUN.length}. Смысловая - чтением выходов.`);
+if (invalid.length) {
+  console.error('прогон недействителен:');
+  for (const b of invalid) console.error(`  ${b}`);
+}
+console.log(`\nДословная половина: ${RUN.length - failures - invalid.length}/${RUN.length - invalid.length}. Смысловая - чтением выходов.`);
+if (invalid.length) process.exit(2);
 // Регламент правки скилла ставит прогон в один ряд с `npm run validate` и `npm test`:
 // без ненулевого кода цепочка через `&&` проглотит провал молча.
 process.exit(failures ? 1 : 0);
