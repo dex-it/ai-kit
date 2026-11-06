@@ -15,7 +15,21 @@
 | strings без -e | b1 (BI-15) | 2/2 d: `-e l` или декомпиляция | снята |
 | debug-info без проверки build-id | n1 (ND-9) | см. `core-dumps` | снята (двойник) |
 | addr2line без -e и -f | n1 (BI-4) | pass там, где применялся (по одному прогону пары) | осталась (не в обоих прогонах пары) |
-| ASLR, c++filt для Rust/Swift, Rizin x2, LIEF x2, obfuscated, debuginfod, objdump cross-arch | b1 | C++ часть `c++filt` пройдена, остальное: нет Rizin в образе, нет кейса; `objdump` в образе multiarch - ситуация невозможна | `unverifiable`, остались |
+| ASLR, c++filt для Rust/Swift, Rizin x2, LIEF x2, obfuscated, debuginfod | b1 | C++ часть `c++filt` пройдена, остальное: нет Rizin в образе, нет кейса | `unverifiable`, остались |
+| objdump cross-arch | b2, b2x (хост, ниже) | в образе `objdump` multiarch - ситуация невозможна; на хосте 4/4 без правки | осталась, различающей силы нет |
+
+## Кейс b2: objdump cross-arch (06.11.2026)
+
+Правка 1.1.4: пример «Плохо» обещал на чужой ISA «file format not recognized»; на GNU objdump 2.42 без ARM (x86_64, Ubuntu) формат читается как `elf64-little`, дизассемблирования нет - «can't disassemble for architecture UNKNOWN!». Проверено руками на `_speedups` из колеса MarkupSafe 2.1.5 под aarch64.
+
+Лаборатория - хост, не `diag46-lab`: [`run-b2.sh`](run-b2.sh) (`prepare` скачивает колёса и кладёт редакции скилла; прогон `<base|cur> <b2|b2x> <повтор>`), `claude-sonnet-5-5` effort medium, `--setting-sources project --strict-mcp-config`, Bash только на `file`, `readelf`, `nm`, `objdump`, `strings`, `which`, `ls`; скилл подан файлом дисциплины (`base` - 1.1.3 из `develop`, `cur` - 1.1.4). Кейс b2 - библиотека aarch64, кейс b2x (приманка) - та же под x86-64. Ключ записан до прогонов: b2 - C1 причина cross-arch, а не порча файла; C2 назван инструмент с aarch64 (`aarch64-linux-gnu-objdump`, `binutils-multiarch`, `gdb-multiarch`, `llvm-objdump`); C3 листинг не выдуман. b2x - X1 разобран штатным `objdump`; X2 cross-arch не утверждается.
+
+| Кейс | `base` 1.1.3 | `cur` 1.1.4 |
+|---|---|---|
+| b2: C1, C2, C3 | 2/2 по всем трём | 2/2 по всем трём |
+| b2x: X1, X2 | 2/2 | 2/2 |
+
+Потолок в обоих условиях: правка - сверка факта, поведение она не меняет и на нём не различается. `b2-cur-2` расшифровал AArch64 вручную по байтам `.text`, назвал это непроверенным и предложил подтвердить дизассемблером; смысл совпал с листингом x86-64 из b2x - C3 засчитан. Первый заход шёл без изоляции среды оператора, в зачёт не взят. Отчёты и команды - `runs/b2*`, 8 прогонов, 0,91 USD.
 
 ## Итоговая редакция
 

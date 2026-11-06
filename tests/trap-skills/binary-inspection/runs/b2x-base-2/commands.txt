@@ -1,0 +1,13 @@
+cd $B2_DIR/labs/b2x-base-2; ls -la . vendor; for t in objdump readelf rizin radare2 gdb nm file r2 llvm-objdump strings python3 ndisasm; do printf "%s: " $t; command -v $t || echo no; done; python3 -I -c "import capstone" 2>&1 | tail -1; python3 -I -c "import lief" 2>&1|tail -1
+ls -la . vendor; which objdump readelf rizin radare2 gdb nm file llvm-objdump strings python3 ndisasm; python3 -I -c "import capstone" 2>&1 | tail -1; python3 -I -c "import lief" 2>&1|tail -1
+ls -la $B2_DIR/labs/b2x-base-2/vendor
+which objdump readelf rizin radare2 gdb nm file llvm-objdump strings python3 ndisasm
+file vendor/libescape.so && readelf -h vendor/libescape.so | grep -E 'Class|Machine|Type' && objdump --version | head -1 && nm -D --defined-only vendor/libescape.so
+cd $B2_DIR (команда обрезана исполнителем)
+readelf -h $B2_DIR/labs/b2x-base-2/vendor/libescape.so
+nm -D --defined-only $B2_DIR/labs/b2x-base-2/vendor/libescape.so
+objdump -d -M intel --no-show-raw-insn --disassemble=PyInit__speedups $B2_DIR/labs/b2x-base-2/vendor/libescape.so
+objdump -d -M intel --no-show-raw-insn --disassemble=_init $B2_DIR/labs/b2x-base-2/vendor/libescape.so
+nm -D $B2_DIR/labs/b2x-base-2/vendor/libescape.so
+objdump -s --start-address=0x2160 --stop-address=0x2190 $B2_DIR/labs/b2x-base-2/vendor/libescape.so
+# cost (0.10138739999999999, 'success', 16)

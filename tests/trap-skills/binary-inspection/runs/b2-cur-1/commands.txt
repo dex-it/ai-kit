@@ -1,0 +1,15 @@
+cd $B2_DIR/labs/b2-cur-1; ls -la . vendor; file vendor/libescape.so; which objdump readelf rizin rz-bin nm gdb llvm-objdump r2 ndisasm aarch64-linux-gnu-objdump; python3 -c 'import lief' ; python3 -c 'import capstone'; objdump -i | head -30
+ls -la $B2_DIR/labs/b2-cur-1/vendor; file $B2_DIR/labs/b2-cur-1/vendor/libescape.so
+which objdump readelf rizin rz-bin nm gdb llvm-objdump r2 ndisasm aarch64-linux-gnu-objdump; python3 -I -c 'import capstone' 2>&1 | tail -1; python3 -I -c 'import lief' 2>&1 | tail -1
+which objdump readelf rizin rz-bin nm gdb llvm-objdump r2 ndisasm aarch64-linux-gnu-objdump
+objdump -i
+python3 -I -c 'import capstone'
+python3 -I -c 'import lief'
+objdump -d $B2_DIR/labs/b2-cur-1/vendor/libescape.so 2>&1 | head -5
+gdb -batch -ex 'set architecture aarch64' 2>&1 | head -5
+readelf -Ws --dyn-syms $B2_DIR/labs/b2-cur-1/vendor/libescape.so 2>&1 | head -40
+gdb -batch -ex 'set architecture aarch64' -ex 'show architecture'
+ndisasm -h 2>&1 | head -20
+readelf -h $B2_DIR/labs/b2-cur-1/vendor/libescape.so
+ls /usr/bin | grep -iE 'objdump|disas|rizin|radare|capstone|qemu|llvm|multiarch'
+# cost (0.0978742, 'success', 17)
