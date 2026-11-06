@@ -1,0 +1,12 @@
+cd $B2_DIR/labs/b2-cur-2; ls -la . vendor; which objdump readelf rizin rz-bin gdb nm file python3 llvm-objdump r2 aarch64-linux-gnu-objdump; head -c 20 vendor/libescape.so | od -An -tx1; file vendor/libescape.so; readelf -h vendor/libescape.so | head -20; objdump -i | head -40
+cd $B2_DIR/labs/b2-cur-2; objdump -d vendor/libescape.so 2>&1 | head -5; echo ---; objdump -i | grep -ci aarch64; gdb -batch -ex 'set architecture aarch64' 2>&1 | head -3; gdb -batch -ex 'set architecture' 2>&1 | head -3; ls /usr/bin | grep -iE 'aarch64|multiarch|llvm|capstone|objdump|qemu|r2|rizin|ghidra'; python3 -I -c 'import capstone' 2>&1|tail -1; python3 -I -c 'import lief' 2>&1|tail -1; echo ---; readelf --dyn-syms -W vendor/libescape.so | head -30
+cd $B2_DIR/labs/b2-cur-2; objdump -d vendor/libescape.so 2>&1 | head -5; echo ---; objdump -i | grep -ci aarch64; echo ---; readelf --dyn-syms -W vendor/libescape.so | head -30
+gdb -batch -ex 'set architecture aarch64' 2>&1 | head -3; ls /usr/bin | grep -iE 'aarch64|multiarch|llvm|objdump|qemu|rizin|ghidra|r2$'; python3 -I -c 'import capstone' 2>&1 | tail -1; python3 -I -c 'import lief' 2>&1 | tail -1
+gdb -batch -ex 'set architecture aarch64' 2>&1 | head -3
+ls /usr/bin | grep -iE 'aarch64|multiarch|llvm|qemu|rizin|ghidra|r2$'
+python3 -I -c 'import capstone' 2>&1 | tail -1
+gdb -batch -ex 'set architecture aarch64'
+python3 -I -c 'import capstone'
+cd $B2_DIR/labs/b2-cur-2; readelf -x .text vendor/libescape.so -W --wide -S -s 2>&1 | head -0; readelf -x .text vendor/libescape.so
+cd $B2_DIR/labs/b2-cur-2; readelf -W -r vendor/libescape.so; readelf -W -S vendor/libescape.so; readelf -p .rodata vendor/libescape.so
+# cost (0.23357350000000002, 'success', 16)

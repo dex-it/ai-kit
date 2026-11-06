@@ -63,7 +63,7 @@ description: Бинарный анализ - binutils (objdump, addr2line, c++fi
 ## objdump и cross-arch
 
 ### objdump для cross-arch
-Плохо: `objdump -d arm64-binary.so` на x86_64 машине без ARM - «file format not recognized»
+Плохо: `objdump -d arm64-binary.so` на x86_64 без ARM в binutils - формат читается как `elf64-little`, дизассемблирования нет: «can't disassemble for architecture UNKNOWN!»
 Правильно: `aarch64-linux-gnu-objdump -d` или binutils-multiarch; `objdump -i` - список форматов
 Почему: ISA берётся из ELF. `--target` - лишь BFD-формат (`elf64-littleaarch64`), ISA не выбирает (binutils 2.40 multiarch разобрал x86-64 ELF и без него)
 

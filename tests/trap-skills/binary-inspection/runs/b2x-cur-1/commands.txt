@@ -1,0 +1,5 @@
+cd $B2_DIR/labs/b2x-cur-1; ls -la . vendor; head -c 20 vendor/libescape.so | od -An -tx1; which objdump readelf rizin gdb llvm-objdump nm file python3 aarch64-linux-gnu-objdump; objdump -i | head -30
+cd $B2_DIR/labs/b2x-cur-1/vendor; readelf -h libescape.so | grep -E 'Machine|Type'; nm -D --defined-only libescape.so; readelf -Ws --dyn-syms libescape.so | grep -E 'FUNC' | grep -v UND
+cd $B2_DIR/labs/b2x-cur-1/vendor; objdump -d -M intel --disassemble=_init --disassemble=PyInit__speedups --disassemble=_fini libescape.so | tail -n +4; readelf -p .rodata libescape.so | head -30; readelf -d libescape.so | grep NEEDED
+cd $B2_DIR/labs/b2x-cur-1/vendor; objdump -d -M intel --start-address=0x1000 --stop-address=0x1020 libescape.so | tail -n +5; objdump -d -M intel --start-address=0x1cf0 --stop-address=0x1d52 -j .text libescape.so | tail -n +5; readelf -r libescape.so | grep -E 'Py|JUMP' | head -30
+# cost (0.0882393, 'success', 7)

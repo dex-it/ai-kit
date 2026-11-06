@@ -236,8 +236,9 @@ Phase 3 отдельным перечнем.
 
 ## Boundaries
 
-- Все Boundaries из `dex-architect` применимы (в т.ч. не переигрывать implementation-план и
-  документацию вызывающей стороны).
+- Все Boundaries из `dex-architect` применимы (в т.ч. не писать код реализации - Deep Dive даёт
+  контракты, схемы и конфигурацию как решение; не переигрывать implementation-план и документацию
+  вызывающей стороны).
 - **.NET-specific:**
   - Не предлагать Service Locator / Singleton DbContext / async void / `.Result` - это
     .NET-anti-patterns
