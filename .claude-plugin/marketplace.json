@@ -2892,7 +2892,7 @@
       "name": "dex-test-automator",
       "source": "./plugins/specialists/qa/dex-test-automator",
       "description": "Автоматизатор тестов: UI, API, интеграционные и unit-тесты, Selenium и Playwright, фреймворки автоматизации.",
-      "version": "2.4.4",
+      "version": "2.4.5",
       "category": "specialist",
       "keywords": [
         "specialist",
