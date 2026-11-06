@@ -271,25 +271,17 @@ const hunkGap = (hunks, roots) => {
   const bare = bareHunks(hunks, roots)
   return bare.length ? `место правки без записи roots: ${bare.join(', ')}` : ''
 }
-// Правила проекта ищет узел снимка, читает ревьюер: прочтение - поле выдачи, иначе непрочитанное правило неотличимо от соблюдённого.
+// Где лежат правила, находит узел снимка, что из них задевает правка - ревьюер: корпус ADR целиком в контекст ревьюера не входит.
 const CONVENTIONS = {
-  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы, которыми проект нормирует код и ревью; не нашёл - пусто' },
+  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы и каталоги, которыми проект нормирует код и ревью; не нашёл - пусто' },
   'conventions-searched': { type: 'string', description: 'где искал правила проекта' },
 }
-const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'пути из правил проекта во входе, прочитанные до суждения' }
-const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
+const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'прочитанные правила проекта: путь от корня репозитория, прочитанное частью - путь#раздел' }
+const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR - каталогом. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
 const conventionsOf = (x) => x && x.status !== 'blocked' ? x.conventions || [] : []
-// Прочитанное называется путём из поданного перечня: свободную строку разведка и ревьюер пишут разной формой, и прочитанное правило числится непрочитанным.
-const conventionsRead = (x) => conventionsOf(x).length ? { ...CONVENTIONS_READ, items: { type: 'string', enum: [...new Set(conventionsOf(x))] } } : CONVENTIONS_READ
 const conventionsText = (x) => !x || x.status === 'blocked' ? '' : conventionsOf(x).length
-  ? `\nПравила проекта - прочитай каждое до суждения: нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
+  ? `\nПравила проекта лежат здесь - подряд не читай: по каждому решению правки найди задетые им правила и ADR и сверяйся с ними по ходу разбора; нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
   : `\nПравил проекта не найдено (искали: ${x['conventions-searched'] || 'не названо'}).`
-const conventionsGap = (x, rev) => {
-  const path = (c) => String(c).trim().replace(/^\.\//, '')
-  const read = ((rev && rev['conventions-read']) || []).map(path)
-  const unread = conventionsOf(x).filter(c => !read.includes(path(c)))
-  return unread.length ? `правила проекта не прочитаны: ${unread.join(', ')}` : ''
-}
 const axesText = (axes) => (axes || []).map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'
 const rootsText = (roots) => (roots || []).map(x => `- ${x.anchor}: ${x.decision} - корень: ${x.root} - ${x.verdict}${x.finding ? ` (находка ${x.finding})` : ''}${x.evidence ? ` - ${x.evidence}` : ''}`).join('\n') || '- не названы'
 const FALSIFY = { type: 'object', properties: {
@@ -352,7 +344,7 @@ const NO_SCRIPTS = 'каталог скриптов не подан (args.script
 // Полный набор кодер гонял сам и следом его же гонял верификатор: на больших наборах это удваивало каждую попытку.
 const COVER_ONLY = 'Гоняй тесты задетого правкой, полный набор не гоняй.'
 // <<< shared: verify
-// >>> shared: prep
+// >>> shared: prep-steps
 // Техконтекст выводится из манифеста, а не из цели: его отдаёт дешёвый узел подготовки, следующие узлы получают команды готовыми.
 const PREP = { type: 'object', properties: {
   status: STATUS,
@@ -371,6 +363,8 @@ const PREP_STEPS = `1. Стек - идентификатор по реестру
 2. report_cmd - test_cmd, дополненная встроенным флагом раннера, который пишет отчёт JUnit XML либо TRX в каталог "$DEX_AUTO_JUNIT_DIR" (переменную задаёт верификатор), например: dotnet test - --logger trx --results-directory "$DEX_AUTO_JUNIT_DIR"; pytest - --junitxml="$DEX_AUTO_JUNIT_DIR/r.xml"; node --test - --test-reporter=junit --test-reporter-destination="$DEX_AUTO_JUNIT_DIR/r.xml"; vitest - --reporter=junit --outputFile="$DEX_AUTO_JUNIT_DIR/r.xml". Флаг не известен наверняка, требует пакета либо test_cmd - обёртка (npm test, make) без проброса аргументов - пусто.
 3. Подготовка: проекту до сборки нужны зависимости, которых сборка сама не ставит, либо шаг подготовки, названный проектом, - назови команду и выполни её в рабочем каталоге; не нужны - prepare_cmd пуст, prepare-status: not-needed. Строки git status --porcelain, которых до команды не было, верни: ?? - удали путь, прочие - git checkout -- путь. prepare-status: done - команда вернула 0, иначе failed.
 Код не правь, сборку и тесты не гоняй.`
+// <<< shared: prep-steps
+// >>> shared: prep
 const steps = (t) => (Array.isArray(t) ? t : String(t || '').split('\n')).map(s => typeof s === 'string' ? fromLedger(s.replace(/^- /, '')) : s).filter(e => e && typeof e === 'object')
 // Первый замер green либо red из trail старше свежего: на возобновлении дерево несёт правки трека, а их опознание узлом не гарантия.
 function baselineOf(fresh, trail) {
@@ -499,7 +493,7 @@ const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], 
 // В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
 const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
 const spotGap = (rev, h) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
-  : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : '', conventionsGap(h, rev) ? `саморевью: ${conventionsGap(h, rev)}` : ''].filter(Boolean).join('; ')
+  : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : ''].filter(Boolean).join('; ')
 const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal.skipped) ? '' : !judged(fal) ? `фальсификация саморевью не выполнена: ${lack(fal, 'скептик')}`
   : [fal.status === 'partial' ? `фальсификация саморевью не завершена: ${fal.missing || 'нехватка не названа'}` : '', silentGap(rev.findings, fal) ? `саморевью: ${silentGap(rev.findings, fal)}` : ''].filter(Boolean).join('; ')
 // Разрыв итога - вердикт не вынесен; разрыв учёта (traceGap) - строка degraded, итог не держит (domain.md §4). chk undefined - сверки не было.
@@ -819,7 +813,7 @@ phase('Review')
 // Диагноз этого прогона - другое намерение: коммиты до прежней базы судились против опровергнутой причины.
 const firstBase = priorBase(reproResumed ? A.trail : null)
 const review = (tag, f, v, priors, base, h) => own('саморевьюер', `${HEAD}Шаг 3 (${tag}): pre-push саморевью локальной ветки - ${scope(base)}${hunkList(spotsOf(h))}${conventionsText(h)}${swapText(cmds0, repro)}${touchedNote(v)}${coderInput(f)} Источник намерения:\n${causeText}${priors.length ? `\n${LISTED}\n${priors.map(listedLine).join('\n')}` : ''}${RESUMED}\nПрогон build/test реальный, итог - в run-status, не в findings. Код не меняй.`,
-  { label: `self-review:${tag}`, phase: 'Review', schema: { type: 'object', properties: { ...REVIEW.properties, 'conventions-read': conventionsRead(h) }, required: [...REVIEW.required] } }, NODE.reviewer)
+  { label: `self-review:${tag}`, phase: 'Review', schema: REVIEW }, NODE.reviewer)
 // Спор с диагнозом в правке по находкам - тот же выход, что в попытке Fix.
 const disputed = (f, k, open) => {
   const dc = noteCheck(f)

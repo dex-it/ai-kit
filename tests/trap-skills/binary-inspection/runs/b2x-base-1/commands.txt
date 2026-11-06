@@ -1,0 +1,10 @@
+cd $B2_DIR/labs/b2x-base-1; ls -la . vendor; which objdump rizin rz-bin readelf nm gdb r2 ll
+for t in objdump rizin rz-bin readelf nm gdb radare2 llvm-objdump ndisasm python3; do printf '%s: ' $t; command -v $t || echo нет; done
+command -v objdump rizin rz-bin readelf nm gdb radare2 llvm-objdump ndisasm python3; echo rc=$?
+which objdump rizin rz-bin readelf nm gdb radare2 llvm-objdump ndisasm python3
+cd $B2_DIR/labs/b2x-base-1/vendor && ls -l libescape.so && readelf -h libescape.so | head -20 && objdump --version | head -1 && nm -D --defined-only libescape.so
+B=$B2_DIR/labs/b2x-base-1/vendor/libescape.so; objdump -d -M intel --no-show-raw-insn --disassemble=PyInit__speedups $B; objdump -d -M intel --no-show-raw-insn --start-address=0x1cf0 --stop-address=0x1d54 $B | tail -n +7 | head -0; nm -D $B | grep ' U '; objdump -s -j .rodata $B | head -30
+objdump -d -M intel --no-show-raw-insn --disassemble=PyInit__speedups $B2_DIR/labs/b2x-base-1/vendor/libescape.so
+nm -D $B2_DIR/labs/b2x-base-1/vendor/libescape.so
+objdump -s -j .rodata $B2_DIR/labs/b2x-base-1/vendor/libescape.so
+# cost (0.1038975, 'success', 14)

@@ -1,0 +1,329 @@
+diff --git a/api/src/app.ts b/api/src/app.ts
+index f72fe6f..97a59d5 100644
+--- a/api/src/app.ts
++++ b/api/src/app.ts
+@@ -3,8 +3,10 @@ import type { Analytics } from './analytics/analytics.js';
+ import { createSession, currentUser, requireUser, type SessionUser } from './auth.js';
+ import { OrderStatus, type Order, type OrderItem } from './domain/order.js';
+ import { HttpError, errorHandler } from './errors.js';
++import { logger } from './logger.js';
+ import type { Notifier } from './notifications/notifier.js';
+ import type { PaymentGateway } from './payments/gateway.js';
++import { PaymentUnavailableError } from './payments/http-gateway.js';
+ import type { Store } from './store.js';
+ import { createOrderSchema, loginSchema, parseBody } from './validation.js';
+ 
+@@ -87,6 +89,50 @@ export function createApp(deps: AppDeps): express.Express {
+     res.json(store.saveOrder({ ...order, status: OrderStatus.Cancelled }));
+   });
+ 
++  orders.post('/:id/pay', async (req, res, next) => {
++    try {
++    const order = findOwnOrder(store, currentUser(req), req.params.id);
++    if (order.status !== OrderStatus.New) {
++      throw new HttpError(409, 'order_not_payable', `Order ${order.number} is ${order.status}`);
++    }
++    let result;
++    try {
++      result = await deps.payments.charge({
++        orderId: order.id,
++        amountKopecks: order.totalKopecks,
++        currency: 'RUB',
++      });
++    } catch (err) {
++      if (err instanceof PaymentUnavailableError) {
++        throw new HttpError(502, 'payment_unavailable', 'Payment gateway is unavailable, try again later');
++      }
++      throw err;
++    }
++    if (result.status === 'declined') {
++      throw new HttpError(402, 'payment_declined', result.reason);
++    }
++    // Пока ждали шлюз, заказ могли отменить или оплатить параллельным запросом.
++    const fresh = store.getOrder(order.id) ?? order;
++    if (fresh.status !== OrderStatus.New) {
++      logger.error(`order ${order.number} is ${fresh.status} but charge ${result.transactionId} was approved`);
++      throw new HttpError(409, 'order_not_payable', `Order ${order.number} is ${fresh.status}`);
++    }
++    const paid = store.saveOrder({ ...fresh, status: OrderStatus.Paid, transactionId: result.transactionId });
++    // Заказ уже оплачен: сбой письма или аналитики не должен ломать ответ.
++    await Promise.allSettled([
++      deps.notifier.orderPaid(paid),
++      deps.analytics.track('order_paid', { orderNumber: paid.number, amountKopecks: paid.totalKopecks }),
++    ]).then((results) =>
++      results.forEach((r) => {
++        if (r.status === 'rejected') logger.warn(`post-payment hook failed for order ${paid.number}`, r.reason);
++      }),
++    );
++    res.json(paid);
++    } catch (err) {
++      next(err);
++    }
++  });
++
+   app.use('/api/orders', orders);
+   app.use(errorHandler);
+   return app;
+diff --git a/api/src/config.ts b/api/src/config.ts
+index 8c2d45e..bb37d21 100644
+--- a/api/src/config.ts
++++ b/api/src/config.ts
+@@ -2,4 +2,6 @@ export const config = {
+   port: Number(process.env.PORT ?? 3000),
+   notifierUrl: process.env.NOTIFIER_URL ?? 'http://localhost:4010',
+   analyticsUrl: process.env.ANALYTICS_URL ?? 'http://localhost:4020',
++  paymentUrl: process.env.PAYMENT_URL ?? 'http://localhost:4040',
++  paymentApiKey: process.env.PAYMENT_API_KEY ?? '',
+ };
+diff --git a/api/src/domain/order.ts b/api/src/domain/order.ts
+index 2f76b51..e77b4ad 100644
+--- a/api/src/domain/order.ts
++++ b/api/src/domain/order.ts
+@@ -18,6 +18,7 @@ export interface Order {
+   items: OrderItem[];
+   totalKopecks: number;
+   status: OrderStatus;
++  transactionId?: string;
+   createdAt: string;
+ }
+ 
+diff --git a/api/src/payments/http-gateway.ts b/api/src/payments/http-gateway.ts
+new file mode 100644
+index 0000000..11523f8
+--- /dev/null
++++ b/api/src/payments/http-gateway.ts
+@@ -0,0 +1,78 @@
++import { logger } from '../logger.js';
++import type { ChargeRequest, ChargeResult, PaymentGateway } from './gateway.js';
++
++const MAX_ATTEMPTS = 3;
++const RETRY_DELAYS_MS = [500, 1500];
++const REQUEST_TIMEOUT_MS = 10_000;
++
++export class PaymentUnavailableError extends Error {
++  constructor(message: string, options?: ErrorOptions) {
++    super(message, options);
++    this.name = 'PaymentUnavailableError';
++  }
++}
++
++class TemporaryGatewayError extends Error {}
++
++function pause(ms: number): Promise<void> {
++  return new Promise((resolve) => setTimeout(resolve, ms));
++}
++
++export class HttpPaymentGateway implements PaymentGateway {
++  constructor(
++    private readonly baseUrl: string,
++    private readonly apiKey: string,
++    private readonly delaysMs: number[] = RETRY_DELAYS_MS,
++  ) {}
++
++  // Шлюз идемпотентен по order_id (сутки), поэтому сетевые сбои, 409 и 5xx безопасно повторять:
++  // результат списания при сбое неизвестен, повторный запрос вернёт результат первого.
++  async charge(req: ChargeRequest): Promise<ChargeResult> {
++    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
++      try {
++        return await this.send(req);
++      } catch (err) {
++        if (!(err instanceof TemporaryGatewayError)) throw err;
++        logger.warn(`payment gateway failed for order ${req.orderId} (attempt ${attempt} of ${MAX_ATTEMPTS}): ${err.message}`);
++        if (attempt === MAX_ATTEMPTS) {
++          throw new PaymentUnavailableError(`Payment for order ${req.orderId} is not confirmed`, { cause: err });
++        }
++        await pause(this.delaysMs[attempt - 1] ?? 0);
++      }
++    }
++    throw new PaymentUnavailableError('unreachable');
++  }
++
++  private async send(req: ChargeRequest): Promise<ChargeResult> {
++    let res: Response;
++    try {
++      res = await fetch(new URL('/v1/charges', this.baseUrl), {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json', 'X-Api-Key': this.apiKey },
++        body: JSON.stringify({ order_id: req.orderId, amount: req.amountKopecks, currency: req.currency }),
++        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
++      });
++    } catch (err) {
++      throw new TemporaryGatewayError(`network error: ${(err as Error).message}`);
++    }
++    if (res.status === 409 || res.status >= 500) {
++      throw new TemporaryGatewayError(`gateway responded with ${res.status}`);
++    }
++    if (!res.ok) {
++      throw new Error(`payment gateway responded with ${res.status}`);
++    }
++    let body: { status?: string; transaction_id?: string; decline_reason?: string };
++    try {
++      body = (await res.json()) as typeof body;
++    } catch (err) {
++      throw new TemporaryGatewayError(`invalid response body: ${(err as Error).message}`);
++    }
++    if (body.status === 'approved' && body.transaction_id) {
++      return { status: 'approved', transactionId: body.transaction_id };
++    }
++    if (body.status === 'declined') {
++      return { status: 'declined', reason: body.decline_reason ?? 'declined' };
++    }
++    throw new Error('payment gateway returned an unexpected response');
++  }
++}
+diff --git a/api/src/server.ts b/api/src/server.ts
+index 0ddc0b1..f795b54 100644
+--- a/api/src/server.ts
++++ b/api/src/server.ts
+@@ -3,7 +3,7 @@ import { createApp } from './app.js';
+ import { config } from './config.js';
+ import { logger } from './logger.js';
+ import { HttpNotifier } from './notifications/notifier.js';
+-import type { PaymentGateway } from './payments/gateway.js';
++import { HttpPaymentGateway } from './payments/http-gateway.js';
+ import { seedDemo } from './seed.js';
+ import { Store } from './store.js';
+ 
+@@ -13,11 +13,7 @@ if (process.env.SEED_DEMO === '1') {
+   logger.info('demo data loaded');
+ }
+ 
+-const payments: PaymentGateway = {
+-  async charge() {
+-    throw new Error('payments are not configured');
+-  },
+-};
++const payments = new HttpPaymentGateway(config.paymentUrl, config.paymentApiKey);
+ 
+ const app = createApp({
+   store,
+diff --git a/api/test/http-gateway.test.ts b/api/test/http-gateway.test.ts
+new file mode 100644
+index 0000000..95a4782
+--- /dev/null
++++ b/api/test/http-gateway.test.ts
+@@ -0,0 +1,49 @@
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import { HttpPaymentGateway, PaymentUnavailableError } from '../src/payments/http-gateway.js';
++
++const req = { orderId: 'ord-1', amountKopecks: 1000, currency: 'RUB' as const };
++const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status });
++
++afterEach(() => vi.unstubAllGlobals());
++
++describe('HttpPaymentGateway', () => {
++  it('sends the contract request and maps approval', async () => {
++    const fetchMock = vi.fn().mockResolvedValue(json(200, { status: 'approved', transaction_id: 'tx_1' }));
++    vi.stubGlobal('fetch', fetchMock);
++    const result = await new HttpPaymentGateway('http://pay', 'key', [0, 0]).charge(req);
++    expect(result).toEqual({ status: 'approved', transactionId: 'tx_1' });
++    const [url, init] = fetchMock.mock.calls[0];
++    expect(String(url)).toBe('http://pay/v1/charges');
++    expect(init.headers['X-Api-Key']).toBe('key');
++    expect(JSON.parse(init.body)).toEqual({ order_id: 'ord-1', amount: 1000, currency: 'RUB' });
++  });
++
++  it('maps decline', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json(200, { status: 'declined', decline_reason: 'card_expired' })));
++    expect(await new HttpPaymentGateway('http://pay', 'k', [0, 0]).charge(req)).toEqual({ status: 'declined', reason: 'card_expired' });
++  });
++
++  it('retries network errors, 409 and 5xx with the same order_id', async () => {
++    const fetchMock = vi
++      .fn()
++      .mockRejectedValueOnce(new TypeError('socket hang up'))
++      .mockResolvedValueOnce(json(409, { error: 'busy' }))
++      .mockResolvedValueOnce(json(200, { status: 'approved', transaction_id: 'tx_2' }));
++    vi.stubGlobal('fetch', fetchMock);
++    const result = await new HttpPaymentGateway('http://pay', 'k', [0, 0]).charge(req);
++    expect(result.status).toBe('approved');
++    expect(fetchMock).toHaveBeenCalledTimes(3);
++  });
++
++  it('gives up with PaymentUnavailableError', async () => {
++    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json(503, { error: 'x' })));
++    await expect(new HttpPaymentGateway('http://pay', 'k', [0, 0]).charge(req)).rejects.toBeInstanceOf(PaymentUnavailableError);
++  });
++
++  it('does not retry 401', async () => {
++    const fetchMock = vi.fn().mockResolvedValue(json(401, { error: 'key' }));
++    vi.stubGlobal('fetch', fetchMock);
++    await expect(new HttpPaymentGateway('http://pay', 'k', [0, 0]).charge(req)).rejects.toThrow('401');
++    expect(fetchMock).toHaveBeenCalledTimes(1);
++  });
++});
+diff --git a/api/test/orders.test.ts b/api/test/orders.test.ts
+index 5cc2c58..f0fdee7 100644
+--- a/api/test/orders.test.ts
++++ b/api/test/orders.test.ts
+@@ -89,3 +89,70 @@ describe('orders api', () => {
+     expect(ctx.store.getOrder('ord-1003')?.status).toBe('paid');
+   });
+ });
++
++describe('order payment', () => {
++  function payApp(charge: PaymentGateway['charge']) {
++    const store = new Store();
++    seedDemo(store);
++    const calls: string[] = [];
++    const app = createApp({
++      store,
++      payments: { charge },
++      notifier: { async orderPaid() { calls.push('mail'); } },
++      analytics: { async track(event, props) { calls.push(`${event}:${props.orderNumber}:${props.amountKopecks}`); } },
++    });
++    return { store, app, calls };
++  }
++
++  it('pays a new order', async () => {
++    const { app, store, calls } = payApp(async () => ({ status: 'approved', transactionId: 'tx-1' }));
++    const auth = await login(app, 'alice');
++    const res = await request(app).post('/api/orders/ord-1001/pay').set('Authorization', auth).expect(200);
++    expect(res.body.status).toBe('paid');
++    expect(res.body.transactionId).toBe('tx-1');
++    expect(store.getOrder('ord-1001')?.status).toBe('paid');
++    expect(calls).toContain('mail');
++    expect(calls).toContain(`order_paid:1001:${res.body.totalKopecks}`);
++  });
++
++  it('returns 402 when the bank declines', async () => {
++    const { app, store, calls } = payApp(async () => ({ status: 'declined', reason: 'insufficient_funds' }));
++    const auth = await login(app, 'alice');
++    const res = await request(app).post('/api/orders/ord-1001/pay').set('Authorization', auth);
++    expect(res.status).toBe(402);
++    expect(res.body).toEqual({ error: { code: 'payment_declined', message: 'insufficient_funds' } });
++    expect(store.getOrder('ord-1001')?.status).toBe('new');
++    expect(calls).toEqual([]);
++  });
++
++  it('returns 404 for foreign or missing orders', async () => {
++    const { app } = payApp(async () => ({ status: 'approved', transactionId: 'tx' }));
++    const auth = await login(app, 'alice');
++    await request(app).post('/api/orders/ord-1004/pay').set('Authorization', auth).expect(404);
++    await request(app).post('/api/orders/nope/pay').set('Authorization', auth).expect(404);
++  });
++
++  it('returns 409 for an already paid order without charging', async () => {
++    let charges = 0;
++    const { app } = payApp(async () => {
++      charges += 1;
++      return { status: 'approved', transactionId: 'tx' };
++    });
++    const auth = await login(app, 'alice');
++    await request(app).post('/api/orders/ord-1003/pay').set('Authorization', auth).expect(409);
++    expect(charges).toBe(0);
++  });
++
++  it('still succeeds when the notifier fails', async () => {
++    const store = new Store();
++    seedDemo(store);
++    const app = createApp({
++      store,
++      payments: { async charge() { return { status: 'approved', transactionId: 'tx' }; } },
++      notifier: { async orderPaid() { throw new Error('down'); } },
++      analytics,
++    });
++    const auth = await login(app, 'alice');
++    await request(app).post('/api/orders/ord-1001/pay').set('Authorization', auth).expect(200);
++  });
++});

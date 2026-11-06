@@ -1,0 +1,15 @@
+[Read] <run>/discipline/SKILL-binary-inspection.md
+[Read] <run>/discipline/SKILL-core-dumps.md
+[Read] <run>/discipline/SKILL-managed-debug.md
+[Read] <run>/discipline/SKILL-native-debug.md
+[Read] <run>/discipline/SKILL-perf-profiling.md
+[Read] <run>/discipline/SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'ps -eo pid,stat,nlwp,pcpu,cmd | grep -i dotnet | grep -v grep; tail -n 15 /work/logs/worker.log; which dotnet-stack dotnet-dump dotnet-counters strace gdb'
+docker exec <ctr> sh -c 'tail -n 2 /work/logs/worker.log; ls /root/.dotnet/tools; for t in /proc/11/task/*; do echo $(basename $t) $(cat $t/comm) $(cat $t/stat | cut -d" " -f3) $(cat $t/wchan); done; timeout 25 dotnet-counters collect -p 11 --counters System.Runtime --refresh-interval 2 --format csv -o /tmp/c.csv >/dev/null 2>&1 & sleep 12; kill %1 2>/dev/null; true'; docker exec <ctr> sh -c 'grep -iE "threadpool|monitor|lock" /tmp/c.csv | tail -n 12'
+docker exec <ctr> sh -c 'cd /tmp && dotnet-dump collect -p 11 -o /tmp/w.dmp 2>&1 | tail -2; printf "clrthreads\nclrstack -all\nsyncblk\ndumpasync\nexit\n" | dotnet-dump analyze /tmp/w.dmp 2>&1 | head -150'
+docker exec <ctr> sh -c 'sed -n 1,12p /work/src/orders-worker/Program.cs; sed -n 28,60p /work/src/orders-worker/Program.cs; ls /work/src /work/src/orders-worker'
+docker exec <ctr> sh -c 'cat -n /work/src/Program.cs | sed -n 1,70p'
+docker exec <ctr> sh -c 'tr "\0" "\n" </proc/11/environ | grep ORDERS; printf "threadpool\nclrstack -all\nexit\n" | dotnet-dump analyze /tmp/w.dmp 2>&1 | grep -iE "Workers Total|Max|Min|Idle|Running|Queue|Work Request|GetPrice|PriceClient" | head -20; ls /work/src; grep -n "class PriceClient" -A12 /work/src/Program.cs'
+docker exec <ctr> sh -c 'printf "threadpool\nexit\n" | dotnet-dump analyze /tmp/w.dmp 2>&1 | grep -iE "Workers|Max|Min|Idle|Running|Queue|Work Request" | head -20; grep -n "class PriceClient" -A12 /work/src/Program.cs; ls /work/*'
+cat <lab>/orders-worker.env
+[Write] <lab>/REPORT.md

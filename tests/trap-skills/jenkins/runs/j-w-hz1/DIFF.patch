@@ -1,0 +1,152 @@
+diff --git a/Jenkinsfile b/Jenkinsfile
+new file mode 100644
+index 0000000..c52e145
+--- /dev/null
++++ b/Jenkinsfile
+@@ -0,0 +1,146 @@
++@Library('depot-pipeline-lib@v1.4.0') _
++
++// Multibranch-job на GitHub. Агенты - постоянные ноды с меткой dotnet-linux.
++// agent none на верхнем уровне: ожидание ручного подтверждения prod не должно держать исполнитель.
++pipeline {
++    agent none
++
++    options {
++        timestamps()
++        buildDiscarder(logRotator(numToKeepStr: '30'))
++    }
++
++    environment {
++        IMAGE_REPO = 'registry.example.com/depot/api'
++    }
++
++    stages {
++        stage('Build') {
++            agent { label 'dotnet-linux' }
++            steps {
++                checkout scm
++                // Теги нужны для выбора версии образа; наибольший semver по sort -V (v1.10.0 > v1.9.3).
++                sh 'git fetch --tags --force'
++                script {
++                    def semver = sh(
++                        returnStdout: true,
++                        script: '''git tag --list | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -n 1'''
++                    ).trim()
++                    if (!semver) {
++                        error 'В репозитории нет semver-тега вида vX.Y.Z'
++                    }
++                    env.IMAGE_TAG = "${semver}-${env.BUILD_NUMBER}"
++                }
++                sh 'dotnet build Depot.sln -c Release --nologo'
++            }
++        }
++
++        stage('Test') {
++            parallel {
++                stage('Unit') {
++                    agent { label 'dotnet-linux' }
++                    steps {
++                        checkout scm
++                        sh 'dotnet test tests/Depot.Api.Tests -c Release --filter "Category!=Integration" --logger "trx;LogFileName=unit.trx" --results-directory TestResults/unit'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/unit/*.trx'
++                        }
++                    }
++                }
++                // Testcontainers поднимает Postgres через Docker на агенте.
++                stage('Integration') {
++                    agent { label 'dotnet-linux' }
++                    steps {
++                        checkout scm
++                        sh 'dotnet test tests/Depot.Api.Tests -c Release --filter "Category=Integration" --logger "trx;LogFileName=integration.trx" --results-directory TestResults/integration'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/integration/*.trx'
++                        }
++                    }
++                }
++            }
++        }
++
++        stage('Image') {
++            agent { label 'dotnet-linux' }
++            stages {
++                stage('Build image') {
++                    steps {
++                        checkout scm
++                        sh 'docker build -t "$IMAGE_REPO:$IMAGE_TAG" .'
++                    }
++                }
++                // PR из форков не получают креды реестра: код форка не должен видеть секреты.
++                stage('Push') {
++                    when {
++                        beforeAgent true
++                        not { changeRequest(fork: true) }
++                    }
++                    steps {
++                        withCredentials([usernamePassword(credentialsId: 'registry-creds', usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASSWORD')]) {
++                            sh 'echo "$REGISTRY_PASSWORD" | docker login registry.example.com -u "$REGISTRY_USER" --password-stdin'
++                            sh 'docker push "$IMAGE_REPO:$IMAGE_TAG"'
++                        }
++                    }
++                    post {
++                        always {
++                            sh 'docker logout registry.example.com || true'
++                        }
++                    }
++                }
++            }
++        }
++
++        stage('Deploy stage') {
++            when {
++                beforeAgent true
++                branch 'main'
++            }
++            agent { label 'dotnet-linux' }
++            steps {
++                checkout scm
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env stage'
++                }
++            }
++        }
++
++        // Ожидание лида может занять до суток и дольше: без агента, с большим таймаутом.
++        stage('Approve prod') {
++            when {
++                beforeAgent true
++                branch 'main'
++            }
++            agent none
++            steps {
++                timeout(time: 72, unit: 'HOURS') {
++                    input message: "Деплой ${env.IMAGE_TAG} на prod?", ok: 'Деплоить'
++                }
++            }
++        }
++
++        stage('Deploy prod') {
++            when {
++                beforeAgent true
++                branch 'main'
++            }
++            agent { label 'dotnet-linux' }
++            steps {
++                checkout scm
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env prod'
++                }
++            }
++        }
++    }
++
++    post {
++        always {
++            notifySlack(currentBuild.currentResult)
++        }
++    }
++}

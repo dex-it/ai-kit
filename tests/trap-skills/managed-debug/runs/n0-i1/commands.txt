@@ -1,0 +1,4 @@
+cd <run>/discipline && cat SKILL-binary-inspection.md SKILL-core-dumps.md SKILL-managed-debug.md SKILL-native-debug.md SKILL-perf-profiling.md SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'cd /work/notifier; ls -la; cat -n notifier.sh; echo ---; cat -n notifier.env; echo ---; tail -n 30 logs/notifier.log'
+docker exec <ctr> sh -c 'grep -rn SMTP_RELAY /work 2>/dev/null; ls /work /work/notifier/logs'
+[Write] <lab>/REPORT.md

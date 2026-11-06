@@ -136,7 +136,7 @@ Software, systems and enterprise - Architecture description.
 |---|---|---|---|
 | Действующая редакция - 2022 | карта артефактов | `indexed` | каталог ISO (п.7 правил) |
 | Описание архитектуры организуется вокруг concerns сторон; каждый concern закрыт хотя бы одним view | карта артефактов этап 3, `dex-architect`, `dex-design-reviewer` | `unverifiable` | paywall |
-| **Шаблон arc42 - двенадцать разделов**: 1 Introduction & Goals, 2 Constraints, 3 Context & Scope, 4 Solution Strategy, 5 Building Block View, 6 Runtime View, 7 Deployment View, 8 Crosscutting Concepts, 9 Architectural Decisions, 10 Quality Requirements, 11 Risks & Technical Debt, 12 Glossary | `dex-skill-architecture-definition-42010`, состав SAD | `verified` | https://arc42.org/overview, сверено 11.08.2026: перечень приведён на странице дословно. Номер редакции шаблона страница не называет |
+| **Шаблон arc42 - двенадцать разделов**: 1 Introduction & Goals, 2 Constraints, 3 Context & Scope, 4 Solution Strategy, 5 Building Block View, 6 Runtime View, 7 Deployment View, 8 Crosscutting Concepts, 9 Architectural Decisions, 10 Quality Requirements, 11 Risks & Technical Debt, 12 Glossary | `dex-skill-architecture-definition-42010`, состав SAD | `verified` | https://arc42.org/overview, сверено 11.08.2026 и 28.10.2026: перечень приведён на странице дословно. Номер редакции шаблона страница не называет |
 | Состав SAD у нас = двенадцать разделов arc42, а не выгрузка из 42010 | `dex-skill-architecture-definition-42010` | `unverifiable` | текст §5-§6 42010 за paywall: стандарт даёт каркас (concerns -> views, строка выше), конкретный перечень разделов он не предписывает. Держать как решение каталога |
 
 ### ISO/IEC/IEEE 29119-3:2021

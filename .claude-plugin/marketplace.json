@@ -12,7 +12,7 @@
       "name": "dex-adr-writer",
       "source": "./plugins/specialists/architecture/dex-adr-writer",
       "description": "Автор ADR: пишет Architecture Decision Records в формате MADR - драйверы решения, альтернативы, trade-off.",
-      "version": "3.8.1",
+      "version": "3.8.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -26,7 +26,7 @@
       "name": "dex-api-designer",
       "source": "./plugins/specialists/architecture/dex-api-designer",
       "description": "Проектировщик API: REST, GraphQL, gRPC, OpenAPI, AsyncAPI, контракты, версионирование, формат ошибки.",
-      "version": "3.7.2",
+      "version": "3.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -41,7 +41,7 @@
       "name": "dex-architect",
       "source": "./plugins/specialists/architecture/dex-architect",
       "description": "System design узел зоны дизайна (дизайн-решение): reference architecture match, альтернативы, решение с CAP/PACELC, deep dive. Требования/capacity/implementation-план ведёт вызывающая команда /design. Стек-нейтральный.",
-      "version": "4.11.1",
+      "version": "4.11.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -59,7 +59,7 @@
       "name": "dex-architect-dotnet",
       "source": "./plugins/specialists/architecture/dex-architect-dotnet",
       "description": "Узел зоны дизайна (дизайн-решение) для .NET: reference architecture match, альтернативы с ASP.NET Core / EF Core / MassTransit / Polly / Serilog, решение с CAP/PACELC, deep dive, fact-check библиотек. Требования/capacity/implementation-план ведёт вызывающая команда /design.",
-      "version": "3.9.2",
+      "version": "3.9.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -76,7 +76,7 @@
       "name": "dex-auto",
       "source": "./plugins/auto/dex-auto",
       "description": "Автономные треки под открытую цель - feature и bugfix (до локальных коммитов) и ревью чужого MR/PR либо своей ветки до MR (read-only, треды в MR по санкции), фиксация истины - дельта корпуса проекта на ветке цели со сверкой против кода, вход проекта - корпус, уровень 0 и порядок работы в CLAUDE.md: ledger вне рабочего дерева, Workflow-скрипт на трек с потолками петель и схемами выхода узлов, сдача исхода скриптом finish.sh, сторожа SessionStart (возобновление по открытой цели) и Stop (терминал цели). Команды /onboard (вход проекта в агентскую работу), /goal (подготовка цели из тикета, спеки или симптома; для feature - проба черновика на домыслы) и /auto (прогон трека, возобновление с верификации).",
-      "version": "9.7.1",
+      "version": "9.9.0",
       "category": "specialist",
       "keywords": [
         "autonomous",
@@ -106,7 +106,7 @@
       "name": "dex-backlog-manager",
       "source": "./plugins/specialists/product/dex-backlog-manager",
       "description": "Менеджер бэклога: ведение бэклога на уровне эпиков, приоритизация, груминг и refinement.",
-      "version": "1.4.2",
+      "version": "1.4.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -119,7 +119,7 @@
       "name": "dex-bdd-author",
       "source": "./plugins/specialists/product/dex-bdd-author",
       "description": "Составитель исполняемых примеров - карта примеров до кода, .feature на Gherkin с тегом трассировки на FR, красная карточка уходит наверх, а не закрывается догадкой",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -134,7 +134,7 @@
       "name": "dex-bug-finder",
       "source": "./plugins/specialists/qa/dex-bug-finder",
       "description": "Узел активного поиска багов в фиче или ветке, языко-агностично: модель рисков и чартеры, адверсариальная охота, skill-чеклисты, воспроизведение и квалификация, handoff в расследование. Точка входа - команда /find-bugs, едет в этом же плагине.",
-      "version": "2.7.3",
+      "version": "2.7.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -149,7 +149,7 @@
       "name": "dex-bug-fixer",
       "source": "./plugins/specialists/delivery/dex-bug-fixer",
       "description": "Пакетная ремедиация найденных тестировщиком багов после мерджа: интейк находок, триаж и приоритет, подтверждение причины по одному, фикс на источнике через follow-up MR, верификация red->green на стенде, регрессия соседей; финиш на локальных коммитах без push.",
-      "version": "1.13.3",
+      "version": "1.13.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -166,7 +166,7 @@
       "name": "dex-bug-reporter",
       "source": "./plugins/specialists/qa/dex-bug-reporter",
       "description": "Автор баг-репортов: шаги воспроизведения, классификация дефекта, severity с основанием.",
-      "version": "1.8.1",
+      "version": "1.8.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -401,7 +401,7 @@
       "name": "dex-business-analyst",
       "source": "./plugins/specialists/product/dex-business-analyst",
       "description": "Бизнес-аналитик: формализует идею в BRD - цели сторон с мерой успеха, стейкхолдеры, риски, эпики.",
-      "version": "5.18.4",
+      "version": "5.18.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -414,7 +414,7 @@
       "name": "dex-cicd-github",
       "source": "./plugins/specialists/infrastructure/dex-cicd-github",
       "description": "Специалист по GitHub Actions: workflow, matrix-сборки, деплой, переиспользуемые workflow.",
-      "version": "2.5.1",
+      "version": "2.5.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -428,7 +428,7 @@
       "name": "dex-cicd-gitlab",
       "source": "./plugins/specialists/infrastructure/dex-cicd-gitlab",
       "description": "Специалист по GitLab CI/CD: пайплайны и джобы, артефакты, окружения, раннеры, стратегии деплоя.",
-      "version": "2.5.1",
+      "version": "2.5.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -441,7 +441,7 @@
       "name": "dex-cicd-jenkins",
       "source": "./plugins/specialists/infrastructure/dex-cicd-jenkins",
       "description": "Специалист по Jenkins: Jenkinsfile, декларативные пайплайны, shared libraries, multibranch.",
-      "version": "2.5.1",
+      "version": "2.5.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -455,7 +455,7 @@
       "name": "dex-cicd-teamcity",
       "source": "./plugins/specialists/infrastructure/dex-cicd-teamcity",
       "description": "Специалист по TeamCity: конфигурации сборки, агенты, build chains, артефакты, диагностика.",
-      "version": "2.6.1",
+      "version": "2.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -468,7 +468,7 @@
       "name": "dex-code-discovery",
       "source": "./plugins/specialists/architecture/dex-code-discovery",
       "description": "Обзорное ревью существующего кода вширь: инвентаризация проблем по топикам, severity с калибровкой под масштаб, результат в docs/discover/. Точка входа - команда /discover, едет в этом же плагине.",
-      "version": "2.10.2",
+      "version": "2.10.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -483,7 +483,7 @@
       "name": "dex-codebase-analyzer",
       "source": "./plugins/utilities/dex-codebase-analyzer",
       "description": "Анализ репозитория для архитектурных сессий: быстрый обзор стека, упаковка для LLM context, граф зависимостей. Обёртка над scc / repomix / ast-grep с graceful fallback на Read/Glob/Grep.",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "category": "utility",
       "keywords": [
         "utility",
@@ -499,7 +499,7 @@
       "name": "dex-data-pipeline",
       "source": "./plugins/specialists/ml/dex-data-pipeline",
       "description": "Пайплайны данных для ML: загрузка и предобработка, оптимизация DataLoader, схема данных.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -512,7 +512,7 @@
       "name": "dex-debugger",
       "source": "./plugins/specialists/delivery/dex-debugger",
       "description": "Языко-агностичный узел root-cause debugger: воспроизведение, изоляция, первопричина, фальсификация гипотез. Продуктовый код не правит: воспроизводит красным тестом, отдаёт найденные проблемы списком. Частные skills грузятся условно по стеку. Точка входа - команда /root-cause, едет в этом же плагине.",
-      "version": "4.6.1",
+      "version": "4.6.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -526,7 +526,7 @@
       "name": "dex-design-reviewer",
       "source": "./plugins/specialists/architecture/dex-design-reviewer",
       "description": "Ревью и согласование чужого дизайн-документа (спека, ADR, диаграммы) до написания кода: полнота NFR, дефекты требований, качество ADR-решений, консистентность и слои, полнота и непротиворечивость набора артефактов работы, фальсификация находок, severity. Не архитектура реализованного кода - её ревьюит /review-arch.",
-      "version": "2.14.1",
+      "version": "2.14.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -543,7 +543,7 @@
       "name": "dex-diagram-creator",
       "source": "./plugins/specialists/architecture/dex-diagram-creator",
       "description": "Автор архитектурных диаграмм: C4, sequence, ER, state, flowchart в Mermaid, PlantUML, Structurizr DSL, D2.",
-      "version": "1.7.1",
+      "version": "1.7.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -572,7 +572,7 @@
       "name": "dex-doc-writer",
       "source": "./plugins/specialists/product/dex-doc-writer",
       "description": "Технический писатель: спеки, руководства, README, release notes, описания архитектуры и API.",
-      "version": "1.8.1",
+      "version": "1.8.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -584,7 +584,7 @@
       "name": "dex-docker-specialist",
       "source": "./plugins/specialists/infrastructure/dex-docker-specialist",
       "description": "Специалист по Docker: контейнеры и образы, docker-compose, multi-stage сборка, health checks, оптимизация.",
-      "version": "1.8.1",
+      "version": "1.8.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -597,7 +597,7 @@
       "name": "dex-domain-analyst",
       "source": "./plugins/specialists/product/dex-domain-analyst",
       "description": "Доменный аналитик: ведёт словарь продукта (ubiquitous language) и конституцию проекта - инварианты и сквозные меры с методом проверки.",
-      "version": "1.3.3",
+      "version": "1.3.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -610,7 +610,7 @@
       "name": "dex-dotnet-coder",
       "source": "./plugins/specialists/dotnet/dex-dotnet-coder",
       "description": "Кодер .NET: пишет код и реализует фичи по требованиям, следует конвенциям проекта, отдаёт статус build/test.",
-      "version": "4.4.1",
+      "version": "4.4.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -623,7 +623,7 @@
       "name": "dex-dotnet-performance",
       "source": "./plugins/specialists/dotnet/dex-dotnet-performance",
       "description": "Аналитик производительности .NET: профилирование, N+1, медленные запросы, утечки памяти, метрики и трассировка.",
-      "version": "2.4.2",
+      "version": "2.4.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -636,7 +636,7 @@
       "name": "dex-dotnet-quality-auditor",
       "source": "./plugins/specialists/dotnet/dex-dotnet-quality-auditor",
       "description": "Аудит гигиены качества .NET-проекта: анализаторы, warning-профиль, NuGet security audit, NSDepCop, CI-gates. Отчёт «есть / нет / настроить».",
-      "version": "2.5.2",
+      "version": "2.5.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -650,7 +650,7 @@
       "name": "dex-dotnet-runtime-diagnostician",
       "source": "./plugins/specialists/dotnet/dex-dotnet-runtime-diagnostician",
       "description": "Runtime-диагностика .NET и native-симптомов: hang, crash, leak, slowdown, post-mortem через netcoredbg, gdb/lldb, perf, bpftrace, dotnet-dump",
-      "version": "2.6.2",
+      "version": "2.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -667,7 +667,7 @@
       "name": "dex-dotnet-tester",
       "source": "./plugins/specialists/dotnet/dex-dotnet-tester",
       "description": "Test writer node for .NET: unit tests, xUnit, Moq, Arrange-Act-Assert, test patterns. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "4.9.2",
+      "version": "4.9.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -680,7 +680,7 @@
       "name": "dex-ef-specialist",
       "source": "./plugins/specialists/dotnet/dex-ef-specialist",
       "description": "Специалист по Entity Framework Core: миграции, запросы, DbContext, конфигурация маппинга, оптимизация.",
-      "version": "2.6.1",
+      "version": "2.6.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -693,7 +693,7 @@
       "name": "dex-elasticsearch-specialist",
       "source": "./plugins/specialists/infrastructure/dex-elasticsearch-specialist",
       "description": "Специалист по Elasticsearch: индексирование, поисковые запросы, агрегации, mapping, здоровье кластера.",
-      "version": "1.7.1",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -784,7 +784,7 @@
       "name": "dex-implementer-reader",
       "source": "./plugins/specialists/review/dex-implementer-reader",
       "description": "Implementer reader: проба готовности набора требований - чтение корпуса глазами автора кода и список решений об исходе, мере и границе, которые пришлось бы принять самому. Чистый контекст, без следа прогона и журнала решений.",
-      "version": "2.6.1",
+      "version": "2.6.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -797,7 +797,7 @@
       "name": "dex-incident-investigator",
       "source": "./plugins/specialists/delivery/dex-incident-investigator",
       "description": "Узел расследования инцидента и поиска корневой причины на общем стенде до фикса на источнике: спецификация IS/IS-NOT, параллельный сбор улик, причинно-следственная цепочка, фальсификация причины, фикс под gate. Делегирует сбор со стенда инфра-плагинам. Точка входа - команда /investigate, едет в этом же плагине.",
-      "version": "2.7.2",
+      "version": "2.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -878,7 +878,7 @@
       "name": "dex-kafka-specialist",
       "source": "./plugins/specialists/infrastructure/dex-kafka-specialist",
       "description": "Специалист по Apache Kafka: топики, consumer group и lag, партиции, разбор сообщений, диагностика.",
-      "version": "1.7.1",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -891,7 +891,7 @@
       "name": "dex-knowledge-extractor",
       "source": "./plugins/utilities/dex-knowledge-extractor",
       "description": "Авторский плагин: работает в клоне репозитория маркетплейса. Pipeline извлечения уроков из чужих MR/PR в маркетплейс: /mr-collect собирает review-комментарии, /mr-analyze обобщает в предложения для skills/agents, /mr-apply применяет с self-review и валидацией.",
-      "version": "3.9.1",
+      "version": "3.9.3",
       "category": "utility",
       "keywords": [
         "utility",
@@ -921,7 +921,7 @@
       "name": "dex-kubernetes-specialist",
       "source": "./plugins/specialists/infrastructure/dex-kubernetes-specialist",
       "description": "Специалист по Kubernetes: Deployment, Service, Ingress, поды и HPA, сеть, масштабирование, диагностика.",
-      "version": "1.7.1",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -934,7 +934,7 @@
       "name": "dex-logging-seq",
       "source": "./plugins/specialists/infrastructure/dex-logging-seq",
       "description": "Специалист по Seq и структурному логированию: разбор логов, корреляция, поиск ошибок, алерты.",
-      "version": "2.6.2",
+      "version": "2.6.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -961,7 +961,7 @@
       "name": "dex-ml-deployer",
       "source": "./plugins/specialists/ml/dex-ml-deployer",
       "description": "Деплой ML-моделей: экспорт в ONNX и TFLite, serving через FastAPI, квантизация, контейнеризация.",
-      "version": "1.5.2",
+      "version": "1.5.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -974,7 +974,7 @@
       "name": "dex-ml-experimenter",
       "source": "./plugins/specialists/ml/dex-ml-experimenter",
       "description": "ML-экспериментатор: разведочный анализ данных, feature engineering, baseline-модели, качество данных.",
-      "version": "1.6.4",
+      "version": "1.6.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -987,7 +987,7 @@
       "name": "dex-model-debugger",
       "source": "./plugins/specialists/ml/dex-model-debugger",
       "description": "Отладчик моделей: loss не падает, переобучение, NaN в градиентах, CUDA OOM, медленное обучение.",
-      "version": "1.6.2",
+      "version": "1.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1000,7 +1000,7 @@
       "name": "dex-model-trainer",
       "source": "./plugins/specialists/ml/dex-model-trainer",
       "description": "Тренер моделей: пайплайны обучения на PyTorch, TensorFlow, scikit-learn, HuggingFace, метрики и артефакты.",
-      "version": "1.6.3",
+      "version": "1.6.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1013,7 +1013,7 @@
       "name": "dex-mongodb-specialist",
       "source": "./plugins/specialists/infrastructure/dex-mongodb-specialist",
       "description": "Специалист по MongoDB: запросы, индексы, aggregation pipeline, replica set, диагностика и оптимизация.",
-      "version": "1.7.1",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1026,7 +1026,7 @@
       "name": "dex-monitoring-grafana",
       "source": "./plugins/specialists/infrastructure/dex-monitoring-grafana",
       "description": "Специалист по Grafana и Prometheus: дашборды, алерты, метрики, PromQL, диагностика.",
-      "version": "2.6.1",
+      "version": "2.6.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1039,7 +1039,7 @@
       "name": "dex-mr-check-reviewer",
       "source": "./plugins/specialists/review/dex-mr-check-reviewer",
       "description": "Узел ре-ревью дельты MR/PR после правок автора: range-diff дельты, статус прежних находок, новые находки только в дельте, обновление существующих тредов и публикация новых, по поручению - разметка новых находок типом. Вызывается на повторных ревизиях командой /mr-review (плагин dex-mr-reviewer), своего командного входа не имеет.",
-      "version": "3.4.1",
+      "version": "3.4.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1056,7 +1056,7 @@
       "name": "dex-mr-reviewer",
       "source": "./plugins/specialists/review/dex-mr-reviewer",
       "description": "Языко-агностичный узел первичного ревью чужого MR/PR: карта изменений, параллельные фокусы, фальсификация находок, severity/confidence/scope, доставка инлайн-тредами через gh/glab. По поручению входа - разметка находок типом в первой строке треда. Точка входа - команда /mr-review, едет в этом же плагине.",
-      "version": "3.5.1",
+      "version": "3.5.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1106,7 +1106,7 @@
       "name": "dex-pm-metrics-analyst",
       "source": "./plugins/specialists/product/dex-pm-metrics-analyst",
       "description": "Аналитик продуктовых метрик: KPI, критерии успеха, OKR, воронки и когорты, решения на данных.",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1119,7 +1119,7 @@
       "name": "dex-postgresql-specialist",
       "source": "./plugins/specialists/infrastructure/dex-postgresql-specialist",
       "description": "Специалист по PostgreSQL: разбор запросов и EXPLAIN, индексы, тюнинг, vacuum, репликация, диагностика.",
-      "version": "1.7.1",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1132,7 +1132,7 @@
       "name": "dex-process-modeler",
       "source": "./plugins/specialists/product/dex-process-modeler",
       "description": "Моделировщик процессов: BPMN 2.0, диаграммы AS-IS и TO-BE, дорожки, поиск точек автоматизации.",
-      "version": "1.5.4",
+      "version": "1.5.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1160,7 +1160,7 @@
       "name": "dex-rabbitmq-specialist",
       "source": "./plugins/specialists/infrastructure/dex-rabbitmq-specialist",
       "description": "Специалист по RabbitMQ: очереди и exchange, consumers, dead-letter, MassTransit, диагностика.",
-      "version": "1.7.1",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1202,7 +1202,7 @@
       "name": "dex-redis-specialist",
       "source": "./plugins/specialists/infrastructure/dex-redis-specialist",
       "description": "Специалист по Redis: кэширование, pub/sub, структуры данных, TTL, анализ памяти, диагностика.",
-      "version": "1.7.1",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1215,7 +1215,7 @@
       "name": "dex-requirements-analyst",
       "source": "./plugins/specialists/product/dex-requirements-analyst",
       "description": "Аналитик требований: выводит FR из шагов и расширений сценариев, NFR из бизнес-требований и ограничений среды, у каждой единицы метод проверки.",
-      "version": "4.15.1",
+      "version": "4.15.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1228,7 +1228,7 @@
       "name": "dex-requirements-reviewer",
       "source": "./plugins/specialists/review/dex-requirements-reviewer",
       "description": "Ревью и согласование чужого готового набора требований (BRD/stories) как документа: дефекты единицы и дефекты набора против источника, фальсификация находок, severity, правки автору без мутации документа.",
-      "version": "2.2.3",
+      "version": "2.2.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1245,7 +1245,7 @@
       "name": "dex-review-planner",
       "source": "./plugins/specialists/delivery/dex-review-planner",
       "description": "Узел планирования правок по комментариям ревью: сбор тредов и коммитов, классификация замечаний, верификация чтением кода, план P0..P3 с blast radius, черновики ответов в треды. Точка входа - команда /review-plan, едет в этом же плагине.",
-      "version": "2.7.2",
+      "version": "2.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1262,7 +1262,7 @@
       "name": "dex-roadmap-planner",
       "source": "./plugins/specialists/product/dex-roadmap-planner",
       "description": "Планировщик roadmap: стратегия развития продукта, планирование релизов и кварталов, OKR.",
-      "version": "1.3.2",
+      "version": "1.3.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1275,7 +1275,7 @@
       "name": "dex-rulebook-miner",
       "source": "./plugins/specialists/review/dex-rulebook-miner",
       "description": "Добыча свода правил проекта из истории ревью: оркестратор ведёт окно и запись, read-only сборщики разбирают источники, каждое правило стоит на дословной цитате и якоре. Норматив жанра, ловушки добычи и оракул приёмки свода едут скиллами этого же плагина. Точка входа - команда /rulebook.",
-      "version": "3.0.2",
+      "version": "3.0.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1290,7 +1290,7 @@
       "name": "dex-security-reviewer",
       "source": "./plugins/specialists/delivery/dex-security-reviewer",
       "description": "Языко-агностичный агент глубокого анализа безопасности: threat model (акторы/границы доверия/активы), attack paths по OWASP, цепочки эксплойтов, severity по эксплуатируемости цепочки. Частные skills грузятся условно по стеку.",
-      "version": "2.3.3",
+      "version": "2.3.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1306,7 +1306,7 @@
       "name": "dex-self-reviewer",
       "source": "./plugins/specialists/review/dex-self-reviewer",
       "description": "Pre-push саморевью своей локальной ветки: committed+staged+worktree diff, скан по осям diff'а (security, architecture, language, business, regressions, performance, loose-ends, non-code) с реальным прогоном build/test, фальсификация, чеклист правок до push, по поручению - разметка находок типом.",
-      "version": "3.3.1",
+      "version": "3.3.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1383,7 +1383,7 @@
       "name": "dex-skill-architecture-definition-42010",
       "source": "./plugins/skills/dex-skill-architecture-definition-42010",
       "description": "Норматив этапа архитектуры (ISO/IEC/IEEE 42010:2022) - concerns сторон и views, двенадцать разделов arc42, граница «решение в SAD против решения в ADR», целевая стадия, вход и выход",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1418,8 +1418,8 @@
     {
       "name": "dex-skill-artifact-review",
       "source": "./plugins/skills/dex-skill-artifact-review",
-      "description": "Авторский скилл: работает в клоне репозитория маркетплейса, часть адресов вне его не резолвится. Ревью артефакта каталога (skill / агент / команда) по обязательным осям: соответствие фреймворку, fact-check, полезность против целей продукта, лаконичность, сверка с гайдом модели, терминология по словарю домена. Активируется при ревью скилла, ревью агента, ревью команды, приёмке артефакта, оси ревью, стоит ли держать в каталоге, какой цели служит артефакт, сверка с BRD, нарушение инварианта проекта, заявление автора как claim, утверждение о поведении платформы, новый термин в артефакте.",
-      "version": "1.11.3",
+      "description": "Авторский скилл: работает в клоне репозитория маркетплейса, часть адресов вне его не резолвится. Ревью артефакта каталога (skill / агент / команда) по обязательным осям: соответствие фреймворку, fact-check, полезность против целей продукта, лаконичность, сверка с гайдом модели, терминология по словарю домена.",
+      "version": "1.12.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1436,7 +1436,7 @@
       "name": "dex-skill-bdd-gherkin",
       "source": "./plugins/skills/dex-skill-bdd-gherkin",
       "description": "Норматив жанра исполняемых примеров - карта примеров Example Mapping, синтаксис Gherkin, структура файла, стиль шага, тег трассировки на FR, граница «пример против теста»",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1452,7 +1452,7 @@
       "name": "dex-skill-binary-inspection",
       "source": "./plugins/skills/dex-skill-binary-inspection",
       "description": "Бинарный анализ - binutils (objdump, addr2line, c++filt), дизассемблирование и cross-arch, Rizin JSON, LIEF Python API, ilspycmd для .NET",
-      "version": "1.1.2",
+      "version": "1.1.4",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1485,7 +1485,7 @@
       "name": "dex-skill-business-analysis-29148",
       "source": "./plugins/skills/dex-skill-business-analysis-29148",
       "description": "Норматив этапа бизнес-анализа (ISO/IEC/IEEE 29148 §6.2): состав Business requirements specification, разделы BRD, атрибуты бизнес-требования, мера успеха MOE, режим сбора interactive/autonomous, поиск конфликта целей, стадии готовности артефакта, вход и выход этапа",
-      "version": "4.6.0",
+      "version": "4.6.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1549,7 +1549,7 @@
       "name": "dex-skill-completeness-mapping",
       "source": "./plugins/skills/dex-skill-completeness-mapping",
       "description": "Completeness-gate карты потребителей при сквозной правке - найти всех читателей/писателей данных и всех вызывающих/ветки до «сторона готова»",
-      "version": "1.0.7",
+      "version": "1.0.8",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1565,7 +1565,7 @@
       "name": "dex-skill-core-dumps",
       "source": "./plugins/skills/dex-skill-core-dumps",
       "description": "Post-mortem анализ coredump: gcore, coredumpctl, kernel.core_pattern, mismatched libs, контейнеры",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1614,7 +1614,7 @@
       "name": "dex-skill-defect-classification",
       "source": "./plugins/skills/dex-skill-defect-classification",
       "description": "Разметка находок ревью MR и саморевью типом по схеме классификации дефектов - гейт по поручению, единица - находка, закрытая схема типов на характеристиках качества продукта, независимость типа от критичности, схема проекта по адресу вместо встроенной, выход разметки",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1660,7 +1660,7 @@
       "name": "dex-skill-docs-layout",
       "source": "./plugins/skills/dex-skill-docs-layout",
       "description": "Целевая раскладка корпуса документации проекта - дерево docs/, куда кладётся каждый жанр, минимум обязательного по размеру фичи, схема идентификаторов и блоки номеров за фичей, развёртывание заготовки в пустом проекте",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1890,7 +1890,7 @@
       "name": "dex-skill-idea-forming",
       "source": "./plugins/skills/dex-skill-idea-forming",
       "description": "Этап формирования идеи до конвейера BRD: замыкание сырой мысли в идею с названной проблемой, носителем, базой сравнения, ценностью и самым рискованным допущением; методика подбирается по дефициту идеи - по одной за раз, не каталогом",
-      "version": "1.3.4",
+      "version": "1.3.5",
       "category": "skill",
       "keywords": [
         "skill",
@@ -1918,7 +1918,7 @@
       "name": "dex-skill-interface-definition-openapi",
       "source": "./plugins/skills/dex-skill-interface-definition-openapi",
       "description": "Норматив этапа определения интерфейсов - состав машиночитаемого контракта (OpenAPI, AsyncAPI, gRPC IDL), дом контракта рядом с кодом, правила совместимости и версионирования, целевая стадия, вход и выход",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2006,7 +2006,7 @@
       "name": "dex-skill-managed-debug",
       "source": "./plugins/skills/dex-skill-managed-debug",
       "description": "Runtime-отладка .NET: netcoredbg, dotnet-dump/trace/counters, SOS, managed-дампы, анализ кучи GC, async-стек.",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2023,7 +2023,7 @@
       "name": "dex-skill-merge-conflict-resolution",
       "source": "./plugins/skills/dex-skill-merge-conflict-resolution",
       "description": "Протокол подтягивания базовой ветки и разрешения конфликтов merge/rebase без тихой потери стороны: якоря и точка отката, превью без записи, семантические конфликты без маркеров, ours/theirs в rebase, переезды, генерируемое, верификация обеих дельт. Команда /resolve-conflicts.",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2087,7 +2087,7 @@
       "name": "dex-skill-node-contract",
       "source": "./plugins/skills/dex-skill-node-contract",
       "description": "Рантайм-контракт агента-узла - режим interactive/autonomous, реакция на неполный вход (blocking/default-ok), возврат наверх, словарь полей handoff, метка quality-checks и её носитель, транспорт артефакта, выбор канала хостинга (native/CLI), graceful degradation при недоступности skill",
-      "version": "9.4.4",
+      "version": "9.5.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2130,7 +2130,7 @@
       "name": "dex-skill-opportunity-canvas",
       "source": "./plugins/skills/dex-skill-opportunity-canvas",
       "description": "Норматив жанра идеи - one-pager и opportunity canvas, шесть полей из десяти у Паттона, статус идеи, переход «принято -> фича» и метрика как MOE, граница «вне конвейера»",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2145,8 +2145,8 @@
     {
       "name": "dex-skill-optimize-for-llm",
       "source": "./plugins/skills/dex-skill-optimize-for-llm",
-      "description": "Переписать инструкцию (CLAUDE.md, agent, SKILL.md, команду, prompt) для модели кратко и однозначно: срезать воду и дубли, оставить механизм/условие/исход, сохранить нормативную силу и грабли, выстроить информационную архитектуру и поле срабатывания. Активируется при оптимизируй под LLM, оптимизируй промпт, перепиши под модель, убери воду из инструкции, убери дубли, сократи CLAUDE.md / агента / skill, сделай однозначной, закрой лазейки, напиши description, пересмотри инструкцию, причеши промпт.",
-      "version": "1.16.3",
+      "description": "Переписать инструкцию (CLAUDE.md, agent, SKILL.md, команду, prompt) для модели кратко и однозначно: срезать воду и дубли, оставить механизм/условие/исход, сохранить нормативную силу и грабли, выстроить информационную архитектуру и поле срабатывания.",
+      "version": "1.17.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2164,7 +2164,7 @@
       "name": "dex-skill-perf-profiling",
       "source": "./plugins/skills/dex-skill-perf-profiling",
       "description": "Linux sampling-профилирование: perf record/script, FlameGraph, on-CPU vs off-CPU, JIT-символы Java",
-      "version": "1.1.2",
+      "version": "1.1.3",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2227,7 +2227,7 @@
       "name": "dex-skill-playwright",
       "source": "./plugins/skills/dex-skill-playwright",
       "description": "E2E на Playwright: локаторы по роли и подписи вместо CSS, вход без формы в каждом тесте, отладка через Inspector, headed в WSL.",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2304,7 +2304,7 @@
       "name": "dex-skill-project-docs-map",
       "source": "./plugins/skills/dex-skill-project-docs-map",
       "description": "Карта документации проекта - где лежат требования, BRD, ADR, спеки, корпус уровня 0 и счётчики номеров; файл путей .docs_layout (ключи product, domain, root, adr, specs, counter), поиск и запись при его отсутствии, статус при недостижимом корпусе",
-      "version": "2.6.3",
+      "version": "2.6.4",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2477,7 +2477,7 @@
       "name": "dex-skill-review-evidence",
       "source": "./plugins/skills/dex-skill-review-evidence",
       "description": "Процедура ревью: где искать источник намерения и когда ставить intent: n/a, два прохода с разделом «перепроверить» для неуверенных находок.",
-      "version": "2.0.1",
+      "version": "2.1.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2590,7 +2590,7 @@
       "name": "dex-skill-stack-registry",
       "source": "./plugins/skills/dex-skill-stack-registry",
       "description": "Канонический реестр стеков и правило загрузки skills по стеку×теме для общих агентов",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2622,7 +2622,7 @@
       "name": "dex-skill-subagent-dispatch",
       "source": "./plugins/skills/dex-skill-subagent-dispatch",
       "description": "Экспериментальный скилл. Оркестрация исполнителей под цель «качество не ниже одной сессии, как можно дешевле»: сам или цепочка (сам - кусок, к которому бриф уровня цели не короче результата; в цепочке сам - только правка в несколько строк), состав работы - задача и обязательства из инструкций репозитория по её путям, бриф под модель исполнителя, источник и запуск проверки не силами оркестратора, параметры запуска (модель и effort исполнителя, перебивающие переменные среды, имя и команды агентов, признак форка), ожидание в claude -p, суд провала проверки по тексту задачи до подъёма тира и повтор по сигналу провала. Команда /do выполняет задачу по правилам скилла.",
-      "version": "1.3.1",
+      "version": "1.3.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2639,7 +2639,7 @@
       "name": "dex-skill-syscall-tracing",
       "source": "./plugins/skills/dex-skill-syscall-tracing",
       "description": "Linux syscall и event tracing: strace, bpftrace JSON output, bcc-tools (execsnoop/opensnoop/funclatency/memleak)",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2656,7 +2656,7 @@
       "name": "dex-skill-system-requirements-29148",
       "source": "./plugins/skills/dex-skill-system-requirements-29148",
       "description": "Норматив этапа системных требований (ISO/IEC/IEEE 29148 §6.4) - состав SRS по §9.6, атрибуты FR и NFR, метод верификации и MOP, охват фичи, целевая стадия, вход и выход",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2686,7 +2686,7 @@
       "name": "dex-skill-test-coverage",
       "source": "./plugins/skills/dex-skill-test-coverage",
       "description": "Контракт покрытия для тест-агентов и агентов, пишущих тесты инлайн - branch coverage по diff-scope, порог >= 75%, деградация метрики и недостижимость явным статусом наверх",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2727,8 +2727,8 @@
     {
       "name": "dex-skill-ts-vitest-jest",
       "source": "./plugins/skills/dex-skill-ts-vitest-jest",
-      "description": "Unit-тесты на Vitest/Jest: фабрика мока и hoisting, мок модуля против spy, проверка вызовов мока вместо результата.",
-      "version": "2.2.1",
+      "description": "Unit-тесты на Vitest/Jest: фабрика мока и hoisting, переменная вне фабрики и vi.hoisted.",
+      "version": "2.3.0",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2776,7 +2776,7 @@
       "name": "dex-skill-use-cases-cockburn",
       "source": "./plugins/skills/dex-skill-use-cases-cockburn",
       "description": "Норматив жанра use case по Cockburn - уровни цели, основной ход и расширения, минимальные гарантии, правила записи шага, связь с FR своей фичи, вход и выход",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "skill",
       "keywords": [
         "skill",
@@ -2820,7 +2820,7 @@
       "name": "dex-stand-reviewer",
       "source": "./plugins/specialists/review/dex-stand-reviewer",
       "description": "Узел приёмки слитой фичи на развёрнутом стенде против ТЗ, read-only: привязка образа к merge-коммиту, карта требование -> проба на стенде, параллельные суб-агенты улик, фальсификация находок и утверждений 'выполнено', severity/confidence/scope, отчёт. Точка входа - команда /review-stand, едет в этом же плагине.",
-      "version": "2.6.3",
+      "version": "2.6.4",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2879,7 +2879,7 @@
       "name": "dex-test-analyst",
       "source": "./plugins/specialists/qa/dex-test-analyst",
       "description": "Тест-аналитик: разбор требований, тест-дизайн, тест-кейсы и сценарии, анализ покрытия.",
-      "version": "1.7.2",
+      "version": "1.7.3",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2892,7 +2892,7 @@
       "name": "dex-test-automator",
       "source": "./plugins/specialists/qa/dex-test-automator",
       "description": "Автоматизатор тестов: UI, API, интеграционные и unit-тесты, Selenium и Playwright, фреймворки автоматизации.",
-      "version": "2.4.3",
+      "version": "2.4.5",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2905,7 +2905,7 @@
       "name": "dex-ts-fullstack-coder",
       "source": "./plugins/specialists/fullstack/dex-ts-fullstack-coder",
       "description": "Fullstack-кодер TypeScript: бэкенд на Node.js/Bun и фронтенд на React, типизация, валидация схем.",
-      "version": "3.3.1",
+      "version": "3.3.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2919,7 +2919,7 @@
       "name": "dex-ts-tester",
       "source": "./plugins/specialists/fullstack/dex-ts-tester",
       "description": "Test writer node for TypeScript/JavaScript: Vitest/Jest, mocks, fake timers, isolation. Вызывается как исполнитель стека командой /test (плагин dex-test), стек определяется по манифесту репозитория.",
-      "version": "3.10.1",
+      "version": "3.11.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2933,7 +2933,7 @@
       "name": "dex-use-case-writer",
       "source": "./plugins/specialists/product/dex-use-case-writer",
       "description": "Составитель сценариев использования по Cockburn - основной ход, расширения с терминалом, минимальные гарантии по каждому провальному исходу; разворачивает FR своей фичи, требований не заводит",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2948,7 +2948,7 @@
       "name": "dex-usecase-analyst",
       "source": "./plugins/specialists/product/dex-usecase-analyst",
       "description": "Usecase analyst: разбор BR в сценарии UC - актор и его цель, предусловия, основной ход, расширения с исходом у каждой ветки. Составитель сценариев зоны требований.",
-      "version": "2.7.1",
+      "version": "2.7.2",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -2961,7 +2961,7 @@
       "name": "dex-user-story-analyst",
       "source": "./plugins/specialists/product/dex-user-story-analyst",
       "description": "Аналитик user stories: нарезка сценариев на истории и написание критериев приёмки в форме Given-When-Then.",
-      "version": "5.3.3",
+      "version": "5.3.4",
       "category": "specialist",
       "keywords": [
         "specialist",

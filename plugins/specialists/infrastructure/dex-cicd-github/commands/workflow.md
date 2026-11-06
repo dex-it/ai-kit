@@ -7,15 +7,15 @@ argument-hint: "[project-type] [--deploy target]"
 
 Создать GitHub Actions workflow YAML для текущего проекта.
 
-**Goal:** Сгенерировать `.github/workflows/ci.yml` (или несколько файлов при сложном pipeline), покрывающий build → test → deploy.
+**Goal:** Сгенерировать `.github/workflows/ci.yml` (или несколько файлов при сложном pipeline), покрывающий build -> test -> deploy.
 
 **Output:** Готовые workflow файлы в `.github/workflows/`.
 
 **Scenarios:**
 
-- `node` / `python` / `dotnet` / `go` — стек проекта
-- `--deploy docker` / `--deploy k8s` / `--deploy pages` — deployment target
-- Без аргументов — автодетект стека по файлам проекта (package.json, requirements.txt, *.csproj, go.mod)
+- `node` / `python` / `dotnet` / `go` - стек проекта
+- `--deploy docker` / `--deploy k8s` / `--deploy pages` - deployment target
+- Без аргументов - автодетект стека по файлам проекта (package.json, requirements.txt, *.csproj, go.mod)
 
 **Constraints:**
 

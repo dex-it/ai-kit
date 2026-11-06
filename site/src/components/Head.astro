@@ -1,0 +1,66 @@
+---
+// Стандартный <head> Starlight плюс клиентский рендер схем Mermaid.
+// Страницы пишут схему блоком ```mermaid; Expressive Code выводит его как блок кода,
+// скрипт ниже заменяет такие блоки на SVG. Библиотека подгружается лениво и только
+// на страницах, где есть хотя бы один блок mermaid.
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default {...Astro.props}><slot /></Default>
+
+<script>
+  const SELECTOR = 'pre[data-language="mermaid"]';
+
+  function sourceOf(pre: Element): string {
+    const lines = pre.querySelectorAll('.ec-line');
+    if (lines.length) return Array.from(lines, (l) => l.textContent ?? '').join('\n');
+    return pre.textContent ?? '';
+  }
+
+  async function render() {
+    const found = Array.from(document.querySelectorAll(SELECTOR));
+    if (!found.length) return;
+
+    const targets: HTMLElement[] = [];
+    for (const pre of found) {
+      const host = pre.closest('.expressive-code') ?? pre;
+      const el = document.createElement('pre');
+      el.className = 'mermaid-diagram';
+      el.dataset.source = sourceOf(pre);
+      el.textContent = el.dataset.source;
+      host.replaceWith(el);
+      targets.push(el);
+    }
+
+    const { default: mermaid } = await import('mermaid');
+
+    const draw = async () => {
+      const dark = document.documentElement.dataset.theme !== 'light';
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme: dark ? 'dark' : 'default',
+        flowchart: { useMaxWidth: true, htmlLabels: false },
+      });
+      let n = 0;
+      for (const el of targets) {
+        const source = el.dataset.source ?? '';
+        try {
+          const { svg } = await mermaid.render(`mermaid-svg-${Date.now()}-${n++}`, source);
+          el.innerHTML = svg;
+        } catch (err) {
+          el.textContent = source;
+          console.error('mermaid', err);
+        }
+      }
+    };
+
+    await draw();
+    new MutationObserver(draw).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+
+  render();
+</script>

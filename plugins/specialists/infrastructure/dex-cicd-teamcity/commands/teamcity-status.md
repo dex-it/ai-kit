@@ -1,5 +1,5 @@
 ---
-description: Статус TeamCity — builds, agents, очередь
+description: Статус TeamCity - builds, agents, очередь
 allowed-tools: Bash, Read, Grep
 ---
 
@@ -10,11 +10,11 @@ allowed-tools: Bash, Read, Grep
 **Goal:** Получить статус recent builds, agents и build queue.
 
 **Scenarios:**
-- Без аргументов — overview: last 10 builds, agent status, queue size
-- `builds` — детальный список recent builds с status, duration, changes
-- `agents` — все agents: status, properties, current build
-- `queue` — builds в очереди с wait reason
-- `<project-name>` — builds конкретного проекта
+- Без аргументов - overview: last 10 builds, agent status, queue size
+- `builds` - детальный список recent builds с status, duration, changes
+- `agents` - все agents: status, properties, current build
+- `queue` - builds в очереди с wait reason
+- `<project-name>` - builds конкретного проекта
 
 **Output:** Таблицы: builds (config, status, duration, triggered by), agents (name, status, OS), queue (config, wait time, reason). Warnings для failed builds и disconnected agents.
 

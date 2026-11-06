@@ -94,7 +94,7 @@ const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], 
 // В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
 const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
 const spotGap = (rev, h) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
-  : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : '', conventionsGap(h, rev) ? `саморевью: ${conventionsGap(h, rev)}` : ''].filter(Boolean).join('; ')
+  : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : ''].filter(Boolean).join('; ')
 const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal.skipped) ? '' : !judged(fal) ? `фальсификация саморевью не выполнена: ${lack(fal, 'скептик')}`
   : [fal.status === 'partial' ? `фальсификация саморевью не завершена: ${fal.missing || 'нехватка не названа'}` : '', silentGap(rev.findings, fal) ? `саморевью: ${silentGap(rev.findings, fal)}` : ''].filter(Boolean).join('; ')
 // Разрыв итога - вердикт не вынесен; разрыв учёта (traceGap) - строка degraded, итог не держит (domain.md §4). chk undefined - сверки не было.

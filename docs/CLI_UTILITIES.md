@@ -458,7 +458,7 @@ CLI-утилиты и MCP-серверы дополняют друг друга.
 Браузерные бинари не скачаны. `/pw-install` (все три движка) или `/pw-install chromium` (точечно). На свежем Linux добавить `--with-deps` для системных библиотек: `npx playwright install --with-deps`.
 
 ### `/pw-codegen` / `--headed` в WSL не открывает окно
-Нет display server. На Windows 11 -- WSLg (`wsl --update`); на Windows 10 -- X-сервер (VcXsrv / Xming) с `export DISPLAY=...`. Альтернатива -- запускать headless и работать с `/pw-show-report` + `/pw-trace`.
+Нет display server. На WSL 2 с Windows 11 или Windows 10 с сборки 19044 -- WSLg (`wsl --update`); на старых Windows 10 -- X-сервер (VcXsrv / Xming) с `export DISPLAY=...`. Альтернатива -- запускать headless и работать с `/pw-show-report` + `/pw-trace`.
 
 ### Браузеры пинуются к версии `@playwright/test`
 После `npm i -D @playwright/test@latest` нужен повторный `/pw-install` -- иначе `Executable doesn't exist` для старого пути. Версия указана в `~/.cache/ms-playwright/`.

@@ -29,7 +29,7 @@ Dev-утилиты для Claude Code marketplace.
 - Description короче 50 символов. Это единственный порог `description` агента, у которого дома во фреймворке нет: `AGENT_FRAMEWORK.md` рассуждает о верхних лимитах и о нижнем не говорит, поэтому число названо здесь
 - Description длиннее мягкого порога - WARNING (`frontmatter-description-long`), длиннее проектного потолка - ERROR (`frontmatter-description-too-long`). Ярусы взаимоисключающие. Верхнего яруса под платформенный лимит у агентов нет: платформенный лимит на description агента не задокументирован
 - Значение `model` вне набора `opus` / `sonnet` / `haiku` / `fable` / `inherit` или полного идентификатора модели (правило `frontmatter-model-invalid`). Само значение `inherit` валидатор пропускает, хотя фреймворк требует явный тир
-- Значение `effort` вне набора `low` / `medium` / `high` / `xhigh` / `max` (`frontmatter-effort-invalid`), а также `effort` при `model: haiku` (`frontmatter-effort-unsupported-model`: у этого тира оси effort нет)
+- Значение `effort` вне набора `low` / `medium` / `high` / `xhigh` / `max` (`frontmatter-effort-invalid`), а также `effort` при полном ID модели без этой оси, `claude-haiku-4-5` и ранее (`frontmatter-effort-unsupported-model`; у Haiku 5.5 ось есть, алиас `haiku` зависит от провайдера и не судится)
 - Избыточное `permissionMode: default` (`frontmatter-permissionmode-default`)
 - Неполный каскад под fact-check (`factcheck-cascade-incomplete`): тело зовёт `dex-skill-fact-verification:fact-verification`, а в `tools` нет `ToolSearch`, `WebSearch` или `WebFetch`
 - Description не содержит ни «Триггеры», ни «Активируется», ни «trigger» - Claude Code матчит агентов по ключевым словам. Засчитывается любое из трёх, регистр не важен (правило `frontmatter-description-no-triggers`); сообщение валидатора называет «Триггеры» и «trigger», а «Активируется» в нём не упомянут вовсе, но «Активируется при ...» проверку проходит
@@ -525,3 +525,33 @@ npm run metrics:run -- --session <id>
 Вывод - строка на главный поток и строка на каждый узел: модель, ходы, пик контекста, токены; ниже
 итог с долей узлов и перечень инструментов главного потока. Файл читается и на живом прогоне -
 недописанная последняя строка JSONL пропускается.
+
+---
+
+## measure-context.js
+
+Замер контекстной стоимости каталога: постоянный слой, предзагрузка skills, срез по группам skills и агентов, команды. Это измерение, не валидатор: порогов и кодов возврата «нарушено» у него нет, в реестр валидаторов он не входит. Порог задаёт сабзадача, сравнивающая два замера.
+
+Мера - байты, строки и знаки (кодовые точки), не токены: локального токенайзера нет. Строки считаются как `wc -l`. Состав групп (S1-S10, A1-A8) - константы в самом скрипте; skill или агент вне групп попадает в «Вне групп», а не пропадает.
+
+```bash
+npm run measure:context                                  # таблицы Markdown
+npm run measure:context -- --json > before.json          # машинный вывод, вход для --diff
+node tools/measure-context.js --diff before.json after.json
+node tools/measure-context.js --prohibitions [--list]    # слова-запреты по областям; --list - каждое вхождение (файл:строка)
+```
+
+`--diff` печатает изменившиеся показатели и разность по файлам; байты и чистый прирост строк совпадают с `git diff --numstat` по тем же файлам. `--prohibitions` считает слова-запреты и капс по областям (агенты, skills и их `references/`, команды, прочее в `plugins/`, `docs/` без `research/`, `guide/`, `superpowers/`, `migration/`, корень, `.claude/rules/`) по всему тексту файла; проверка - `tests/tools/measure-context.test.sh`. Опорная точка миграции на Claude 5.5 - [docs/migration/claude55-baseline.md](../docs/migration/claude55-baseline.md).
+
+---
+
+## description-listing.js
+
+Бюджет листинга и различимость `description` skills, агентов и команд. Измерение, не валидатор: порогов и кодов возврата «нарушено» нет, в реестр валидаторов не входит. Мера - знаки; близость - косинус TF-IDF по токенам (лексическая, смысл не доказывает): список пар - вход для ручной классификации. Разбор среза - [docs/migration/claude55-descriptions.md](../docs/migration/claude55-descriptions.md).
+
+```bash
+npm run measure:listing                     # суммы, максимум, распределение, число длинных описаний
+npm run measure:listing -- --pairs=0.4      # пары с близостью не ниже порога
+npm run measure:listing -- --bundles        # листинг при установке одного бандла
+npm run measure:listing -- --json           # машинный вывод
+```

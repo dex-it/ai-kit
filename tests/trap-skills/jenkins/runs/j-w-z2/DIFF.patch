@@ -1,0 +1,170 @@
+diff --git a/Jenkinsfile b/Jenkinsfile
+new file mode 100644
+index 0000000..aa68f00
+--- /dev/null
++++ b/Jenkinsfile
+@@ -0,0 +1,164 @@
++// Библиотека закреплена на релизном теге: не rc и не плавающая ветка main.
++@Library('depot-pipeline-lib@v1.4.0') _
++
++pipeline {
++    agent none
++
++    options {
++        timestamps()
++        skipDefaultCheckout(true)
++        disableConcurrentBuilds()
++        buildDiscarder(logRotator(numToKeepStr: '30'))
++    }
++
++    environment {
++        IMAGE_REPO = 'registry.example.com/depot/api'
++        DOTNET_CLI_TELEMETRY_OPTOUT = '1'
++        DOTNET_NOLOGO = '1'
++    }
++
++    stages {
++        stage('CI') {
++            agent { label 'dotnet-linux' }
++            environment {
++                NUGET_PACKAGES = "${WORKSPACE}/.nuget/packages"
++                // Отдельный docker config на сборку: ноды постоянные, логин не должен оставаться на них.
++                DOCKER_CONFIG = "${WORKSPACE}@tmp/docker-config"
++            }
++            stages {
++                stage('Checkout') {
++                    steps {
++                        // Workspace сохраняется между сборками - чистим старые артефакты и результаты тестов.
++                        cleanWs()
++                        // Нужны все теги для расчёта версии образа.
++                        checkout([
++                            $class: 'GitSCM',
++                            branches: scm.branches,
++                            userRemoteConfigs: scm.userRemoteConfigs,
++                            extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, shallow: false]]
++                        ])
++                        script {
++                            // Наибольший по semver релизный тег (сортировка версий, не алфавитная).
++                            def tag = sh(returnStdout: true, script: '''
++                                git tag --list 'v[0-9]*' --sort=-v:refname \
++                                    | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' | head -n 1
++                            ''').trim()
++                            if (!tag) {
++                                error 'В репозитории нет semver-тегов вида vX.Y.Z'
++                            }
++                            env.IMAGE_TAG = "${tag}-${env.BUILD_NUMBER}"
++                            echo "Тег образа: ${env.IMAGE_TAG}"
++                        }
++                    }
++                }
++
++                stage('Build') {
++                    steps {
++                        sh 'dotnet restore Depot.sln'
++                        sh 'dotnet build Depot.sln -c Release --no-restore'
++                    }
++                }
++
++                stage('Test') {
++                    parallel {
++                        stage('Unit') {
++                            steps {
++                                sh '''dotnet test Depot.sln -c Release --no-build \
++                                    --filter "Category!=Integration" \
++                                    --logger "trx;LogFileName=unit.trx" --results-directory TestResults/unit'''
++                            }
++                            post {
++                                always {
++                                    xunit(tools: [MSTest(pattern: 'TestResults/unit/*.trx', skipNoTestFiles: true)])
++                                }
++                            }
++                        }
++                        stage('Integration') {
++                            steps {
++                                // Postgres поднимается Testcontainers через Docker агента.
++                                sh '''dotnet test Depot.sln -c Release --no-build \
++                                    --filter "Category=Integration" \
++                                    --logger "trx;LogFileName=integration.trx" --results-directory TestResults/integration'''
++                            }
++                            post {
++                                always {
++                                    xunit(tools: [MSTest(pattern: 'TestResults/integration/*.trx', skipNoTestFiles: true)])
++                                }
++                            }
++                        }
++                    }
++                }
++
++                stage('Image') {
++                    steps {
++                        sh 'docker build -t "$IMAGE_REPO:$IMAGE_TAG" .'
++                    }
++                }
++
++                // Секреты registry и деплоя недоступны PR (в том числе из форков): пуш и деплой только с main.
++                stage('Push') {
++                    when { allOf { branch 'main'; not { changeRequest() } } }
++                    steps {
++                        withCredentials([usernamePassword(credentialsId: 'registry-creds',
++                                usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASS')]) {
++                            sh '''
++                                echo "$REGISTRY_PASS" | docker login registry.example.com -u "$REGISTRY_USER" --password-stdin
++                                docker push "$IMAGE_REPO:$IMAGE_TAG"
++                            '''
++                        }
++                    }
++                    post {
++                        always {
++                            sh 'docker logout registry.example.com || true'
++                        }
++                    }
++                }
++
++                stage('Deploy stage') {
++                    when { allOf { branch 'main'; not { changeRequest() } } }
++                    steps {
++                        withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                            // Одинарные кавычки: токен подставляет shell, а не Groovy.
++                            sh './deploy.sh --token "$DEPLOY_TOKEN" --env stage'
++                        }
++                    }
++                }
++            }
++            post {
++                always {
++                    sh 'docker rmi "$IMAGE_REPO:$IMAGE_TAG" || true'
++                }
++            }
++        }
++
++        // Ожидание подтверждения идёт без агента: лид может ответить на следующий день,
++        // executor на это время не занимается.
++        stage('Approve prod') {
++            when { allOf { branch 'main'; not { changeRequest() } } }
++            agent none
++            options { timeout(time: 3, unit: 'DAYS') }
++            steps {
++                input message: "Выкатить ${env.IMAGE_TAG} на prod?", ok: 'Deploy'
++            }
++        }
++
++        stage('Deploy prod') {
++            when { allOf { branch 'main'; not { changeRequest() } } }
++            agent { label 'dotnet-linux' }
++            steps {
++                cleanWs()
++                checkout scm
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env prod'
++                }
++            }
++        }
++    }
++
++    post {
++        success { notifySlack('SUCCESS') }
++        unstable { notifySlack('UNSTABLE') }
++        failure { notifySlack('FAILURE') }
++        aborted { notifySlack('ABORTED') }
++    }
++}

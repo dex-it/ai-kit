@@ -1,0 +1,133 @@
+diff --git a/Jenkinsfile b/Jenkinsfile
+new file mode 100644
+index 0000000..7bd3179
+--- /dev/null
++++ b/Jenkinsfile
+@@ -0,0 +1,127 @@
++@Library('depot-pipeline-lib@v1.4.0') _
++
++// Верхний agent none: постоянный агент занимается только стадией, которой он нужен,
++// а ожидание подтверждения prod не держит executor.
++pipeline {
++  agent none
++  environment {
++    IMAGE = 'registry.example.com/depot/api'
++  }
++  stages {
++    stage('Build') {
++      agent { label 'dotnet-linux' }
++      options { timeout(time: 20, unit: 'MINUTES') }
++      steps {
++        checkout scm
++        sh 'dotnet build Depot.sln -c Release'
++        script {
++          // Тег образа: наибольший семвер-тег git (по semver, а не по алфавиту) + номер сборки.
++          env.IMAGE_TAG = sh(returnStdout: true, script: '''
++            git fetch --tags --force --quiet
++            tag=$(git tag --list | grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -V | tail -n 1)
++            [ -n "$tag" ] || { echo "no semver tags in repository" >&2; exit 1; }
++            echo "${tag}-${BUILD_NUMBER}"
++          ''').trim()
++        }
++      }
++      post { always { cleanWs() } }
++    }
++    stage('Tests') {
++      failFast true
++      parallel {
++        stage('Unit') {
++          agent { label 'dotnet-linux' }
++          options { timeout(time: 20, unit: 'MINUTES') }
++          steps {
++            checkout scm
++            sh 'dotnet test tests/Depot.Api.Tests -c Release --filter "Category!=Integration" --logger "trx;LogFileName=unit.trx" --results-directory TestResults/unit'
++          }
++          post {
++            always {
++              mstest testResultsFile: 'TestResults/**/*.trx'
++              cleanWs()
++            }
++          }
++        }
++        stage('Integration') {
++          agent { label 'dotnet-linux' }
++          options { timeout(time: 30, unit: 'MINUTES') }
++          steps {
++            // Testcontainers поднимает Postgres через Docker на этом агенте.
++            checkout scm
++            sh 'dotnet test tests/Depot.Api.Tests -c Release --filter "Category=Integration" --logger "trx;LogFileName=integration.trx" --results-directory TestResults/integration'
++          }
++          post {
++            always {
++              mstest testResultsFile: 'TestResults/**/*.trx'
++              cleanWs()
++            }
++          }
++        }
++      }
++    }
++    stage('Image') {
++      agent { label 'dotnet-linux' }
++      options { timeout(time: 20, unit: 'MINUTES') }
++      steps {
++        checkout scm
++        sh 'docker build -t "$IMAGE:$IMAGE_TAG" .'
++      }
++      post { always { cleanWs() } }
++    }
++    stage('Push') {
++      // Push только из main: учётка реестра не должна попадать в сборки PR, в том числе из форков.
++      when { beforeAgent true; branch 'main' }
++      agent { label 'dotnet-linux' }
++      options { timeout(time: 10, unit: 'MINUTES') }
++      steps {
++        withCredentials([usernamePassword(credentialsId: 'registry-creds', usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
++          sh 'echo "$REG_PASS" | docker login registry.example.com -u "$REG_USER" --password-stdin'
++          sh 'docker push "$IMAGE:$IMAGE_TAG"'
++        }
++      }
++      post {
++        always {
++          sh 'docker logout registry.example.com || true'
++          cleanWs()
++        }
++      }
++    }
++    stage('Deploy stage') {
++      when { beforeAgent true; branch 'main' }
++      agent { label 'dotnet-linux' }
++      options { timeout(time: 15, unit: 'MINUTES') }
++      steps {
++        checkout scm
++        withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++          sh './deploy.sh --token "$DEPLOY_TOKEN" --env stage'
++        }
++      }
++      post { always { cleanWs() } }
++    }
++    stage('Approve prod') {
++      // Без agent: пока лид не ответил, нода не занята. Таймаут с запасом на ответ на следующий день.
++      when { branch 'main' }
++      steps {
++        timeout(time: 72, unit: 'HOURS') {
++          input message: 'Деплой на prod?', ok: 'Деплоить'
++        }
++      }
++    }
++    stage('Deploy prod') {
++      when { beforeAgent true; branch 'main' }
++      agent { label 'dotnet-linux' }
++      options { timeout(time: 15, unit: 'MINUTES') }
++      steps {
++        checkout scm
++        withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++          sh './deploy.sh --token "$DEPLOY_TOKEN" --env prod'
++        }
++      }
++      post { always { cleanWs() } }
++    }
++  }
++  post {
++    always { notifySlack(currentBuild.currentResult) }
++  }
++}

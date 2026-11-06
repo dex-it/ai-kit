@@ -1,0 +1,73 @@
+[Read] <run>/discipline/SKILL-binary-inspection.md
+[Read] <run>/discipline/SKILL-core-dumps.md
+[Read] <run>/discipline/SKILL-managed-debug.md
+[Read] <run>/discipline/SKILL-native-debug.md
+[Read] <run>/discipline/SKILL-perf-profiling.md
+[Read] <run>/discipline/SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'cd /work && ls; ls src app | head -30; which strace perf dotnet-trace dotnet-counters bpftrace; ps aux | grep -i dotnet | head'
+docker exec <ctr> sh -c 'ls /work/logs; tail -5 /work/logs/* 2>/dev/null; top -H -b -n1 -p 11 | head -20; timeout 5 strace -f -c -p 11 2>&1 | head -25'
+docker exec <ctr> sh -c 'pkill -f OrdersWorker.dll; sleep 1; cd /work && DOTNET_PerfMapEnabled=1 nohup dotnet app/OrdersWorker.dll slow >/tmp/o.log 2>&1 & sleep 6; P=$(pgrep -f OrdersWorker.dll|head -1); echo $P; cd /tmp && perf record -F 499 -g -p $P -o /tmp/perf.data -- sleep 8 2>&1 | tail -3; perf report -i /tmp/perf.data --no-children --sort sym --stdio 2>&1 | grep -v "^$" | head -50'
+docker exec <ctr> sh -c 'ps -eo pid,args | grep [O]rdersWorker'; docker exec -d <ctr> sh -c 'cd /work && DOTNET_PerfMapEnabled=1 exec dotnet app/OrdersWorker.dll slow >/tmp/o.log 2>&1'; sleep 6; docker exec <ctr> sh -c 'ps -eo pid,args | grep [O]rdersWorker'
+docker exec <ctr> sh -c 'ps -eo pid,args | grep [O]rdersWorker'
+docker exec <ctr> sh -c 'cd /work && (DOTNET_PerfMapEnabled=1 nohup dotnet app/OrdersWorker.dll slow >/tmp/o.log 2>&1 &) ; sleep 6; ps -eo pid,args | grep "[O]rdersWorker"'
+docker exec <ctr> sh -c 'cd /tmp && perf record -F 499 -g -p 70 -o /tmp/perf.data -- sleep 8 2>&1 | tail -3; perf report -i /tmp/perf.data --no-children --sort sym --stdio -g none 2>&1 | grep -v "^$" | head -40'
+docker exec <ctr> sh -c 'cd /tmp && /root/.dotnet/tools/dotnet-trace collect -p 70 --providers Microsoft-DotNETCore-SampleProfiler:0xFFFFFFFFFFFFFFFF:5 --duration 00:00:08 --format Speedscope -o /tmp/tr 2>&1 | tail -5; ls /tmp | grep tr'
+docker exec <ctr> python3 -c '
+import json,collections
+d=json.load(open("/tmp/tr.speedscope.json"))
+fr=[f["name"] for f in d["shared"]["frames"]]
+for p in d["profiles"]:
+    c=collections.Counter(); t=collections.Counter()
+    for s in p["samples"]:
+        if s: c[fr[s[-1]]]+=1
+        for x in set(s): t[fr[x]]+=1
+    print(p["name"],len(p["samples"]))
+    for k,v in c.most_common(4): print("  self",v,k)
+    for k,v in t.most_common(6): print("  incl",v,k)
+' 2>&1 | head -60
+docker exec <ctr> python3 -c '
+import json,collections
+d=json.load(open("/tmp/tr.speedscope.json"))
+fr=[f["name"] for f in d["shared"]["frames"]]
+for p in d["profiles"]:
+    ev=p["events"]
+    if len(ev)<50: continue
+    st=[];self=collections.Counter();inc=collections.Counter();last=0
+    for e in ev:
+        dt=e["at"]-last;last=e["at"]
+        if st:
+            self[st[-1]]+=dt
+            for x in set(st): inc[x]+=dt
+        if e["type"]=="O": st.append(fr[e["frame"]])
+        else: st.pop()
+    print(p["name"],len(ev))
+    for k,v in self.most_common(4): print("  self %.0f"%v,k)
+    for k,v in inc.most_common(8): print("  incl %.0f"%v,k)
+' 2>&1 | head -60
+docker exec <ctr> grep -n -B3 -A8 "Slugify" /work/src/Program.cs
+cat > <lab>/REPORT.md <<'EOF'
+# REPORT
+
+## Симптом
+orders-worker (`dotnet app/OrdersWorker.dll slow`): p50 вырос с 0.2 до 3 мс. Процесс CPU-bound: `top -H` — два рабочих потока по ~100% CPU (us=100%, sy=0), остальные потоки спят. `strace -f -c` за 5 с: системное время не доминирует (futex/membarrier — фон, openat/read — единицы), т.е. время уходит в пользовательском коде, а не в I/O или блокировках.
+
+## Причина
+`src/Program.cs:162` — `TextUtils.Slugify` на каждый вызов создаёт `new Regex(@"[^\p{L}\p{Nd}]+(?:[\s\p{P}]*)")` (разбор паттерна и построение интерпретатора каждый раз), вместо одного статического/кэшированного экземпляра. Вызывается из горячего цикла обработчика, `src/Program.cs:98`.
+
+## Улики
+1. Нагрузка по потокам: `docker exec <ctr> top -H -b -n1 -p 11`
+   `20 root ... R 99.9 dotnet` / `19 root ... R 93.3 dotnet`, `%Cpu(s): 100.0 us, 0.0 sy`
+2. Системные вызовы: `strace -f -c -p 11` (5 с) — `81.26% futex 7812 calls`, `openat 582`, `read 539`; рабочих syscall'ов, объясняющих задержку, нет.
+3. Сэмплирование управляемых стеков (perf недоступен: `perf_event_paranoid>=2`, запись пустая), поэтому:
+   `dotnet-trace collect -p 70 --providers Microsoft-DotNETCore-SampleProfiler:0xFFFFFFFFFFFFFFFF:5 --duration 00:00:08 --format Speedscope`
+   Разбор по обоим рабочим потокам (инклюзивное время из 8004 ед. на поток):
+   - `OrdersWorker!TextUtils.Slugify(String)` — 7990 (99.8%) и 7983
+   - `System.Text.RegularExpressions.Regex..ctor(String,CultureInfo)` — 5332 (66.6%) и 5699 (71%)
+   - в стеке также `RegexParser.ScanRegex()`
+   Т.е. ~2/3 всего времени — конструирование Regex, остальное — `Replace` по свежему экземпляру.
+4. Журнал `logs/worker.log`: ~0.9 млн обработок за 2 с на два потока при 100% CPU — полностью занятые ядра.
+
+## Что предлагаю
+Вынести Regex в `static readonly` поле (`private static readonly Regex Rx = new(..., RegexOptions.Compiled)` или `[GeneratedRegex]`) и вызывать `Rx.Replace(...)`. После правки повторить `dotnet-trace` и сравнить p50 с базовым 0.2 мс. Код не менял.
+Примечание: для снятия профиля сервис был перезапущен (с `DOTNET_PerfMapEnabled=1`), прежний процесс остановлен.
+EOF

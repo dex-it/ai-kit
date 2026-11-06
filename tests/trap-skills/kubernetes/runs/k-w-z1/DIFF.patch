@@ -1,0 +1,269 @@
+diff --git a/deploy/k8s/00-namespace.yaml b/deploy/k8s/00-namespace.yaml
+new file mode 100644
+index 0000000..e73613b
+--- /dev/null
++++ b/deploy/k8s/00-namespace.yaml
+@@ -0,0 +1,4 @@
++apiVersion: v1
++kind: Namespace
++metadata:
++  name: depot
+diff --git a/deploy/k8s/10-secret.yaml b/deploy/k8s/10-secret.yaml
+new file mode 100644
+index 0000000..589cd97
+--- /dev/null
++++ b/deploy/k8s/10-secret.yaml
+@@ -0,0 +1,11 @@
++# Значения stage из docs/stage-values.md (тестовые, FAKE). Оператора секретов в stage нет,
++# поэтому Secret лежит в манифестах. Для прода значения заменить при деплое (реальные не коммитить).
++apiVersion: v1
++kind: Secret
++metadata:
++  name: depot-env
++  namespace: depot
++type: Opaque
++stringData:
++  ConnectionStrings__Default: "Host=pg-stage.internal;Database=depot;Username=depot;Password=FAKE-test-only-not-a-key"
++  Auth__ApiKey: "FAKE-test-only-not-a-key-2"
+diff --git a/deploy/k8s/20-api-deployment.yaml b/deploy/k8s/20-api-deployment.yaml
+new file mode 100644
+index 0000000..ae90d87
+--- /dev/null
++++ b/deploy/k8s/20-api-deployment.yaml
+@@ -0,0 +1,100 @@
++apiVersion: apps/v1
++kind: Deployment
++metadata:
++  name: depot-api
++  namespace: depot
++  labels:
++    app.kubernetes.io/name: depot-api
++    app.kubernetes.io/part-of: depot
++spec:
++  replicas: 3
++  revisionHistoryLimit: 5
++  strategy:
++    type: RollingUpdate
++    rollingUpdate:
++      maxUnavailable: 0
++      maxSurge: 1
++  selector:
++    matchLabels:
++      app.kubernetes.io/name: depot-api
++  template:
++    metadata:
++      labels:
++        app.kubernetes.io/name: depot-api
++        app.kubernetes.io/part-of: depot
++    spec:
++      imagePullSecrets:
++        - name: regcred
++      securityContext:
++        runAsNonRoot: true
++        runAsUser: 1654
++        seccompProfile:
++          type: RuntimeDefault
++      terminationGracePeriodSeconds: 30
++      topologySpreadConstraints:
++        - maxSkew: 1
++          topologyKey: kubernetes.io/hostname
++          whenUnsatisfiable: ScheduleAnyway
++          labelSelector:
++            matchLabels:
++              app.kubernetes.io/name: depot-api
++      containers:
++        - name: api
++          image: registry.example.com/depot/api:1.4.0
++          ports:
++            - name: http
++              containerPort: 8080
++          env:
++            - name: ASPNETCORE_URLS
++              value: http://+:8080
++            - name: ConnectionStrings__Default
++              valueFrom:
++                secretKeyRef:
++                  name: depot-env
++                  key: ConnectionStrings__Default
++            - name: Auth__ApiKey
++              valueFrom:
++                secretKeyRef:
++                  name: depot-env
++                  key: Auth__ApiKey
++          # Старт включает миграции: до 35 с (p95), запас - до 150 с.
++          startupProbe:
++            httpGet:
++              path: /health
++              port: http
++            periodSeconds: 5
++            failureThreshold: 30
++          readinessProbe:
++            httpGet:
++              path: /health
++              port: http
++            periodSeconds: 10
++            timeoutSeconds: 3
++            failureThreshold: 3
++          # /health зависит от БД: liveness по нему перезапускал бы все поды при сбое БД.
++          livenessProbe:
++            tcpSocket:
++              port: http
++            periodSeconds: 20
++            failureThreshold: 3
++          lifecycle:
++            preStop:
++              exec:
++                command: ["sleep", "5"]
++          resources:
++            requests:
++              cpu: 100m
++              memory: 384Mi
++            limits:
++              memory: 512Mi
++          securityContext:
++            allowPrivilegeEscalation: false
++            readOnlyRootFilesystem: true
++            capabilities:
++              drop: ["ALL"]
++          volumeMounts:
++            - name: tmp
++              mountPath: /tmp
++      volumes:
++        - name: tmp
++          emptyDir: {}
+diff --git a/deploy/k8s/21-api-service.yaml b/deploy/k8s/21-api-service.yaml
+new file mode 100644
+index 0000000..ef03b13
+--- /dev/null
++++ b/deploy/k8s/21-api-service.yaml
+@@ -0,0 +1,14 @@
++apiVersion: v1
++kind: Service
++metadata:
++  name: depot-api
++  namespace: depot
++  labels:
++    app.kubernetes.io/name: depot-api
++spec:
++  selector:
++    app.kubernetes.io/name: depot-api
++  ports:
++    - name: http
++      port: 80
++      targetPort: http
+diff --git a/deploy/k8s/22-api-pdb.yaml b/deploy/k8s/22-api-pdb.yaml
+new file mode 100644
+index 0000000..35c75b2
+--- /dev/null
++++ b/deploy/k8s/22-api-pdb.yaml
+@@ -0,0 +1,11 @@
++# Еженедельный drain нод не должен оставлять меньше 2 из 3 реплик.
++apiVersion: policy/v1
++kind: PodDisruptionBudget
++metadata:
++  name: depot-api
++  namespace: depot
++spec:
++  minAvailable: 2
++  selector:
++    matchLabels:
++      app.kubernetes.io/name: depot-api
+diff --git a/deploy/k8s/23-api-ingress.yaml b/deploy/k8s/23-api-ingress.yaml
+new file mode 100644
+index 0000000..a228bdd
+--- /dev/null
++++ b/deploy/k8s/23-api-ingress.yaml
+@@ -0,0 +1,22 @@
++apiVersion: networking.k8s.io/v1
++kind: Ingress
++metadata:
++  name: depot-api
++  namespace: depot
++spec:
++  ingressClassName: nginx
++  tls:
++    - hosts:
++        - depot.example.com
++      secretName: depot-tls
++  rules:
++    - host: depot.example.com
++      http:
++        paths:
++          - path: /
++            pathType: Prefix
++            backend:
++              service:
++                name: depot-api
++                port:
++                  name: http
+diff --git a/deploy/k8s/30-worker-deployment.yaml b/deploy/k8s/30-worker-deployment.yaml
+new file mode 100644
+index 0000000..5752c83
+--- /dev/null
++++ b/deploy/k8s/30-worker-deployment.yaml
+@@ -0,0 +1,65 @@
++# Ровно один экземпляр: два обработают очередь дважды. Recreate - чтобы при выкате
++# старый и новый поды никогда не работали одновременно.
++apiVersion: apps/v1
++kind: Deployment
++metadata:
++  name: depot-worker
++  namespace: depot
++  labels:
++    app.kubernetes.io/name: depot-worker
++    app.kubernetes.io/part-of: depot
++spec:
++  replicas: 1
++  revisionHistoryLimit: 5
++  strategy:
++    type: Recreate
++  selector:
++    matchLabels:
++      app.kubernetes.io/name: depot-worker
++  template:
++    metadata:
++      labels:
++        app.kubernetes.io/name: depot-worker
++        app.kubernetes.io/part-of: depot
++    spec:
++      imagePullSecrets:
++        - name: regcred
++      securityContext:
++        runAsNonRoot: true
++        runAsUser: 1654
++        seccompProfile:
++          type: RuntimeDefault
++      containers:
++        - name: worker
++          image: registry.example.com/depot/api:1.4.0
++          command: ["dotnet", "Depot.Api.dll", "--worker"]
++          env:
++            - name: ASPNETCORE_URLS
++              value: http://+:8080
++            - name: ConnectionStrings__Default
++              valueFrom:
++                secretKeyRef:
++                  name: depot-env
++                  key: ConnectionStrings__Default
++            - name: Auth__ApiKey
++              valueFrom:
++                secretKeyRef:
++                  name: depot-env
++                  key: Auth__ApiKey
++          resources:
++            requests:
++              cpu: 50m
++              memory: 384Mi
++            limits:
++              memory: 512Mi
++          securityContext:
++            allowPrivilegeEscalation: false
++            readOnlyRootFilesystem: true
++            capabilities:
++              drop: ["ALL"]
++          volumeMounts:
++            - name: tmp
++              mountPath: /tmp
++      volumes:
++        - name: tmp
++          emptyDir: {}

@@ -1,0 +1,174 @@
+diff --git a/Jenkinsfile b/Jenkinsfile
+new file mode 100644
+index 0000000..17982c0
+--- /dev/null
++++ b/Jenkinsfile
+@@ -0,0 +1,168 @@
++@Library('depot-pipeline-lib@v1.4.0') _
++
++// Образ: registry.example.com/depot/api:<наибольший semver-тег git>-<номер сборки>.
++// PR (в том числе из форков) собираются и тестируются, но push и деплой - только для main:
++// credentials привязываются только в стадиях с `when { branch 'main' }`.
++
++// Сравнение списков-ключей версии: [major, minor, patch, 1 для релиза / 0 для pre-release].
++@NonCPS
++int compareKeys(List a, List b) {
++    for (int i = 0; i < a.size(); i++) {
++        int c = (a[i] as int) <=> (b[i] as int)
++        if (c != 0) {
++            return c
++        }
++    }
++    return 0
++}
++
++// Наибольший по semver тег из списка тегов (строки). Теги, не похожие на vX.Y.Z, пропускаются.
++@NonCPS
++String latestSemverTag(String tagList) {
++    def re = ~/v(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/
++    List best = null
++    String bestTag = null
++    tagList.readLines().each { String line ->
++        String tag = line.trim()
++        def m = re.matcher(tag)
++        if (!m.matches()) {
++            return
++        }
++        // Релиз старше pre-release той же версии: v1.5.0 > v1.5.0-rc1.
++        List key = [m.group(1) as int, m.group(2) as int, m.group(3) as int, m.group(4) ? 0 : 1]
++        if (best == null || compareKeys(key, best) > 0) {
++            best = key
++            bestTag = tag
++        }
++    }
++    return bestTag
++}
++
++pipeline {
++    // Агент выбирается в стадиях: ожидание подтверждения prod не должно держать ноду.
++    agent none
++
++    environment {
++        IMAGE = 'registry.example.com/depot/api'
++    }
++
++    stages {
++        stage('Сборка') {
++            agent { label 'dotnet-linux' }
++            steps {
++                sh 'dotnet build Depot.sln -c Release'
++            }
++        }
++
++        stage('Тесты') {
++            parallel {
++                stage('Unit') {
++                    agent { label 'dotnet-linux' }
++                    steps {
++                        sh 'dotnet test tests/Depot.Api.Tests -c Release --filter "Category=Contracts" --logger "trx;LogFileName=unit.trx" --results-directory TestResults'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/unit.trx', keepLongStdio: true
++                        }
++                    }
++                }
++                stage('Integration') {
++                    agent { label 'dotnet-linux' }
++                    options {
++                        timeout(time: 30, unit: 'MINUTES')
++                    }
++                    steps {
++                        // Testcontainers поднимает Postgres через Docker на агенте.
++                        sh 'dotnet test tests/Depot.Api.Tests -c Release --filter "Category=Integration" --logger "trx;LogFileName=integration.trx" --results-directory TestResults'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/integration.trx', keepLongStdio: true
++                        }
++                    }
++                }
++            }
++        }
++
++        // Образ и push на одной ноде: собранный образ лежит в Docker-демоне конкретного агента.
++        stage('Образ и push') {
++            agent { label 'dotnet-linux' }
++            stages {
++                stage('Образ') {
++                    steps {
++                        script {
++                            // Теги при checkout могут не подтянуться - тянем явно.
++                            sh 'git fetch --tags --force'
++                            String latest = latestSemverTag(sh(script: 'git tag --list', returnStdout: true))
++                            if (!latest) {
++                                error 'В репозитории нет semver-тега вида vX.Y.Z'
++                            }
++                            env.IMAGE_TAG = "${latest}-${env.BUILD_NUMBER}"
++                        }
++                        sh "docker build -t ${IMAGE}:${IMAGE_TAG} ."
++                    }
++                }
++
++                stage('Push') {
++                    when { branch 'main' }
++                    steps {
++                        withCredentials([usernamePassword(credentialsId: 'registry-creds', usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
++                            sh 'echo "$REG_PASS" | docker login registry.example.com -u "$REG_USER" --password-stdin'
++                            sh "docker push ${IMAGE}:${IMAGE_TAG}"
++                        }
++                    }
++                    post {
++                        always {
++                            sh 'docker logout registry.example.com || true'
++                        }
++                    }
++                }
++            }
++        }
++
++        stage('Деплой stage') {
++            when {
++                beforeAgent true
++                branch 'main'
++            }
++            agent { label 'dotnet-linux' }
++            steps {
++                // Токен передаётся значением из credentials; Jenkins маскирует его в логе.
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env stage'
++                }
++            }
++        }
++
++        stage('Подтверждение prod') {
++            when { branch 'main' }
++            steps {
++                // Ожидание идёт без ноды. Лид отвечает иногда на следующий день, поэтому таймаут 72 часа.
++                // Общий timeout пайплайна не ставим: он бы считал и время ожидания.
++                timeout(time: 72, unit: 'HOURS') {
++                    input message: 'Деплоить на prod?', ok: 'Деплой на prod'
++                }
++            }
++        }
++
++        stage('Деплой prod') {
++            when {
++                beforeAgent true
++                branch 'main'
++            }
++            agent { label 'dotnet-linux' }
++            steps {
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env prod'
++                }
++            }
++        }
++    }
++
++    post {
++        always {
++            notifySlack(currentBuild.currentResult)
++        }
++    }
++}

@@ -37,25 +37,17 @@ const hunkGap = (hunks, roots) => {
   const bare = bareHunks(hunks, roots)
   return bare.length ? `место правки без записи roots: ${bare.join(', ')}` : ''
 }
-// Правила проекта ищет узел снимка, читает ревьюер: прочтение - поле выдачи, иначе непрочитанное правило неотличимо от соблюдённого.
+// Где лежат правила, находит узел снимка, что из них задевает правка - ревьюер: корпус ADR целиком в контекст ревьюера не входит.
 const CONVENTIONS = {
-  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы, которыми проект нормирует код и ревью; не нашёл - пусто' },
+  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы и каталоги, которыми проект нормирует код и ревью; не нашёл - пусто' },
   'conventions-searched': { type: 'string', description: 'где искал правила проекта' },
 }
-const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'пути из правил проекта во входе, прочитанные до суждения' }
-const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
+const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'прочитанные правила проекта: путь от корня репозитория, прочитанное частью - путь#раздел' }
+const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR - каталогом. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
 const conventionsOf = (x) => x && x.status !== 'blocked' ? x.conventions || [] : []
-// Прочитанное называется путём из поданного перечня: свободную строку разведка и ревьюер пишут разной формой, и прочитанное правило числится непрочитанным.
-const conventionsRead = (x) => conventionsOf(x).length ? { ...CONVENTIONS_READ, items: { type: 'string', enum: [...new Set(conventionsOf(x))] } } : CONVENTIONS_READ
 const conventionsText = (x) => !x || x.status === 'blocked' ? '' : conventionsOf(x).length
-  ? `\nПравила проекта - прочитай каждое до суждения: нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
+  ? `\nПравила проекта лежат здесь - подряд не читай: по каждому решению правки найди задетые им правила и ADR и сверяйся с ними по ходу разбора; нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
   : `\nПравил проекта не найдено (искали: ${x['conventions-searched'] || 'не названо'}).`
-const conventionsGap = (x, rev) => {
-  const path = (c) => String(c).trim().replace(/^\.\//, '')
-  const read = ((rev && rev['conventions-read']) || []).map(path)
-  const unread = conventionsOf(x).filter(c => !read.includes(path(c)))
-  return unread.length ? `правила проекта не прочитаны: ${unread.join(', ')}` : ''
-}
 const axesText = (axes) => (axes || []).map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'
 const rootsText = (roots) => (roots || []).map(x => `- ${x.anchor}: ${x.decision} - корень: ${x.root} - ${x.verdict}${x.finding ? ` (находка ${x.finding})` : ''}${x.evidence ? ` - ${x.evidence}` : ''}`).join('\n') || '- не названы'
 const FALSIFY = { type: 'object', properties: {

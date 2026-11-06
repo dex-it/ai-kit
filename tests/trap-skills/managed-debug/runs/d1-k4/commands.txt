@@ -1,0 +1,14 @@
+[Read] <run>/discipline/SKILL-binary-inspection.md
+[Read] <run>/discipline/SKILL-core-dumps.md
+[Read] <run>/discipline/SKILL-managed-debug.md
+[Read] <run>/discipline/SKILL-native-debug.md
+[Read] <run>/discipline/SKILL-perf-profiling.md
+[Read] <run>/discipline/SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'pgrep -a dotnet; tail -n 15 /work/logs/worker.log; which dotnet-stack dotnet-dump dotnet-counters gdb strace'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; timeout 8 dotnet-counters monitor -p 11 --counters System.Runtime --refresh-interval 2 2>&1 | grep -iE "ThreadPool|Lock|CPU" | tail -n 8; grep State /proc/11/status; ls /proc/11/task | wc -l'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; cd /tmp; dotnet-dump collect -p 11 -o /tmp/w.dmp 2>&1 | tail -n 2; dotnet-dump analyze /tmp/w.dmp -c "clrthreads" -c "syncblk" -c "threadpool" -c "clrstack -all" -c exit 2>&1 | head -n 120'
+docker exec <ctr> sh -c 'tr "\0" "\n" </proc/11/environ | grep -iE "DOTNET|COMPlus"; cat /proc/11/cmdline | tr "\0" " "; echo; cat app/*.runtimeconfig.json 2>/dev/null || cat /proc/11/cwd/app/*.runtimeconfig.json; ls -l /proc/11/cwd; rm -f /tmp/w.dmp'
+docker exec <ctr> sh -c 'cd /proc/11/cwd && pwd -P; cat app/*.runtimeconfig.json; rm -f /tmp/w.dmp'; docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; grep -c . /dev/null; ls /work/src'
+cd <lab>/src; grep -nE "SetMaxThreads|SetMinThreads|Wait\(|Result|Hang" Program.cs
+cd <lab>/src; sed -n 33,60p Program.cs
+[Write] <lab>/REPORT.md

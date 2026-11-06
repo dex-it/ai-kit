@@ -1,0 +1,192 @@
+diff --git a/.teamcity/settings.kts b/.teamcity/settings.kts
+new file mode 100644
+index 0000000..ec7ce33
+--- /dev/null
++++ b/.teamcity/settings.kts
+@@ -0,0 +1,186 @@
++import jetbrains.buildServer.configs.kotlin.*
++import jetbrains.buildServer.configs.kotlin.buildFeatures.PullRequests
++import jetbrains.buildServer.configs.kotlin.buildFeatures.pullRequests
++import jetbrains.buildServer.configs.kotlin.buildSteps.dotnetBuild
++import jetbrains.buildServer.configs.kotlin.buildSteps.dotnetRestore
++import jetbrains.buildServer.configs.kotlin.buildSteps.dotnetTest
++import jetbrains.buildServer.configs.kotlin.buildSteps.script
++import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnMetric
++import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
++import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
++import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
++import jetbrains.buildServer.configs.kotlin.triggers.vcs
++import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
++
++version = "2024.12"
++
++/*
++ * Цепочка сервиса: Build+unit -> Integration -> Image -> Stage -> Prod (вручную).
++ * Вся схема описана функцией serviceChain; остальным сервисам нужен только другой ServiceSpec.
++ * Чтобы не копировать функцию в девять репозиториев, её нужно вынести в общую библиотеку Kotlin DSL
++ * (см. замечания в DPT-23).
++ */
++project(serviceChain(ServiceSpec(name = "Depot", solution = "Depot.sln")))
++
++data class ServiceSpec(
++    val name: String,
++    val solution: String,
++    val vcsUrl: String = "https://git.example.com/depot/depot.git",
++    val defaultBranch: String = "refs/heads/main",
++)
++
++fun serviceChain(s: ServiceSpec): Project {
++    val pid = s.name
++    val repo = GitVcsRoot {
++        id("${pid}_Vcs")
++        name = "${s.name} repo"
++        url = s.vcsUrl
++        branch = s.defaultBranch
++        branchSpec = "+:refs/heads/*\n+:refs/pull/*/head"
++    }
++
++    // dotnet test завершается нулём и без тестов, и после OOM: ловим это отдельными условиями.
++    fun BuildType.testGuards() {
++        failureConditions {
++            failOnMetricChange {
++                metric = BuildFailureOnMetric.MetricType.PASSED_TEST_COUNT
++                threshold = 1
++                units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
++                comparison = BuildFailureOnMetric.MetricComparison.LESS
++                compareTo = value()
++            }
++            failOnText {
++                conditionType = BuildFailureOnText.ConditionType.CONTAINS
++                pattern = "System.OutOfMemoryException"
++                failureMessage = "OutOfMemoryException в логе"
++                reverse = false
++            }
++        }
++    }
++
++    val build = BuildType {
++        id("${pid}_Build")
++        name = "1. Build + unit"
++        vcs { root(repo) }
++        steps {
++            dotnetRestore { name = "restore"; projects = s.solution }
++            dotnetBuild { name = "build"; projects = s.solution; configuration = "Release"; args = "--no-restore" }
++            dotnetTest {
++                name = "unit tests"
++                projects = s.solution
++                configuration = "Release"
++                args = "--no-build --no-restore --filter Category=Contracts"
++            }
++        }
++        testGuards()
++        triggers {
++            // main и PR (в том числе из форков). Секретных параметров у этой конфигурации нет.
++            vcs { branchFilter = "+:<default>\n+:pull/*" }
++        }
++        features {
++            pullRequests {
++                vcsRootExtId = "${repo.id}"
++                provider = github {
++                    authType = vcsRoot()
++                    filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
++                }
++            }
++        }
++        requirements { contains("teamcity.agent.jvm.os.name", "Linux") }
++    }
++
++    // Секрет db.password не должен попадать в сборки PR из форков: конфигурация собирается только на main.
++    val integration = BuildType {
++        id("${pid}_Integration")
++        name = "2. Integration tests"
++        vcs { root(repo) }
++        params {
++            password("db.password", "credentialsJSON:depot-db-password", display = ParameterDisplay.HIDDEN)
++            password("env.DB_PASSWORD", "%db.password%", display = ParameterDisplay.HIDDEN)
++        }
++        steps {
++            dotnetRestore { name = "restore"; projects = s.solution }
++            dotnetBuild { name = "build"; projects = s.solution; configuration = "Release"; args = "--no-restore" }
++            dotnetTest {
++                name = "integration tests"
++                projects = s.solution
++                configuration = "Release"
++                args = "--no-build --no-restore --filter Category=Integration"
++            }
++        }
++        testGuards()
++        dependencies { snapshot(build) { onDependencyFailure = FailureAction.FAIL_TO_START } }
++        requirements { contains("teamcity.agent.jvm.os.name", "Linux") }
++    }
++
++    val image = BuildType {
++        id("${pid}_Image")
++        name = "3. Image + push"
++        vcs { root(repo) }
++        params {
++            param("registry.url", "registry.example.com/depot")
++            param("registry.user", "ci")
++            password("registry.password", "credentialsJSON:registry-password", display = ParameterDisplay.HIDDEN)
++            password("env.REGISTRY_PASSWORD", "%registry.password%", display = ParameterDisplay.HIDDEN)
++        }
++        steps {
++            script {
++                name = "docker build, push, deploy-values.yaml"
++                scriptContent = """
++                    set -eu
++                    IMAGE="%registry.url%/${s.name.lowercase()}:%build.number%"
++                    docker build -t "${'$'}IMAGE" .
++                    printf '%s' "${'$'}REGISTRY_PASSWORD" | docker login "%registry.url%" -u "%registry.user%" --password-stdin
++                    docker push "${'$'}IMAGE"
++                    DIGEST="${'$'}(docker inspect --format '{{index .RepoDigests 0}}' "${'$'}IMAGE")"
++                    printf 'image: %s\n' "${'$'}DIGEST" > deploy-values.yaml
++                """.trimIndent()
++            }
++        }
++        artifactRules = "deploy-values.yaml"
++        dependencies { snapshot(integration) { onDependencyFailure = FailureAction.FAIL_TO_START } }
++        requirements { contains("teamcity.agent.jvm.os.name", "Linux") }
++    }
++
++    fun deploy(suffix: String, title: String, env: String, after: BuildType) = BuildType {
++        id("${pid}_$suffix")
++        name = title
++        params {
++            param("deploy.env", env)
++            password("deploy.token", "credentialsJSON:deploy-token-$env", display = ParameterDisplay.HIDDEN)
++            password("env.DEPLOY_TOKEN", "%deploy.token%", display = ParameterDisplay.HIDDEN)
++        }
++        steps {
++            script {
++                name = "deploy $env"
++                // Образ (digest) и значения - из артефакта Image этой же цепочки.
++                scriptContent = """
++                    set -eu
++                    test -s deploy-values.yaml
++                    ./deploy.sh "%deploy.env%" deploy-values.yaml
++                """.trimIndent()
++            }
++        }
++        dependencies {
++            snapshot(after) { onDependencyFailure = FailureAction.FAIL_TO_START }
++            artifacts(image) {
++                buildRule = sameChainOrLastFinished()
++                artifactRules = "deploy-values.yaml"
++            }
++        }
++        requirements { contains("teamcity.agent.jvm.os.name", "Linux") }
++    }
++
++    val stage = deploy("Stage", "4. Deploy stage", "stage", image)
++    stage.triggers { vcs { branchFilter = "+:<default>" } }  // коммит в main запускает всю цепочку
++    // Прод - только вручную: триггеров нет.
++    val prod = deploy("Prod", "5. Deploy prod (manual)", "prod", stage)
++
++    return Project {
++        id(pid)
++        name = s.name
++        vcsRoot(repo)
++        listOf(build, integration, image, stage, prod).forEach { buildType(it) }
++        buildTypesOrder = listOf(build, integration, image, stage, prod)
++    }
++}

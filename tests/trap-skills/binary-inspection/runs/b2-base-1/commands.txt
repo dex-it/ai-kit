@@ -1,0 +1,14 @@
+cd $B2_DIR/labs/b2-base-1/vendor; ls -l; which objdump readelf rizin rz-bin nm gdb r2 llvm-objdump python3 file aarch64-linux-gnu-objdump; file libescape.so; readelf -h libescape.so | head -20; objdump -i | head -5
+cd $B2_DIR/labs/b2-base-1; objdump -i | grep -i -E "aarch64|arm" | head; echo ---; objdump -d vendor/libescape.so 2>&1 | head -5; echo ---; gdb -batch -ex 'set architecture aarch64' 2>&1 | head -3; gdb --configuration 2>&1 | grep -i -E "target|multi"; echo ---; python3 -I -c "import capstone" 2>&1; python3 -I -c "import lief" 2>&1; ls /usr/bin | grep -i -E "llvm|aarch64|multiarch|ndisasm|rz|radare"; readelf -sW --dyn-syms vendor/libescape.so | grep -v UND | head -30
+cd $B2_DIR/labs/b2-base-1; objdump -i | grep -i -E "aarch64|arm"; echo "rc=$?"; objdump -d vendor/libescape.so 2>&1 | head -5
+gdb --configuration 2>&1 | grep -i -E "target|multi"; python3 -I -c "import capstone" 2>&1; python3 -I -c "import lief" 2>&1; ls /usr/bin | grep -i -E "llvm|aarch64|multiarch|ndisasm|rz-|radare|r2"
+cd $B2_DIR/labs/b2-base-1; readelf -sW --dyn-syms vendor/libescape.so | grep -v UND | head -30
+objdump -i | grep -i -c -E "aarch64|arm"
+objdump -d --start-address=0x1740 --stop-address=0x17c8 vendor/libescape.so
+gdb --configuration
+python3 -I -c "import capstone"
+ls /usr/bin /usr/local/bin
+gdb -nx -batch -ex "set architecture aarch64" -ex "show architecture" -ex "info line *0x1740"
+readelf -x .text vendor/libescape.so | head -3; which rizin rz-bin llvm-objdump aarch64-linux-gnu-objdump gdb-multiarch r2 capstone; echo rc=$?
+which rizin rz-bin llvm-objdump aarch64-linux-gnu-objdump gdb-multiarch r2
+# cost (0.0986913, 'success', 16)

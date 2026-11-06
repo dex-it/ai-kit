@@ -8,7 +8,7 @@ description: Как добавить плагин или поправить су
 ## Путь изменения
 
 1. Форкните репозиторий и создайте ветку от `develop`.
-2. Прочитайте устройство того, что правите: [skill](https://github.com/dex-it/ai-kit/blob/main/docs/SKILL_FRAMEWORK.md), [агент](https://github.com/dex-it/ai-kit/blob/main/docs/AGENT_FRAMEWORK.md), [команда](https://github.com/dex-it/ai-kit/blob/main/docs/COMMAND_FRAMEWORK.md), [мод](https://github.com/dex-it/ai-kit/blob/main/docs/MOD_FRAMEWORK.md).
+2. Выберите вид единицы и пройдите руководство по нему: [Разработка плагинов](/authoring/). Прочитайте устройство того, что правите: [skill](https://github.com/dex-it/ai-kit/blob/main/docs/SKILL_FRAMEWORK.md), [агент](https://github.com/dex-it/ai-kit/blob/main/docs/AGENT_FRAMEWORK.md), [команда](https://github.com/dex-it/ai-kit/blob/main/docs/COMMAND_FRAMEWORK.md), [мод](https://github.com/dex-it/ai-kit/blob/main/docs/MOD_FRAMEWORK.md).
 3. Внесите изменение и синхронизируйте всё, что нужно: [Добавить плагин](/contributing/add-plugin/), [Версии](/contributing/versions/).
 4. Прогоните [проверки](/contributing/checks/).
 5. Откройте Pull Request в `develop`: [Pull Request](/contributing/pull-requests/).
@@ -19,8 +19,9 @@ description: Как добавить плагин или поправить су
 
 | Документ | О чём |
 |---|---|
-| [CLAUDE.md](https://github.com/dex-it/ai-kit/blob/main/CLAUDE.md) | Как писать плагины, ревьюить и проверять перед коммитом |
-| [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md) | Версии (semver), обязательные синхронизации, гейт перед коммитом |
+| [AGENTS.md](https://github.com/dex-it/ai-kit/blob/main/AGENTS.md) | Как писать плагины, ревьюить и проверять перед коммитом |
+| [plugin-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/plugin-changes.md) | Версии (semver), обязательные синхронизации |
+| [commit-gate.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/commit-gate.md) | Гейт перед коммитом и CI |
 | [docs-changes.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/docs-changes.md) | Правки документации |
 | [terminology.md](https://github.com/dex-it/ai-kit/blob/main/.claude/rules/terminology.md) | Заведённые имена; значения - в [словаре](https://github.com/dex-it/ai-kit/blob/main/docs/domain/domain-model.md) |
 | [VALIDATOR_RULES.md](https://github.com/dex-it/ai-kit/blob/main/docs/VALIDATOR_RULES.md) | Реестр правил валидаторов: что ловит каждое |

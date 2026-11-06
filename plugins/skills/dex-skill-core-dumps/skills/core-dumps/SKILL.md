@@ -20,13 +20,13 @@ description: Post-mortem анализ coredump - gcore live snapshot, coredumpct
 ### coredump_filter режет shared memory
 Плохо: дамп есть, но `info shared` показывает «no shared library symbols» - mmap-ed файлы не сохранены
 Правильно: `echo 0xff > /proc/<PID>/coredump_filter` (все типы памяти); проверить через `cat /proc/<PID>/coredump_filter`
-Почему: filter определяет какие сегменты VM попадают в дамп. Дефолт исключает shared mmap. Для .NET / Java с большой heap-mmap это критично
+Почему: filter определяет какие сегменты VM попадают в дамп. Дефолт 0x33 не включает file-backed mapping (core(5))
 
 ## gcore и coredumpctl
 
 ### gcore блокирует процесс
 Плохо: `gcore <PID>` на prod-сервисе с 8GB heap во время инцидента
-Правильно: понимать что gcore делает stop+ptrace+write всех страниц RAM; multi-GB = секунды-минуты остановки, health-check может зафейлиться; для .NET использовать `dotnet-dump collect` (менее блокирующе через diagnostic port)
+Правильно: понимать что gcore делает stop+ptrace+write всех страниц RAM; multi-GB = секунды-минуты остановки, health-check может зафейлиться; для .NET - `dotnet-dump collect` (пауза не сверена)
 Почему: gcore через ptrace останавливает процесс на время записи. Размер дампа = RES процесса в худшем случае
 
 ### coredumpctl list не показывает старые дампы
@@ -49,7 +49,7 @@ description: Post-mortem анализ coredump - gcore live snapshot, coredumpct
 ### core_pattern named-pipe host-only
 Плохо: настроить `core_pattern` внутри контейнера и ожидать что host увидит
 Правильно: `core_pattern` глобальный sysctl, действует только на host; внутри контейнера запись `|/path/handler` бесполезна; решение - `core_pattern=/dumps/core.%e.%p` плюс mount tmpfs в контейнер
-Почему: sysctl `/proc/sys/kernel/core_pattern` - shared kernel resource, не namespaced. Контейнерное изменение игнорируется
+Почему: sysctl `/proc/sys/kernel/core_pattern` - shared kernel resource, не namespaced; обработчик `|...` запускается в namespaces хоста (core(5))
 
 ### Symbols для post-mortem контейнера
 Плохо: дамп взят с продового container image, analyze без image

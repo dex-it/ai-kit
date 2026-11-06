@@ -10,7 +10,7 @@ description: Linux sampling-профилирование - perf record/script/re
 ### perf_event_paranoid блокирует event capture
 Плохо: `perf record -F 99 -a -g sleep 30` под user-аккаунтом - `permission denied`
 Правильно: проверить `cat /proc/sys/kernel/perf_event_paranoid`. >=2 (default) - запрет kernel events; для prod-machine рекомендуется 1 (samples + tracepoints) или 0 (kernel addresses тоже); либо `sudo perf record ...`
-Почему: paranoid - sysctl Linux для ограничения perf_event_open(). Уровень 4 (Debian) даже user-events запрещает без CAP_PERFMON
+Почему: paranoid - sysctl Linux для ограничения perf_event_open(). Уровни 3-4 - патчи дистрибутивов (не сверено)
 
 ### CAP_PERFMON вместо CAP_SYS_ADMIN
 Плохо: устаревший совет - давать процессу CAP_SYS_ADMIN для perf
@@ -38,7 +38,7 @@ description: Linux sampling-профилирование - perf record/script/re
 
 ### Spinning loop виден, блокировка нет
 Плохо: flamegraph не показывает причину slowdown - busy функция в hot path не найдена
-Правильно: для off-CPU (sleep, lock wait, io_wait) - bpftrace `offcputime` или `perf sched`; on-CPU и off-CPU - разные сценарии
+Правильно: для off-CPU (sleep, lock wait, io_wait) - bcc `offcputime` или `perf sched`; on-CPU и off-CPU - разные сценарии
 Почему: perf record sample CPU; sleeping thread не в выборке. «Где провёл время» = on-CPU + off-CPU вместе
 
 ### Sched events для блокировок
@@ -60,7 +60,7 @@ description: Linux sampling-профилирование - perf record/script/re
 
 ## JIT-символы Java
 
-### Java aync-profiler vs perf
+### Java async-profiler vs perf
 Плохо: пытаться `perf record` Java-приложение и парсить через стандартный pipeline
 Правильно: async-profiler (jvmti) - правильный инструмент; perf для Java требует `-XX:+PreserveFramePointer` и agentlib для перевода JIT в perfmap
 Почему: JVM по умолчанию не preserve frame pointer, perf видит только JIT-frame адреса. async-profiler знает JVM internals

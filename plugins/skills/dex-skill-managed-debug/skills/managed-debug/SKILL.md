@@ -45,7 +45,7 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 
 ### gcdump блокирует процесс на multi-GB heap
 Плохо: `dotnet-gcdump collect -p <PID>` на prod-сервисе с heap 8GB во время инцидента
-Правильно: до prod-инцидента понимать что gcdump блокирует worker на seconds-minutes; в проде использовать `dotnet-counters` для live или `dotnet-dump --type Full` для post-mortem
+Правильно: до prod-инцидента понимать что gcdump блокирует worker на seconds-minutes; в проде использовать `dotnet-counters` для live или `dotnet-dump collect --type Full` для post-mortem
 Почему: gcdump делает stop-the-world GC + serializes heap; multi-GB heap = заметная пауза, может вызвать health-check fail и перезапуск
 
 ### Analyze падает на mismatch версии runtime
@@ -61,8 +61,8 @@ description: Runtime .NET debug - netcoredbg, dotnet diagnostic tools, SOS, mana
 Почему: `-a` (locals и parameters) требует public PDB символов. Без них видны только имена методов, аргументы как `<no data>`
 
 ### dumpasync скрывает completed continuations
-Плохо: `!dumpasync` показал три pending state-machines, root cause «найден»
-Правильно: `!dumpasync -completed` дополнительно, плюс `!syncblk` для managed monitors, `!clrthreads -live` для активных threads
+Плохо: `dumpasync` показал три pending state-machines, root cause «найден»
+Правильно: `dumpasync --completed` дополнительно, плюс `syncblk` для managed monitors, `clrthreads -live` для активных threads (dotnet-dump 10.0.750501)
 Почему: `dumpasync` по умолчанию фильтрует завершённые. Cause hang может быть в continuation, которая уже вернула Task но висит на нижестоящем .Wait()
 
 ## Символы и исходники

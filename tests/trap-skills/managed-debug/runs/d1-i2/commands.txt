@@ -1,0 +1,13 @@
+[Read] <run>/discipline/SKILL-binary-inspection.md
+[Read] <run>/discipline/SKILL-core-dumps.md
+[Read] <run>/discipline/SKILL-managed-debug.md
+[Read] <run>/discipline/SKILL-native-debug.md
+[Read] <run>/discipline/SKILL-perf-profiling.md
+[Read] <run>/discipline/SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'ps -eo pid,stat,pcpu,nlwp,cmd | grep -i dotnet | grep -v grep; tail -n 15 /work/logs/worker.log; which dotnet-stack dotnet-dump dotnet-counters strace gdb'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; timeout 20 dotnet-counters monitor -p 11 --counters System.Runtime --refresh-interval 2 2>&1 | grep -iE "threadpool|lock|completed" | tail -8; cat /proc/11/status | grep -E "State|Threads"; ls /proc/11/task | head -30'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; cd /tmp && dotnet-dump collect -p 11 -o /tmp/w.dmp 2>&1 | tail -3; printf "clrthreads\nsyncblk\nthreadpool\nclrstack -all\nexit\n" | dotnet-dump analyze /tmp/w.dmp 2>&1 | head -120'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; printf "clrstack -all\nexit\n" | dotnet-dump analyze /tmp/w.dmp 2>&1 | grep -c "Hang>b__0"; ls /work /work/src /work/app 2>/dev/null; cat /proc/11/cmdline | tr "\0" " "; echo; tr "\0" "\n" < /proc/11/environ | grep -i dotnet; cat /app/*.runtimeconfig.json; grep -rn "MaxThreads\|SetMax\|Wait()\|Hang" /work/src --include=*.cs | head -20'
+docker exec <ctr> sh -c 'export PATH=$PATH:/root/.dotnet/tools; printf "clrstack -all\nexit\n" | dotnet-dump analyze /tmp/w.dmp 2>&1 | grep -c "Hang>b__0"; ls /work /work/src /app 2>/dev/null; cat /app/*.runtimeconfig.json; grep -rn "SetMax\|Wait()\|Hang\|Result" /work/src --include=*.cs | head -20'
+cd <lab>; cat orders-worker.env; sed -n 33,60p src/Program.cs; sed -n 108,120p src/Program.cs
+[Write] <lab>/REPORT.md

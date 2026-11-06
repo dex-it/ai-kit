@@ -1,0 +1,174 @@
+diff --git a/Jenkinsfile b/Jenkinsfile
+new file mode 100644
+index 0000000..dcb7868
+--- /dev/null
++++ b/Jenkinsfile
+@@ -0,0 +1,168 @@
++@Library('depot-pipeline-lib@v1.4.0') _
++
++def imageRepo = 'registry.example.com/depot/api'
++def imageTag
++
++// Наибольший semver-тег по правилам semver: 1.10.0 > 1.9.3; релиз старше своих пре-релизов (1.5.0 > 1.5.0-rc1).
++@NonCPS
++String latestSemverTag(String gitTags) {
++    def semver = ~/v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/
++    def best = null
++    gitTags.split('\n').collect { it.trim() }.each { tag ->
++        def m = semver.matcher(tag)
++        if (!m.matches()) return
++        def v = [tag: tag, nums: [m.group(1), m.group(2), m.group(3)].collect { it.toInteger() }, pre: m.group(4)]
++        if (best == null || compareSemver(v, best) > 0) best = v
++    }
++    return best?.tag
++}
++
++@NonCPS
++int compareSemver(Map a, Map b) {
++    int c = 0
++    for (int i = 0; i < 3 && c == 0; i++) c = a.nums[i] <=> b.nums[i]
++    return c != 0 ? c : comparePreRelease(a.pre, b.pre)
++}
++
++@NonCPS
++int comparePreRelease(String a, String b) {
++    if (a == b) return 0
++    if (a == null) return 1
++    if (b == null) return -1
++    def x = a.split('\\.')
++    def y = b.split('\\.')
++    for (int i = 0; i < Math.min(x.length, y.length); i++) {
++        boolean dx = x[i].isInteger()
++        boolean dy = y[i].isInteger()
++        int c = (dx && dy) ? x[i].toInteger() <=> y[i].toInteger() : (dx ? -1 : (dy ? 1 : x[i] <=> y[i]))
++        if (c != 0) return c
++    }
++    return x.length <=> y.length
++}
++
++pipeline {
++    agent none
++
++    options {
++        // Чекаут делаем явно в каждой стадии: агенты постоянные, workspace общий между сборками.
++        skipDefaultCheckout()
++    }
++
++    stages {
++        stage('Build') {
++            agent { label 'dotnet-linux' }
++            steps {
++                checkout scm
++                // Workspace сохраняется между сборками, теги могли прийти раньше: подтягиваем принудительно.
++                sh 'git fetch --tags --force'
++                script {
++                    def base = latestSemverTag(sh(script: 'git tag --list', returnStdout: true))
++                    if (!base) {
++                        error 'В репозитории нет semver-тегов'
++                    }
++                    imageTag = "${base}-${env.BUILD_NUMBER}"
++                    env.IMAGE = "${imageRepo}:${imageTag}"
++                    env.IMAGE_TAG = imageTag
++                }
++                sh 'dotnet build Depot.sln -c Release --nologo'
++            }
++        }
++
++        stage('Test') {
++            failFast true
++            parallel {
++                stage('Unit') {
++                    agent { label 'dotnet-linux' }
++                    steps {
++                        checkout scm
++                        sh 'rm -rf TestResults'
++                        sh 'dotnet test tests/Depot.Api.Tests --filter "Category=Contracts" --logger "trx;LogFileName=unit.trx" --results-directory TestResults/unit'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/unit/*.trx'
++                        }
++                    }
++                }
++                stage('Integration') {
++                    agent { label 'dotnet-linux' }
++                    steps {
++                        checkout scm
++                        sh 'rm -rf TestResults'
++                        // Testcontainers поднимает Postgres через Docker на агенте.
++                        sh 'dotnet test tests/Depot.Api.Tests --filter "Category=Integration" --logger "trx;LogFileName=integration.trx" --results-directory TestResults/integration'
++                    }
++                    post {
++                        always {
++                            mstest testResultsFile: 'TestResults/integration/*.trx'
++                        }
++                    }
++                }
++            }
++        }
++
++        stage('Image') {
++            agent { label 'dotnet-linux' }
++            steps {
++                checkout scm
++                sh 'docker build -t "$IMAGE" .'
++                script {
++                    // Пуш только из main: учётка реестра не должна попадать в сборки PR, в т.ч. из форков.
++                    if (env.BRANCH_NAME == 'main') {
++                        withCredentials([usernamePassword(credentialsId: 'registry-creds', usernameVariable: 'REG_USER', passwordVariable: 'REG_PASS')]) {
++                            // Отдельный конфиг docker на время пуша: логин не остаётся на постоянном агенте.
++                            sh '''
++                                export DOCKER_CONFIG="$(mktemp -d)"
++                                trap 'rm -rf "$DOCKER_CONFIG"' EXIT
++                                echo "$REG_PASS" | docker login registry.example.com -u "$REG_USER" --password-stdin
++                                docker push "$IMAGE"
++                            '''
++                        }
++                    } else {
++                        echo 'Не main: образ собран, но не отправлен в реестр'
++                    }
++                }
++            }
++        }
++
++        stage('Deploy stage') {
++            when { branch 'main' }
++            agent { label 'dotnet-linux' }
++            steps {
++                checkout scm
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env stage'
++                }
++            }
++        }
++
++        stage('Approve prod') {
++            when { branch 'main' }
++            // Без агента: ожидание решения лида не должно держать executor.
++            agent none
++            steps {
++                // Лид отвечает иногда на следующий день; по таймауту сборка прерывается.
++                timeout(time: 72, unit: 'HOURS') {
++                    input message: "Выкатить образ ${imageTag} на prod?", ok: 'Деплой на prod'
++                }
++            }
++        }
++
++        stage('Deploy prod') {
++            when { branch 'main' }
++            agent { label 'dotnet-linux' }
++            steps {
++                checkout scm
++                withCredentials([string(credentialsId: 'deploy-token', variable: 'DEPLOY_TOKEN')]) {
++                    sh './deploy.sh --token "$DEPLOY_TOKEN" --env prod'
++                }
++            }
++        }
++    }
++
++    post {
++        always {
++            notifySlack(currentBuild.currentResult)
++        }
++    }
++}

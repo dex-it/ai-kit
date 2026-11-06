@@ -4166,23 +4166,13 @@ const SCENARIOS = [
       ['на месте none - разрыв', result.where.includes('фальсификация: решение не перечислено ревьюером: api/cfg.ts:3 - ключ конфига сменён')],
       ['поле в выходе - как у скептика', result['roots-missed'].length === 2],
     ] },
-  { name: 'R83 правило проекта не прочитано ревьюером -> разрыв с путём', track: 'review', args: reviewArgs,
-    responses: { 'ctx:subject': { ...ctxMr, conventions: ['CLAUDE.md', 'docs/review-rules.md'] }, 'review:first': { ...revMr, 'conventions-read': ['CLAUDE.md'] }, 'falsify+coverage': falOk },
+  { name: 'R84 R96 места правил - в промптах ревьюера и скептика без требования читать каждое; непрочитанное - не разрыв', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': { ...ctxMr, conventions: ['CLAUDE.md', 'docs/adr/'] }, 'review:first': { ...revMr, 'conventions-read': ['CLAUDE.md', 'docs/adr/0007-x.md#Решение'] }, 'falsify+coverage': falOk },
     expect: ({ result, calls }) => [
-      ['прочитанное - enum из поданных путей', JSON.stringify(calls.find(c => c.label === 'review:first').schema.properties['conventions-read'].items.enum) === '["CLAUDE.md","docs/review-rules.md"]'],
-      ['узлу предмета поручен поиск правил', /Правила проекта - conventions/.test(promptOf(calls, 'ctx:subject'))],
-      ['непрочитанный путь назван', result.status === 'partial' && result.where.includes('ревью: правила проекта не прочитаны: docs/review-rules.md') && !/не прочитаны: [^;]*CLAUDE/.test(result.where)],
-    ] },
-  { name: 'R85 путь правила записан ревьюером с ./ -> прочитан, разрыва нет', track: 'review', args: reviewArgs,
-    responses: { 'ctx:subject': { ...ctxMr, conventions: ['CLAUDE.md', 'docs/review-rules.md'] }, 'review:first': { ...revMr, 'conventions-read': ['./CLAUDE.md', 'docs/review-rules.md'] }, 'falsify+coverage': falOk },
-    expect: ({ result }) => [
-      ['разрыва о правилах нет', !String(result.where || '').includes('правила проекта')],
-    ] },
-  { name: 'R84 правила проекта - в промптах ревьюера и скептика; пустой перечень назван с местом поиска', track: 'review', args: reviewArgs,
-    responses: { 'ctx:subject': { ...ctxMr, conventions: ['docs/review-rules.md'] }, 'review:first': { ...revMr, 'conventions-read': ['docs/review-rules.md'] }, 'falsify+coverage': falOk },
-    expect: ({ result, calls }) => [
-      ['перечень у ревьюера и скептика', ['review:first', 'falsify+coverage'].every(l => promptOf(calls, l).includes('Правила проекта - прочитай каждое') && promptOf(calls, l).includes('- docs/review-rules.md'))],
-      ['всё прочитано - разрыва нет', !String(result.where || '').includes('правила проекта')],
+      ['узлу предмета поручен поиск мест правил, ADR - каталогом', /Правила проекта - conventions/.test(promptOf(calls, 'ctx:subject')) && /ADR - каталогом/.test(promptOf(calls, 'ctx:subject'))],
+      ['места у ревьюера и скептика: сверка по решениям, не чтение подряд', ['review:first', 'falsify+coverage'].every(l => promptOf(calls, l).includes('подряд не читай: по каждому решению правки найди задетые им правила и ADR') && promptOf(calls, l).includes('- docs/adr/'))],
+      ['прочитанное - свободный перечень, не enum', !calls.find(c => c.label === 'review:first').schema.properties['conventions-read'].items.enum],
+      ['разрыва о правилах нет', !String(result.where || '').includes('правила проекта') && !degOf(result).includes('правила проекта')],
     ] },
   { name: 'R84 правил проекта нет -> ревьюеру названо, где искали, разрыва нет', track: 'review', args: reviewArgs,
     responses: { 'ctx:subject': ctxMr, 'review:first': revMr, 'falsify+coverage': falOk },
@@ -4190,22 +4180,51 @@ const SCENARIOS = [
       ['пустой перечень назван', promptOf(calls, 'review:first').includes('Правил проекта не найдено (искали: CLAUDE.md, docs/)')],
       ['разрыва нет', !String(result.where || '').includes('правила проекта')],
     ] },
+  { name: 'R97 ревьюер прочёл часть мест правил -> разрыва нет', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': { ...ctxMr, conventions: ['CLAUDE.md', 'docs/adr/', 'docs/review-rules.md'] }, 'review:first': { ...revMr, 'conventions-read': ['CLAUDE.md'] }, 'falsify+coverage': falOk },
+    expect: ({ result }) => [
+      ['разрыва и degraded о правилах нет', result.status === 'complete' && !degOf(result).includes('правила проекта')],
+    ] },
+  { name: 'R98 каталог на head_sha -> подготовка дерева до ревьюера, команды у ревьюера и скептика', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': ctxMr, 'ctx:tree': prepTs, 'review:first': revMr, 'falsify+coverage': falOk },
+    expect: ({ result, calls }) => [
+      ['подготовка после предмета и до ревьюера', labelsOf(calls).indexOf('ctx:tree') === labelsOf(calls).indexOf('ctx:subject') + 1 && labelsOf(calls).indexOf('ctx:tree') < labelsOf(calls).indexOf('review:first')],
+      ['узел подготовки - haiku с шагами подготовки', calls.find(c => c.label === 'ctx:tree').model === 'haiku' && /выполни её в рабочем каталоге/.test(promptOf(calls, 'ctx:tree'))],
+      ['уже стоящие зависимости - не готовить', /Если зависимости уже стоят и согласованы с манифестом, подготовка не нужна/.test(promptOf(calls, 'ctx:tree'))],
+      ['команды и запрет повторной установки у ревьюера и скептика', ['review:first', 'falsify+coverage'].every(l => promptOf(calls, l).includes('Сборка: tsc; тесты: npm test; зависимости поставлены (npm ci) - установку не повторяй'))],
+      ['замер подготовки в trail, итог complete', result.status === 'complete' && result.trail.some(e => e.step === '1-tree' && e.prepare === 'done')],
+    ] },
+  ...[['провал установки', prepFailed, 'подготовка дерева: dotnet restore: NU1101 фид недоступен'], ['узел без выхода', null, 'подготовка дерева: узел подготовки дерева не вернул выход'], ['blocked', { ...prepOk, status: 'blocked', missing: 'нет доступа к фиду' }, 'подготовка дерева: нет доступа к фиду']].map(([what, prep, line]) => (
+    { name: `R99 подготовка дерева: ${what} -> ревью идёт, строка degraded, ревьюеру сказано`, track: 'review', args: reviewArgs,
+      responses: { 'ctx:subject': ctxMr, 'ctx:tree': prep, 'review:first': revMr, 'falsify+coverage': falOk },
+      expect: ({ result, calls }) => [
+        ['ревью идёт, итог не держит', labelsOf(calls).includes('review:first') && result.status === 'complete'],
+        ['строка degraded с причиной', degOf(result).includes(line)],
+        ['ревьюеру сказано, что дерево не подготовлено', promptOf(calls, 'review:first').includes('Дерево к сборке не подготовлено.')],
+        ['причины провала в промптах судей нет', ['review:first', 'falsify+coverage'].every(l => !promptOf(calls, l).includes(line.replace('подготовка дерева: ', '')))],
+      ] })),
+  { name: 'R100 каталог не на head_sha -> подготовка не вызывается', track: 'review', args: reviewArgs,
+    responses: { 'ctx:subject': { ...ctxMr, at_head: false, missing: 'HEAD на ccc' }, 'review:first': revMr, 'falsify+coverage': falOk },
+    expect: ({ calls }) => [
+      ['узла подготовки нет', !labelsOf(calls).includes('ctx:tree')],
+      ['ревьюеру о сборке ничего', !/Сборка: |Дерево к сборке/.test(promptOf(calls, 'review:first'))],
+    ] },
   ...[['feature', { 'ctx:R-I': ctxOk }, ['F141', 'F142', 'F143', 'F144']], ['bugfix', { reproduce: reproOk }, ['B199', 'B200', 'B201', 'B202', 'B203']]].flatMap(([track, head, [nGap, nText, nAxis, nWide, nCheck]]) => {
     const args = track === 'feature' ? featureArgs : bugfixArgs
     const base = { ...head, 'fix:1': fixOk, 'verify:после попытки 1': green }
     const side = track === 'feature' ? 'саморевью feature' : 'саморевью bugfix'
     return [
-      { name: `${nGap} ${side}: правило проекта не прочитано саморевьюером -> разрыв с путём`, track, args,
-        responses: { ...base, 'hunks:первое': { ...hunksAt(), conventions: ['CLAUDE.md', 'docs/review-rules.md'] }, 'self-review:первое': { ...revClean, 'conventions-read': ['CLAUDE.md'] } },
+      { name: `${nGap} ${side}: саморевьюер прочёл часть мест правил -> разрыва нет, прочитанное - свободный перечень`, track, args,
+        responses: { ...base, 'hunks:первое': { ...hunksAt(), conventions: ['CLAUDE.md', 'docs/adr/'] }, 'self-review:первое': { ...revClean, 'conventions-read': ['CLAUDE.md'] } },
         expect: ({ result, calls }) => [
-          ['снимку поручен поиск правил', /Правила проекта - conventions/.test(promptOf(calls, 'hunks:первое'))],
-          ['прочитанное - enum из поданных путей', JSON.stringify(calls.find(c => c.label === 'self-review:первое').schema.properties['conventions-read'].items.enum) === '["CLAUDE.md","docs/review-rules.md"]'],
-          ['непрочитанный путь назван', result.status === 'complete' && degOf(result).includes('саморевью: правила проекта не прочитаны: docs/review-rules.md') && !/не прочитаны: [^;]*CLAUDE/.test(degOf(result))],
+          ['снимку поручен поиск мест правил, ADR - каталогом', /Правила проекта - conventions/.test(promptOf(calls, 'hunks:первое')) && /ADR - каталогом/.test(promptOf(calls, 'hunks:первое'))],
+          ['прочитанное - не enum', !calls.find(c => c.label === 'self-review:первое').schema.properties['conventions-read'].items.enum],
+          ['разрыва нет', result.status === 'complete' && !degOf(result).includes('правила проекта')],
         ] },
-      { name: `${nText} ${side}: правила проекта - в промптах саморевьюера и скептика, всё прочитано -> разрыва нет`, track, args,
-        responses: { ...base, 'hunks:первое': { ...hunksAt(), conventions: ['docs/review-rules.md'] }, 'self-review:первое': { ...revClean, 'conventions-read': ['docs/review-rules.md'] } },
+      { name: `${nText} ${side}: места правил - в промптах саморевьюера и скептика, сверка по решениям`, track, args,
+        responses: { ...base, 'hunks:первое': { ...hunksAt(), conventions: ['docs/adr/'] }, 'self-review:первое': { ...revClean, 'conventions-read': ['docs/adr/0001-a.md'] } },
         expect: ({ result, calls }) => [
-          ['перечень у саморевьюера и скептика', ['self-review:первое', 'falsify:первое'].every(l => promptOf(calls, l).includes('Правила проекта - прочитай каждое') && promptOf(calls, l).includes('- docs/review-rules.md'))],
+          ['места у саморевьюера и скептика', ['self-review:первое', 'falsify:первое'].every(l => promptOf(calls, l).includes('подряд не читай: по каждому решению правки найди задетые им правила и ADR') && promptOf(calls, l).includes('- docs/adr/'))],
           ['разрыва нет', result.status === 'complete'],
         ] },
       { name: `${nAxis} ${side}: ось без записи сверки скептика и ось, опровергнутая без находки -> разрыв с именами`, track, args,
@@ -4566,6 +4585,7 @@ const SCENARIOS = [
         ['поля скелетника', fields('scaffold', 'scaffolder')],
         ['скелетник: запись без замены, без model', agentTools('scaffolder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('scaffolder'))],
         ['скелетник: baseline по норме, стек по реестру, smoke-тест, лок, свой трейлер, без бизнес-кода и слоёв', ['`dex-skill-project-baseline:project-baseline`', '`dex-skill-stack-registry:stack-registry`', 'smoke-тест', 'лок-файл', 'трейлером `Dex-Auto-Onboard: scaffold`', 'Бизнес-код, архитектурный стиль и разбиение на слои'].every(t => agentBody('scaffolder').includes(t))],
+        ['составитель: карта - только невидимое из имени и манифеста, запреты - только отслеживаемые git', ['корень корпуса - всегда', 'когда назначение не видно из\n     имени и манифеста', '`guards` - путь, который `git ls-files -- <путь>` находит'].every(t => agentBody('onboarder').includes(t))],
         ['составитель: карта, правила - документы-нормы, запреты по улике; правил из кода не выводит', ['`map`', '`rules`', '`guards`', 'Правило из кода не выводишь'].every(t => agentBody('onboarder').includes(t))],
         ['предмет входа - блок в обоих файлах', ['onboarder', 'corpus-checker'].every(n => agentBody(n).includes('<!-- >>> shared: onboard-subject -->'))],
         ['составитель: запись без замены продукта', agentTools('onboarder') === 'Bash,Edit,Glob,Grep,Read,Skill,Write' && !/^(model|effort):/m.test(frontmatter('onboarder'))],
@@ -4590,7 +4610,7 @@ const SCENARIOS = [
         ['стек - язык либо рантайм, фреймворком тоже; то же у скелетника', cmd.includes('язык либо рантайм, названный в описании прямо либо фреймворком') && readFileSync(join(TRACKS, '..', 'agents', 'scaffolder.md'), 'utf8').includes('не задаёт язык либо рантайм ни прямо, ни фреймворком')],
         ['незелёный скелет откатывается до прочих шагов', cmd.includes('Возврат несёт `unverified` - `git revert` этого коммита до прочих\nшагов')],
         ['трек получает стек только пустым и каталог скриптов', cmd.includes('`{cwd, brief, stack, scripts}`') && cmd.includes('`stack` - пустому проекту со стеком') && cmd.includes('`${CLAUDE_PLUGIN_ROOT}/hooks/scripts`')],
-        ['карта, правила, запреты; нет правил - сбор свода предложен; путь сверен с деревом', ['`## Карта`', '`## Правила`', '`## Запреты`', '`/dex-rulebook-miner:rulebook`', 'чей путь не найден `git ls-files`'].every(t => cmd.includes(t))],
+        ['карта, правила, запреты; нет правил - сбор свода предложен; путь сверен с деревом', ['`## Карта`', '`## Правила`', '`## Запреты`', '`/dex-rulebook-miner:rulebook`', 'чей путь не найден `git ls-files` (у каталога `git ls-files -- <каталог>` пуст)'].every(t => cmd.includes(t))],
         ['готовность по осям, секреты и размер CLAUDE.md, в непустом ничего не заводится', ['**Готовность.**', '`есть` либо `нет` с тем, что\nсделать', 'по перечню сам ничего не меняешь', '`.env`', 'не длиннее 200 строк'].every(t => cmd.includes(t))],
         ['маркеры: пара не ровно одна - блок не пишется, причина в выход', cmd.includes('нет - блок дописываешь в конец') && cmd.includes('Маркер есть, а\n   пара маркеров не ровно одна - блок не пишешь') && cmd.includes('маркер в код-блоке не считается')],
         ['после остановки либо отката - git status --porcelain и что удалить', cmd.includes('`git status --porcelain` и назови оператору файлы, которые удалить') && readFileSync(join(TRACKS, '..', 'agents', 'scaffolder.md'), 'utf8').includes('оставленные неотслеженные файлы')],
@@ -4598,10 +4618,10 @@ const SCENARIOS = [
         ['коммит CLAUDE.md своим трейлером', cmd.includes('`Dex-Auto-Onboard: flow`')],
         ['приёмка: отклонить - revert коммитов вызова, скелета тоже', cmd.includes('принять | отклонить') && cmd.includes('у вызова есть неоткаченный коммит - трека, скелета либо `CLAUDE.md`') && cmd.includes('`git revert` каждого коммита этого\nвызова от нового к старому')],
         ['правил из кода не выводит, свода не собирает', cmd.includes('правил проекта из кода не\nвыводишь и свода не собираешь')],
-        ['шаблон: цикл goal -> auto -> фиксация -> MR', ['`/dex-auto:goal', '`/dex-auto:auto TASK`', 'Фиксация истины', '`/dex-auto:auto TASK --pr`', '`продолжить`', '`.docs_layout`'].every(t => flow.includes(t))],
+        ['шаблон: только невыводимое - корпус по раскладке и worktree на параллельную цель, команды цикла несут их описания', ['`.docs_layout`', 'Цель параллельно другой - свой worktree'].every(t => flow.includes(t)) && !['`/dex-auto:goal', '`/dex-auto:auto', '`продолжить`'].some(t => flow.includes(t))],
         ['спека: пустой проект - стек только из описания, свод предлагается только непустому', ['стек - только из описания, не назван - скелета нет', 'непустому проекту команда предлагает собрать', 'у непустого проекта и о\n  его сборке'].every(t => readFileSync(join(TRACKS, '..', '..', 'docs', 'tracks', 'onboard.md'), 'utf8').includes(t))],
         ['шаблон: без шагов внутри треков', !['проектирование', 'воспроизведение', 'саморевью'].some(t => flow.includes(t))],
-        ['шаблон: тезис Требования -> Разработка -> Фиксация истины, шаг - трек', ['**Требования -> Разработка -> Фиксация истины**', 'каждый шаг - трек dex-auto', '1. **Требования** - `/dex-auto:goal', '2. **Разработка** - `/dex-auto:auto TASK`', '3. **Фиксация истины** - идёт сама'].every(t => flow.includes(t))],
+        ['шаблон: тезис Требования -> Разработка -> Фиксация истины, шаг - трек', ['**Требования -> Разработка -> Фиксация истины**', 'каждый шаг - трек dex-auto'].every(t => flow.includes(t))],
       ]
     } },
   { name: 'O16 пустой проект: скелетник, верификатор по verify.py, составитель со стеком и коммитом скелета, сверщик без суда скелета; complete (T3, T6, T7, T11, T16)', track: 'onboard', args: scaffoldArgs,
@@ -4685,9 +4705,9 @@ for (const s of SCENARIOS.filter(s => ARMED.test(s.name))) {
   s.args = { trail: '- {"step":1}', ...(s.track === 'feature' ? { ctx: JSON.stringify(ctxOk) } : { repro: JSON.stringify(reproOk) }), ...s.args, resume: true, open_findings: JSON.stringify([...JSON.parse(s.args.open_findings || '[]'), LEDGER_P1]) }
   s.responses = Object.fromEntries(Object.entries(s.responses).map(([k, v]) => [k, /^self-review:/.test(k) ? arm(v) : v]))
 }
-// Узел подготовки дерева - фон любого сценария feature / bugfix, а не его предмет: ответ по
+// Узел подготовки дерева - фон любого сценария feature / bugfix / review, а не его предмет: ответ по
 // умолчанию задан здесь, сценарий о самой подготовке перекрывает его своим ключом 'ctx:tree'.
-const DEFAULT_TREE = { feature: prepOk, bugfix: prepTs }
+const DEFAULT_TREE = { feature: prepOk, bugfix: prepTs, review: prepTs }
 // База до правок, решение проектировщика (feature) и верификация возобновления - тот же фон: сценарий о них перекрывает свой ключ.
 // Возобновление по умолчанию красное с коммитами трека: кодер вызывается, проектировщик - нет (T7a, T7b).
 const DEFAULT_BASE = { 'verify:база': baseGreen, design: designOk, 'verify:возобновление': red }

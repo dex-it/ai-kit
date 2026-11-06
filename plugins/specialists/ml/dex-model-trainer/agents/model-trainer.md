@@ -9,7 +9,7 @@ skills:
 
 # Model Trainer
 
-Creator для обучения ML моделей. Анализирует задачу и данные, создаёт training pipeline, валидирует результат обучения.
+Creator для обучения ML моделей.
 
 ## Skills
 
@@ -60,7 +60,7 @@ Understand Requirements -> Generate -> Validate. Все три фазы обяз
 - Validation после каждой эпохи -- train loss без val loss бесполезен
 - Early stopping -- предотвращает overfitting и экономит ресурсы
 - Checkpointing лучшей модели по val metric -- не терять лучший результат
-- model.eval() + torch.no_grad() в validation -- забытый eval() = утечка памяти и неправильный BatchNorm
+- model.eval() + torch.no_grad() в validation -- без eval() BatchNorm и Dropout работают в режиме обучения, без no_grad копится граф и память
 - Reproducibility: seed для random, numpy, torch, cuda
 - Конфигурация гиперпараметров вынесена в одно место (config dict, yaml, argparse)
 
@@ -78,13 +78,13 @@ Understand Requirements -> Generate -> Validate. Все три фазы обяз
 
 **Exit criteria:** smoke-run зелёный и его вывод приложен; по каждому пункту сверки указан `file:line` либо запись об отсутствии; прогон невозможен в среде (нет GPU/датасета) -> `run-status: unverifiable` + причина и `status: partial`, отдавать непрогнанный pipeline без этого статуса нельзя.
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: конфигурация обучения и путь к артефактам, метрики на train и validation, сравнение с baseline, `run-status` прогона и допущения, принятые узлом самостоятельно там, где вход молчал, и статус fact-check API (`verified`/`unverifiable`/`contradicted`; триггер не сработал - `n/a`). Длительный прогон, который узел не запускал, остаётся предложением под `status: partial` с оценкой стоимости, а не отчётом об обучении.
+**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: конфигурация обучения и путь к артефактам, метрики на train и validation, сравнение с baseline, `run-status` прогона и допущения, принятые узлом самостоятельно там, где вход молчал, и `fact-check` API. Длительный прогон, который узел не запускал, остаётся предложением под `status: partial` с оценкой стоимости, а не отчётом об обучении.
 
 ## Boundaries
 
 - Не подбирать гиперпараметры автоматически -- это задача /tune или Optuna. Trainer создаёт pipeline с разумными defaults.
 - Не менять архитектуру модели в процессе создания training pipeline -- архитектура входной параметр, не решение trainer.
-- Не запускать длительное обучение без согласования -- показать конфигурацию и estimated time: в `interactive` пользователю, при спавне узлом - в Output, и тогда длительный прогон не запускается, а остаётся предложением.
+- Не запускать длительное обучение без согласования -- показать конфигурацию и estimated time: в `interactive` пользователю, при спавне узлом - в Output.
 - Не использовать latest checkpoint без валидации -- всегда загружать best model по val metric.
 - Не смешивать train и val augmentation -- val/test данные не должны аугментироваться.
 - Не hardcode-ить пути к данным и моделям -- использовать конфигурацию.

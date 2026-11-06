@@ -1,0 +1,50 @@
+[Read] <run>/discipline/SKILL-binary-inspection.md
+[Read] <run>/discipline/SKILL-core-dumps.md
+[Read] <run>/discipline/SKILL-managed-debug.md
+[Read] <run>/discipline/SKILL-native-debug.md
+[Read] <run>/discipline/SKILL-perf-profiling.md
+[Read] <run>/discipline/SKILL-syscall-tracing.md
+docker exec <ctr> sh -c 'ls -la /work /work/dumps /work/src; which dotnet-dump gdb lldb; ls ~/.dotnet/tools 2>/dev/null'
+cd <lab>; cat -n src/Program.cs; ls -la logs app; docker exec <ctr> sh -c 'cd /work && /root/.dotnet/tools/dotnet-dump analyze dumps/orders-worker.dmp -c "pe -lines" -c "clrthreads" -c "exit" 2>&1 | head -60'
+docker exec <ctr> sh -c 'cd /work && /root/.dotnet/tools/dotnet-dump analyze dumps/orders-worker.dmp -c "setthread 5" -c "pe -lines" -c "clrstack" -c "dumpheap -type NativeSlab -stat" -c "dumpheap -type NativeSlab" -c "exit" 2>&1 | head -70; cat /work/app/OrdersWorker.runtimeconfig.json'
+docker exec <ctr> sh -c 'cd /work && /root/.dotnet/tools/dotnet-dump analyze dumps/orders-worker.dmp -c "dumpobj fffc8e809250" -c "dumpobj fffc8e809508" -c "gcroot fffc8e809508" -c "exit" 2>&1 | head -40'
+cat > <lab>/REPORT.md <<'EOF'
+# REPORT: падение orders-worker
+
+## Симптом
+Процесс упал ночью, лог потерян. В дампе /work/dumps/orders-worker.dmp необработанное `System.InvalidOperationException: slab 28 already released` на потоке финализатора (поток 5, OSID 0x10). Режим запуска по стеку главного потока — `Modes.FinCrash()`.
+
+## Причина
+Двойное освобождение: `NativeSlab` освобождается дважды. Первый раз явно через `using` → `Dispose()` → `Release()` (src/Program.cs:79, 154). Второй раз его же вызывает финализатор `~NativeSlab() => Release()` (src/Program.cs:155). Повторный `Release()` бросает `InvalidOperationException` (src/Program.cs:151). Исключение вылетает из финализатора, его никто не перехватывает, и среда выполнения аварийно завершает процесс. В `Dispose()` нет `GC.SuppressFinalize(this)`, а `Release()` не идемпотентен.
+
+## Улики
+Команды выполнялись внутри контейнера: `dotnet-dump analyze /work/dumps/orders-worker.dmp -c ...`
+
+1. `clrthreads` — исключение на потоке финализатора:
+```
+5  2  10 0000AAAB0DB202C0  21220 Preemptive ... (Finalizer) System.InvalidOperationException 0000fffc8e0015a8
+```
+2. `setthread 5`, `pe -lines`:
+```
+Exception type:   System.InvalidOperationException
+Message:          slab 28 already released
+OrdersWorker.dll!NativeSlab.Release()+0x124 [Program.cs @ 151]
+OrdersWorker.dll!NativeSlab.Finalize()+0x28 [Program.cs @ 155]
+```
+3. `dumpheap -type NativeSlab -stat`:
+```
+ffff7423bc48    30       720 NativeSlab
+```
+Все 30 объектов (i = 0..29 из цикла в src/Program.cs:77) живы в куче к моменту падения.
+4. `dumpobj fffc8e809250` и `dumpobj fffc8e809508` (первый и последний объект): `_id` 0 и 29, у обоих `_released = 1`. Значит, к моменту вызова финализатора они уже освобождены через `Dispose()`.
+5. `gcroot fffc8e809508` — объект ещё достижим из кадра `Modes.FinCrash()` потока b (главный). Падение пришло из вызова `GC.Collect()` / `GC.WaitForPendingFinalizers()` (src/Program.cs:82-83).
+
+Оговорка: в дампе виден только кадр `slab 28`. Остальные 29 объектов находятся в том же состоянии (`_released = 1` проверено на первом и последнем), поэтому падение не зависит от конкретного номера. Символы взяты из OrdersWorker.pdb (пути `/tmp/src/orders-worker/Program.cs` соответствуют src/Program.cs).
+
+## Что предлагаю
+Код не правился, это предложения для разработчиков:
+1. Сделать `Release()` идемпотентным: при `_released == true` выходить без исключения.
+2. В `Dispose()` вызывать `GC.SuppressFinalize(this)` (стандартный dispose-pattern: `Dispose(bool disposing)`).
+3. Никогда не бросать исключения из финализатора. Если финализатор нужен как страховка для неуправляемого ресурса, он должен проверять флаг и молча завершаться.
+4. Для будущих инцидентов: включить сохранение лога на постоянный том (в /work/logs пусто) и оставить создание дампов через `DOTNET_DbgEnableMiniDump`.
+EOF

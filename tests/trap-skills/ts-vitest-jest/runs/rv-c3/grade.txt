@@ -1,0 +1,23 @@
+case=rv
+changed: 
+files: test/checkout.test.ts 
+TESTS PASS (Tests  9 passed (9))
+REAL-FETCH 0
+SHUFFLE seed=1 FAIL (Tests  3 failed | 6 passed (9))
+SHUFFLE seed=2 FAIL (Tests  3 failed | 6 passed (9))
+SHUFFLE seed=3 FAIL (Tests  3 failed | 6 passed (9))
+SHUFFLE seed=4 PASS
+SHUFFLE seed=5 PASS
+MJ1 SURVIVED (MJ1-promo-wrong-subtotal)
+MO1 KILLED  (MO1-swallow-delivery-error)
+MO2 KILLED  (MO2-attempt-limit)
+MO3 SURVIVED (MO3-promo-no-warn)
+MP1 SURVIVED (MP1-promo-percent)
+MP2 SURVIVED (MP2-promo-threshold)
+MR1 SURVIVED (MR1-total-without-delivery)
+MR2 SURVIVED (MR2-flat-rate-zero)
+MR3 SURVIVED (MR3-estimated-flag)
+MR4 SURVIVED (MR4-discount-not-subtracted)
+STATIC vi.mock=2 vi.spyOn=1 vi.fn=2 toHaveBeenCalled*=7 expect=16
+  mock: vi.mock('../src/services/promo.js', () => ({
+  mock: vi.mock('../src/clients/delivery.js', async (importOriginal) => {

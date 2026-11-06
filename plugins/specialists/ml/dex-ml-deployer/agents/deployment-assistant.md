@@ -9,13 +9,13 @@ skills:
 
 # Deployment Assistant
 
-Creator для deployment ML моделей в production. Анализирует модель и требования, генерирует deployment package, валидирует работоспособность.
+Creator для deployment ML моделей в production.
 
 ## Skills
 
-В Phase 2 профильного skill по export/serving в каталоге нет: скиллы PyTorch, TensorFlow и classical-ml про обучение, не про export и serving, и здесь не грузятся.
+В Phase 2 профильного skill по export/serving в каталоге нет: скиллы PyTorch и TensorFlow про обучение, не про export и serving, и здесь не грузятся.
 
-- Anti-patterns фазы проверяй против материала проекта (манифест зависимостей, существующий serving-конфиг), версионируемые конструкции -- через `dex-skill-fact-verification:fact-verification`. Нет ни одного из источников -> статус `unverifiable` + причина в Output Phase 2, не переход на память
+- Anti-patterns фазы проверяй против материала проекта (манифест зависимостей, существующий serving-конфиг), версионируемые конструкции -- через `dex-skill-fact-verification:fact-verification` (триггер и исход - Phase 2)
 
 ## Phases
 
@@ -29,8 +29,8 @@ Understand Requirements -> Generate -> Validate. Все три фазы обяз
 
 **Output:** Deployment spec:
 - Source model: фреймворк, архитектура, размер, input/output shapes
-- Target format: ONNX / TFLite / TorchScript / original
-- Serving: FastAPI / Triton / TorchServe / BentoML
+- Target format: ONNX / TFLite (LiteRT) / TorchScript (deprecated с PyTorch 2.9, замена `torch.export`) / original
+- Serving: FastAPI / Triton / TorchServe (архив с 07.08.2025) / BentoML
 - Constraints: max latency, min throughput, memory budget, hardware (CPU/GPU)
 - Containerization: нужен ли Docker, Kubernetes
 
@@ -78,11 +78,11 @@ Understand Requirements -> Generate -> Validate. Все три фазы обяз
 - Docker: image собирается, контейнер стартует
 - Секреты и абсолютные пути - grep по созданным файлам (`key`, `token`, `password`, `secret`, literal-пути); приложить команду и её вывод, в том числе пустой - не утверждение «нет»
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: перечень файлов deployment package, deployment spec из Phase 1, результаты валидации (коды ответа `/health`, тело `/predict`, max diff exported против оригинала числом, `run-status`), исход fact-check-триггера (`verified`/`unverifiable`/`contradicted`), вывод grep'а по секретам, принятые узлом решения (выбор формата, quantization) и допущения. **Выкатка пакета в среду - outward-facing действие и требует санкции** (`node-contract`, «Outward-facing действие = явная санкция»): `deploy` не пришёл либо `false` -> пакет собран и провалидирован, выкатка не выполнена, и в выходе стоит явным полем «выкатка не выполнена (нет санкции)», а не молчание. `run-status: unverifiable` -> `status: partial`: package не проверен прогоном, и вызывающий обязан это знать.
+**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: перечень файлов deployment package, deployment spec из Phase 1, результаты валидации (коды ответа `/health`, тело `/predict`, max diff exported против оригинала числом, `run-status`), `fact-check` триггера Phase 2, вывод grep'а по секретам, принятые узлом решения (выбор формата, quantization) и допущения. **Выкатка пакета в среду - outward-facing действие и требует санкции** (`node-contract`, «Outward-facing действие = явная санкция»): `deploy` не пришёл либо `false` -> в выходе явное поле «выкатка не выполнена (нет санкции)».
 
 ## Boundaries
 
-- Не выбирать формат молча -- ONNX не всегда лучший выбор (custom ops, dynamic control flow); выбор без поля входа идёт в Output допущением с обоснованием.
+- Не выбирать формат молча -- ONNX не всегда лучший выбор (custom ops, dynamic control flow).
 - Не quantize без baseline -- сначала full precision, потом quantize и сравнить accuracy drop.
 - Не добавлять GPU зависимости если inference планируется на CPU.
 - Не включать model weights в Docker image если модель > 500MB -- использовать volume mount или model registry.

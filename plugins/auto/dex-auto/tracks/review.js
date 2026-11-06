@@ -248,25 +248,17 @@ const hunkGap = (hunks, roots) => {
   const bare = bareHunks(hunks, roots)
   return bare.length ? `место правки без записи roots: ${bare.join(', ')}` : ''
 }
-// Правила проекта ищет узел снимка, читает ревьюер: прочтение - поле выдачи, иначе непрочитанное правило неотличимо от соблюдённого.
+// Где лежат правила, находит узел снимка, что из них задевает правка - ревьюер: корпус ADR целиком в контекст ревьюера не входит.
 const CONVENTIONS = {
-  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы, которыми проект нормирует код и ревью; не нашёл - пусто' },
+  conventions: { type: 'array', items: { type: 'string' }, description: 'пути от корня репозитория: документы и каталоги, которыми проект нормирует код и ревью; не нашёл - пусто' },
   'conventions-searched': { type: 'string', description: 'где искал правила проекта' },
 }
-const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'пути из правил проекта во входе, прочитанные до суждения' }
-const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
+const CONVENTIONS_READ = { type: 'array', items: { type: 'string' }, description: 'прочитанные правила проекта: путь от корня репозитория, прочитанное частью - путь#раздел' }
+const conventionsAsk = 'Правила проекта - conventions: документы, предписывающие, каким быть коду и ревью: CLAUDE.md, AGENTS.md и аналоги в корне и на пути к изменённым файлам, названное ими нормой, гайды вклада и стиля, ADR - каталогом. Не правила: конфиги сборки и линтера, заметки, которые проект нормой не называет. conventions-searched - где искал.'
 const conventionsOf = (x) => x && x.status !== 'blocked' ? x.conventions || [] : []
-// Прочитанное называется путём из поданного перечня: свободную строку разведка и ревьюер пишут разной формой, и прочитанное правило числится непрочитанным.
-const conventionsRead = (x) => conventionsOf(x).length ? { ...CONVENTIONS_READ, items: { type: 'string', enum: [...new Set(conventionsOf(x))] } } : CONVENTIONS_READ
 const conventionsText = (x) => !x || x.status === 'blocked' ? '' : conventionsOf(x).length
-  ? `\nПравила проекта - прочитай каждое до суждения: нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
+  ? `\nПравила проекта лежат здесь - подряд не читай: по каждому решению правки найди задетые им правила и ADR и сверяйся с ними по ходу разбора; нарушение правила - находка, в evidence путь и ключ либо цитата правила; где правило расходится с отраслевой нормой о форме кода, судит правило:\n${conventionsOf(x).map(c => `- ${c}`).join('\n')}`
   : `\nПравил проекта не найдено (искали: ${x['conventions-searched'] || 'не названо'}).`
-const conventionsGap = (x, rev) => {
-  const path = (c) => String(c).trim().replace(/^\.\//, '')
-  const read = ((rev && rev['conventions-read']) || []).map(path)
-  const unread = conventionsOf(x).filter(c => !read.includes(path(c)))
-  return unread.length ? `правила проекта не прочитаны: ${unread.join(', ')}` : ''
-}
 const axesText = (axes) => (axes || []).map(a => `- ${a.name}: ${a.outcome}${a.checked ? ` - ${a.checked}` : ''}`).join('\n') || '- не названы'
 const rootsText = (roots) => (roots || []).map(x => `- ${x.anchor}: ${x.decision} - корень: ${x.root} - ${x.verdict}${x.finding ? ` (находка ${x.finding})` : ''}${x.evidence ? ` - ${x.evidence}` : ''}`).join('\n') || '- не названы'
 const FALSIFY = { type: 'object', properties: {
@@ -282,6 +274,26 @@ const FALSIFY = { type: 'object', properties: {
   missing: { type: 'string' },
 }, required: ['status', 'confirmed', 'dropped', 'coverage', 'axes-check', 'roots-check', 'roots-missed', 'review-verdict', 'prior', 'missing'] }
 // <<< shared: falsify
+// >>> shared: prep-steps
+// Техконтекст выводится из манифеста, а не из цели: его отдаёт дешёвый узел подготовки, следующие узлы получают команды готовыми.
+const PREP = { type: 'object', properties: {
+  status: STATUS,
+  stack: { type: 'string', description: 'идентификатор стека по реестру (Skill dex-skill-stack-registry:stack-registry); вне реестра - "other"' },
+  stack_basis: { type: 'string', description: 'манифест, из которого выведен стек (путь:строка); манифеста нет - чем определено иначе' },
+  test_cmd: { type: 'string', description: 'команда прогона тестов; нет тестов - пустая строка' },
+  report_cmd: { type: 'string', description: 'test_cmd со встроенным флагом раннера, пишущим отчёт JUnit XML либо TRX в $DEX_AUTO_JUNIT_DIR; такой флаг не известен наверняка - пустая строка' },
+  build_cmd: { type: 'string', description: 'команда сборки/типизации; нет - пустая строка' },
+  prepare_cmd: { type: 'string', description: 'команда подготовки дерева до сборки; подготовка не нужна - пустая строка' },
+  // Enum: «дерево готово» и «готовить нечего» ведут к разному промпту дальше, а провал установки пустой строкой неотличим от успеха до первой сборки.
+  'prepare-status': { type: 'string', enum: ['done', 'not-needed', 'failed'], description: 'done - команда вернула 0; not-needed - prepare_cmd пуст; failed - команда вернула не 0 либо не запущена' },
+  prepare_log: { type: 'string', description: 'при done - код возврата, чем подтверждено и возвращённые пути; при failed - команда и последние строки вывода; при not-needed - почему готовить нечего' },
+  missing: { type: 'string', description: 'при blocked - чего не хватает и у кого это есть' },
+}, required: ['status', 'stack', 'stack_basis', 'test_cmd', 'report_cmd', 'build_cmd', 'prepare_cmd', 'prepare-status', 'prepare_log', 'missing'] }
+const PREP_STEPS = `1. Стек - идентификатор по реестру: вызови Skill dex-skill-stack-registry:stack-registry и сопоставь с манифестом проекта; вне реестра - "other". Манифест, из которого вывел, назови в stack_basis - догадка по именам файлов не принимается. По тому же манифесту назови команды сборки и тестов.
+2. report_cmd - test_cmd, дополненная встроенным флагом раннера, который пишет отчёт JUnit XML либо TRX в каталог "$DEX_AUTO_JUNIT_DIR" (переменную задаёт верификатор), например: dotnet test - --logger trx --results-directory "$DEX_AUTO_JUNIT_DIR"; pytest - --junitxml="$DEX_AUTO_JUNIT_DIR/r.xml"; node --test - --test-reporter=junit --test-reporter-destination="$DEX_AUTO_JUNIT_DIR/r.xml"; vitest - --reporter=junit --outputFile="$DEX_AUTO_JUNIT_DIR/r.xml". Флаг не известен наверняка, требует пакета либо test_cmd - обёртка (npm test, make) без проброса аргументов - пусто.
+3. Подготовка: проекту до сборки нужны зависимости, которых сборка сама не ставит, либо шаг подготовки, названный проектом, - назови команду и выполни её в рабочем каталоге; не нужны - prepare_cmd пуст, prepare-status: not-needed. Строки git status --porcelain, которых до команды не было, верни: ?? - удали путь, прочие - git checkout -- путь. prepare-status: done - команда вернула 0, иначе failed.
+Код не правь, сборку и тесты не гоняй.`
+// <<< shared: prep-steps
 const checkGap = (rev, fal) => {
   const found = [...(fal.confirmed || []), ...(fal.prior || [])]
   return [silentGap(rev.findings, fal), axesCheckGap(rev.axes, fal['axes-check'], found), rootsCheckGap(rev.roots, fal['roots-check'], found), rootsMissedGap(fal['roots-missed'], rev.roots)].filter(Boolean).join('; ')
@@ -327,14 +339,24 @@ const ctx = await node('сбор предмета ревью', `${HEAD}Шаг 1:
   { label: 'ctx:subject', phase: 'Context', effort: 'low', schema: CTX })
 trail.push({ step: 1, doer: 'general-purpose', status: ctx ? ctx.status : 'null' })
 if (!ctx || ctx.status === 'blocked') return outcome('blocked', 'Context', lack(ctx, 'узел контекста'), { node_failure: true })
+// Ревью идёт в свежем worktree без зависимостей: без подготовки ревьюер не соберёт проект и не прогонит тесты (T2a).
+// Каталог не на head_sha - код правки читают через git show либо хостинг, и готовить к прогону нечего.
+const PREP_HEAD = `mode: ${A.mode || 'autonomous'}\nзадача (${A.task}): подготовить рабочий каталог ${A.cwd} к сборке и тестам ревью - и только это. Процесс уже в нём; ветку и ревизию не переключай, коммитов не делай. Если зависимости уже стоят и согласованы с манифестом, подготовка не нужна.\n`
+const prep = ctx.at_head ? await node('подготовка дерева', `${PREP_HEAD}${PREP_STEPS}`, { label: 'ctx:tree', phase: 'Context', model: 'haiku', schema: PREP }) : null
+if (ctx.at_head) trail.push({ step: '1-tree', doer: 'general-purpose', status: prep ? prep.status : 'null', prepare: prep ? prep['prepare-status'] : null })
+const prepLack = !ctx.at_head ? '' : !prep || prep.status === 'blocked' ? lack(prep, 'узел подготовки дерева') : prep['prepare-status'] === 'failed' ? prep.prepare_log || 'причина не названа' : ''
+if (prepLack) degraded.push(`подготовка дерева: ${prepLack}`)
+// Вывод установки - текст из скриптов правки: в промпты судей не идёт, оператору - строкой degraded.
+const TREE_PREP = !ctx.at_head ? '' : prepLack ? ' Дерево к сборке не подготовлено.'
+  : ` Сборка: ${prep.build_cmd || 'нет'}; тесты: ${prep.test_cmd || 'нет'}${prep['prepare-status'] === 'done' ? `; зависимости поставлены (${prep.prepare_cmd}) - установку не повторяй` : ''}.`
 
 phase('Review')
 // Где читать код правки, знают оба узла суждения: скептик, читающий диск не на head_sha, сбросил бы находки о правке.
 const TREE_AT = `${ctx.at_head ? `Каталог ${A.cwd} на ${ctx.head_sha}, код читай с диска` : `Каталог ${A.cwd} не на ${ctx.head_sha} (${ctx.missing || 'причина не названа'}): код правки читай ${LOCAL ? `через git show ${ctx.head_sha}` : 'через канал хостинга на этой ревизии'}`}; ревизию не переключай - нужна другая, читай её через git show.`
-const common = `${LOCAL ? `Своя ветка против ${A.base || 'ветки по умолчанию у remote'}` : `MR/PR: ${A.mr}`}, BASE_SHA ${ctx.base_sha}, HEAD_SHA ${ctx.head_sha}, файлов ${ctx.files.length}. intent: ${ctx.intent}. ${LOCAL ? '' : 'publish: false - ноль записей в MR. '}${TREE_AT}${conventionsText(ctx)}`
+const common = `${LOCAL ? `Своя ветка против ${A.base || 'ветки по умолчанию у remote'}` : `MR/PR: ${A.mr}`}, BASE_SHA ${ctx.base_sha}, HEAD_SHA ${ctx.head_sha}, файлов ${ctx.files.length}. intent: ${ctx.intent}. ${LOCAL ? '' : 'publish: false - ноль записей в MR. '}${TREE_AT}${TREE_PREP}${conventionsText(ctx)}`
 const LEDGER_TEXT = LEDGER.length ? `\nПрежние находки из ledger - по каждой запись в prior с её id, статус с доказательством; находка перечня идёт только в prior, в findings - то, чего в перечне нет:\n${LEDGER.map(priorLine).join('\n')}` : ''
 const rev = await own(DELTA ? 'ре-ревьюер дельты' : LOCAL ? 'ревьюер ветки' : 'ревьюер MR', `${HEAD}Шаг 2: ${DELTA ? `ре-ревью дельты: LAST_REVIEW_SHA ${A.last_review_sha}, статус прежних находок, новые находки только в дельте` : `первичное ревью правки ${ctx.base_sha}..${ctx.head_sha}`}. ${common}${DELTA && !LOCAL ? ' Прежняя находка из тредов MR, которой нет в перечне ledger, - в threads, не в prior.' : ''}${hunkList(ctx.hunks)}${LEDGER_TEXT}`,
-  { label: DELTA ? 'review:delta' : 'review:first', phase: 'Review', schema: { type: 'object', properties: { ...REVIEW.properties, 'conventions-read': conventionsRead(ctx) }, required: [...REVIEW.required] } }, NODE.reviewer)
+  { label: DELTA ? 'review:delta' : 'review:first', phase: 'Review', schema: REVIEW }, NODE.reviewer)
 loops.review = 1
 trail.push({ step: 2, doer: NODE.reviewer.agentType, status: rev ? rev.status : 'null', findings: rev ? rev.findings.length : -1 })
 if (!rev || rev.status === 'blocked') return outcome('blocked', 'Review', lack(rev, 'узел ревью'), { ctx, node_failure: true })
@@ -395,7 +417,6 @@ if (rev.status !== 'complete') issues.push(`ревью не завершено: 
 if (axesGap(axes, rev.findings)) issues.push(`ревью: ${axesGap(axes, rev.findings)}`)
 if (rootsGap(rev.roots, [...rev.findings, ...(rev.prior || []), ...(rev.threads || [])])) issues.push(`ревью: ${rootsGap(rev.roots, [...rev.findings, ...(rev.prior || []), ...(rev.threads || [])])}`)
 if (hunkGap(ctx.hunks, rev.roots)) issues.push(`ревью: ${hunkGap(ctx.hunks, rev.roots)}`)
-if (conventionsGap(ctx, rev)) issues.push(`ревью: ${conventionsGap(ctx, rev)}`)
 if (fal.status !== 'complete') issues.push(`фальсификация не завершена: ${fal.missing || 'узел не назвал нехватку'}`)
 if (checkGap(rev, fal)) issues.push(`фальсификация: ${checkGap(rev, fal)}`)
 if (unsettled.length) issues.push(`статус прежних находок не сверен скептиком: ${unsettled.map(p => p.id).join(', ')}`)

@@ -8,3 +8,17 @@
   --sl-color-accent: #c2121a;
   --sl-color-accent-high: #7a0b10;
 }
+
+/* Схемы Mermaid: прокрутка по горизонтали вместо выхода за край на узких экранах. */
+.mermaid-diagram {
+  overflow-x: auto;
+  background: transparent;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}

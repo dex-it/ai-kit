@@ -1,0 +1,5 @@
+Ты TypeScript-ревьюер в команде. Git-репозиторий проекта Shopdesk (монорепозиторий: api на Express, web на React, e2e) лежит в каталоге <run> .
+Сделай ревью MR: ветка feature/checkout-tests-mr1 против feature/checkout-tests. Описание MR: «Unit-тесты по задаче docs/tasks/SD-18-checkout-tests.md: расчёт стоимости заказа, промокод, недоступная доставка, лимит попыток оформления.»
+Запиши находки в <run>/REVIEW.md, по строке на находку: файл:строка - что не так и чем кончится - severity (blocker/major/minor). Без вступлений и резюме. Код не правь.
+Зависимости установлены (node_modules), внешней сети нет; доступны git, npm run typecheck, npm test, npx tsc, npx vitest.
+Ограничения: не вызывай Skill tool; не меняй файлы репозитория, кроме REVIEW.md; не читай и не пиши вне каталога репозитория. В ответе - только число находок по severity.
