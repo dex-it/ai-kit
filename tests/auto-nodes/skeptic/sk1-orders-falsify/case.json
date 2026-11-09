@@ -71,6 +71,11 @@
       "checked": "правка эту ось не задевает"
     },
     {
+      "name": "reuse",
+      "outcome": "clean",
+      "checked": "возможность правки - поиск заказа пользователя: двойник getOrder src/orders.js:8; сведение к нему - closure находки security src/orders.js:14, отдельной находки reuse на том же месте нет"
+    },
+    {
       "name": "non-code",
       "outcome": "n/a",
       "checked": "правка эту ось не задевает"

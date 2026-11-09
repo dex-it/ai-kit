@@ -50,6 +50,11 @@
       "checked": "правка эту ось не задевает"
     },
     {
+      "name": "reuse",
+      "outcome": "clean",
+      "checked": "возможность правки - запуск внешней команды: в src/ кроме files.js (readdirSync) запуска процессов нет, искал child_process, exec, spawn"
+    },
+    {
       "name": "non-code",
       "outcome": "n/a",
       "checked": "правка эту ось не задевает"

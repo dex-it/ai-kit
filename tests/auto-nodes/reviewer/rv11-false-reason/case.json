@@ -1,0 +1,34 @@
+{
+  "task": "FEAT-11",
+  "kind": "feature",
+  "commit": "feat(suppliers): уведомление поставщиков о заказе",
+  "goal": "В src/suppliers/notify.js есть notifySuppliers по требованиям FEAT.md.",
+  "done": "Требования FEAT.md R1-R2 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. notifySuppliers(suppliers, mailer, order) отправляет каждому поставщику письмо вызовом mailer.send(supplier.email, { order: order.number }) и возвращает число отправленных. (FEAT.md:3)",
+    "R2. Почтовый шлюз временно недоступен (ответ 5xx либо обрыв соединения ECONNRESET, ETIMEDOUT) - письмо отправляется ещё раз, всего не больше 3 раз, с паузой 100 мс перед вторым и 200 мс перед третьим; ответ 4xx пробрасывается сразу. (FEAT.md:4)"
+  ],
+  "coder": {
+    "red-run": [
+      {
+        "test": "test/notify.test.js",
+        "status": "shown",
+        "evidence": "тестовый файл на коде до правки не загружается: нет src/suppliers/notify.js (ERR_MODULE_NOT_FOUND) - красные все тесты файла, R1-R2 в их числе; после правки зелёные"
+      }
+    ],
+    "uncovered-status": "none",
+    "uncovered": [],
+    "dependents-status": "none",
+    "dependents": []
+  },
+  "mines": [
+    {
+      "id": "M17",
+      "file": "src/suppliers/notify.js",
+      "lines": [3, 15],
+      "blocking": false,
+      "what": "свой цикл повтора с причиной в комментарии строки 3: «withRetry не даёт задать, какие ошибки повторять, а шлюзу нужен свой набор кодов». Причина ложна дважды: src/lib/retry.js:withRetry принимает retryOn, а набор gatewayDown совпадает с isTransient литерал в литерал; умолчания (3 попытки, 100 мс с удвоением) те же. Дефекта нет. Техдолг, ожидаемо P2; засчитывается находка, называющая withRetry и опровергающая причину, а не принимающая её"
+    }
+  ]
+}

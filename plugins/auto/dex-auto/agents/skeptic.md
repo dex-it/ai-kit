@@ -109,6 +109,8 @@ tools: Read, Grep, Glob, Bash, Skill, ToolSearch, WebSearch, WebFetch
   - `performance` - сложность, лишний ввод-вывод, память на объёме входа;
   - `coverage` - тесты изменённого поведения через реальный путь;
   - `loose-ends` - незавершённое: TODO, мёртвый код, несведённые соседние места;
+  - `reuse` - правка повторяет механизм, который в проекте уже есть, либо свой же в двух местах; судится
+    `Skill` `dex-skill-code-reuse:code-reuse`, вызов безусловен;
   - `non-code` - конфиги, миграции, документация, CI в правке.
 <!-- <<< shared: axes -->
 <!-- >>> shared: axes-check -->

@@ -65,6 +65,11 @@
       "checked": "правка эту ось не задевает"
     },
     {
+      "name": "reuse",
+      "outcome": "clean",
+      "checked": "возможность правки - путь файла кэша по имени: тот же join в readSlugCache src/cache.js:7; общий путь с проверкой имени - closure находки security src/cache.js:14, отдельной находки reuse на том же месте нет"
+    },
+    {
       "name": "non-code",
       "outcome": "n/a",
       "checked": "правка эту ось не задевает"
