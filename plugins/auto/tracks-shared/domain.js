@@ -51,7 +51,8 @@ const isOpen = (f) => OPEN_FINDING.includes(f.status)
 const isBlocking = (f) => f.severity === 'P0' || f.severity === 'P1'
 // Предикаты находки - docs/domain.md §2.
 // P2 правится, пока идут круги; итог держат только P0/P1 (P115).
-const holds = (f) => isOpen(f) && (isBlocking(f) || f.severity === 'P2')
+const buysFix = (f) => isBlocking(f) || f.severity === 'P2'
+const holds = (f) => isOpen(f) && buysFix(f)
 // Исход такой находки решает проба оператора, а не правка: кодер по ней покупал круг за кругом на недостижимом пути.
 const awaitsProbe = (f) => !!String(f.premise || '').trim()
 const toFix = (f) => holds(f) && !awaitsProbe(f)

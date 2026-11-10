@@ -8,7 +8,7 @@ export const meta = {
     { title: 'Context', detail: 'подготовка дерева по манифесту стека, команды сборки и тестов' },
     { title: 'Reproduce', detail: 'debugger: красный воспроизводящий тест либо прослеженный путь, первопричина, предложение фикса; продуктовый код не меняет' },
     { title: 'Fix', detail: 'кодер принимает диагноз и лечит первопричину x верификация внешним фактом, потолок 3; спор с диагнозом - к оператору, продолжение зовёт диагноста с уликой (фаза Reproduce); при возобновлении - сначала верификация' },
-    { title: 'Review', detail: 'саморевью со скептиком; находки, держащие порог, - правка с верификацией и сверка правки по её дельте; ревью одно, правок по находкам до 2' },
+    { title: 'Review', detail: 'саморевью со скептиком; находки P0-P2 - правка с верификацией и сверка правки по её дельте; ревью одно, правок по находкам до 2' },
   ],
 }
 
@@ -130,7 +130,8 @@ const isOpen = (f) => OPEN_FINDING.includes(f.status)
 const isBlocking = (f) => f.severity === 'P0' || f.severity === 'P1'
 // Предикаты находки - docs/domain.md §2.
 // P2 правится, пока идут круги; итог держат только P0/P1 (P115).
-const holds = (f) => isOpen(f) && (isBlocking(f) || f.severity === 'P2')
+const buysFix = (f) => isBlocking(f) || f.severity === 'P2'
+const holds = (f) => isOpen(f) && buysFix(f)
 // Исход такой находки решает проба оператора, а не правка: кодер по ней покупал круг за кругом на недостижимом пути.
 const awaitsProbe = (f) => !!String(f.premise || '').trim()
 const toFix = (f) => holds(f) && !awaitsProbe(f)
@@ -486,8 +487,8 @@ const doubted = (rev, listed) => listed.map(p => { const c = (rev.prior || []).f
 const falsifyOf = (tag, rev, listed, base, h) => own('скептик', `${HEAD}Шаг 3 (${tag}): фальсификация находок, исходов осей, решений и статусов прежних из саморевью; вердикт по покрытию. Объём - ${scope(base)} Код не меняй.${conventionsText(h)}\nНаходки:\n${rev.findings.map(findingLine).join('\n') || '- находок нет: только вердикт по покрытию'}${listed.length ? `\nПрежние находки - статус саморевьюера:\n${doubted(rev, listed)}` : ''}\nОси саморевьюера:\n${axesText(rev.axes)}\nРешения саморевьюера:\n${rootsText(rev.roots)}`,
   { label: `falsify:${tag}`, phase: 'Review', schema: FALSIFY }, NODE.skeptic)
 const judged = (fal) => !!fal && fal.status !== 'blocked' && !fal.skipped
-// Сверка стоит как само ревью, а без P0/P1 исход итога от неё не зависит (P115).
-const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(isBlocking)
+// Сверка стоит как само ревью; без находки, покупающей правку, исход прогона от неё не зависит (P115).
+const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(buysFix)
 const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], prior: [] }
 // В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
 const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
@@ -533,7 +534,7 @@ async function reviewLoop(t) {
   const dropped = []
   let fal = null
   if (rev && rev.status !== 'blocked') {
-    if (!needsSkeptic(rev, LEDGER)) { trail.push({ step: '3-falsify', doer: 'не куплен: P0/P1 нет', status: 'skipped' }); fal = SKIPPED }
+    if (!needsSkeptic(rev, LEDGER)) { trail.push({ step: '3-falsify', doer: 'не куплен: P0-P2 нет', status: 'skipped' }); fal = SKIPPED }
     else {
       fal = await falsifyOf('первое', rev, LEDGER, firstBase, spots)
       trail.push({ step: '3-falsify', doer: NODE.skeptic.agentType, status: fal ? fal.status : 'null', confirmed: fal ? fal.confirmed.length : -1, dropped: fal ? fal.dropped.length : -1 })
@@ -549,7 +550,7 @@ async function reviewLoop(t) {
   // Вопрос оператору (domain.md §2) едет и в выходе из цикла: иначе P2 видна только записью prior.
   const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, chk, reg, spots, fix2, ver2, dropped, offeredOnly })
   while (rev && rev.status !== 'blocked' && loops.review_fix < REVIEW_FIX_CEILING) {
-    // Не держащая порог подаётся кодеру один раз: оспоренная им осталась бы открытой и гоняла круги до потолка.
+    // Не обязательная к правке подаётся кодеру один раз: оспоренная им осталась бы открытой и гоняла круги до потолка.
     const may = reg.offers().filter(f => !offeredHere.has(f.id))
     if (!reg.fixes().length && !may.length && !red) break
     const k = ++loops.review_fix, must = reg.fixes().length > 0 || !!red
