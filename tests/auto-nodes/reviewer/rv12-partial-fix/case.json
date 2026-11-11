@@ -1,0 +1,36 @@
+{
+  "task": "BUG-12",
+  "kind": "bugfix",
+  "commit": "fix(billing): потолок запроса счёта к шлюзу",
+  "goal": "fetchInvoice не возвращается, когда платёжный шлюз принял соединение и не отвечает.",
+  "expected": "запрос счёта без ответа шлюза за 10 с обрывается ошибкой gateway: timeout (BUG.md, Контракт)",
+  "done": "fetchInvoice при молчащем шлюзе обрывается за 10 с ошибкой gateway: timeout; контракт BUG.md (R1, R2) держится; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. Запрос счёта к шлюзу, не получивший ответа за 10 с, обрывается ошибкой gateway: timeout. (BUG.md:8)",
+    "R2. Ответ шлюза в пределах 10 с обрабатывается как прежде: 2xx - тело, иначе ошибка gateway: <status>. (BUG.md:9)"
+  ],
+  "repro": {
+    "root_cause": "src/billing/invoices.js:4 - fetch к шлюзу без signal: молчащий шлюз держит промис без конца",
+    "reproduction": "fetchInvoice с fetchImpl, который не отвечает, не завершается",
+    "expected-basis": "BUG.md, раздел Контракт: R1 и R2",
+    "fix_proposal": "передать в fetch AbortSignal.timeout(10000) и перевести TimeoutError в ошибку gateway: timeout",
+    "repro_test": "test/invoices.test.js: тест «шлюз молчит - обрыв по потолку»"
+  },
+  "coder": {
+    "red-run": [{ "test": "test/invoices.test.js", "status": "shown", "evidence": "тест «шлюз молчит - обрыв по потолку» до правки красный: fetchInvoice не передаёт fetchImpl второй аргумент, заглушка падает TypeError; после правки зелёный" }],
+    "uncovered-status": "none",
+    "uncovered": [],
+    "dependents-status": "none",
+    "dependents": []
+  },
+  "mines": [
+    {
+      "id": "M18",
+      "file": "src/billing/refunds.js",
+      "lines": [3, 7],
+      "blocking": false,
+      "what": "fetchRefund ходит в тот же шлюз своим fetch без signal: правка поставила потолок одному исполнителю возможности «запрос к платёжному шлюзу» из двух, у fetchRefund (и refundsOf) зависание, которое BUG-12 чинит, осталось. До правки дефект был у обоих, правка новой копии не заводит. Засчитывается находка, называющая fetchRefund либо refunds.js - распространить потолок либо вынести общий запрос к шлюзу"
+    }
+  ]
+}

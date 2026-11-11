@@ -1,0 +1,35 @@
+{
+  "kind": "feature",
+  "task": "FEAT-8",
+  "stack": "ts",
+  "goal": "В src/billing/invoices.js есть syncInvoices по требованиям FEAT.md.",
+  "done": "Требования FEAT.md R1-R3 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. syncInvoices(api, store) забирает из биллинга все счета и кладёт каждый в store.put(invoice.id, invoice); возвращает число сохранённых. (FEAT.md:3)",
+    "R2. Биллинг отдаёт счета страницами: api.listInvoices(cursor) -> { data: [...], cursor: <следующий курсор либо null> }; первый вызов - с cursor = null. (FEAT.md:4)",
+    "R3. Ответ биллинга с ошибкой 5xx либо сетевая ошибка повторяется до 3 попыток всего, с паузой 100 мс, 200 мс между попытками; ошибка 4xx не повторяется и пробрасывается. (FEAT.md:5)"
+  ],
+  "files": [
+    "src/billing/invoices.js",
+    "test/invoices.test.js"
+  ],
+  "test_cmd": "npm test",
+  "build_cmd": "",
+  "score": {
+    "oracle_cmd": "node --test --test-reporter=tap 'oracle/*.test.js'",
+    "tests_cmd": "node --test --test-reporter=tap",
+    "mutants": {
+      "m1-4xx": "R3: ошибка 4xx повторяется",
+      "m2-page": "R2: берётся только первая страница"
+    },
+    "shape": {
+      "свой повтор в src/billing (catch)": "grep -rc catch src/billing || true",
+      "callWithBackoff в src/billing": "grep -rn callWithBackoff src/billing || true",
+      "drainFeed в src/billing": "grep -rn drainFeed src/billing || true",
+      "тронутые файлы": "git diff --stat main HEAD"
+    },
+    "oracle_dest": "oracle",
+    "fail_re": "^\\s*not ok \\d+ - (.+)$"
+  }
+}

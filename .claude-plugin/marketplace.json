@@ -76,7 +76,7 @@
       "name": "dex-auto",
       "source": "./plugins/auto/dex-auto",
       "description": "Автономные треки под открытую цель - feature и bugfix (до локальных коммитов) и ревью чужого MR/PR либо своей ветки до MR (read-only, треды в MR по санкции), фиксация истины - дельта корпуса проекта на ветке цели со сверкой против кода, вход проекта - корпус, уровень 0 и порядок работы в CLAUDE.md: ledger вне рабочего дерева, Workflow-скрипт на трек с потолками петель и схемами выхода узлов, сдача исхода скриптом finish.sh, сторожа SessionStart (возобновление по открытой цели) и Stop (терминал цели). Команды /onboard (вход проекта в агентскую работу), /goal (подготовка цели из тикета, спеки или симптома; для feature - проба черновика на домыслы) и /auto (прогон трека, возобновление с верификации).",
-      "version": "9.10.0",
+      "version": "9.12.0",
       "category": "specialist",
       "keywords": [
         "autonomous",
@@ -1039,7 +1039,7 @@
       "name": "dex-mr-check-reviewer",
       "source": "./plugins/specialists/review/dex-mr-check-reviewer",
       "description": "Узел ре-ревью дельты MR/PR после правок автора: range-diff дельты, статус прежних находок, новые находки только в дельте, обновление существующих тредов и публикация новых, по поручению - разметка новых находок типом. Вызывается на повторных ревизиях командой /mr-review (плагин dex-mr-reviewer), своего командного входа не имеет.",
-      "version": "3.5.0",
+      "version": "3.6.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1056,7 +1056,7 @@
       "name": "dex-mr-reviewer",
       "source": "./plugins/specialists/review/dex-mr-reviewer",
       "description": "Языко-агностичный узел первичного ревью чужого MR/PR: карта изменений, параллельные фокусы, фальсификация находок, severity/confidence/scope, доставка инлайн-тредами через gh/glab. По поручению входа - разметка находок типом в первой строке треда. Точка входа - команда /mr-review, едет в этом же плагине.",
-      "version": "3.6.0",
+      "version": "3.7.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1306,7 +1306,7 @@
       "name": "dex-self-reviewer",
       "source": "./plugins/specialists/review/dex-self-reviewer",
       "description": "Pre-push саморевью своей локальной ветки: committed+staged+worktree diff, скан по осям diff'а (security, architecture, language, business, regressions, performance, loose-ends, reuse, non-code) с реальным прогоном build/test, фальсификация, чеклист правок до push, по поручению - разметка находок типом.",
-      "version": "3.4.0",
+      "version": "3.5.0",
       "category": "specialist",
       "keywords": [
         "specialist",
@@ -1550,7 +1550,7 @@
       "name": "dex-skill-code-reuse",
       "source": "./plugins/skills/dex-skill-code-reuse",
       "description": "Переиспользование механизмов проекта вместо копии - разложение правки на возможности, поиск двойника по признаку кода, исход «беру / адаптирую / пишу новое», отказ от ложного обобщения; одна норма для автора правки и для ревью",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "skill",
       "keywords": [
         "skill",

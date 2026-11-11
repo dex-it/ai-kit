@@ -360,7 +360,8 @@ export default {
   build({ commit = 'HEAD' } = {}) {
     const { conds } = buildConditions(rootNorm(commit));
     let cur = null;
-    try { cur = JSON.parse(showAt(commit, CATALOG)).version; } catch { /* репозиторий без каталога (офлайн-тест стенда): кейсы `at` не строятся */ }
+    // Репозиторий без каталога (офлайн-тест стенда) кейсов `at` не строит; прочая ошибка - отказ, а не молча урезанная серия.
+    try { cur = JSON.parse(showAt(commit, CATALOG)).version; } catch (e) { if (!e.message.startsWith(`нет ${CATALOG} на коммите`)) throw e; }
     const [maj, min] = (cur || '').split('.');
     const ks = cases.flatMap((k) => (!k.at ? [k] : cur ? [{ ...k, ...k.at({ cur, next: `${maj}.${Number(min) + 1}.0` }) }] : []));
     return conds.flatMap((c) => ks.map((k) => ({

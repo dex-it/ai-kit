@@ -14,11 +14,13 @@ const walk = (d, hit) => existsSync(d) ? readdirSync(d).flatMap(e => {
   const p = join(d, e)
   return statSync(p).isDirectory() ? walk(p, hit) : hit(p) ? [p] : []
 }) : []
-const nearBy = (f, m, slack = 2) => {
-  const [file, line] = String(f.anchor || '').split(':')
+// Якорь `file:1-29` - одна находка на несколько копий: судится пересечение, не первая строка.
+const nearBy = (f, m, slack = 2, wide = true) => {
+  const [file, span = ''] = String(f.anchor || '').split(':')
   if (!file || !file.endsWith(m.file)) return false
-  const n = parseInt(line, 10)
-  return Number.isNaN(n) || (n >= m.lines[0] - slack && n <= m.lines[1] + slack)
+  const [lo, hi] = span.split('-').map(n => parseInt(n, 10))
+  if (Number.isNaN(lo)) return true
+  return lo <= m.lines[1] + slack && (wide && Number.isFinite(hi) ? hi : lo) >= m.lines[0] - slack
 }
 const near = (f, m) => nearBy(f, m)
 const sh = (cmd, cwd, re) => {
@@ -163,10 +165,10 @@ function debuggerNode(id, c, r, repo, logs) {
 }
 
 // Находка ревьюера засчитана подтверждённой, если в confirmed есть якорь в её строках, отброшенной - если якорь в dropped; покрытие - по названным требованиям.
-// Без допуска по строкам: подтверждаемая и отбрасываемая находки кейса стоят в соседних строках.
+// Без допуска по строкам и диапазон якоря - первой строкой: подтверждаемая и отбрасываемая находки кейса стоят в соседних строках.
 function skeptic(c, r) {
   const k = JSON.parse(readFileSync(join(here, 'skeptic', c, 'case.json'), 'utf8')).expect
-  const near = (f, m) => nearBy(f, m, 0)
+  const near = (f, m) => nearBy(f, m, 0, false)
   console.log(`  status=${r.status} verdict=${r['review-verdict']} confirmed=${r.confirmed.length} dropped=${r.dropped.length}`)
   for (const m of k.confirm) {
     const hits = r.confirmed.filter(f => near(f, m))

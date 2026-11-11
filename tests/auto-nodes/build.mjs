@@ -25,12 +25,13 @@ for (const d of readdirSync(join(here, nodeName)).sort()) {
   }
   cases[d] = c
 }
-const PHASE = { reviewer: 'Review', coder: 'Implement', debugger: 'Reproduce', skeptic: 'Falsify' }
+const PHASE = { reviewer: 'Review', coder: 'Implement', designer: 'Implement', debugger: 'Reproduce', skeptic: 'Falsify' }
 const meta = `export const meta = {\n  name: 'auto-node-${nodeName}',\n  description: 'Прогон узла ${nodeName} на кейсе tests/auto-nodes',\n  phases: [{ title: '${PHASE[nodeName] || 'Review'}' }],\n}\n`
 const src = (f) => `// >>> ${f}\n${readFileSync(join(shared, f), 'utf8')}\n`
 // Схема диагноста живёт в треке, не в tracks-shared: берётся из bugfix.js как есть.
 const fromTrack = (track, name) => readFileSync(join(here, '../../plugins/auto/dex-auto/tracks', track), 'utf8').match(new RegExp(`^const ${name} = [\\s\\S]*?^\\}, required: .*$`, 'm'))[0] + '\n'
 const repro = nodeName === 'debugger' ? fromTrack('bugfix.js', 'REPRO') : ''
+const design = nodeName === 'designer' ? fromTrack('feature.js', 'DESIGN') : ''
 // Промпт узла - тот же, что в треке: хвост шага кодера сверяется с feature.js, расхождение - отказ сборки (молча разъехавшийся
 // промпт делает меру стенда мерой не того узла, который едет в треке).
 if (nodeName === 'coder') {
@@ -39,7 +40,13 @@ if (nodeName === 'coder') {
   const bench = tail(readFileSync(join(here, 'coder/node.js'), 'utf8'))
   if (!track || track !== bench) { console.error(`промпт кодера стенда разошёлся с feature.js: ${bench} против ${track}`); process.exit(1) }
 }
+if (nodeName === 'designer') {
+  const head = (s) => (s.match(/Шаг 2а: [^\\]*\\nТребования:/) || [])[0]
+  const track = head(readFileSync(join(here, '../../plugins/auto/dex-auto/tracks/feature.js'), 'utf8').split('\n').find(l => l.includes("own('проектировщик'")) || '')
+  const bench = head(readFileSync(join(here, 'designer/node.js'), 'utf8'))
+  if (!track || track !== bench) { console.error(`промпт проектировщика стенда разошёлся с feature.js: ${bench} против ${track}`); process.exit(1) }
+}
 
-writeFileSync(out, meta + src('contract.js') + src('nodes.js') + src('domain.js') + src('falsify.js') + src('own-commits.js') + src('self-review.js') + repro
+writeFileSync(out, meta + src('contract.js') + src('nodes.js') + src('domain.js') + src('falsify.js') + src('own-commits.js') + src('self-review.js') + repro + design
   + `const CASES = ${JSON.stringify(cases, null, 2)}\n` + readFileSync(join(here, nodeName, 'node.js'), 'utf8'))
 console.log(out)

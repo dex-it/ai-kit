@@ -106,11 +106,11 @@ const PRIOR = { type: 'object', properties: {
 const isOpen = (f) => OPEN_FINDING.includes(f.status)
 const isBlocking = (f) => f.severity === 'P0' || f.severity === 'P1'
 // Предикаты находки - docs/domain.md §2.
-// P2, внесённая правкой по находкам, - убыток самой правки: правится, пока идут круги; итог держат только P0/P1 (P115).
-const holds = (f) => isOpen(f) && (isBlocking(f) || !!f.introduced && f.severity === 'P2')
+// P2 правится, пока идут круги; итог держат только P0/P1 (P115).
+const buysFix = (f) => isBlocking(f) || f.severity === 'P2'
+const holds = (f) => isOpen(f) && buysFix(f)
 // Исход такой находки решает проба оператора, а не правка: кодер по ней покупал круг за кругом на недостижимом пути.
 const awaitsProbe = (f) => !!String(f.premise || '').trim()
-// Правка сверх порога рискует достигнутым ради необязательного: правка по P2 о скорости перестроила механизм и внесла регрессию.
 const toFix = (f) => holds(f) && !awaitsProbe(f)
 const offered = (f) => isOpen(f) && !holds(f) && !awaitsProbe(f)
 const asks = (f) => isOpen(f) && !isBlocking(f) && (f.severity === 'P2' || awaitsProbe(f))
@@ -136,7 +136,7 @@ function registry(unsettled) {
   const at = (id) => id ? list.findIndex(q => q.id === id) : -1
   const seat = (p, status, evidence) => {
     const i = at(p.id)
-    // Важность записи только растёт: P2, поднятая узлом до P1, держит порог допуска.
+    // Важность записи только растёт: P2, поднятая узлом до P1, держит итог.
     const base = i < 0 ? { id: p.id || mint(), anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '', ...(p.introduced ? { introduced: true } : {}) }
       : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [], ...(p.introduced ? { introduced: true } : {}) }
     const rec = { ...base, status: FINDING_STATUS.includes(status) ? status : 'unverified', evidence: FINDING_STATUS.includes(status) ? evidence : `статус вне словаря реестра (${status}): ${evidence}` }

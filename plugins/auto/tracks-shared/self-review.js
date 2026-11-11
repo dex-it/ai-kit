@@ -55,8 +55,8 @@ const admit = (green, rev, stuck, gaps) => !green ? 'верификация по
   : !rev ? 'саморевьюер не вернул выход'
   : rev.status === 'blocked' ? `саморевью не выполнено: ${lack(rev, 'саморевьюер')}`
   : stuck.some(isBlocking) ? `открытые P0/P1: ${stuck.filter(isBlocking).map(stuckLine).join('; ')}` : gaps
-// Не правится в прогоне и порог не держит, но вопрос оператору не теряется: «продолжить» подаёт такую находку кодеру из ledger.
-const askLines = (r) => r.asking().map(f => `${f.id} [${f.severity}] ${f.anchor}: ${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}порога не держит, решение за оператором - ${f.text}`}`)
+// Итога не держит, но вопрос оператору не теряется: «продолжить» подаёт такую находку кодеру из ledger.
+const askLines = (r) => r.asking().map(f => `${f.id} [${f.severity}] ${f.anchor}: ${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}итога не держит, решение за оператором - ${f.text}`}`)
 // Закрытая в прогоне находка в перечне - чтобы ревью сверило, не вернула ли её правка.
 const listedLine = (p) => `${priorLine(p)}${p.status === 'closed' ? ' (закрыта в этом прогоне: сверь, что правка её не вернула)' : ''}`
 // Ревизия - поле head_sha: head - текст git log, у модели-верификатора его первое слово не обязано быть sha.
@@ -88,8 +88,8 @@ const doubted = (rev, listed) => listed.map(p => { const c = (rev.prior || []).f
 const falsifyOf = (tag, rev, listed, base, h) => own('скептик', `${HEAD}Шаг 3 (${tag}): фальсификация находок, исходов осей, решений и статусов прежних из саморевью; вердикт по покрытию. Объём - ${scope(base)} Код не меняй.${conventionsText(h)}\nНаходки:\n${rev.findings.map(findingLine).join('\n') || '- находок нет: только вердикт по покрытию'}${listed.length ? `\nПрежние находки - статус саморевьюера:\n${doubted(rev, listed)}` : ''}\nОси саморевьюера:\n${axesText(rev.axes)}\nРешения саморевьюера:\n${rootsText(rev.roots)}`,
   { label: `falsify:${tag}`, phase: 'Review', schema: FALSIFY }, NODE.skeptic)
 const judged = (fal) => !!fal && fal.status !== 'blocked' && !fal.skipped
-// Сверка стоит как само ревью, а без P0/P1 исход итога от неё не зависит (P115).
-const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(isBlocking)
+// Сверка стоит как само ревью; без находки, покупающей правку, исход прогона от неё не зависит (P115).
+const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(buysFix)
 const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], prior: [] }
 // В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
 const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev

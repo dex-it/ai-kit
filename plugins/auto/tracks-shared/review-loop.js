@@ -13,7 +13,7 @@ async function reviewLoop(t) {
   const dropped = []
   let fal = null
   if (rev && rev.status !== 'blocked') {
-    if (!needsSkeptic(rev, LEDGER)) { trail.push({ step: '3-falsify', doer: 'не куплен: P0/P1 нет', status: 'skipped' }); fal = SKIPPED }
+    if (!needsSkeptic(rev, LEDGER)) { trail.push({ step: '3-falsify', doer: 'не куплен: P0-P2 нет', status: 'skipped' }); fal = SKIPPED }
     else {
       fal = await falsifyOf('первое', rev, LEDGER, firstBase, spots)
       trail.push({ step: '3-falsify', doer: NODE.skeptic.agentType, status: fal ? fal.status : 'null', confirmed: fal ? fal.confirmed.length : -1, dropped: fal ? fal.dropped.length : -1 })
@@ -29,7 +29,7 @@ async function reviewLoop(t) {
   // Вопрос оператору (domain.md §2) едет и в выходе из цикла: иначе P2 видна только записью prior.
   const state = (exit) => ({ exit: exit && { ...exit, decisions: [...(exit.decisions || []), ...askLines(reg)] }, rev, fal, chk, reg, spots, fix2, ver2, dropped, offeredOnly })
   while (rev && rev.status !== 'blocked' && loops.review_fix < REVIEW_FIX_CEILING) {
-    // Не держащая порог подаётся кодеру один раз: оспоренная им осталась бы открытой и гоняла круги до потолка.
+    // Не обязательная к правке подаётся кодеру один раз: оспоренная им осталась бы открытой и гоняла круги до потолка.
     const may = reg.offers().filter(f => !offeredHere.has(f.id))
     if (!reg.fixes().length && !may.length && !red) break
     const k = ++loops.review_fix, must = reg.fixes().length > 0 || !!red
