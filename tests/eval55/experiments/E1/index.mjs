@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync, appendFileSync, rmSync, mkdtempSync, mkdir
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { rootNorm, exportAt } from '../../lib/repo.mjs';
+import { rootNorm, exportAt, showAt } from '../../lib/repo.mjs';
 
 const SKILL = 'plugins/skills/dex-skill-redis/skills/redis/SKILL.md';
 const REDIS_PJ = 'plugins/skills/dex-skill-redis/.claude-plugin/plugin.json';
@@ -263,27 +263,30 @@ const cases = [
     ],
     solve: add(JIRA_README, '\n## Дальше\n\n[Хаб CLI-плагинов](https://github.com/dex-it/ai-kit/blob/main/docs/CLI_UTILITIES.md) - матрица установки, CLI против MCP.\n') },
   // Снятие плагина (`.claude/rules/plugin-changes.md`): запись каталога, витрина README, строка таблицы снятых, minor каталога в двух носителях.
+  // Версия каталога - с коммита прогона (`build`), иначе кейс ломается на каждом бампе каталога.
   { id: 'plugin-removal',
     prompt: 'Плагин dex-mcp-inspector больше не нужен. Сними его из каталога и доведи изменения до состояния, готового к коммиту.',
-    graders: [
-      { type: 'cmd', id: 'plugin-dir-gone', run: ['sh', '-c', `test ! -e ${INSPECTOR}`] },
-      { type: 'file-not-matches', id: 'catalog-entry-gone', path: CATALOG, regex: '"name":\\s*"dex-mcp-inspector"' },
-      { type: 'file-matches', id: 'removed-table-row', path: 'install-bundle/README.md', regex: '^\\| `dex-mcp-inspector` \\|', flags: 'mu' },
-      { type: 'file-matches', id: 'catalog-minor-bumped', path: CATALOG, regex: '^  "version": "6\\.28\\.0"', flags: 'mu' },
-      { type: 'cmd', id: 'readme-valid', run: ['node', 'tools/validate-readme.js', 'all'] },
-      SYNC,
-    ],
-    solve(dir) {
-      rmSync(join(dir, INSPECTOR), { recursive: true });
-      edit(dir, CATALOG, (t) => {
-        const d = JSON.parse(t);
-        d.plugins = d.plugins.filter((x) => x.name !== 'dex-mcp-inspector');
-        d.version = '6.28.0';
-        return `${JSON.stringify(d, null, 2)}\n`;
-      });
-      edit(dir, 'README.md', (t) => replaceOnce(replaceOnce(t, '| dex-mcp-inspector | `/mcp-inspect` | MCP Inspector: тестирование и отладка MCP серверов |\n', ''), 'Version 6.27.0', 'Version 6.28.0'));
-      edit(dir, 'install-bundle/README.md', (t) => replaceOnce(t, '| `dex-skill-agile` | - |', `${REMOVED_ROW}| \`dex-skill-agile\` | - |`));
-    } },
+    at: ({ cur, next }) => ({
+      graders: [
+        { type: 'cmd', id: 'plugin-dir-gone', run: ['sh', '-c', `test ! -e ${INSPECTOR}`] },
+        { type: 'file-not-matches', id: 'catalog-entry-gone', path: CATALOG, regex: '"name":\\s*"dex-mcp-inspector"' },
+        { type: 'file-matches', id: 'removed-table-row', path: 'install-bundle/README.md', regex: '^\\| `dex-mcp-inspector` \\|', flags: 'mu' },
+        { type: 'file-matches', id: 'catalog-minor-bumped', path: CATALOG, regex: `^  "version": "${next.replaceAll('.', '\\.')}"`, flags: 'mu' },
+        { type: 'cmd', id: 'readme-valid', run: ['node', 'tools/validate-readme.js', 'all'] },
+        SYNC,
+      ],
+      solve(dir) {
+        rmSync(join(dir, INSPECTOR), { recursive: true });
+        edit(dir, CATALOG, (t) => {
+          const d = JSON.parse(t);
+          d.plugins = d.plugins.filter((x) => x.name !== 'dex-mcp-inspector');
+          d.version = next;
+          return `${JSON.stringify(d, null, 2)}\n`;
+        });
+        edit(dir, 'README.md', (t) => replaceOnce(replaceOnce(t, '| dex-mcp-inspector | `/mcp-inspect` | MCP Inspector: тестирование и отладка MCP серверов |\n', ''), `Version ${cur}`, `Version ${next}`));
+        edit(dir, 'install-bundle/README.md', (t) => replaceOnce(t, '| `dex-skill-agile` | - |', `${REMOVED_ROW}| \`dex-skill-agile\` | - |`));
+      },
+    }) },
   // Ложная тревога: падения нет, верный исход - ничего не менять (контроль на перекос к дельте). Нетронутая песочница проходит проверки; `solve` здесь - посторонняя правка, которую они обязаны поймать.
   { id: 'no-change-needed', control: 'idle-passes',
     prompt: FIX_PROMPT,
@@ -356,7 +359,11 @@ export default {
   // Состав корневого файла и разделов-условий берётся с коммита прогона (`commit`), тем же, из которого собрана песочница.
   build({ commit = 'HEAD' } = {}) {
     const { conds } = buildConditions(rootNorm(commit));
-    return conds.flatMap((c) => cases.map((k) => ({
+    let cur = null;
+    try { cur = JSON.parse(showAt(commit, CATALOG)).version; } catch { /* репозиторий без каталога (офлайн-тест стенда): кейсы `at` не строятся */ }
+    const [maj, min] = (cur || '').split('.');
+    const ks = cases.flatMap((k) => (!k.at ? [k] : cur ? [{ ...k, ...k.at({ cur, next: `${maj}.${Number(min) + 1}.0` }) }] : []));
+    return conds.flatMap((c) => ks.map((k) => ({
       cond: c.id, condTitle: c.title, case: k.id, fixture: 'repo', prompt: k.prompt, graders: k.graders, solve: k.solve, control: k.control,
       prepare(dir) { c.prepare(dir); k.seed?.(dir); },
     })));

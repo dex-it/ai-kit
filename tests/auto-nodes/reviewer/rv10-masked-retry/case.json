@@ -1,0 +1,34 @@
+{
+  "task": "FEAT-10",
+  "kind": "feature",
+  "commit": "feat(billing): выгрузка счетов в бухгалтерию",
+  "goal": "В src/billing/export.js есть exportInvoices по требованиям FEAT.md.",
+  "done": "Требования FEAT.md R1-R2 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. exportInvoices(invoices, ledger) отправляет каждый счёт вызовом ledger.post(invoice.id, invoice) по порядку и возвращает число отправленных. (FEAT.md:3)",
+    "R2. Бухгалтерия временно недоступна (ответ 5xx либо обрыв соединения ECONNRESET, ETIMEDOUT) - отправка счёта выполняется ещё раз, всего не больше 3 раз, с паузой 100 мс перед вторым и 200 мс перед третьим; ответ 4xx пробрасывается сразу. (FEAT.md:4)"
+  ],
+  "coder": {
+    "red-run": [
+      {
+        "test": "test/export.test.js",
+        "status": "shown",
+        "evidence": "тестовый файл на коде до правки не загружается: нет src/billing/export.js (ERR_MODULE_NOT_FOUND) - красные все тесты файла, R1-R2 в их числе; после правки зелёные"
+      }
+    ],
+    "uncovered-status": "none",
+    "uncovered": [],
+    "dependents-status": "none",
+    "dependents": []
+  },
+  "mines": [
+    {
+      "id": "M16",
+      "file": "src/billing/export.js",
+      "lines": [3, 13],
+      "blocking": false,
+      "what": "повтор с паузой переписан рекурсией send с предикатом ledgerDown, хотя src/lib/retry.js:withRetry с теми же умолчаниями (3 попытки, 100 мс с удвоением, isTransient - тот же предикат в другой записи) уже служит src/crm/contacts.js и src/orders/sync.js; поведение на всех входах совпадает, дефекта нет. Четыре теста R2 в test/export.test.js повторяют проверку test/retry.test.js. Следующая правка политики повтора потребует двух мест. Техдолг, ожидаемо P2; засчитывается находка, называющая withRetry"
+    }
+  ]
+}

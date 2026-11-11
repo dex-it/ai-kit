@@ -60,7 +60,7 @@ const designOk = { status: 'complete', design: [{ requirement: 'R1', device: 'р
 const fixDisputeCause = { ...fixOk, status: 'partial', commit: '', 'diagnosis-check': 'disputed-cause', dispute: 'src/pay.ts:40 ключ идемпотентности уже проверяется - причина не в src/pay.ts:12', missing: 'диагноз оспорен' }
 // Правка, замкнутая в себе: оба поля явным «нет»; сверку она не отменяет (domain.md §4).
 const fixSealed = { ...fixOk, 'uncovered-status': 'none', uncovered: [], 'dependents-status': 'none', dependents: [], prior: [{ id: 'F21', anchor: 'src/A.cs:8', severity: 'P1', text: 'ретрай не различает случаи', status: 'closed', evidence: 'тест T2' }] }
-const AXES_ALL = ['security', 'architecture', 'language', 'business', 'regressions', 'performance', 'coverage', 'loose-ends', 'non-code']
+const AXES_ALL = ['security', 'architecture', 'language', 'business', 'regressions', 'performance', 'coverage', 'loose-ends', 'reuse', 'non-code']
 const axesWith = (set = {}) => [...Object.keys(set), ...AXES_ALL.filter(n => !(n in set))].map(name => ({ name, outcome: set[name] ? set[name][0] : 'n/a', checked: set[name] ? set[name][1] : 'правка ось не задевает' }))
 const axesOk = axesWith()
 const revClean = { status: 'complete', 'conventions-read': [], axes: axesOk, roots: [], findings: [], 'run-status': 'build ok, tests 9/9', 'red-run': 'T1 действует', 'fact-check': [], intent: 'соответствует', 'intent-status': 'match', prior: [], 'review-verdict': 'APPROVE', missing: '' }

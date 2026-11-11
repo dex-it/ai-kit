@@ -1,0 +1,27 @@
+{
+  "task": "FEAT-9",
+  "kind": "feature",
+  "commit": "feat(reports): ожидание выгрузки отчёта",
+  "goal": "В src/reports/export.js есть waitForExport по требованиям FEAT.md.",
+  "done": "Требования FEAT.md R1-R3 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. waitForExport(api, jobId) опрашивает api.exportStatus(jobId) -> { state: 'pending' | 'done' | 'failed', url? } каждые 500 мс, пока state не 'done' либо 'failed'; первый опрос - сразу. (FEAT.md:3)",
+    "R2. state 'done' - вернуть url; state 'failed' - бросить ошибку «выгрузка не удалась»; после 20 опросов в 'pending' - бросить ошибку «выгрузка не готова за 10 с». (FEAT.md:4)",
+    "R3. Ошибка самого вызова api.exportStatus не повторяется и пробрасывается как есть. (FEAT.md:5)"
+  ],
+  "coder": {
+    "red-run": [
+      {
+        "test": "test/export.test.js",
+        "status": "shown",
+        "evidence": "тестовый файл на коде до правки не загружается: нет src/reports/export.js (ERR_MODULE_NOT_FOUND) - красные все тесты файла, R1-R3 в их числе; после правки зелёные"
+      }
+    ],
+    "uncovered-status": "none",
+    "uncovered": [],
+    "dependents-status": "none",
+    "dependents": []
+  },
+  "mines": []
+}

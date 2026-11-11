@@ -199,6 +199,7 @@ const PROCESS_SKILLS = new Set([
   'project-baseline',
   'stack-registry',
   'completeness-mapping',
+  'code-reuse',
   'optimize-for-llm',
   'node-contract',
   'test-coverage',

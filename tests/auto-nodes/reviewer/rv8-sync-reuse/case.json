@@ -1,0 +1,42 @@
+{
+  "task": "FEAT-8",
+  "kind": "feature",
+  "commit": "feat(billing): синхронизация счетов из биллинга",
+  "goal": "В src/billing/invoices.js есть syncInvoices по требованиям FEAT.md.",
+  "done": "Требования FEAT.md R1-R3 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. syncInvoices(api, store) забирает из биллинга все счета и кладёт каждый в store.put(invoice.id, invoice); возвращает число сохранённых. (FEAT.md:3)",
+    "R2. Биллинг отдаёт счета страницами: api.listInvoices(cursor) -> { data: [...], cursor: <следующий курсор либо null> }; первый вызов - с cursor = null. (FEAT.md:4)",
+    "R3. Ответ биллинга с ошибкой 5xx либо сетевая ошибка повторяется до 3 попыток всего, с паузой 100 мс, 200 мс между попытками; ошибка 4xx не повторяется и пробрасывается. (FEAT.md:5)"
+  ],
+  "coder": {
+    "red-run": [
+      {
+        "test": "test/invoices.test.js",
+        "status": "shown",
+        "evidence": "тестовый файл на коде до правки не загружается: нет src/billing/invoices.js (ERR_MODULE_NOT_FOUND) - красные все тесты файла, R1-R3 в их числе; после правки зелёные"
+      }
+    ],
+    "uncovered-status": "none",
+    "uncovered": [],
+    "dependents-status": "none",
+    "dependents": []
+  },
+  "mines": [
+    {
+      "id": "M14",
+      "file": "src/billing/invoices.js",
+      "lines": [3, 15],
+      "blocking": false,
+      "what": "повтор с паузой переписан циклом в fetchInvoicePage, хотя src/lib/retry.js:withRetry с теми же умолчаниями (3 попытки, 100 мс с удвоением, isTransient - тот же предикат) уже служит src/crm/contacts.js и src/orders/sync.js; поведение на всех входах совпадает, дефекта нет. Следующая правка политики повтора потребует двух мест. Техдолг, ожидаемо P2; засчитывается находка, называющая withRetry"
+    },
+    {
+      "id": "M15",
+      "file": "src/billing/invoices.js",
+      "lines": [19, 27],
+      "blocking": false,
+      "what": "обход страниц по курсору переписан циклом, хотя src/lib/pages.js:collectPages делает тот же обход и служит src/crm/contacts.js; форма страницы биллинга ({ data, cursor }) отличается от формы collectPages ({ items, next }), механизм берётся адаптером страницы либо обобщением collectPages, а не копией цикла. Дефекта нет. Техдолг, ожидаемо P2; засчитывается находка, называющая collectPages"
+    }
+  ]
+}

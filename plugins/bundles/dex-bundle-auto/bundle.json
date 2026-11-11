@@ -13,6 +13,7 @@
     "dex-rulebook-miner",
     "dex-skill-artifact-naming",
     "dex-skill-ci-gates",
+    "dex-skill-code-reuse",
     "dex-skill-docs-layout",
     "dex-skill-fact-verification",
     "dex-skill-github-actions",
