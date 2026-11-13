@@ -1,0 +1,26 @@
+{
+  "kind": "feature",
+  "task": "FEAT-23",
+  "stack": "ts",
+  "goal": "В src/carriers/fedex.js есть fedexTrack - статус отправления у третьего перевозчика.",
+  "done": "Требования R1-R3 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. fedexTrack(code, fetchImpl) запрашивает GET https://api.fedex.example/track/<code> и возвращает { code, status, eta } из полей ответа latestStatus и estimatedDelivery.",
+    "R2. Запрос дольше 2 секунд прерывается, ошибка пробрасывается вызывающему.",
+    "R3. Трек-номер с префиксом FX обслуживает fedexTrack: trackerFor возвращает его."
+  ],
+  "files": [
+    "src/carriers/fedex.js",
+    "src/carriers/index.js",
+    "test/fedex.test.js"
+  ],
+  "test_cmd": "npm test",
+  "build_cmd": "",
+  "base": "auto-nodes/designer/ds3-js-shape/base",
+  "expect": {
+    "must": ["src/platform/net/request.js"],
+    "miss": ["fetchWithTimeout"],
+    "note": "Двойников два: fetchWithTimeout у соседей по каталогу (гонка с таймером - запрос не прерывается, таймер не снимается, ошибка без типа) и request в platform/net (прерывание, снятый таймер, TimeoutError, три потребителя). Верный исход - request в device; взятый fetchWithTimeout - промах."
+  }
+}

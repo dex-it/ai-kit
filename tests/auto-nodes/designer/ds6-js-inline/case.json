@@ -1,0 +1,24 @@
+{
+  "kind": "feature",
+  "task": "FEAT-24",
+  "stack": "ts",
+  "goal": "Повтор запроса к внешнему сервису уважает ответ 429: ждёт столько, сколько сервис просит, а без такой просьбы не повторяет.",
+  "done": "Требования R1-R2 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. Ошибка со status 429 и полем retryAfter (секунды) повторяется; пауза перед повтором - retryAfter * 1000 мс вместо шага из delays.",
+    "R2. Ошибка со status 429 без retryAfter не повторяется и пробрасывается."
+  ],
+  "files": [
+    "src/platform/net/backoff.js",
+    "test/backoff.test.js"
+  ],
+  "test_cmd": "npm test",
+  "build_cmd": "",
+  "base": "auto-nodes/designer/ds3-js-shape/base",
+  "expect": {
+    "must": ["src/jobs/nightly.js"],
+    "miss_merge": ["src/notify/poll.js"],
+    "note": "Исполнитель той же возможности своим кодом - цикл попыток внутри runNightly, слов механизма в нём нет; находится по литералам 429 и >= 500. Опрос waitDelivered - не повтор: сведение с withRetry либо изменение в нём - промах."
+  }
+}
