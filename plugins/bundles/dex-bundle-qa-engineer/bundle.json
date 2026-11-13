@@ -20,6 +20,7 @@
     "dex-skill-bdd-gherkin",
     "dex-skill-bug-reproduction",
     "dex-skill-change-correlation",
+    "dex-skill-code-reuse",
     "dex-skill-codebase-conventions",
     "dex-skill-completeness-mapping",
     "dex-skill-decision-log",
