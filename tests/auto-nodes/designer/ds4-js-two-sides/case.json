@@ -1,0 +1,25 @@
+{
+  "kind": "feature",
+  "task": "FEAT-22",
+  "stack": "ts",
+  "goal": "Оператор видит в ленте консоли смену маршрута отправления.",
+  "done": "Требования R1-R2 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/ и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. reroute(store, bus, id, route) в src/shipments/reroute.js меняет маршрут отправления, сохраняет его и шлёт через bus событие { type: 'shipment.rerouted', id, route }; отправления нет - ошибка.",
+    "R2. renderFeed печатает для события shipment.rerouted строку 'Маршрут: <id> -> <route>'."
+  ],
+  "files": [
+    "src/shipments/reroute.js",
+    "src/console/feed.js",
+    "test/reroute.test.js",
+    "test/feed.test.js"
+  ],
+  "test_cmd": "npm test",
+  "build_cmd": "",
+  "base": "auto-nodes/designer/ds3-js-shape/base",
+  "expect": {
+    "must": ["src/events/wire.js", "src/console/stream.js", "src/events/types.js", "src/console/types.js"],
+    "note": "Перечень типов событий объявлен на обеих сторонах порознь: кодировщик шины молча отбрасывает тип без строки в FIELDS, приёмник консоли - тип вне KNOWN. Без обоих событие до ленты не доходит. Тип события объявлен на каждой стороне своим файлом types.js, проверки между ними нет: правка одного объявления без второго ничем не ловится."
+  }
+}
