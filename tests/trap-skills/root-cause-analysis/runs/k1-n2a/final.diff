@@ -1,0 +1,71 @@
+diff --git a/src/parcel.js b/src/parcel.js
+index 7791970..97e87fa 100644
+--- a/src/parcel.js
++++ b/src/parcel.js
+@@ -1,16 +1,15 @@
+ // Вес посылки в целых граммах из того, что прислал клиент; форматы - docs/api.md.
+ import { HttpError } from './errors.js';
+ 
+-const WITH_UNIT = /^(\d+(?:[.,]\d+)?)\s*(kg|g)$/i;
++const WITH_UNIT = /^(\d+(?:[.,]\d+)?)\s*(kg|g)?$/i;
+ 
+ export function parseWeight(input) {
+-  if (typeof input === 'number') return Math.round(input * 1000);
++  if (typeof input === 'number' && Number.isFinite(input)) return Math.round(input * 1000);
+   const s = String(input ?? '').trim();
+-  if (!/[a-z]/i.test(s)) return Math.round(Number(s) * 1000); // виджет партнёра: килограммы строкой
+-  const m = WITH_UNIT.exec(s);
++  const m = WITH_UNIT.exec(s); // единица необязательна: без неё - килограммы (виджет партнёра)
+   if (!m) throw new HttpError(400, `вес: неизвестный формат "${input}"`);
+   const value = Number(m[1].replace(',', '.'));
+-  return Math.round(m[2].toLowerCase() === 'g' ? value : value * 1000);
++  return Math.round(m[2]?.toLowerCase() === 'g' ? value : value * 1000);
+ }
+ 
+ // Расчётный вес - вверх до 0,5 кг (docs/tariffs.md, «Расчётный вес»).
+diff --git a/src/zones.js b/src/zones.js
+index deb4ac0..27ba5eb 100644
+--- a/src/zones.js
++++ b/src/zones.js
+@@ -5,6 +5,6 @@ import { readConfig } from './config.js';
+ const ZONES = readConfig('zones.json');
+ 
+ export function zoneFor(postcode, zones = ZONES) {
+-  const code = Number(postcode); // числом - как в логах и метриках по регионам
+-  return zones.exact[code] ?? zones.regions[Math.floor(code / 1000)];
++  const code = String(postcode); // строкой: ведущий ноль значим, ключи таблицы - "01", "01067"
++  return zones.exact[code] ?? zones.regions[code.slice(0, 2)];
+ }
+diff --git a/test/parcel.test.js b/test/parcel.test.js
+index 554fcdf..fa4f3b5 100644
+--- a/test/parcel.test.js
++++ b/test/parcel.test.js
+@@ -27,3 +27,14 @@ test('расчётный вес - вверх до 0,5 кг', () => {
+ test('неизвестный формат - 400', () => {
+   assert.throws(() => parseWeight('1.5lb'), { status: 400 });
+ });
++
++test('вес строкой без единицы - запятая как разделитель (виджет партнёра)', () => {
++  assert.equal(parseWeight('1,5'), 1500);
++  assert.equal(parseWeight('2,3'), 2300);
++});
++
++test('вес - не число - 400', () => {
++  assert.throws(() => parseWeight('abc1'), { status: 400 });
++  assert.throws(() => parseWeight('1,5,2'), { status: 400 });
++  assert.throws(() => parseWeight(undefined), { status: 400 });
++});
+diff --git a/test/zones.test.js b/test/zones.test.js
+index 125192f..5956c83 100644
+--- a/test/zones.test.js
++++ b/test/zones.test.js
+@@ -17,3 +17,9 @@ for (const [postcode, zone] of cases) {
+     assert.equal(zoneFor(postcode), zone);
+   });
+ }
++
++for (const [postcode, zone] of [['01067', 'B'], ['04109', 'B'], ['06108', 'B'], ['09111', 'B']]) {
++  test(`индекс с ведущим нулём ${postcode} - зона ${zone}`, () => {
++    assert.equal(zoneFor(postcode), zone);
++  });
++}

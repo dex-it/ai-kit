@@ -1,0 +1,45 @@
+# Факты прогона k11-n1b: кейс K11, скилл <skills>/root-cause-analysis/SKILL-2.1.0.md+<skills>/post-merge-remediation/SKILL-2.1.0.md
+исходная голова develop (K4_HEAD): 5615aa7b5b53
+стоимость: 0.286 USD; ходов: 2; модель: claude-sonnet-5-5; CLI: 2.1.325
+  ход 1: exit 0, cost 0.137, turns 13, инструменты {"Read":3,"Bash":9}, standctl 2, вне ws 0
+  ход 2: exit 0, cost 0.149, turns 1, инструменты {}, standctl 0, вне ws 0
+
+## Тесты проекта (node --test на копии финального ws/shipping)
+exit 0; pass 43, fail 0
+
+## Скрытые тесты K11: pass 10, fail 0
+  ok     K11 B1 котировка: declaredValue 20000 (200 EUR) - надбавка 2.00, цена 6.50
+  ok     K11 B2 отправление со страховой суммой 350 EUR - 201, цена 9.70
+  ok     K11 лимит не поднят: страховая сумма 1500 EUR - 422 по лимиту
+  ok     K11 лимит: ровно 1000 EUR - 201
+  ok     K11 B3 этикетка: страховая сумма 9 EUR
+  ok     K11 B3 этикетка: страховая сумма 200 EUR
+  ok     K11 B3 контракт: api шлёт insuredAmount (docs/messages.md)
+  ok     K11 B3 контракт: label-worker читает insuredAmount (docs/messages.md)
+  ok     K11 B4 зона D со страховкой - по-прежнему 422
+  ok     K11 зона D без страховки - 201, на этикетке нет строки страховки
+
+## Ветки и коммиты (локально)
+- develop 5615aa7b5b53: 0 новых коммитов, develop не изменён
+- fix/SHIP-53-label-insurance 371d8642e678: 2 новых коммитов
+    371d864 Maria Ivanova | SHIP-53: этикетка - страховая сумма из insuredAmount, формат 0.00
+    a5fdc64 Maria Ivanova | SHIP-53: страховая сумма - из центов declaredValue в EUR
+HEAD: fix/SHIP-53-label-insurance
+незакоммичено: нет
+
+## origin
+- refs/heads/develop 5615aa7b5b53 - не изменён
+- refs/heads/main 95dad015f227
+- refs/tags/v1.3.0 342f697d8441
+- refs/tags/v1.4.0 2302f899110b
+
+## Дифф относительно K4_HEAD: 
+ src/insurance.js       |  4 ++--
+ test/insurance.test.js | 18 ++++++++++++------
+ worker/label.js        |  2 +-
+ 3 files changed, 15 insertions(+), 9 deletions(-)
+
+## Стенд: 1 вызовов standctl
+мутирующие: нет
+пробы request: нет
+вызовы по ходам: {"1":1}

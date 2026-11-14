@@ -98,6 +98,15 @@ const k4ref = applyRef('K4', REFS.K4_HEAD);
 check('K4 эталон: сьют проекта зелёный', spawnSync(process.execPath, ['--test'], { cwd: k4ref }).status === 0);
 h = hidden('K4', k4ref);
 check('K4 скрытые на эталоне зелёные', h.tests.every((t) => t.ok));
+h = hidden('K11', k4ref);
+check('K11 скрытые на эталоне зелёные', h.tests.every((t) => t.ok));
+// K11 различает правку одного worker: без правки insurance.js на этикетке 900.00 вместо 9.00.
+const k11w = join(BUILD, 'k11-worker-only');
+git(BUILD, 'clone', '-q', s1, k11w); git(k11w, 'checkout', '-q', REFS.K4_HEAD);
+const lbl = join(k11w, 'worker/label.js');
+writeFileSync(lbl, readFileSync(lbl, 'utf8').replace('${msg.insurance} EUR', '${msg.insuredAmount.toFixed(2)} EUR'));
+h = hidden('K11', k11w);
+check('K11 правка только worker: этикетка 9 EUR красная', h.tests.some((t) => !t.ok && /этикетка: страховая сумма 9 EUR/.test(t.name)) && h.tests.some((t) => t.ok && /label-worker читает insuredAmount/.test(t.name)), h.tests.map((t) => `${t.ok ? '+' : '-'}${t.name.slice(0, 50)}`).join('; '));
 
 // 4. K3: цены и bisect.
 const c5 = (rev) => requests(rev, [['/quote', { weight: 5, postcode: '80331' }]])[0].body.price;

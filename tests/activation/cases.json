@@ -429,6 +429,12 @@
     "prompt": "Ошибку убрали проверкой на null, но она вылезла в соседнем месте. Как докопаться до настоящей причины?"
   },
   {
+    "id": "root-cause-probe-in",
+    "mode": "in-scope",
+    "expect": "dex-skill-root-cause-analysis:root-cause-analysis",
+    "prompt": "Баг пустяковый - formatAddress падает на заказе без адреса, а воспроизвести его через систему - это Kafka и три сервиса, час на прогон. Каким тестом доказать, что баг был и что фикс его закрыл?"
+  },
+  {
     "id": "scalability-in",
     "mode": "in-scope",
     "expect": "dex-skill-scalability:scalability",
