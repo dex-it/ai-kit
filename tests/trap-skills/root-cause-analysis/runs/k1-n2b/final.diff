@@ -1,0 +1,53 @@
+diff --git a/src/parcel.js b/src/parcel.js
+index 7791970..b2e0af9 100644
+--- a/src/parcel.js
++++ b/src/parcel.js
+@@ -6,7 +6,7 @@ const WITH_UNIT = /^(\d+(?:[.,]\d+)?)\s*(kg|g)$/i;
+ export function parseWeight(input) {
+   if (typeof input === 'number') return Math.round(input * 1000);
+   const s = String(input ?? '').trim();
+-  if (!/[a-z]/i.test(s)) return Math.round(Number(s) * 1000); // виджет партнёра: килограммы строкой
++  if (!/[a-z]/i.test(s)) return Math.round(Number(s.replace(',', '.')) * 1000); // виджет партнёра: килограммы строкой, разделитель . или ,
+   const m = WITH_UNIT.exec(s);
+   if (!m) throw new HttpError(400, `вес: неизвестный формат "${input}"`);
+   const value = Number(m[1].replace(',', '.'));
+diff --git a/src/zones.js b/src/zones.js
+index deb4ac0..94c5ed1 100644
+--- a/src/zones.js
++++ b/src/zones.js
+@@ -5,6 +5,6 @@ import { readConfig } from './config.js';
+ const ZONES = readConfig('zones.json');
+ 
+ export function zoneFor(postcode, zones = ZONES) {
+-  const code = Number(postcode); // числом - как в логах и метриках по регионам
+-  return zones.exact[code] ?? zones.regions[Math.floor(code / 1000)];
++  const code = String(postcode); // строкой: ведущий ноль значим («01067»), ключи таблицы - строки
++  return zones.exact[code] ?? zones.regions[code.slice(0, 2)];
+ }
+diff --git a/test/parcel.test.js b/test/parcel.test.js
+index 554fcdf..0f11b25 100644
+--- a/test/parcel.test.js
++++ b/test/parcel.test.js
+@@ -16,6 +16,8 @@ test('вес строкой с единицей', () => {
+ test('вес строкой без единицы - килограммы (виджет партнёра)', () => {
+   assert.equal(parseWeight('1.5'), 1500);
+   assert.equal(parseWeight('2'), 2000);
++  assert.equal(parseWeight('1,5'), 1500);
++  assert.equal(parseWeight(' 2,3 '), 2300);
+ });
+ 
+ test('расчётный вес - вверх до 0,5 кг', () => {
+diff --git a/test/zones.test.js b/test/zones.test.js
+index 125192f..4b80fc2 100644
+--- a/test/zones.test.js
++++ b/test/zones.test.js
+@@ -10,6 +10,9 @@ const cases = [
+   ['99084', 'B'],
+   ['25980', 'D'],
+   ['18565', 'D'],
++  ['01067', 'B'],
++  ['06108', 'B'],
++  ['09111', 'B'],
+ ];
+ 
+ for (const [postcode, zone] of cases) {
