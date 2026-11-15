@@ -1,0 +1,7 @@
+# n0-x2 case=N0 skill=<scratch>/rt-new-review-threads.md+<scratch>/rt-new-node-contract.md model=claude-sonnet-5-5/medium cost=$0.149 turns=1
+hosting: calls=6 writes=0 errors=0
+turn 1: exit=0 cost=0.149 tools={"Read":3,"Bash":3} outside=0 realGh=0
+snap 0: HEAD feature/invoice-reminders X; status: clean
+  origin: feature/invoice-reminders=Y main=M
+snap 1: HEAD feature/invoice-reminders X; status: clean
+  origin: feature/invoice-reminders=Y main=M

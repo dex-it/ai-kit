@@ -33,9 +33,10 @@ const rootsGap = (roots, found) => {
 const FINDING = { type: 'object', properties: {
   ref: { type: 'string', description: 'номер находки в выходе: у ревьюера R1, R2...; у скептика в confirmed - ref подтверждаемой находки ревьюера, своя находка - пусто' },
   anchor: { type: 'string', description: 'file:line' }, places: { type: 'array', items: { type: 'string' } }, severity: SEV, axis: AXIS,
-  text: { type: 'string' }, closure: { type: 'string', description: 'критерий закрытия' }, evidence: { type: 'string' },
+  context: { type: 'string', description: 'о чём место для читателя без контекста: какой задаче служит задетый код и что он делает, при каком входе или действии срабатывает находка' },
+  text: { type: 'string', description: 'что не так; у улучшения - что и чем лучше' }, closure: { type: 'string', description: 'критерий закрытия' }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка, которую не доказали ни код, ни прогон, и проба, которая её проверит; посылка доказана - пусто' },
-}, required: ['ref', 'anchor', 'places', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
+}, required: ['ref', 'anchor', 'places', 'severity', 'axis', 'context', 'text', 'closure', 'evidence', 'premise'] }
 // Узел выносит статус из PRIOR_STATUS; unverified и dropped ставит только трек. Перечень реестра держат и dexauto.py с finish.py - сверяет sync-tracks --check.
 const PRIOR_STATUS = ['closed', 'partial', 'open', 'disputed', 'no-longer-applicable']
 const OPEN_FINDING = ['open', 'partial', 'unverified']
@@ -60,7 +61,11 @@ const offered = (f) => isOpen(f) && !holds(f) && !awaitsProbe(f)
 const asks = (f) => isOpen(f) && !isBlocking(f) && (f.severity === 'P2' || awaitsProbe(f))
 // Дельта не получена - внесённой считается любая новая находка: молча отложить убыток правки дороже лишнего вопроса.
 const introducedAt = (delta) => (f) => !Array.isArray(delta) || delta.some(d => atFinding(f, d))
-const priorLine = (p) => `- ${p.id || p.ref ? `${p.id || p.ref} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${(p.places || []).length ? ` (также: ${p.places.join(', ')})` : ''}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
+// Читатель строки находки - оператор либо узел без контекста правки: о чём место - до того, что в нём не так.
+const aboutOf = (f) => f.context ? `${f.context}; проблема: ` : ''
+// Скептик подтверждает находку ревьюера по ref: его пустой context не стирает context ревьюера, а находку ревьюера реестр не заводит.
+const contextFrom = (fs, src) => (fs || []).map(f => f.context || !f.ref ? f : { ...f, context: ((src || []).find(r => r.ref === f.ref) || {}).context || '' })
+const priorLine = (p) => `- ${p.id || p.ref ? `${p.id || p.ref} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${aboutOf(p)}${p.text}${(p.places || []).length ? ` (также: ${p.places.join(', ')})` : ''}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
 const findingLine = (f) => `${priorLine(f)}${f.closure ? ` (закрытие: ${f.closure})` : ''}${f.evidence ? `\n  улика: ${f.evidence}` : ''}`
 // Опознание - по id (ledger.md R10): строка сдвигается правкой, а на одной строке бывают разные находки. Статус прежней - последний, вынесенный узлом; о которой узел промолчал, та остаётся непроверенной.
 // id записей, которые узел закрыл в своём выходе (статус не из открытых).
@@ -81,8 +86,8 @@ function registry(unsettled) {
   const seat = (p, status, evidence) => {
     const i = at(p.id)
     // Важность записи только растёт: P2, поднятая узлом до P1, держит итог.
-    const base = i < 0 ? { id: p.id || mint(), anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '', ...(p.introduced ? { introduced: true } : {}) }
-      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [], ...(p.introduced ? { introduced: true } : {}) }
+    const base = i < 0 ? { id: p.id || mint(), anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', context: p.context || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '', ...(p.introduced ? { introduced: true } : {}) }
+      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [], context: p.context || list[i].context || '', ...(p.introduced ? { introduced: true } : {}) }
     const rec = { ...base, status: FINDING_STATUS.includes(status) ? status : 'unverified', evidence: FINDING_STATUS.includes(status) ? evidence : `статус вне словаря реестра (${status}): ${evidence}` }
     if (rec.status === 'closed') closedHere.add(rec.id)
     if (i < 0) list.push(rec); else list[i] = rec

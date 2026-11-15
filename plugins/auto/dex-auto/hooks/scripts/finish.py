@@ -99,7 +99,7 @@ def run_section(data, state, changed):
     out += ["- " + text(e) for e in items(data, "trail")]
     # Раздел - разность реестра на конец прогона, а не находки этого прогона: молчание прогона о находке её не закрывает.
     out += ["", "### Открытые находки"]
-    out += [finding_line(r, text(r.get("text")) + (" (закрытие: %s)" % text(r["closure"]) if r.get("closure") else "")
+    out += [finding_line(r, ("%s; проблема: " % text(r["context"]) if r.get("context") else "") + text(r.get("text")) + (" (закрытие: %s)" % text(r["closure"]) if r.get("closure") else "")
                          + (" (также: %s)" % ", ".join(text(x) for x in r["places"]) if isinstance(r.get("places"), list) and r["places"] else ""))
             for r in state.values() if r.get("status") in dx.OPEN_FINDING]
     out += ["- не опубликовано %s %s: %s" % (text(f.get("id")), text(f.get("anchor")), text(f.get("reason")))

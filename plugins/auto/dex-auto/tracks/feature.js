@@ -112,9 +112,10 @@ const rootsGap = (roots, found) => {
 const FINDING = { type: 'object', properties: {
   ref: { type: 'string', description: 'номер находки в выходе: у ревьюера R1, R2...; у скептика в confirmed - ref подтверждаемой находки ревьюера, своя находка - пусто' },
   anchor: { type: 'string', description: 'file:line' }, places: { type: 'array', items: { type: 'string' } }, severity: SEV, axis: AXIS,
-  text: { type: 'string' }, closure: { type: 'string', description: 'критерий закрытия' }, evidence: { type: 'string' },
+  context: { type: 'string', description: 'о чём место для читателя без контекста: какой задаче служит задетый код и что он делает, при каком входе или действии срабатывает находка' },
+  text: { type: 'string', description: 'что не так; у улучшения - что и чем лучше' }, closure: { type: 'string', description: 'критерий закрытия' }, evidence: { type: 'string' },
   premise: { type: 'string', description: 'посылка, которую не доказали ни код, ни прогон, и проба, которая её проверит; посылка доказана - пусто' },
-}, required: ['ref', 'anchor', 'places', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }
+}, required: ['ref', 'anchor', 'places', 'severity', 'axis', 'context', 'text', 'closure', 'evidence', 'premise'] }
 // Узел выносит статус из PRIOR_STATUS; unverified и dropped ставит только трек. Перечень реестра держат и dexauto.py с finish.py - сверяет sync-tracks --check.
 const PRIOR_STATUS = ['closed', 'partial', 'open', 'disputed', 'no-longer-applicable']
 const OPEN_FINDING = ['open', 'partial', 'unverified']
@@ -139,7 +140,11 @@ const offered = (f) => isOpen(f) && !holds(f) && !awaitsProbe(f)
 const asks = (f) => isOpen(f) && !isBlocking(f) && (f.severity === 'P2' || awaitsProbe(f))
 // Дельта не получена - внесённой считается любая новая находка: молча отложить убыток правки дороже лишнего вопроса.
 const introducedAt = (delta) => (f) => !Array.isArray(delta) || delta.some(d => atFinding(f, d))
-const priorLine = (p) => `- ${p.id || p.ref ? `${p.id || p.ref} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${p.text}${(p.places || []).length ? ` (также: ${p.places.join(', ')})` : ''}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
+// Читатель строки находки - оператор либо узел без контекста правки: о чём место - до того, что в нём не так.
+const aboutOf = (f) => f.context ? `${f.context}; проблема: ` : ''
+// Скептик подтверждает находку ревьюера по ref: его пустой context не стирает context ревьюера, а находку ревьюера реестр не заводит.
+const contextFrom = (fs, src) => (fs || []).map(f => f.context || !f.ref ? f : { ...f, context: ((src || []).find(r => r.ref === f.ref) || {}).context || '' })
+const priorLine = (p) => `- ${p.id || p.ref ? `${p.id || p.ref} ` : ''}[${p.severity}] ${p.axis ? `${p.axis} ` : ''}${p.anchor}: ${aboutOf(p)}${p.text}${(p.places || []).length ? ` (также: ${p.places.join(', ')})` : ''}${awaitsProbe(p) ? ` (проба: ${p.premise})` : ''}`
 const findingLine = (f) => `${priorLine(f)}${f.closure ? ` (закрытие: ${f.closure})` : ''}${f.evidence ? `\n  улика: ${f.evidence}` : ''}`
 // Опознание - по id (ledger.md R10): строка сдвигается правкой, а на одной строке бывают разные находки. Статус прежней - последний, вынесенный узлом; о которой узел промолчал, та остаётся непроверенной.
 // id записей, которые узел закрыл в своём выходе (статус не из открытых).
@@ -160,8 +165,8 @@ function registry(unsettled) {
   const seat = (p, status, evidence) => {
     const i = at(p.id)
     // Важность записи только растёт: P2, поднятая узлом до P1, держит итог.
-    const base = i < 0 ? { id: p.id || mint(), anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '', ...(p.introduced ? { introduced: true } : {}) }
-      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [], ...(p.introduced ? { introduced: true } : {}) }
+    const base = i < 0 ? { id: p.id || mint(), anchor: p.anchor || '', places: p.places || [], severity: p.severity || '', axis: p.axis || '', context: p.context || '', text: p.text || '', closure: p.closure || '', premise: p.premise || '', ...(p.introduced ? { introduced: true } : {}) }
+      : { ...list[i], severity: p.severity && (!list[i].severity || p.severity < list[i].severity) ? p.severity : list[i].severity, premise: 'premise' in p ? p.premise || '' : list[i].premise || '', places: (p.places || []).length ? p.places : list[i].places || [], context: p.context || list[i].context || '', ...(p.introduced ? { introduced: true } : {}) }
     const rec = { ...base, status: FINDING_STATUS.includes(status) ? status : 'unverified', evidence: FINDING_STATUS.includes(status) ? evidence : `статус вне словаря реестра (${status}): ${evidence}` }
     if (rec.status === 'closed') closedHere.add(rec.id)
     if (i < 0) list.push(rec); else list[i] = rec
@@ -423,9 +428,9 @@ const FIX = { type: 'object', properties: {
 }, required: ['status', 'plan', 'diff-scope', 'commit', 'commands', 'run-status', 'red-run', 'uncovered-status', 'uncovered', 'dependents-status', 'dependents', 'fact-check', 'decisions', 'prior', 'missing'] }
 const REVIEW = { type: 'object', properties: {
   status: STATUS,
-  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text,
+  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, context: FINDING.properties.context, text: FINDING.properties.text,
     closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
-  required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }, description: 'только находки, которых нет в перечне прежних' },
+  required: ['ref', 'anchor', 'severity', 'axis', 'context', 'text', 'closure', 'evidence', 'premise'] }, description: 'только находки, которых нет в перечне прежних' },
   axes: AXES,
   roots: ROOTS,
   'run-status': { type: 'string', description: 'прогон свой, не пересказ входа' },
@@ -455,7 +460,7 @@ const admit = (green, rev, stuck, gaps) => !green ? 'верификация по
   : rev.status === 'blocked' ? `саморевью не выполнено: ${lack(rev, 'саморевьюер')}`
   : stuck.some(isBlocking) ? `открытые P0/P1: ${stuck.filter(isBlocking).map(stuckLine).join('; ')}` : gaps
 // Итога не держит, но вопрос оператору не теряется: «продолжить» подаёт такую находку кодеру из ledger.
-const askLines = (r) => r.asking().map(f => `${f.id} [${f.severity}] ${f.anchor}: ${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}итога не держит, решение за оператором - ${f.text}`}`)
+const askLines = (r) => r.asking().map(f => `${f.id} [${f.severity}] ${f.anchor}: ${f.context ? `${f.context}; ` : ''}${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}итога не держит, решение за оператором - ${f.text}`}`)
 // Закрытая в прогоне находка в перечне - чтобы ревью сверило, не вернула ли её правка.
 const listedLine = (p) => `${priorLine(p)}${p.status === 'closed' ? ' (закрыта в этом прогоне: сверь, что правка её не вернула)' : ''}`
 // Ревизия - поле head_sha: head - текст git log, у модели-верификатора его первое слово не обязано быть sha.
@@ -491,7 +496,7 @@ const judged = (fal) => !!fal && fal.status !== 'blocked' && !fal.skipped
 const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(buysFix)
 const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], prior: [] }
 // В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
-const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
+const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: contextFrom(fal.confirmed, rev.findings), prior: fal.prior } : rev
 const spotGap = (rev, h) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
   : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : ''].filter(Boolean).join('; ')
 const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal.skipped) ? '' : !judged(fal) ? `фальсификация саморевью не выполнена: ${lack(fal, 'скептик')}`
@@ -510,8 +515,8 @@ const traceGap = (r, h, fal, reg = []) => {
 const CHECK = { type: 'object', properties: {
   status: STATUS,
   prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня - запись с её id, статус с уликой из кода ревизии' },
-  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text, closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
-    required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }, description: 'только дефекты, внесённые дельтой правки: место пересекает дельту, находки нет в перечне' },
+  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, context: FINDING.properties.context, text: FINDING.properties.text, closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
+    required: ['ref', 'anchor', 'severity', 'axis', 'context', 'text', 'closure', 'evidence', 'premise'] }, description: 'только дефекты, внесённые дельтой правки: место пересекает дельту, находки нет в перечне' },
   missing: { type: 'string', description: 'при blocked либо partial - чего не хватило для сверки; иначе пусто' },
 }, required: ['status', 'prior', 'findings', 'missing'] }
 // Сверка - не ревью (domain.md §1): решения, оси и правила проекта судило ревью, полный прогон дала верификация.

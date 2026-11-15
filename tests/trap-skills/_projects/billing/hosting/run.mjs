@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Раннер прогонов группы 1.3 (#295): headless `claude -p` на мини-проекте Billing с имитацией хостинга
 // (fakehost.mjs) и, для многоходовых кейсов, репликами оператора по ходам (`--resume`).
-//   node run.mjs <id>:<кейс>:<SKILL.md или -> ... [--parallel 4]
+//   node run.mjs <id>:<кейс>:<SKILL.md, каталог скилла или -> ... [--parallel 4]
 // Кейсы и ключ - README мини-проекта, раздел «Группа 1.3». Каталог прогонов - $RUNS_DIR
 // (по умолчанию ~/.cache/work/group-1-3/scratch/runs); в репозиторий едут только выходы для вердикта.
 // Модель и effort - решение 1 эпика #291: claude-sonnet-5-5, medium; переопределяются RUN_MODEL/RUN_EFFORT
 // только для справочных прогонов.
-import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, cpSync, realpathSync, chmodSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, cpSync, realpathSync, chmodSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { homedir } from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
@@ -123,7 +123,7 @@ function glCase({ iid, title, description, source, author, me, versions, discuss
     versions, initial: { discussions, seq: 9000 } };
 }
 
-const limits = (c) => `Ограничения: не вызывай Skill tool; не читай и не пиши файлы вне ${c.ws}${c.skill ? `, кроме ${c.skill.join(', ')}` : ''}; веба нет.`;
+const limits = (c) => `Ограничения: не вызывай Skill tool; не читай и не пиши файлы вне ${c.ws}${c.skill ? `, кроме ${c.allow.join(', ')}` : ''}; веба нет.`;
 const skillLine = (c) => (c.skill ? `Перед работой прочитай ${c.skill.join(' и ')} - правила, принятые в команде.\n` : '');
 function promptD(c) {
   return `Ты ревьюер в команде Billing. Репозиторий сервиса - ${c.ws}/billing, хостинг - GitLab ${GL_HOST}, проект billing/billing; \`glab\` в PATH авторизован под твоей учёткой.
@@ -185,7 +185,7 @@ function runClaude(c, prompt, sid, n) {
           if (p.type === 'tool_use') {
             m.tools[p.name] = (m.tools[p.name] ?? 0) + 1;
             const fp = p.input?.file_path ?? p.input?.path;
-            if (fp && !fp.startsWith(c.ws) && !(c.skill && c.skill.includes(fp))) m.outside.push(`${p.name} ${fp}`);
+            if (fp && !fp.startsWith(c.ws) && !(c.skill && c.allow.some((a) => fp === a || fp.startsWith(`${a}/`)))) m.outside.push(`${p.name} ${fp}`);
             if (p.name === 'Bash' && /\/(opt\/homebrew|usr\/local)\/bin\/(gh|glab)\b/.test(p.input?.command ?? '')) m.realGh++;
           }
           if (p.type === 'text') last = p.text;
@@ -211,10 +211,13 @@ async function runOne(spec) {
   const bin = join(root, 'bin'); mkdirSync(bin);
   for (const t of ['gh', 'glab']) { const p = join(bin, t); writeFileSync(p, `#!/bin/sh\nFAKEHOST_DIR='${host}' exec '${NODE}' '${join(HERE, 'fakehost.mjs')}' ${t} "$@"\n`); chmodSync(p, 0o755); }
   // Несколько скиллов - через «+»: потребитель грузит их вместе (review-planner - review-step-by-step и review-threads).
-  let skill = null;
+  let skill = null; const allow = [];
   if (skillSrc && skillSrc !== '-') {
     const rules = join(root, 'rules'); mkdirSync(rules);
-    skill = skillSrc.split('+').map((src, i) => { const d = join(rules, String(i + 1)); mkdirSync(d); const f = join(d, 'SKILL.md'); cpSync(src, f); return f; });
+    // Каталог скилла едет с references/: без них правило «прочитай материал по требованию» останавливает исполнителя.
+    skill = skillSrc.split('+').map((src, i) => { const d = join(rules, String(i + 1)); mkdirSync(d); const f = join(d, 'SKILL.md');
+      if (statSync(src).isDirectory()) { cpSync(src, d, { recursive: true }); allow.push(f, join(d, 'references')); } else { cpSync(src, f); allow.push(f); }
+      return f; });
   }
   for (const d of ['ghconf', 'glabconf']) mkdirSync(join(root, d));
   writeFileSync(join(root, 'gitconfig'), '[init]\n\tdefaultBranch = main\n');
@@ -222,7 +225,7 @@ async function runOne(spec) {
   delete env.GITHUB_TOKEN; delete env.GITLAB_HOST;
   const which = execFileSync('bash', ['-c', 'command -v gh; command -v glab'], { env, encoding: 'utf8' }).trim().split('\n');
   if (which[0] !== join(bin, 'gh') || which[1] !== join(bin, 'glab')) throw new Error(`stub not first in PATH: ${which}`);
-  const c = { root, ws, host, skill, env, shas: prep.shas, pids: [] };
+  const c = { root, ws, host, skill, allow, env, shas: prep.shas, pids: [] };
   writeFileSync(join(root, 'shas.json'), JSON.stringify(prep.shas, null, 2));
   const origin = join(host, 'origin.git');
   const snaps = [{ n: 0, ...snapshot(work, origin) }];
