@@ -24,9 +24,9 @@ const FIX = { type: 'object', properties: {
 }, required: ['status', 'plan', 'diff-scope', 'commit', 'commands', 'run-status', 'red-run', 'uncovered-status', 'uncovered', 'dependents-status', 'dependents', 'fact-check', 'decisions', 'prior', 'missing'] }
 const REVIEW = { type: 'object', properties: {
   status: STATUS,
-  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text,
+  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, context: FINDING.properties.context, text: FINDING.properties.text,
     closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
-  required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }, description: 'только находки, которых нет в перечне прежних' },
+  required: ['ref', 'anchor', 'severity', 'axis', 'context', 'text', 'closure', 'evidence', 'premise'] }, description: 'только находки, которых нет в перечне прежних' },
   axes: AXES,
   roots: ROOTS,
   'run-status': { type: 'string', description: 'прогон свой, не пересказ входа' },
@@ -56,7 +56,7 @@ const admit = (green, rev, stuck, gaps) => !green ? 'верификация по
   : rev.status === 'blocked' ? `саморевью не выполнено: ${lack(rev, 'саморевьюер')}`
   : stuck.some(isBlocking) ? `открытые P0/P1: ${stuck.filter(isBlocking).map(stuckLine).join('; ')}` : gaps
 // Итога не держит, но вопрос оператору не теряется: «продолжить» подаёт такую находку кодеру из ledger.
-const askLines = (r) => r.asking().map(f => `${f.id} [${f.severity}] ${f.anchor}: ${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}итога не держит, решение за оператором - ${f.text}`}`)
+const askLines = (r) => r.asking().map(f => `${f.id} [${f.severity}] ${f.anchor}: ${f.context ? `${f.context}; ` : ''}${awaitsProbe(f) ? `нужна проба оператора - ${f.premise}` : `${f.introduced ? 'внесена правкой, ' : ''}итога не держит, решение за оператором - ${f.text}`}`)
 // Закрытая в прогоне находка в перечне - чтобы ревью сверило, не вернула ли её правка.
 const listedLine = (p) => `${priorLine(p)}${p.status === 'closed' ? ' (закрыта в этом прогоне: сверь, что правка её не вернула)' : ''}`
 // Ревизия - поле head_sha: head - текст git log, у модели-верификатора его первое слово не обязано быть sha.
@@ -92,7 +92,7 @@ const judged = (fal) => !!fal && fal.status !== 'blocked' && !fal.skipped
 const needsSkeptic = (rev, listed) => [...rev.findings, ...listed].some(buysFix)
 const SKIPPED = { skipped: true, status: 'skipped', confirmed: [], dropped: [], prior: [] }
 // В реестр входит выход скептика; без него - claims ревьюера, и разрыв не выпускает complete.
-const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: fal.confirmed, prior: fal.prior } : rev
+const verdictOf = (rev, fal) => judged(fal) ? { status: fal.status, findings: contextFrom(fal.confirmed, rev.findings), prior: fal.prior } : rev
 const spotGap = (rev, h) => !rev || rev.status === 'blocked' ? '' : !h || h.status === 'blocked' ? `места правки не сняты: ${lack(h, 'снимок правки')}`
   : [h.status === 'partial' ? `места правки сняты не целиком: ${h.missing || 'нехватка не названа'}` : '', hunkGap(h.hunks, rev.roots) ? `саморевью: ${hunkGap(h.hunks, rev.roots)}` : ''].filter(Boolean).join('; ')
 const falsifyGap = (rev, fal) => !rev || rev.status === 'blocked' || (fal && fal.skipped) ? '' : !judged(fal) ? `фальсификация саморевью не выполнена: ${lack(fal, 'скептик')}`
@@ -111,8 +111,8 @@ const traceGap = (r, h, fal, reg = []) => {
 const CHECK = { type: 'object', properties: {
   status: STATUS,
   prior: { type: 'array', items: PRIOR, description: 'по каждой находке перечня - запись с её id, статус с уликой из кода ревизии' },
-  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, text: FINDING.properties.text, closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
-    required: ['ref', 'anchor', 'severity', 'axis', 'text', 'closure', 'evidence', 'premise'] }, description: 'только дефекты, внесённые дельтой правки: место пересекает дельту, находки нет в перечне' },
+  findings: { type: 'array', items: { type: 'object', properties: { ref: FINDING.properties.ref, anchor: FINDING.properties.anchor, severity: SEV, axis: FINDING.properties.axis, context: FINDING.properties.context, text: FINDING.properties.text, closure: FINDING.properties.closure, evidence: FINDING.properties.evidence, premise: FINDING.properties.premise },
+    required: ['ref', 'anchor', 'severity', 'axis', 'context', 'text', 'closure', 'evidence', 'premise'] }, description: 'только дефекты, внесённые дельтой правки: место пересекает дельту, находки нет в перечне' },
   missing: { type: 'string', description: 'при blocked либо partial - чего не хватило для сверки; иначе пусто' },
 }, required: ['status', 'prior', 'findings', 'missing'] }
 // Сверка - не ревью (domain.md §1): решения, оси и правила проекта судило ревью, полный прогон дала верификация.

@@ -82,6 +82,9 @@ check "$(grep -c '"ref"' "$("$L" dir P-9)/01-review.findings.jsonl")" "0" "finis
 "$F" P-3 feature partial <<< '{"status":"partial","trail":[{"step":3}],"prior":[{"id":"F1","status":"open","evidence":"не закрыта"}]}' >/dev/null
 check "$("$L" findings P-3 feature | python3 -c 'import json,sys; print(json.load(sys.stdin)[0].get("introduced"))')" "True" "реестр: introduced переживает прогон и запись без поля его не снимает (ledger.md R9)"
 check "$(grep -c '^- F1 partial \[P2\] src/s.ts:4: флаг не сброшен (закрытие: сброшен везде) (также: src/t.ts:9-12)$' "$("$L" dir P-2)/01-review.md")" "1" "finish: места находки - в строке Открытых находок"
+"$L" open P-11 >/dev/null
+"$F" P-11 feature partial <<< '{"status":"partial","trail":[{"step":3}],"open_findings":[{"severity":"P1","anchor":"src/pay.ts:7","context":"списание по заказу при повторном нажатии «Оплатить»","text":"второе списание не отсекается","closure":"одно списание на заказ"}]}' >/dev/null
+check "$(grep -c '^- F1 open \[P1\] src/pay.ts:7: списание по заказу при повторном нажатии «Оплатить»; проблема: второе списание не отсекается (закрытие: одно списание на заказ)$' "$("$L" dir P-11)/01-feature.md")" "1" "finish: context находки - перед проблемой в строке Открытых находок (ledger.md R9)"
 
 "$L" open F-2 >/dev/null
 "$F" F-2 feature partial <<< '{"status":"partial","trail":[{"step":1}],"open_findings":[{"severity":"P1","anchor":"src/a.ts:10","text":"находка прогона 1"}]}' >/dev/null

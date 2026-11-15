@@ -1,0 +1,7 @@
+7257586 Billing Team  (HEAD -> feature/invoice-reminders, origin/feature/invoice-reminders) | Отмена: без повторной проверки статуса - отменяет только бэк-офис
+7768666 Billing Team  | Напоминания о просрочке, пеня, повтор проводки при таймауте, валюты из конфигурации
+445a57f Billing Team  (origin/main, origin/HEAD, main) | API: enum в JSON строками - контракт с фронтом
+fef5712 Billing Team  | Свод правил команды
+3170b91 Billing Team  | ADR-0007: устойчивость HTTP через Microsoft.Extensions.Http.Resilience вместо ADR-0003
+a59b100 Billing Team  | Проводки в Ledger через outbox (ADR-0006), отмена счёта
+4eadeaa Billing Team  | Счета: создание, оплата с проводкой в Ledger, котировка в валюте

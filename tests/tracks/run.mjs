@@ -454,6 +454,22 @@ const SCENARIOS = [
     responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revP3, 'fix:after-review': { ...fixOk, prior: [{ ...fixDeclines('F21', 'P3').prior[0], status: 'closed', evidence: 'переименовано' }] }, 'verify:после саморевью': green },
     expect: ({ result }) => [['F21 closed с уликой кодера', (f => !!f && f.status === 'closed' && /закрыто кодером без сверки/.test(f.evidence))(result.prior.find(f => f.id === 'F21'))],
       ['вопроса оператору по F21 нет', !result.decisions.some(d => /^F21 \[/.test(d))]] },
+  ...[['F223', 'feature', featureArgs, { 'ctx:R-I': ctxOk }], ['B270', 'bugfix', bugfixArgs, { reproduce: reproOk }]].map(([n, track, args, head]) => ({
+    name: `${n} ${track}: у находки context -> вопрос оператору и перечень кодеру называют, о чём место, до проблемы (T18 / T16)`, track, args,
+    responses: { ...head, 'fix:1': fixOk, 'verify:после попытки 1': green,
+      'self-review:первое': { ...revP2, findings: [{ ...revP2.findings[0], context: 'имя счётчика повторов в клиенте оплаты' }] } },
+    expect: ({ result, calls }) => [
+      ['вопрос оператору: context до проблемы', result.decisions.some(d => d.startsWith('F21 [P2] src/A.cs:9: имя счётчика повторов в клиенте оплаты; итога не держит'))],
+      ['перечень кодеру: context до проблемы', promptOf(calls, 'fix:after-review').includes('src/A.cs:9: имя счётчика повторов в клиенте оплаты; проблема: имя переменной')],
+    ] })),
+  ...[['F224', 'feature', featureArgs, { 'ctx:R-I': ctxOk }], ['B271', 'bugfix', bugfixArgs, { reproduce: reproOk }]].map(([n, track, args, head]) => ({
+    name: `${n} ${track}: скептик подтвердил находку ревьюера по ref с пустым context -> context ревьюера в вопросе оператору (T18 / T16)`, track, args,
+    responses: { ...head, 'fix:1': fixOk, 'verify:после попытки 1': green,
+      'self-review:первое': { ...revP2, findings: [{ ...revP2.findings[0], ref: 'R1', context: 'имя счётчика повторов в клиенте оплаты' }] },
+      'falsify:первое': falWith({ confirmed: [{ ...revP2.findings[0], ref: 'R1', context: '' }], dropped: [] }) },
+    expect: ({ result }) => [
+      ['вопрос оператору несёт context ревьюера', result.decisions.some(d => d.startsWith('F21 [P2] src/A.cs:9: имя счётчика повторов в клиенте оплаты; итога не держит'))],
+    ] })),
   { name: 'F221 P2, закрытая сверкой правки, оператору не выносится: вопрос - только у открытой (T18)', track: 'feature', args: featureArgs,
     responses: { 'ctx:R-I': ctxOk, 'fix:1': fixOk, 'verify:после попытки 1': green, 'self-review:первое': revP2,
       'fix:after-review': fixOk, 'verify:после саморевью': green,
@@ -664,6 +680,20 @@ const SCENARIOS = [
       ['статус complete', result.status === 'complete'],
       ['тред опубликован', result.published.length === 1],
       ['неопубликованных нет', result.unpublished.length === 0],
+    ] },
+  { name: 'R101 с санкцией: тред публикатору - context находки до проблемы (T9)', track: 'review', args: { ...reviewArgs, publish: true },
+    responses: { 'ctx:subject': ctxMr, 'review:first': revMr, 'falsify+coverage': { ...falOk, confirmed: [{ ...mrFinding, context: 'выборка заказов по владельцу в API кабинета' }] },
+      publish: { status: 'complete', published: [{ id: 'F21', url: 'https://x/1', note: '' }], unpublished: [] } },
+    expect: ({ calls }) => [
+      ['context в перечне публикатору до проблемы', promptOf(calls, 'publish').includes('api/user.ts:41: выборка заказов по владельцу в API кабинета; проблема: токен в логе')],
+      ['публикатору велено ставить context в тред', /context находки/.test(promptOf(calls, 'publish'))],
+    ] },
+  { name: 'R102 скептик подтвердил находку ревьюера по ref с пустым context -> публикатору context ревьюера (T9)', track: 'review', args: { ...reviewArgs, publish: true },
+    responses: { 'ctx:subject': ctxMr, 'review:first': { ...revMr, findings: [{ ...mrFinding, ref: 'R1', context: 'выборка заказов по владельцу в API кабинета' }] },
+      'falsify+coverage': { ...falOk, confirmed: [{ ...mrFinding, ref: 'R1', context: '' }] },
+      publish: { status: 'complete', published: [{ id: 'F21', url: 'https://x/1', note: '' }], unpublished: [] } },
+    expect: ({ calls }) => [
+      ['context ревьюера в перечне публикатору', promptOf(calls, 'publish').includes('api/user.ts:41: выборка заказов по владельцу в API кабинета; проблема: токен в логе')],
     ] },
   { name: 'R3 с санкцией: канал отказал на части тредов', track: 'review', args: { ...reviewArgs, publish: true },
     responses: { 'ctx:subject': ctxMr, 'review:first': revMr, 'falsify+coverage': falOk,
