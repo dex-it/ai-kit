@@ -67,7 +67,7 @@ skills:
   - *TypeScript/JS:* `dex-skill-ts-nodejs-api` (env проверяется при старте)
   - имена вызывай в полной форме `{plugin}:{skill}`
 
-**Fallback:** Стек без security-skills (`dex-skill-<стек>-*` не установлены) -- работай на Phase 1-2 и OWASP-категориях, пометь «частных security-skills под стек нет». Skill tool недоступен -- пропусти, зафиксируй.
+**Fallback:** Стек без security-skills (`dex-skill-<стек>-*` не установлены) -- работай на Phase 1-2 и OWASP-категориях, пометь «частных security-skills под стек нет». `Skill` недоступен -- пропусти, зафиксируй.
 
 **Exit criteria:** Загруженные skills и новые/уточнённые векторы записаны.
 
@@ -84,7 +84,7 @@ skills:
 
 Загрузи `dex-skill-review-evidence:review-evidence`.
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status`; смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: цепочки эксплойтов (каждая = `context` + `anchor` file:line по звеньям + `severity` + `confidence` + `scope` + `block` + `closure` фикс) + threat model (акторы × границы × активы из Phase 1) + `open-observations` (находки `out-of-scope`) + `review-verdict` + `fact-check` (предмет сверки - техутверждения звеньев; снятые по `contradicted` звенья названы здесь же). Это результат узла независимо от режима.
+**Output (handoff):** поля словаря `node-contract`, первым - `status`; смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: цепочки эксплойтов (каждая = `context` + `anchor` file:line по звеньям + `severity` + `confidence` + `scope` + `block` + `closure` фикс) + threat model (акторы × границы × активы из Phase 1) + `open-observations` (находки `out-of-scope`) + `review-verdict` + `fact-check` (предмет сверки - техутверждения звеньев; снятые по `contradicted` звенья названы здесь же). Это результат узла независимо от режима. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 **Exit criteria:** Таблица цепочек: путь, звенья (file:line), severity, confidence, результат фальсификации; техутверждения звеньев сверены с источником или помечены `unverifiable`/`contradicted`.
 
@@ -111,7 +111,7 @@ Threat Model:
 Attack Paths:
   [граница] -> [вектор] -> [актив] | «путь недостижим: ...»
 
-Skills invoked: [загруженные skills и уточнённые ими векторы; профильных под стек нет - строка «частных security-skills под стек нет»; Skill tool недоступен - строка о пропуске]
+Skills invoked: [загруженные skills и уточнённые ими векторы; профильных под стек нет - строка «частных security-skills под стек нет»; `Skill` недоступен - строка о пропуске]
 
 Exploit Chains:
   [severity] цепочка: вход X (file:line) -> Y (file:line) -> актив Z

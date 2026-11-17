@@ -44,7 +44,7 @@ Context? -> Direct Analysis -> Skill-Based Deep Scan -> Report.
 - Для аномалии: root cause hypothesis, affected segments, correlation с другими метриками
 - Для funnel: drop-off points, conversion rates по шагам, biggest opportunity
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-product-discovery:product-discovery` - гипотеза с порогом опровержения, проверка поведением до разработки
 
 **Exit criteria:** Каждый insight подкреплён конкретными данными (числа, %). Correlation vs causation явно разделены. Есть actionable recommendations, а не только наблюдения.
@@ -55,7 +55,7 @@ Context? -> Direct Analysis -> Skill-Based Deep Scan -> Report.
 
 **Goal:** Проверить анализ через prioritization frameworks и определить impact рекомендаций.
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-prioritization:prioritization` - оценки RICE, доля P0 при ранжировании action items
 
 **Output:** Рекомендации, отсортированные по expected impact с обоснованием приоритета.
@@ -76,7 +76,7 @@ Context? -> Direct Analysis -> Skill-Based Deep Scan -> Report.
 
 **Exit criteria:** Отчёт отвечает на исходный вопрос вызывающего. Числа consistent между секциями. Нет рекомендаций без данных.
 
-**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла): Metrics Report составом из Output этой фазы, insights каждый со своими числами, приоритизированные action items с expected impact, раздел Methodology (источники, допущения, ограничения), принятые узлом решения о трактовке данных. **Продуктовое решение остаётся за человеком:** рекомендация ship / iterate / kill отдаётся как рекомендация с основанием, а не как принятое решение, и `status: complete` означает, что анализ выполнен, а не что направление выбрано. Данных не нашлось либо significance не достигнута -> `status: partial` с этим фактом.
+**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла): Metrics Report составом из Output этой фазы, insights каждый со своими числами, приоритизированные action items с expected impact, раздел Methodology (источники, допущения, ограничения), принятые узлом решения о трактовке данных. **Продуктовое решение остаётся за человеком:** рекомендация ship / iterate / kill отдаётся как рекомендация с основанием, а не как принятое решение, и `status: complete` означает, что анализ выполнен, а не что направление выбрано. Данных не нашлось либо significance не достигнута -> `status: partial` с этим фактом. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 ## Boundaries
 

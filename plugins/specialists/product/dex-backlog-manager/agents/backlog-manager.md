@@ -25,7 +25,7 @@ Gather -> Analyze -> Prioritize -> Present.
 
 **Exit criteria:** Есть полный snapshot backlog с метаданными (status, priority, age, owner). Пустые слоты помечены.
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-epic-planning:epic-planning` - ограничения цели, точность оценки и размер эпика
 
 ## Phase 2: Analyze
@@ -49,7 +49,7 @@ Gather -> Analyze -> Prioritize -> Present.
 
 **Exit criteria:** Top-10 items упорядочены с обоснованием. Для каждого epic указано: почему на этой позиции и что теряем, если отложим. Epic без business value в упорядочивание не идёт и позицией не наделяется: он выносится отдельным перечнем, и при спавне узлом фаза закрывается `status: blocked` по этому перечню (см. Boundaries). Value не определён ни у одного - упорядочивать нечего, и это тот же `blocked`, а не пустой Top-10.
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-prioritization:prioritization` - оценки RICE, доля P0, решение по авторитету
 
 **Mandatory:** yes
@@ -68,7 +68,7 @@ Gather -> Analyze -> Prioritize -> Present.
 
 **Exit criteria:** Отчёт сохранён или показан пользователю. Action items имеют owner'ов (или помечены «нужен owner»).
 
-**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла): Backlog Health Report составом из **Output** этой фазы, перечень изменённых элементов бэклога, и решения, принятые узлом самостоятельно при приоритизации, с основанием каждого. Epics без бизнес-ценности - `status: blocked` с их перечнем и адресатом вопроса (Phase 3), а не приоритет наугад.
+**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла): Backlog Health Report составом из **Output** этой фазы, перечень изменённых элементов бэклога, и решения, принятые узлом самостоятельно при приоритизации, с основанием каждого. Epics без бизнес-ценности - `status: blocked` с их перечнем и адресатом вопроса (Phase 3), а не приоритет наугад. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 ## Boundaries
 

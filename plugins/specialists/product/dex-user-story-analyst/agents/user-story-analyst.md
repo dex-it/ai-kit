@@ -44,7 +44,7 @@ Understand Requirements -> Generate -> Validate.
 
 **Exit criteria:** Role, goal и benefit определены (минимум для «As a / I want / So that»). Источник пришёл одной темой либо только бизнес-уровнем (без `FR`/`NFR` системного уровня) - halt + возврат оркестратору по валидации входа выше, не додумывать.
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-user-stories:user-stories` - чек-лист историй и критериев приёмки
 
 ## Phase 2: Generate
@@ -77,7 +77,7 @@ Understand Requirements -> Generate -> Validate.
 
 **Goal:** Проверить stories на INVEST compliance и полноту acceptance criteria.
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-requirement-quality:requirement-quality` - оракул единицы по набору acceptance criteria. Дефект устранить до выдачи handoff; неустранимый (нужно решение постановщика) - `status: blocked` оркестратору, не додумывать сценарий за него.
 
 **Output:** Validation results per story:
@@ -114,7 +114,7 @@ Understand Requirements -> Generate -> Validate.
 
 **Exit criteria:** Все stories проходят INVEST. История, покрывающая больше одной цели пользователя, разбита. Нет AC без конкретного expected outcome. Каждый путь и каждая ось несут годный по реестру статус - иначе фаза не закрывается. Непогашенная дыра -> `status: blocked` с перечнем дыр. `self-check` несёт результат прогона оракула по stories; метку по ним ставит судья гейта, не этот агент. Блок `quality-checks` присутствует **в шапке файла со stories** (унаследованные со входа записи; входных записей не было -> явная пометка «входных записей нет»), не только в тексте выхода: handoff до следующего узла не доживает (`node-contract`, носитель метки). Блок ведётся как индекс - без пояснений, зачем он там; `self-check` и `pending-judgement` остаются полями выхода и разделами артефакта не становятся («артефакт не пересказывает отчёт»). Несостоявшийся суд -> `pending-judgement`.
 
-**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла); состав: перечень stories, `acceptance criteria` (Given-When-Then, продуктовый оракул, с метками `[FR-NNN]`), покрытие с двух сторон (правила без примера и непокрытые ветки - перечнями), non-goals (что не покрыто историями, с основанием из входа), допущения (каждое - с источником вывода), строки решений для `decision-log` (файл пишет владелец журнала - `node-contract`, `references/decision-log-ownership.md`), дыры истории (если `blocked`), `quality-checks` (сквозное поле, переносится со входа), `self-check`. Продуктовый оракул старше технического DoD (`node-contract`, `references/oracle-precedence.md`).
+**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла); состав: перечень stories, `acceptance criteria` (Given-When-Then, продуктовый оракул, с метками `[FR-NNN]`), покрытие с двух сторон (правила без примера и непокрытые ветки - перечнями), non-goals (что не покрыто историями, с основанием из входа), допущения (каждое - с источником вывода), строки решений для `decision-log` (файл пишет владелец журнала - `node-contract`, `references/decision-log-ownership.md`), дыры истории (если `blocked`), `quality-checks` (сквозное поле, переносится со входа), `self-check`. Продуктовый оракул старше технического DoD (`node-contract`, `references/oracle-precedence.md`). `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 **`self-check` - обязательное поле выхода** (`node-contract`, раздел B п.7): результат прогона `requirement-quality` по своим stories в Phase 3 - что прогнано, что устранено. **Записи в `quality-checks` автор не делает ни при каком исходе**: вердикт ставит судья - дирижёр на гейте либо ревьюер требований. Дефект, неустранимый здесь (нужно решение постановщика), называется перечнем дефектов и дыр в выходе: набор историй написан, дефект открыт -> `status: partial`, историй нет вовсе -> `blocked`. Прогон не состоялся (skill не загрузился) -> строка причины в `self-check` и `status: partial` с этой проверкой в перечне незакрытого (graceful degradation, `node-contract`).
 

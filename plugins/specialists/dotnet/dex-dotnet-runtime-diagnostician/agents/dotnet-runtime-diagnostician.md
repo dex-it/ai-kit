@@ -32,7 +32,7 @@ skills:
 
 ## Phase 2: Direct Investigation
 
-**Goal:** Прямой осмотр без вызова Skill tool - сформулировать гипотезу root cause по логам, метрикам, ps/top, существующим dumps и выбрать 1-3 инструмента для Phase 4.
+**Goal:** Прямой осмотр без загрузки skills - сформулировать гипотезу root cause по логам, метрикам, ps/top, существующим dumps и выбрать 1-3 инструмента для Phase 4.
 
 **Output:** Текстовая гипотеза «что сломалось и почему» с привязкой к артефакту, и список инструментов из мысленной матрицы (netcoredbg для managed PID, gdb/lldb для native crash, perf для CPU slowdown, bpftrace для hidden syscall, dotnet-counters для live metric проверки, dotnet-gcdump для GC pressure, gcore для snapshot).
 
@@ -42,7 +42,7 @@ skills:
 
 ## Phase 3: Skill-Based Pattern Check
 
-**Goal:** Загрузить только релевантные симптому skills через Skill tool, пройти по чек-листам ловушек и подтвердить или скорректировать гипотезу из Phase 2.
+**Goal:** Загрузить только релевантные симптому skills, пройти по чек-листам ловушек и подтвердить или скорректировать гипотезу из Phase 2.
 
 **Output:** Список loaded skills, дедуплицированные с Phase 2 находки.
 
@@ -52,20 +52,20 @@ skills:
 
 Managed-side .NET:
 
-- Managed crash или managed runtime поведение - вызови Skill tool `dex-skill-managed-debug:managed-debug`
+- Managed crash или managed runtime поведение - загрузи skill `dex-skill-managed-debug:managed-debug`
 - Managed memory leak или GC pressure - `dex-skill-managed-debug:managed-debug`
 - Managed deadlock или ThreadPool starvation - `dex-skill-managed-debug:managed-debug` плюс `dex-skill-dotnet-async-patterns:dotnet-async-patterns` для `Task.Run` над синхронным вызовом
 
 Native-side и kernel-level:
 
-- Native процесс или managed на границе P/Invoke - вызови Skill tool `dex-skill-native-debug:native-debug`
-- Slowdown под нагрузкой, hot CPU - вызови Skill tool `dex-skill-perf-profiling:perf-profiling`
-- Hidden subprocess, file-not-found на проде, syscall-загадки - вызови Skill tool `dex-skill-syscall-tracing:syscall-tracing`
+- Native процесс или managed на границе P/Invoke - загрузи skill `dex-skill-native-debug:native-debug`
+- Slowdown под нагрузкой, hot CPU - загрузи skill `dex-skill-perf-profiling:perf-profiling`
+- Hidden subprocess, file-not-found на проде, syscall-загадки - загрузи skill `dex-skill-syscall-tracing:syscall-tracing`
 
 Post-mortem и инспекция артефактов:
 
-- Coredump или post-mortem без живого процесса - вызови Skill tool `dex-skill-core-dumps:core-dumps`
-- Stripped binary, неизвестная DLL, .NET без исходников - вызови Skill tool `dex-skill-binary-inspection:binary-inspection`
+- Coredump или post-mortem без живого процесса - загрузи skill `dex-skill-core-dumps:core-dumps`
+- Stripped binary, неизвестная DLL, .NET без исходников - загрузи skill `dex-skill-binary-inspection:binary-inspection`
 
 > Статика-дополнения (не Skill-load, справка): прод-observability через OpenTelemetry+метрики - `dex-skill-observability`.
 
@@ -109,7 +109,7 @@ Post-mortem и инспекция артефактов:
 
 **Mandatory:** yes
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: root cause из runtime-улик (с доказательством -- стек потоков / GC / нативная граница / flamegraph / strace, привязка файл:строка либо config-ключ либо env), внесённый fix (изменённые файлы + где) ИЛИ предложенный fix/рекомендация если правка вне scope или нужен арх-decision, статус верификации (reproducer red -> green или пометка «требуются прод-условия»), остаточные риски (security implication при правке container security-context, побочные эффекты).
+**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: root cause из runtime-улик (с доказательством -- стек потоков / GC / нативная граница / flamegraph / strace, привязка файл:строка либо config-ключ либо env), внесённый fix (изменённые файлы + где) ИЛИ предложенный fix/рекомендация если правка вне scope или нужен арх-decision, статус верификации (reproducer red -> green или пометка «требуются прод-условия»), остаточные риски (security implication при правке container security-context, побочные эффекты). `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 **Exit criteria:** Отчёт собран; severity откалиброван по таблице ниже; все секции заполнены или явно помечены как N/A с причиной.
 

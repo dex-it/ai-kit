@@ -32,7 +32,7 @@ Gather -> Analyze -> Prioritize -> Present.
 
 **Exit criteria:** Горизонт и goals определены. Goals не формализованы -> при канале (тело исполняет главный цикл, `interactive`) помочь оператору их сформулировать; при спавне узлом спрашивать некого ни в каком режиме - зафиксировать «goals not defined, roadmap будет основан на available input» - ожидание ответа в субагентной позиции повисает.
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-epic-planning:epic-planning` - ограничения цели, точность оценки и размер эпика
 
 ## Phase 2: Analyze
@@ -53,7 +53,7 @@ Gather -> Analyze -> Prioritize -> Present.
 
 **Goal:** Определить порядок initiatives в roadmap с явными trade-off'ами.
 
-Загрузить через Skill tool:
+Загрузи skills:
 - `dex-skill-prioritization:prioritization` - оценки RICE, доля P0, решение по авторитету
 
 **Output:**
@@ -83,7 +83,7 @@ Gather -> Analyze -> Prioritize -> Present.
 
 **Exit criteria:** Документ сохранён. Каждая initiative имеет owner (или помечена «needs owner»). Success metrics определены для top priorities.
 
-**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла); состав: путь к сохранённому roadmap-документу, распределение initiatives по periods, top-приоритеты с обоснованием и success metrics, trade-off'ы формулировкой «принимаем X ценой Y», риски и зависимости, принятые узлом допущения (оценки effort, гипотезы impact). **Выбор направления продукта остаётся за человеком:** порядок отдаётся как обоснованное предложение, и `status: complete` означает, что план собран, а не что приоритеты утверждены. Goals пришли статусом «not defined» либо capacity неизвестна -> `status: partial` с этим фактом.
+**Output (handoff):** поля словаря `node-contract` (смысл и терминалы - там), первым `status` (исход узла); состав: путь к сохранённому roadmap-документу, распределение initiatives по periods, top-приоритеты с обоснованием и success metrics, trade-off'ы формулировкой «принимаем X ценой Y», риски и зависимости, принятые узлом допущения (оценки effort, гипотезы impact). **Выбор направления продукта остаётся за человеком:** порядок отдаётся как обоснованное предложение, и `status: complete` означает, что план собран, а не что приоритеты утверждены. Goals пришли статусом «not defined» либо capacity неизвестна -> `status: partial` с этим фактом. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 ## Boundaries
 

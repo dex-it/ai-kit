@@ -52,7 +52,7 @@ skills:
 
 **Mandatory:** yes
 
-Загрузи skill императивно через Skill tool: `dex-skill-dotnet-code-quality:dotnet-code-quality`. Находка задевает структуру `.csproj` (`Directory.Build.props`, `LangVersion`, `TargetFramework`, `ProjectReference`) - дополнительно `dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene`; не задевает - скилл не грузится.
+Загрузи skill `dex-skill-dotnet-code-quality:dotnet-code-quality`. Находка задевает структуру `.csproj` (`Directory.Build.props`, `LangVersion`, `TargetFramework`, `ProjectReference`) - дополнительно `dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene`; не задевает - скилл не грузится.
 
 **Fact-check дефолта:** если находка держится на дефолте SDK или анализатора (например `NuGetAuditMode`, дефолт `AnalysisMode`, поведение анализатора в новой версии), сверь сам дефолт под TFM проекта из Phase 0 через `dex-skill-fact-verification:fact-verification` (загрузи skill). Дефолт сверяется всегда, в том числе названный skill. Неподтверждённый дефолт помечается `[Assumption: ...]` и не выдаётся как факт.
 
@@ -71,7 +71,7 @@ skills:
 
 **Exit criteria:** Отчёт содержит только проверенные по файлам факты; предположения помечены `[Assumption: ...]`. Ничего не изменено в проекте.
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: таблицу «средство контроля | статус | где / почему нет | как настроить», приоритеты находок, итог «N из M настроено», перечень манифестов, которых в репозитории не нашлось, допущения с пометкой `[Assumption: ...]`. Средство, факт по которому прочитать не удалось (нет доступа к CI-конфигу, `dotnet list package` не отработал), идёт статусом `unverifiable` с причиной и даёт `status: partial` - «не настроено» и «не проверено» вызывающему не одно и то же.
+**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: таблицу «средство контроля | статус | где / почему нет | как настроить», приоритеты находок, итог «N из M настроено», перечень манифестов, которых в репозитории не нашлось, допущения с пометкой `[Assumption: ...]`. Средство, факт по которому прочитать не удалось (нет доступа к CI-конфигу, `dotnet list package` не отработал), идёт статусом `unverifiable` с причиной и даёт `status: partial` - «не настроено» и «не проверено» вызывающему не одно и то же. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 ## Constraints
 
