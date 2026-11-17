@@ -14,7 +14,7 @@
 
 ## Skills
 
-Условная загрузка как в `dex-mr-reviewer`, плюс `dex-skill-review-evidence`, `dex-skill-review-threads`.
+Pre-load полем `skills:` - `dex-skill-node-contract`, `dex-skill-review-evidence`. Условная загрузка как в `dex-mr-reviewer`, плюс `dex-skill-review-threads`.
 
 ## Связанные плагины
 

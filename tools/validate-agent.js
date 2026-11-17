@@ -239,6 +239,7 @@ const ALLOWED_PRELOAD_SKILLS = new Map([
   ['dotnet-api-development', new Set(['architect-dotnet'])],
   ['dotnet-resilience', new Set(['architect-dotnet'])],
   ['project-rulebook', new Set(['rulebook-orchestrator'])],
+  ['review-evidence', new Set(['self-reviewer', 'mr-reviewer', 'mr-check-reviewer'])],
 ]);
 
 /**

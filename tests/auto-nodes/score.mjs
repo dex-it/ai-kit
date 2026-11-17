@@ -78,8 +78,12 @@ function reviewer(c, r) {
   console.log(`  red-run: ${cut(r['red-run'], 160)}`)
   for (const m of mines) {
     const hits = r.findings.filter(f => nearBy(f, m, m.slack ?? 2))
-    console.log(`  ${m.id}${m.blocking ? '*' : ''} ${m.file}:${m.lines.join('-')} -> ${hits.map(f => f.severity).join(',') || '-'}`)
+    const wrong = m.false_at ? hits.filter(f => m.false_at.includes(f.severity)) : []
+    console.log(`  ${m.id}${m.blocking ? '*' : ''} ${m.file}:${m.lines.join('-')} -> ${hits.map(f => f.severity).join(',') || '-'}${wrong.length ? ` ЛОЖНАЯ ${wrong.map(f => f.severity).join(',')}` : ''}`)
   }
+  console.log(`  axes: ${(r.axes || []).map(a => `${a.name}=${a.outcome}`).join(' ') || '-'}`)
+  ;(r.axes || []).filter(a => a.outcome !== 'findings').forEach(a => console.log(`    ${a.name} ${a.outcome}: ${cut(a.checked, 120)}`))
+  ;(r.roots || []).forEach(x => console.log(`  root ${x.anchor} ${x.verdict}: ${cut(x.decision, 100)}`))
   r.findings.forEach((f, i) => console.log(`  [${i}] ${f.severity} ${f.axis} ${f.anchor}: ${cut(f.text, 220)}`))
 }
 

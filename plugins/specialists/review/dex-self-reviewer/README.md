@@ -16,7 +16,7 @@
 
 ## Skills
 
-Тематические skills грузятся по активным осям (solid, performance-review, testability, ddd, nfr и др.): ось не задета diff'ом - её skill не грузится. Исключение - `dex-skill-code-reuse`: грузится всегда, двойник правки часто лежит вне diff. Профильные по стеку - через реестр `dex-skill-stack-registry` (единый способ для всех языко-агностичных агентов). Дисциплина фаз: `dex-skill-review-evidence`.
+Тематические skills грузятся по активным осям (solid, performance-review, testability, ddd, nfr и др.): ось не задета diff'ом - её skill не грузится. Исключение - `dex-skill-code-reuse`: грузится всегда, двойник правки часто лежит вне diff. Профильные по стеку - через реестр `dex-skill-stack-registry` (единый способ для всех языко-агностичных агентов). Дисциплина фаз: `dex-skill-review-evidence` (pre-load полем `skills:` вместе с `dex-skill-node-contract`, в каждом запуске).
 
 ## Связанные плагины
 

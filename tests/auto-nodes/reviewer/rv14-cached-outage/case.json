@@ -1,0 +1,35 @@
+{
+  "task": "FEAT-14",
+  "kind": "feature",
+  "commit": "feat(probe): probe референса с кэшем на 10 минут",
+  "goal": "В src/probe.js есть probe по требованиям FEAT.md; startGeneration из src/generate.js его уже вызывает.",
+  "done": "Требования FEAT.md R1-R3 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/probe.js и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. probe(url) отдаёт { ok: true, durationSec } по ответу провайдера на HEAD-запрос (заголовок x-duration-sec). (FEAT.md:5)",
+    "R2. Повторный probe того же url в пределах 10 минут не ходит к провайдеру: у провайдера квота на пробы. (FEAT.md:6)",
+    "R3. Отказ - { ok: false, reason }: unsupported - ресурс не подходит (404, 415, нет длительности), unavailable - провайдер не ответил (таймаут, сбой сети, 5xx). (FEAT.md:7)"
+  ],
+  "coder": {
+    "red-run": [{ "test": "test/probe.test.js", "status": "shown", "evidence": "файл на коде до правки не загружается: нет src/probe.js (ERR_MODULE_NOT_FOUND) - красные тесты R1-R3; после правки зелёные" }],
+    "uncovered-status": "none", "uncovered": [],
+    "dependents-status": "none", "dependents": []
+  },
+  "mines": [
+    {
+      "id": "M20",
+      "file": "src/probe.js",
+      "lines": [9, 13],
+      "slack": 0,
+      "blocking": false,
+      "what": "решение «кэшировать результат пробы по url на 10 минут» неверно для временного отказа: `cache.set` кладёт и `{ ok: false, reason: 'unavailable' }` (5xx, таймаут, сбой сети) - один сбой провайдера отказывает тому же референсу 10 минут, хотя FEAT.md называет `unavailable` повторяемым через минуту-две, а `startGeneration` превращает его в RefRejectedError без списания. Для успеха и `unsupported` решение держится. Ни одна ось перечня его не называет: производительность и регрессии чисты (кэш предписан R2), тесты зелёные и R2 для отказа не оговорено. Засчитывается находка, называющая кэширование `unavailable` (временного отказа) на 10 минут; верная severity P1-P2"
+    }
+  ],
+  "expect": {
+    "decisions": [
+      { "anchor": "src/probe.js:12", "decision": "кэш результата пробы по url на 10 минут (R2)", "root": "квота провайдера на пробы (FEAT.md:6)", "verdict": "illegitimate", "input": "класс «провайдер временно не ответил»: результат unavailable живёт 10 минут, повтор через минуту-две (FEAT.md, Контекст) получает тот же отказ" },
+      { "anchor": "src/probe.js:23", "decision": "404 и 415 - unsupported", "root": "FEAT.md:7", "verdict": "legitimate" }
+    ],
+    "axes": "оси performance и regressions - clean законен (кэш предписан R2); оси без находки на этом месте - не ошибка, мина ловится только через решение либо через coverage (нет теста на повтор после unavailable)"
+  }
+}
