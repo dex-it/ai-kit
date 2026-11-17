@@ -202,9 +202,10 @@ const FORBIDDEN_FRONTMATTER_FIELDS = ['allowed-tools'];
  * and stripped `dex-skill-` prefix) so all listing formats resolve.
  *
  * Value = which agents may pre-load it. `null` - any agent (the handoff contract
- * is unconditional for every node). A Set - a stage normative: unconditional for
- * the agent OWNING that stage and conditional for everyone else, so an open
- * allowlist would let any agent pre-load a stage normative it never runs.
+ * is unconditional for every node). A Set - a skill unconditional only for the
+ * named agents: a stage normative (for the agent OWNING that stage; conditional
+ * for everyone else) or a skill the agent text applies on every run (#128).
+ * An open allowlist would let any agent pre-load what it never runs.
  */
 const NODE_CONTRACT_REF = 'dex-skill-node-contract:node-contract';
 
@@ -216,6 +217,27 @@ const ALLOWED_PRELOAD_SKILLS = new Map([
   ['interface-definition-openapi', new Set(['api-designer'])],
   ['use-cases-cockburn', new Set(['usecase-analyst', 'use-case-writer'])],
   ['bdd-gherkin', new Set(['bdd-author'])],
+  // Безусловное у названных агентов (класс A, #128): текст агента велит применять скилл в каждом
+  // запуске, и императивная загрузка такого скилла - ручная эмуляция pre-load, которую модель
+  // молча пропускает. Для остальных агентов эти же скиллы условны и грузятся в фазе.
+  ['project-baseline', new Set(['dotnet-coder', 'ts-fullstack-assistant', 'discover-reviewer', 'bug-fixer'])],
+  [
+    'codebase-conventions',
+    new Set([
+      'dotnet-coder',
+      'ts-fullstack-assistant',
+      'bug-fixer',
+      'design-reviewer',
+      'requirements-reviewer',
+      'stand-reviewer',
+    ]),
+  ],
+  ['code-reuse', new Set(['designer'])],
+  ['solid', new Set(['debugger'])],
+  ['dotnet-async-patterns', new Set(['dotnet-performance-analyst'])],
+  ['scalability', new Set(['architect', 'architect-dotnet'])],
+  ['dotnet-api-development', new Set(['architect-dotnet'])],
+  ['dotnet-resilience', new Set(['architect-dotnet'])],
   ['project-rulebook', new Set(['rulebook-orchestrator'])],
 ]);
 
@@ -432,7 +454,7 @@ function validateFrontmatter(parsed, findings, trackNode = false) {
         findings.push({
           level: ERROR,
           rule: 'frontmatter-skills-not-preloadable',
-          message: `\`skills:\` entry "${String(raw).trim()}" is not an unconditional process-skill - pre-load only [${[...ALLOWED_PRELOAD_SKILLS.keys()].join(', ')}]; conditional skills load imperatively via Skill tool in phases`,
+          message: `\`skills:\` entry "${String(raw).trim()}" is not an unconditional process-skill - pre-load only [${[...ALLOWED_PRELOAD_SKILLS.keys()].join(', ')}]; conditional skills are loaded by phase directives`,
         });
         continue;
       }
@@ -441,7 +463,7 @@ function validateFrontmatter(parsed, findings, trackNode = false) {
         findings.push({
           level: ERROR,
           rule: 'frontmatter-skills-not-own-stage',
-          message: `\`skills:\` entry "${String(raw).trim()}" is a stage normative - pre-loadable only by the agent owning that stage [${[...owners].join(', ')}]; for others it is conditional and loads via Skill tool in a phase`,
+          message: `\`skills:\` entry "${String(raw).trim()}" is unconditional only for [${[...owners].join(', ')}] (the stage owner for a stage normative) - pre-load it there; for other agents it is conditional and is loaded by a phase directive`,
         });
       }
     }
@@ -924,6 +946,60 @@ function validateStageNormativeReaders(parsed, findings) {
   }
 }
 
+/**
+ * Агент с императивными загрузками обязан назвать в Output поле `skills-loaded`.
+ *
+ * Императивная загрузка - шаг внутри фазы, и модель его молча пропускает: выход узла
+ * не требовал следа, поэтому пропуск не виден ни вызывающему, ни ревью (#128). Поле
+ * превращает загрузку в проверяемый факт: загружены / пропущены с причиной.
+ *
+ * Признак императивной загрузки - тело (без ```-фенсов) называет скилл полной формой
+ * `dex-skill-*:*`, которого нет в `skills:` самого агента (pre-load от пропуска не
+ * страдает), либо предписывает вызов `Skill` по слову («Skill tool», «`Skill`»
+ * с адресом). Поле засчитывается только в абзаце `**Output (handoff)` до конца его
+ * фазы: имя в другом месте тела выходом не является. Узел трека не судится - у него
+ * нет объявленной сигнатуры, схему выдачи держит скрипт трека.
+ */
+const IMPERATIVE_SKILL_ADDR_RE = /`?(dex-skill-[a-z0-9-]+:[a-z0-9-]+)`?/g;
+const IMPERATIVE_SKILL_WORD_RE = /Skill tool|`Skill`\s+`dex-/;
+
+function validateSkillsLoadedField(parsed, findings) {
+  const body = withoutFences(parsed.content || '');
+  const fm = parsed.data || {};
+  const rawPre = 'skills' in fm && fm.skills != null ? fm.skills : [];
+  const preloaded = new Set(
+    (Array.isArray(rawPre) ? rawPre : String(rawPre).split(','))
+      .map((e) => String(e).trim())
+      .filter((e) => e !== ''),
+  );
+
+  let loads = IMPERATIVE_SKILL_WORD_RE.test(body);
+  if (!loads) {
+    for (const m of body.matchAll(IMPERATIVE_SKILL_ADDR_RE)) {
+      if (!preloaded.has(m[1])) {
+        loads = true;
+        break;
+      }
+    }
+  }
+  if (!loads) return;
+
+  const start = body.search(HANDOFF_OUTPUT_RE);
+  // Нет Output (handoff) - это уже `handoff-output-missing`, второй находкой не дублируется.
+  if (start < 0) return;
+  const rest = body.slice(start);
+  const end = rest.search(/\n## /);
+  const output = end < 0 ? rest : rest.slice(0, end);
+  if (!/`skills-loaded`/.test(output)) {
+    findings.push({
+      level: ERROR,
+      rule: 'skills-loaded-missing',
+      message:
+        'Agent loads skills imperatively in phases but its **Output (handoff):** names no `skills-loaded` - a skipped load stays invisible to the caller and to review (loaded / skipped with reason; node-contract, field dictionary)',
+    });
+  }
+}
+
 // Половина «скилл» полной формы `{plugin}:{skill}`: плагин известен, а такого артефакта в нём нет.
 // Судится у любого плагина каталога и без условия на разбор фаз - опечатка в адресе не зависит от
 // того, сошёлся ли файл с контрактом фаз (tools/plugin-artifacts.js, #423).
@@ -1046,6 +1122,7 @@ function validateFile(filepath, marketplacePlugins) {
   validateJudgeCarriesWriter(parsed, findings);
   validateStageNormativeReaders(parsed, findings);
   if (!trackNode) validateHandoffSignature(parsed, findings);
+  if (!trackNode) validateSkillsLoadedField(parsed, findings);
   validateAttributeBlocks(parsed.content, findings, bodyOffset);
   validateCatalogDocsLink(raw, filepath, findings);
   validateLinkEscapesPlugin(raw, filepath, findings);

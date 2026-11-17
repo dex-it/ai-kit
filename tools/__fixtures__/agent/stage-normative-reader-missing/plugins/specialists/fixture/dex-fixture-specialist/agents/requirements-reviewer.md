@@ -17,6 +17,6 @@ skills:
 
 **Input (handoff):** `[blocking]` набор требований под суд; `[default-ok]` режим (дефолт `autonomous`).
 
-**Output (handoff):** `status` (`complete`/`blocked`/`partial`), находки по осям набора, вердикт.
+**Output (handoff):** `status` (`complete`/`blocked`/`partial`), находки по осям набора, вердикт. `skills-loaded` - загруженные skills и пропущенные с причиной.
 
 **Exit criteria:** По каждой оси набора есть блок находок либо явная пометка «чисто».

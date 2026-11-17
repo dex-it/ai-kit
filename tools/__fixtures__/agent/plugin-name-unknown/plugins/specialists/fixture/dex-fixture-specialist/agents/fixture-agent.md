@@ -27,7 +27,7 @@ skills:
 
 **Goal:** Отдать результат вызывающему.
 
-**Output (handoff):** `status` (`complete`/`blocked`/`partial`), перечень находок, допущения.
+**Output (handoff):** `status` (`complete`/`blocked`/`partial`), перечень находок, допущения. `skills-loaded` - загруженные skills и пропущенные с причиной.
 
 **Exit criteria:** Output содержит `status` и перечень находок; пустой перечень назван явно.
 
