@@ -217,6 +217,7 @@ const ALLOWED_PRELOAD_SKILLS = new Map([
   ['use-cases-cockburn', new Set(['usecase-analyst', 'use-case-writer'])],
   ['bdd-gherkin', new Set(['bdd-author'])],
   ['project-rulebook', new Set(['rulebook-orchestrator'])],
+  ['review-evidence', new Set(['self-reviewer', 'mr-reviewer', 'mr-check-reviewer'])],
 ]);
 
 /**
