@@ -572,7 +572,7 @@ skills:
 
 **Skill недоступен:**
 
-- **Skill tool недоступен в subagent** (`Skill` нет в `tools` либо он в `disallowedTools`, [sub-agents](https://code.claude.com/docs/en/sub-agents), сверено 27.10.2026; ловит `frontmatter-no-skill-tool`) - fallback: «пропусти загрузку, укажи в отчёте, что фаза без skill-проверок».
+- **Skill tool недоступен в subagent** (`Skill` нет в `tools` либо он в `disallowedTools`, [sub-agents](https://code.claude.com/docs/en/sub-agents), сверено 27.10.2026; ловит `frontmatter-no-skill-tool`) - fallback: «пропусти загрузку, укажи в отчёте, что фаза без skill-проверок»; в `skills-loaded` загрузка - `skipped` с причиной «`Skill` нет в `tools`» (вызова не было, поэтому `unverifiable` по причине «skill не поднялся» здесь не ставится).
 - **Skill установлен, но контекст не требует** - нормальная работа условной загрузки, пропуск без ошибки.
 - **Skill упомянут, но не установлен** - ошибка автора, ловит валидатор (имена сверяются с `marketplace.json`).
 

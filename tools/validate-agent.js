@@ -223,16 +223,14 @@ const ALLOWED_PRELOAD_SKILLS = new Map([
   ['project-baseline', new Set(['dotnet-coder', 'ts-fullstack-assistant', 'discover-reviewer', 'bug-fixer'])],
   [
     'codebase-conventions',
-    new Set([
-      'dotnet-coder',
-      'ts-fullstack-assistant',
-      'bug-fixer',
-      'design-reviewer',
-      'requirements-reviewer',
-      'stand-reviewer',
-    ]),
+    new Set(['bug-fixer', 'design-reviewer', 'requirements-reviewer', 'stand-reviewer']),
   ],
   ['code-reuse', new Set(['designer'])],
+  ['review-step-by-step', new Set(['review-planner'])],
+  ['dotnet-code-quality', new Set(['dotnet-quality-auditor'])],
+  ['test-coverage', new Set(['dotnet-test-writer', 'ts-test-writer'])],
+  ['functional-requirements', new Set(['requirements-analyst'])],
+  ['use-case-quality', new Set(['use-case-writer', 'usecase-analyst'])],
   ['solid', new Set(['debugger'])],
   ['dotnet-async-patterns', new Set(['dotnet-performance-analyst'])],
   ['scalability', new Set(['architect', 'architect-dotnet'])],
@@ -954,15 +952,16 @@ function validateStageNormativeReaders(parsed, findings) {
  * не требовал следа, поэтому пропуск не виден ни вызывающему, ни ревью (#128). Поле
  * превращает загрузку в проверяемый факт: загружены / пропущены с причиной.
  *
- * Признак императивной загрузки - тело (без ```-фенсов) называет скилл полной формой
- * `dex-skill-*:*`, которого нет в `skills:` самого агента (pre-load от пропуска не
- * страдает), либо предписывает вызов `Skill` по слову («Skill tool», «`Skill`»
- * с адресом). Поле засчитывается только в абзаце `**Output (handoff)` до конца его
- * фазы: имя в другом месте тела выходом не является. Узел трека не судится - у него
+ * Признак императивной загрузки - тело (без ```-фенсов) либо предписывает вызов по слову
+ * («Skill tool», «`Skill`» с адресом), либо называет полной формой `{plugin}:{skill}` СКИЛЛ
+ * (не агента и не команду того же пространства имён), которого нет в `skills:` самого агента:
+ * pre-load от пропуска не страдает. Скилл отличается перечнем скиллов плагинов (`PLUGIN_SKILLS`),
+ * а не префиксом имени плагина. Поле засчитывается только в абзаце `**Output (handoff)` до
+ * конца его фазы: имя в другом месте тела выходом не является. Узел трека не судится - у него
  * нет объявленной сигнатуры, схему выдачи держит скрипт трека.
  */
-const IMPERATIVE_SKILL_ADDR_RE = /`?(dex-skill-[a-z0-9-]+:[a-z0-9-]+)`?/g;
-const IMPERATIVE_SKILL_WORD_RE = /Skill tool|`Skill`\s+`dex-/;
+const IMPERATIVE_SKILL_ADDR_RE = /`?(dex-[a-z0-9-]+):([a-z0-9-]+)`?/g;
+const IMPERATIVE_SKILL_WORD_RE = /Skill tool|`Skill`[^\n`]{0,12}`?dex-/;
 
 function validateSkillsLoadedField(parsed, findings) {
   const body = withoutFences(parsed.content || '');
@@ -977,7 +976,7 @@ function validateSkillsLoadedField(parsed, findings) {
   let loads = IMPERATIVE_SKILL_WORD_RE.test(body);
   if (!loads) {
     for (const m of body.matchAll(IMPERATIVE_SKILL_ADDR_RE)) {
-      if (!preloaded.has(m[1])) {
+      if (PLUGIN_SKILLS.get(m[1])?.has(m[2]) && !preloaded.has(`${m[1]}:${m[2]}`)) {
         loads = true;
         break;
       }
@@ -995,8 +994,7 @@ function validateSkillsLoadedField(parsed, findings) {
     findings.push({
       level: ERROR,
       rule: 'skills-loaded-missing',
-      message:
-        'Agent loads skills imperatively in phases but its **Output (handoff):** names no `skills-loaded` - a skipped load stays invisible to the caller and to review (loaded / skipped with reason; node-contract, field dictionary)',
+      message: `Agent "${String(fm.name ?? '').trim()}" loads skills in phases but its **Output (handoff):** names no \`skills-loaded\` - a skipped load stays invisible to the caller and to review (loaded / skipped with reason; node-contract, field dictionary)`,
     });
   }
 }

@@ -6,6 +6,7 @@ model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
   - dex-skill-system-requirements-29148:system-requirements-29148
+  - dex-skill-functional-requirements:functional-requirements
 ---
 
 # Requirements Analyst
@@ -39,7 +40,7 @@ skills:
 
 **Goal:** Пройти каждый шаг и каждое расширение сценария и получить правило либо объявленное отсутствие правила.
 
-Загрузи `dex-skill-functional-requirements:functional-requirements` - чек-лист правила `FR`.
+`functional-requirements` загружен заранее (`skills:`) - чек-лист правила `FR`.
 
 **Output:**
 

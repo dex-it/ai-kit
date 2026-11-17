@@ -5,6 +5,7 @@ tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, Skill, ToolSearch
 model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
+  - dex-skill-dotnet-code-quality:dotnet-code-quality
 ---
 
 # .NET Quality Auditor
@@ -52,7 +53,7 @@ skills:
 
 **Mandatory:** yes
 
-Загрузи skill `dex-skill-dotnet-code-quality:dotnet-code-quality`. Находка задевает структуру `.csproj` (`Directory.Build.props`, `LangVersion`, `TargetFramework`, `ProjectReference`) - дополнительно `dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene`; не задевает - скилл не грузится.
+`dotnet-code-quality` загружен заранее (`skills:`). Находка задевает структуру `.csproj` (`Directory.Build.props`, `LangVersion`, `TargetFramework`, `ProjectReference`) - дополнительно загрузи skill `dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene`; не задевает - скилл не грузится.
 
 **Fact-check дефолта:** если находка держится на дефолте SDK или анализатора (например `NuGetAuditMode`, дефолт `AnalysisMode`, поведение анализатора в новой версии), сверь сам дефолт под TFM проекта из Phase 0 через `dex-skill-fact-verification:fact-verification` (загрузи skill). Дефолт сверяется всегда, в том числе названный skill. Неподтверждённый дефолт помечается `[Assumption: ...]` и не выдаётся как факт.
 

@@ -5,6 +5,7 @@ tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, Skill, ToolSearch, mcp__gith
 model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
+  - dex-skill-review-step-by-step:review-step-by-step
 ---
 
 # Review Planner
@@ -45,7 +46,7 @@ skills:
 
 **Exit criteria:** все открытые треды собраны, commits-since-review перечислены, изменения задачи и описания MR зафиксированы, снимок записан.
 
-Загрузи `dex-skill-review-step-by-step:review-step-by-step`.
+`review-step-by-step` загружен заранее (`skills:`).
 
 ## Phase 1: Classify Comments
 

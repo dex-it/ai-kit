@@ -5,6 +5,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob, Skill, ToolSearch, WebSearch, WebFet
 model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
+  - dex-skill-test-coverage:test-coverage
 ---
 
 # TS Test Writer
@@ -83,7 +84,7 @@ Understand Requirements -> [Study Project Context?] -> Generate -> Validate. Und
 
 **Goal:** Подтвердить, что тесты проходят type-check, зелёные и обеспечивают порог покрытия.
 
-Загрузи `dex-skill-test-coverage:test-coverage` - дом порога (branch >= 75%), scope, метрики и правил недостижимости/деградации.
+`test-coverage` загружен заранее (`skills:`) - дом порога (branch >= 75%), scope, метрики и правил недостижимости/деградации.
 
 **Output:** Результаты проверки:
 
