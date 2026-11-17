@@ -53,6 +53,8 @@ const edit = (dir, path, fn) => { const p = join(dir, path); writeFileSync(p, fn
 const replaceOnce = (t, from, to) => { if (!t.includes(from)) throw new Error(`solve: нет фрагмента: ${from}`); return t.replace(from, to); };
 // Версия плагина в solve и засеве не зашита литералом: любой патч-бамп плагина другой правкой не ломает кейсы.
 const VER = /"version": "(\d+)\.(\d+)\.(\d+)"/;
+// Регэксп версии после major-bump: следующая мажорная от `cur`; версии на коммите нет - любой `N.0.0`.
+const majorRe = (cur) => { const m = /^(\d+)\./.exec(cur || ''); return m ? `"version":\\s*"${+m[1] + 1}\\.0\\.0"` : '"version":\\s*"\\d+\\.0\\.0"'; };
 const bumpVer = (t, part, by = 1) => { if (!VER.test(t)) throw new Error('solve: нет версии'); return t.replace(VER, (_, a, b, c) => `"version": "${part === 'major' ? `${+a + by}.0.0` : part === 'minor' ? `${a}.${+b + by}.0` : `${a}.${b}.${+c + by}`}"`); };
 
 function sections(md) { // [{title, start, end}] по заголовкам H2; вне fence
@@ -217,13 +219,14 @@ const cases = [
       syncCatalog(dir);
     } },
   // Rename агента (раздел «Имя агента», правило в `.claude/rules/plugin-changes.md`): major плагина, директория и `name` плагина прежние, карта `ALLOWED_PRELOAD_SKILLS` правится.
+  // Ожидание major - от версии плагина на коммите прогона (`graders(ver)`), не число: каждый major-bump плагина иначе ломает эталон.
   { id: 'agent-rename',
     prompt: 'Переименуй агента bdd-author (плагин dex-bdd-author) в gherkin-author и доведи изменения до состояния, готового к коммиту.',
-    graders: [
+    graders: (ver) => [
       { type: 'file-matches', id: 'agent-renamed', path: BDD_AGENT_NEW, regex: '^name: gherkin-author$', flags: 'mu' },
       { type: 'file-not-matches', id: 'old-file-gone', path: BDD_AGENT, regex: '^name:', flags: 'mu' },
       { type: 'file-matches', id: 'command-delegates-to-new', path: BDD_CMD, regex: 'dex-bdd-author:gherkin-author' },
-      { type: 'file-matches', id: 'major-bump', path: BDD_PJ, regex: '"version":\\s*"2\\.0\\.0"' },
+      { type: 'file-matches', id: 'major-bump', path: BDD_PJ, regex: majorRe(ver(BDD_PJ)) },
       { type: 'file-matches', id: 'plugin-name-kept', path: BDD_PJ, regex: '"name":\\s*"dex-bdd-author"' },
       SYNC,
       { type: 'cmd', id: 'agents-valid', run: ['node', 'tools/validate-agent.js', 'all'] },
@@ -363,9 +366,11 @@ export default {
     // Репозиторий без каталога (офлайн-тест стенда) кейсов `at` не строит; прочая ошибка - отказ, а не молча урезанная серия.
     try { cur = JSON.parse(showAt(commit, CATALOG)).version; } catch (e) { if (!e.message.startsWith(`нет ${CATALOG} на коммите`)) throw e; }
     const [maj, min] = (cur || '').split('.');
+    // Версия плагина на коммите прогона; нет файла - null (кейсы без `graders(ver)` её не спрашивают).
+    const ver = (p) => { try { return JSON.parse(showAt(commit, p)).version; } catch { return null; } };
     const ks = cases.flatMap((k) => (!k.at ? [k] : cur ? [{ ...k, ...k.at({ cur, next: `${maj}.${Number(min) + 1}.0` }) }] : []));
     return conds.flatMap((c) => ks.map((k) => ({
-      cond: c.id, condTitle: c.title, case: k.id, fixture: 'repo', prompt: k.prompt, graders: k.graders, solve: k.solve, control: k.control,
+      cond: c.id, condTitle: c.title, case: k.id, fixture: 'repo', prompt: k.prompt, graders: typeof k.graders === 'function' ? k.graders(ver) : k.graders, solve: k.solve, control: k.control,
       prepare(dir) { c.prepare(dir); k.seed?.(dir); },
     })));
   },
