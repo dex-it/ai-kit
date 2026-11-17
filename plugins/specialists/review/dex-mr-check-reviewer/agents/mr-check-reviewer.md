@@ -6,6 +6,7 @@ model: opus
 skills:
   - dex-skill-node-contract:node-contract
   - dex-skill-review-evidence:review-evidence
+  - dex-skill-code-reuse:code-reuse
 ---
 
 # MR Re-Reviewer
@@ -85,7 +86,7 @@ Skills грузи **по активным осям**: ось активна - г
 - `architecture` - дизайн классов и зависимостей: `dex-skill-solid:solid`; архитектура дельты: `dex-skill-ddd:ddd`
 - `performance` - данные и запросы, работа в цикле, конкурентность, ресурсы горячего пути: `dex-skill-performance-review:performance-review`
 - `regressions` - тестируемость правленого кода (обращение к внешнему миру без шва для подмены в тесте): `dex-skill-testability:testability`
-- `reuse` - в каждой ревизии: двойник дельты часто лежит вне неё; `dex-skill-code-reuse:code-reuse`
+- `reuse` - в каждой ревизии: двойник дельты часто лежит вне неё; `code-reuse` загружен заранее (`skills:`)
 
 Профильные по стеку - по реестру: загрузи `dex-skill-stack-registry:stack-registry`, определи стек дельты по манифестам, отфильтруй видимый список available-skills по префиксу `dex-skill-<стек>-*` и сузь по фокусам, без зашитого перечня имён. При крупной дельте распараллель через Agent tool **тяжёлые и независимые** фокусы; фокус, который закрывается парой вызовов, веди сам, и одному субагенту отдавай фокус целиком, а не дроби на несколько.
 

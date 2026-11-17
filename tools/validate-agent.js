@@ -220,12 +220,12 @@ const ALLOWED_PRELOAD_SKILLS = new Map([
   // Безусловное у названных агентов (класс A, #128): текст агента велит применять скилл в каждом
   // запуске, и императивная загрузка такого скилла - ручная эмуляция pre-load, которую модель
   // молча пропускает. Для остальных агентов эти же скиллы условны и грузятся в фазе.
-  ['project-baseline', new Set(['dotnet-coder', 'ts-fullstack-assistant', 'discover-reviewer', 'bug-fixer'])],
+  ['project-baseline', new Set(['dotnet-coder', 'ts-fullstack-assistant', 'discover-reviewer', 'bug-fixer', 'self-reviewer'])],
   [
     'codebase-conventions',
-    new Set(['bug-fixer', 'design-reviewer', 'requirements-reviewer', 'stand-reviewer']),
+    new Set(['bug-fixer', 'design-reviewer', 'requirements-reviewer', 'stand-reviewer', 'mr-reviewer']),
   ],
-  ['code-reuse', new Set(['designer'])],
+  ['code-reuse', new Set(['designer', 'self-reviewer', 'mr-reviewer', 'mr-check-reviewer'])],
   ['review-step-by-step', new Set(['review-planner'])],
   ['dotnet-code-quality', new Set(['dotnet-quality-auditor'])],
   ['test-coverage', new Set(['dotnet-test-writer', 'ts-test-writer'])],
