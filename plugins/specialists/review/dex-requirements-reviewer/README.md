@@ -23,7 +23,7 @@ Set Analysis занимает в этом агенте место, которо�
 
 ## Skills
 
-Pre-load: `dex-skill-node-contract` (контракт узла, входная приёмка по метке). Императивно по фазам: `dex-skill-codebase-conventions`, `dex-skill-ddd` (Domain Priming), `dex-skill-requirement-quality` (единица), `dex-skill-requirement-set-quality` (набор), `dex-skill-fact-verification` (сверка) + `dex-skill-review-evidence` (порог уверенности).
+Pre-load: `dex-skill-node-contract` (контракт узла, входная приёмка по метке), `dex-skill-codebase-conventions` (свод правил). Загружаются в фазах: `dex-skill-ddd` (Domain Priming), `dex-skill-requirement-quality` (единица), `dex-skill-requirement-set-quality` (набор), `dex-skill-fact-verification` (сверка) + `dex-skill-review-evidence` (порог уверенности).
 
 ## Связанные плагины
 

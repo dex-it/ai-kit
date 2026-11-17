@@ -6,6 +6,9 @@ model: opus
 skills:
   - dex-skill-node-contract:node-contract
   - dex-skill-architecture-definition-42010:architecture-definition-42010
+  - dex-skill-scalability:scalability
+  - dex-skill-dotnet-api-development:dotnet-api-development
+  - dex-skill-dotnet-resilience:dotnet-resilience
 ---
 
 # Architect (.NET)
@@ -108,7 +111,7 @@ Read/Grep; полный обзор репо ведёт вызывающая ст
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool:
+В этой фазе загружай skills:
 
 - Для bounded contexts, aggregates - `dex-skill-ddd:ddd`
 - Для соответствия конвенциям существующего проекта - `dex-skill-codebase-conventions:codebase-conventions`
@@ -207,11 +210,11 @@ implementation-план вызывающей стороны не на чем с�
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool:
+В этой фазе загружай skills:
 
-- Всегда `dex-skill-scalability:scalability` - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
-- Всегда `dex-skill-dotnet-api-development:dotnet-api-development` - тонкий контроллер, код ответа, маршруты и параметры
-- Всегда `dex-skill-dotnet-resilience:dotnet-resilience` - место политики, общий timeout, circuit breaker, промахи кэша
+- `scalability` загружен заранее (`skills:`), применяется всегда - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
+- `dotnet-api-development` загружен заранее (`skills:`), применяется всегда - тонкий контроллер, код ответа, маршруты и параметры
+- `dotnet-resilience` загружен заранее (`skills:`), применяется всегда - место политики, общий timeout, circuit breaker, промахи кэша
 - Если выбрано EF Core / SQL - `dex-skill-dotnet-ef-core:dotnet-ef-core`
 - Если присутствует async-код - `dex-skill-dotnet-async-patterns:dotnet-async-patterns`
 - Если значимое логирование - `dex-skill-dotnet-logging:dotnet-logging`
@@ -232,7 +235,7 @@ schema/ASP.NET Core API/caching/resilience/failure modes/security controls), `qu
 `verified`/`unverifiable`/`contradicted` + что сверялось; иначе - `n/a (триггер не сработал)`),
 принятые инж-решения и допущения (выбор библиотек/паттернов - правило стыка), путь к
 журналу решений (пришедший переносится как есть, заведённый тобой называется) и строки решений
-Phase 3 отдельным перечнем.
+Phase 3 отдельным перечнем. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 ## Boundaries
 

@@ -6,6 +6,7 @@ model: opus
 skills:
   - dex-skill-node-contract:node-contract
   - dex-skill-review-evidence:review-evidence
+  - dex-skill-code-reuse:code-reuse
 ---
 
 # MR Re-Reviewer
@@ -85,7 +86,7 @@ Skills грузи **по активным осям**: ось активна - г
 - `architecture` - дизайн классов и зависимостей: `dex-skill-solid:solid`; архитектура дельты: `dex-skill-ddd:ddd`
 - `performance` - данные и запросы, работа в цикле, конкурентность, ресурсы горячего пути: `dex-skill-performance-review:performance-review`
 - `regressions` - тестируемость правленого кода (обращение к внешнему миру без шва для подмены в тесте): `dex-skill-testability:testability`
-- `reuse` - в каждой ревизии: двойник дельты часто лежит вне неё; `dex-skill-code-reuse:code-reuse`
+- `reuse` - в каждой ревизии: двойник дельты часто лежит вне неё; `code-reuse` загружен заранее (`skills:`)
 
 Профильные по стеку - по реестру: загрузи `dex-skill-stack-registry:stack-registry`, определи стек дельты по манифестам, отфильтруй видимый список available-skills по префиксу `dex-skill-<стек>-*` и сузь по фокусам, без зашитого перечня имён. При крупной дельте распараллель через Agent tool **тяжёлые и независимые** фокусы; фокус, который закрывается парой вызовов, веди сам, и одному субагенту отдавай фокус целиком, а не дроби на несколько.
 
@@ -125,7 +126,7 @@ Skills грузи **по активным осям**: ось активна - г
 
 **Санкция на запись:** дельта-набор утверждается до записи в чужой MR. Форма санкции - по `node-contract`, «Outward-facing действие»; здесь её дают команды оператора `оформляй` (оформление) и `пушь` (публикация) при канале либо `publish: true` во входе при спавне, при любом `mode`. Санкции нет -> стоп на Output, Phase 7-8 не выполняются.
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла, не статус находки ниже); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: статус каждой прежней находки (closed/partial/open/disputed/no-longer-applicable + `severity` прежней + доказательство), новые находки в дельте (каждая = `context` + `anchor` file:line + `severity` + `confidence` + `scope` + `origin` + `block` + `closure`, плюс `type` при `classify`), `open-observations` (находки `out-of-scope`), обновлённый `review-verdict`, summary-метки, `fact-check` (предмет сверки - техутверждения новых находок). При `classify` - выход разметки по `dex-skill-defect-classification:defect-classification` (состав держит скилл, здесь не перечисляется). Ось `intent`: источник намерения был -> результат сверки затронутых дельтой требований (соответствует / расхождения «корректно, но не то»); не было -> `intent: n/a`. Это результат узла независимо от режима.
+**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла, не статус находки ниже); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: статус каждой прежней находки (closed/partial/open/disputed/no-longer-applicable + `severity` прежней + доказательство), новые находки в дельте (каждая = `context` + `anchor` file:line + `severity` + `confidence` + `scope` + `origin` + `block` + `closure`, плюс `type` при `classify`), `open-observations` (находки `out-of-scope`), обновлённый `review-verdict`, summary-метки, `fact-check` (предмет сверки - техутверждения новых находок). При `classify` - выход разметки по `dex-skill-defect-classification:defect-classification` (состав держит скилл, здесь не перечисляется). Ось `intent`: источник намерения был -> результат сверки затронутых дельтой требований (соответствует / расхождения «корректно, но не то»); не было -> `intent: n/a`. Это результат узла независимо от режима. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 **Exit criteria:** `review-verdict` обновлён, обзор готов; при канале (тело исполняет главный цикл, `interactive`) - показан и получена команда `оформляй`; при спавне узлом (в том числе с `interactive`) - Output отдан наверх.
 

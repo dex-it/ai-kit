@@ -5,6 +5,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob, Skill, ToolSearch, WebSearch, WebFet
 model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
+  - dex-skill-project-baseline:project-baseline
 ---
 
 # .NET Coding Assistant
@@ -21,14 +22,14 @@ Project Bootstrap (conditional) -> Understand Requirements -> Study Project Cont
 
 **Trigger:** задача -- «создай новый сервис», «новый проект», «scaffold», `dotnet new`, пустой репозиторий без существующего кода.
 
-**Skill-Based Setup:** загрузи императивно через Skill tool:
+**Skill-Based Setup:** загрузи skills:
 
-- `dex-skill-project-baseline:project-baseline` -- **всегда** в этой фазе. Состав гейтов качества и правило применения baseline (с нуля / внутри существующего solution).
+`project-baseline` загружен заранее (`skills:`): состав гейтов качества и правило применения baseline (с нуля / внутри существующего solution).
 
-Затем -- дочерние skills под состав baseline, только релевантное типу проекта:
+Дочерние skills под состав baseline, только релевантное типу проекта:
 
-- `dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene` -- всегда (Directory.Build.props, LangVersion, TargetFramework, ProjectReference)
-- `dex-skill-dotnet-code-quality:dotnet-code-quality` -- всегда (AnalysisMode, NuGet audit)
+- `dex-skill-dotnet-csproj-hygiene:dotnet-csproj-hygiene` -- всегда в этой фазе (Directory.Build.props, LangVersion, TargetFramework, ProjectReference)
+- `dex-skill-dotnet-code-quality:dotnet-code-quality` -- всегда в этой фазе (AnalysisMode, NuGet audit)
 - `dex-skill-dotnet-logging:dotnet-logging` -- если сервис, не голая библиотека
 - `dex-skill-dotnet-validation:dotnet-validation` -- если принимает внешний ввод
 
@@ -84,11 +85,11 @@ Project Bootstrap (conditional) -> Understand Requirements -> Study Project Cont
 
 **Exit criteria:** Понятно, как должен выглядеть новый код, чтобы вписаться в проект; релевантные `Accepted` ADR учтены (код пишется по ним, отклонение -- явно с обоснованием). **Гейт первоисточника:** каждое конвенция-решение, для которого в проекте есть прецедент (форма ошибки единообразно по слою, размещение валидации/маппинга, нейминг слоя, базовый тип артефакта, способ интеграции), привязано к **названному первоисточнику** -- `file:line` соседа-образца, `Accepted` ADR, инструкция или гайд проекта (`путь:раздел`), принятая единица свода правил проекта или enforced-правило (analyzer/`.editorconfig`/lint); прецедента нет -- зафиксировано допущением, не молчаливым дефолтом. Изучение контекста без названного первоисточника под решение фазу **не закрывает** -- «поизучал» без образца под конкретный выбор = решение угадано.
 
-Загрузи `dex-skill-codebase-conventions:codebase-conventions` -- свод правил, throw или Result не по соседу.
+Загрузи skill `dex-skill-codebase-conventions:codebase-conventions` -- свод правил, throw или Result не по соседу.
 
 Возможность правки, исход переиспользования которой пришедший план не называет, проводишь по `Skill` `dex-skill-code-reuse:code-reuse`: исход - в принятые решения выхода; названный планом исход - основа, отступление - с причиной.
 
-Загрузи `dex-skill-project-baseline:project-baseline` -- **всегда** в этой фазе, независимо от стадии и размера проекта и независимо от skip остального содержания фазы: отсутствие гейта симптома не даёт, и без явной проверки дефект не всплывает вовсе - работа уходит непроверенной при зелёном билде.
+`project-baseline` (загружен заранее, `skills:`) применяй **всегда** в этой фазе, независимо от стадии и размера проекта и независимо от skip остального содержания фазы: отсутствие гейта симптома не даёт, и без явной проверки дефект не всплывает вовсе - работа уходит непроверенной при зелёном билде.
 
 **Skip_if:**
 
@@ -107,7 +108,7 @@ Project Bootstrap (conditional) -> Understand Requirements -> Study Project Cont
 
 **Exit criteria:** Файлы сохранены, в них отражены требования Phase 1 и стиль Phase 2. Сработавший fact-check-триггер закрыт статусом `verified` / `unverifiable` / `contradicted`.
 
-В этой фазе загружай императивно через Skill tool только те skills, область которых пересекается с задачей (не все подряд):
+В этой фазе загружай только те skills, область которых пересекается с задачей (не все подряд):
 
 - Для тестируемости кода -- `dex-skill-testability:testability`
 - Для `Task.Run` над синхронным вызовом -- `dex-skill-dotnet-async-patterns:dotnet-async-patterns`
@@ -130,9 +131,9 @@ Project Bootstrap (conditional) -> Understand Requirements -> Study Project Cont
 - Lint / analyzers -- никаких новых warnings от StyleCop / Roslyn analyzers
 - Smoke check -- для нетривиального кода, если возможен запуск, проверить базовый сценарий
 
-**Покрытие тестов, написанных этой правкой.** Тесты вошли в состав правки - загрузи `dex-skill-test-coverage:test-coverage` и закрой замер по его дому, включая исход при недоборе порога; результат идёт в handoff полем `coverage`. Тестов в правке нет - `coverage: n/a` с этой причиной. Skill не поднялся - `coverage: unverifiable` + что пробовал; число покрытия по памяти не называется.
+**Покрытие тестов, написанных этой правкой.** Тесты вошли в состав правки - загрузи `dex-skill-test-coverage:test-coverage` и закрой замер по его дому, включая исход при недоборе порога; результат идёт в handoff полем `coverage`. Тестов в правке нет - `coverage: n/a` с этой причиной. Skill не поднялся - `coverage: unverifiable` + что пробовал, и только после вызова `Skill`, названного в `skills-loaded` с ответом вызова; число покрытия по памяти не называется.
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status`; смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: `diff-scope`, `success criteria` (что из принятых критериев закрыто; критерий, пришедший с меткой `[FR-NNN]`/`[NFR-NNN]`, несёт её и в выходе - иначе нить требования обрывается здесь и не доходит до теста), `run-status`, `coverage` (замер выше), пара `uncovered-status` + `uncovered`, `red-run` (зелёный `run-status` эту запись не заменяет), `fact-check`, **принятые решения/допущения** (всё, что решил сам -- восполнение инженерной нехватки, трактовка неоднозначности, выбор паттерна/имени/структуры; конвенция-решения - с первоисточником или пометкой «допущение» по Phase 3), известные остатки. Это вход следующего узла (tester или self-reviewer); маршрут решает оркестратор.
+**Output (handoff):** поля словаря `node-contract`, первым - `status`; смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: `diff-scope`, `success criteria` (что из принятых критериев закрыто; критерий, пришедший с меткой `[FR-NNN]`/`[NFR-NNN]`, несёт её и в выходе - иначе нить требования обрывается здесь и не доходит до теста), `run-status`, `coverage` (замер выше), пара `uncovered-status` + `uncovered`, `red-run` (зелёный `run-status` эту запись не заменяет), `fact-check`, **принятые решения/допущения** (всё, что решил сам -- восполнение инженерной нехватки, трактовка неоднозначности, выбор паттерна/имени/структуры; конвенция-решения - с первоисточником или пометкой «допущение» по Phase 3), известные остатки. Это вход следующего узла (tester или self-reviewer); маршрут решает оркестратор. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 **Exit criteria:** Компиляция прошла, тесты зелёные, analyzers молчат. Если что-то красное -- вернуться в Phase 3, не оставлять «потом поправим».
 

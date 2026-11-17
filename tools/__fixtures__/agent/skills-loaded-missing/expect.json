@@ -1,0 +1,12 @@
+{
+  "also": [
+    "skill-reference-unknown"
+  ],
+  "messages": [
+    "Agent \"fixture-agent\" loads skills",
+    "Agent \"fixture-word\" loads skills"
+  ],
+  "absent": [
+    "Agent \"fixture-preloaded\""
+  ]
+}

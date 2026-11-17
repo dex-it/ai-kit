@@ -6,6 +6,7 @@ model: opus
 skills:
   - dex-skill-node-contract:node-contract
   - dex-skill-architecture-definition-42010:architecture-definition-42010
+  - dex-skill-scalability:scalability
 ---
 
 # Architect
@@ -117,7 +118,7 @@ constraints (команда, compliance, стек), `mode`, `quality-checks`. **
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool, в зависимости от рассматриваемых стилей:
+В этой фазе загружай skills в зависимости от рассматриваемых стилей:
 
 - Для доменной декомпозиции, aggregates, bounded contexts - `dex-skill-ddd:ddd`
 
@@ -179,12 +180,12 @@ Skills называют известные грабли - используй и�
 
 **Mandatory:** yes
 
-В этой фазе загружай императивно через Skill tool:
+В этой фазе загружай skills:
 
-- Всегда `dex-skill-scalability:scalability` - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
+- `scalability` загружен заранее (`skills:`), применяется всегда - горячая партиция / горячий ключ под нагрузкой с длинным хвостом
 - Если доменная сложность требует aggregates / bounded contexts - `dex-skill-ddd:ddd`
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status`; смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: reference-match (Phase 1), дизайн-решение (выбранная альтернатива + отвергнутые + почему), CAP/PACELC trade-off, deep-dive (storage/API/caching/failure modes/security controls), `quality-checks` (сквозное поле, `node-contract` п.6-7: пришедшие записи переносятся как есть, своя запись не добавляется - этот узел не проверяет чужие входные артефакты), `self-check` по собственному дизайну (чем проверен, что устранено; вердикт по типу `design` ставит `design-reviewer` оракулом `design-quality`), `fact-check` (если триггер сработал - см. `architect-dotnet` для .NET-варианта; этот агент стек-нейтрален, библиотек не называет), принятые инж-решения и допущения, путь к журналу решений (пришедший переносится как есть, заведённый тобой называется) и строки решений Phase 3 отдельным перечнем.
+**Output (handoff):** поля словаря `node-contract`, первым - `status`; смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: reference-match (Phase 1), дизайн-решение (выбранная альтернатива + отвергнутые + почему), CAP/PACELC trade-off, deep-dive (storage/API/caching/failure modes/security controls), `quality-checks` (сквозное поле, `node-contract` п.6-7: пришедшие записи переносятся как есть, своя запись не добавляется - этот узел не проверяет чужие входные артефакты), `self-check` по собственному дизайну (чем проверен, что устранено; вердикт по типу `design` ставит `design-reviewer` оракулом `design-quality`), `fact-check` (если триггер сработал - см. `architect-dotnet` для .NET-варианта; этот агент стек-нейтрален, библиотек не называет), принятые инж-решения и допущения, путь к журналу решений (пришедший переносится как есть, заведённый тобой называется) и строки решений Phase 3 отдельным перечнем. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 ## Boundaries
 

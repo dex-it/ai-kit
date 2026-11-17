@@ -1,6 +1,6 @@
 {
   "name": "dex-data-pipeline",
-  "version": "1.7.3",
+  "version": "2.0.0",
   "description": "Пайплайны данных для ML: загрузка и предобработка, оптимизация DataLoader, схема данных.",
   "author": {
     "name": "Dex Team",

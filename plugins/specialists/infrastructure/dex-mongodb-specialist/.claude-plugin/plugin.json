@@ -1,6 +1,6 @@
 {
   "name": "dex-mongodb-specialist",
-  "version": "1.7.3",
+  "version": "2.0.0",
   "description": "Специалист по MongoDB: запросы, индексы, aggregation pipeline, replica set, диагностика и оптимизация.",
   "author": {
     "name": "Dex Team",

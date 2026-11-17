@@ -5,6 +5,7 @@ tools: Read, Bash, Grep, Glob, Skill
 model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
+  - dex-skill-dotnet-async-patterns:dotnet-async-patterns
 ---
 
 # Performance Analyst
@@ -13,7 +14,7 @@ skills:
 
 ## Phase 1: Direct Analysis
 
-**Goal:** Определить стек пользователя, просканировать горячие пути и сформулировать гипотезу узкого места без вызова Skill tool.
+**Goal:** Определить стек пользователя, просканировать горячие пути и сформулировать гипотезу узкого места без загрузки skills (загруженные заранее в `skills:` не в счёт: первый проход они не ограничивают).
 
 **Mandatory:** yes
 
@@ -46,19 +47,19 @@ Root cause -- сформулируй гипотезу: где именно уз�
 
 Выполняй всегда после Phase 1. Не спрашивай, продолжать ли.
 
-- **Всегда** -- вызови Skill tool `dex-skill-dotnet-async-patterns:dotnet-async-patterns` -- `Task.Run` над синхронным вызовом
-- **Если EF Core или БД в стеке** -- вызови Skill tool `dex-skill-dotnet-ef-core:dotnet-ef-core` -- нетранслируемый фильтр, трекинг read-only выборки
-- **Если Redis в стеке** -- вызови Skill tool `dex-skill-redis:redis` `[справочно]` -- промахи горячего ключа
-- **Если MongoDB в стеке** -- вызови Skill tool `dex-skill-mongodb:mongodb` `[справочно]` -- чтение документов целиком без проекции, опрос коллекции по таймеру
-- **Если OpenTelemetry/distributed tracing** -- вызови Skill tool `dex-skill-observability:observability` -- статус ошибки спана и запись исключения, health-пробы в трассах, дедлайн health-проверки, связь логов с трассой
-- **Если логирование на hot path** -- вызови Skill tool `dex-skill-dotnet-logging:dotnet-logging` -- отладочные подробности и шаги флоу на Information
+- `dotnet-async-patterns` загружен заранее (`skills:`), применяется всегда -- `Task.Run` над синхронным вызовом
+- **Если EF Core или БД в стеке** -- загрузи skill `dex-skill-dotnet-ef-core:dotnet-ef-core` -- нетранслируемый фильтр, трекинг read-only выборки
+- **Если Redis в стеке** -- загрузи skill `dex-skill-redis:redis` `[справочно]` -- промахи горячего ключа
+- **Если MongoDB в стеке** -- загрузи skill `dex-skill-mongodb:mongodb` `[справочно]` -- чтение документов целиком без проекции, опрос коллекции по таймеру
+- **Если OpenTelemetry/distributed tracing** -- загрузи skill `dex-skill-observability:observability` -- статус ошибки спана и запись исключения, health-пробы в трассах, дедлайн health-проверки, связь логов с трассой
+- **Если логирование на hot path** -- загрузи skill `dex-skill-dotnet-logging:dotnet-logging` -- отладочные подробности и шаги флоу на Information
 - Дедупликация с Phase 1 -- сообщай только новые находки
 
 Пометь секцию **"Pass 2: Deep Pattern Scan"**.
 
 **Exit criteria:** Список проверенных skills и новых находок записан; гипотеза из Phase 1 подтверждена или скорректирована; summary с severity breakdown готов.
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: отчёт составом из Output Format ниже, гипотезу узкого места с вердиктом «подтверждена / скорректирована», находки с severity и якорями, скиллы, которые не поднялись, с причиной, принятые узлом решения о составе стека и допущения. Метрики недоступны (нет APM, нет трейсов) -> `status: partial` с названной непроверенной частью, а не оценка, выданная за замер.
+**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: отчёт составом из Output Format ниже, гипотезу узкого места с вердиктом «подтверждена / скорректирована», находки с severity и якорями, скиллы, которые не поднялись, с причиной, принятые узлом решения о составе стека и допущения. Метрики недоступны (нет APM, нет трейсов) -> `status: partial` с названной непроверенной частью, а не оценка, выданная за замер. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 ## Scan Recipes
 

@@ -11,7 +11,7 @@ capacity, implementation-план и документацию ведёт выз�
 
 ## Required skills
 
-Агент императивно загружает skills через Skill tool в фазах. Базовые архитектурные skills + .NET-специфичные. **Обязательно** установить через `dex-bundle-dotnet-developer` или `dex-bundle-dotnet-fullstack` - оба bundle содержат полный набор.
+Агент загружает skills в фазах. Базовые архитектурные skills + .NET-специфичные. **Обязательно** установить через `dex-bundle-dotnet-developer` или `dex-bundle-dotnet-fullstack` - оба bundle содержат полный набор.
 
 ### Базовые архитектурные skills (общие с `dex-architect`)
 

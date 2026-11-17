@@ -5,6 +5,7 @@ tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, Skill, ToolSearch, mcp__gith
 model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
+  - dex-skill-review-step-by-step:review-step-by-step
 ---
 
 # Review Planner
@@ -45,7 +46,7 @@ skills:
 
 **Exit criteria:** все открытые треды собраны, commits-since-review перечислены, изменения задачи и описания MR зафиксированы, снимок записан.
 
-Загрузи `dex-skill-review-step-by-step:review-step-by-step`.
+`review-step-by-step` загружен заранее (`skills:`).
 
 ## Phase 1: Classify Comments
 
@@ -83,7 +84,7 @@ Blast radius правки, затрагивающей контракт / тип 
 
 **Mandatory:** yes
 
-**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: план правок P0..P3 (шаги по форме плана + суть + риск регрессии + blast radius), классификация замечаний (type/actionability/priority/task_alignment; замечание, снятое или отложенное по несверённому техфакту, несёт статус `unverifiable`/`contradicted` рядом с `clarify`/`disputed`), черновики ответов (из Phase 4, если выполнена). Это результат узла независимо от режима.
+**Output (handoff):** поля словаря `node-contract`, первым - `status` (исход узла); смысл и терминалы каждого поля - там же, здесь только что отдаёт этот узел: план правок P0..P3 (шаги по форме плана + суть + риск регрессии + blast radius), классификация замечаний (type/actionability/priority/task_alignment; замечание, снятое или отложенное по несверённому техфакту, несёт статус `unverifiable`/`contradicted` рядом с `clarify`/`disputed`), черновики ответов (из Phase 4, если выполнена). Это результат узла независимо от режима. `skills-loaded` - загруженные skills и пропущенные с причиной пропуска (`node-contract`, словарь полей).
 
 **Exit criteria:** каждое валидное actionable и каждое непокрытое требование задачи попало в один из P0..P3 шагом, записанным по форме; out_of_scope и наблюдения вынесены отдельно, без действия.
 
