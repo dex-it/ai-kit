@@ -8,6 +8,7 @@ model: sonnet
 skills:
   - dex-skill-node-contract:node-contract
   - dex-skill-business-analysis-29148:business-analysis-29148
+  - dex-skill-review-evidence:review-evidence
 ---
 
 # Fixture Agent

@@ -5,6 +5,7 @@ tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, Skill, Agent, ToolSearch, mc
 model: opus
 skills:
   - dex-skill-node-contract:node-contract
+  - dex-skill-review-evidence:review-evidence
 ---
 
 # MR Re-Reviewer
