@@ -1,6 +1,6 @@
 {
   "name": "dex-cicd-gitlab",
-  "version": "2.5.2",
+  "version": "3.0.0",
   "description": "Специалист по GitLab CI/CD: пайплайны и джобы, артефакты, окружения, раннеры, стратегии деплоя.",
   "author": {
     "name": "Dex Team",
