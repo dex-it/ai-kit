@@ -19,8 +19,8 @@
     {
       "id": "M20",
       "file": "src/probe.js",
-      "lines": [12, 12],
-      "slack": 1,
+      "lines": [9, 13],
+      "slack": 0,
       "blocking": false,
       "what": "решение «кэшировать результат пробы по url на 10 минут» неверно для временного отказа: `cache.set` кладёт и `{ ok: false, reason: 'unavailable' }` (5xx, таймаут, сбой сети) - один сбой провайдера отказывает тому же референсу 10 минут, хотя FEAT.md называет `unavailable` повторяемым через минуту-две, а `startGeneration` превращает его в RefRejectedError без списания. Для успеха и `unsupported` решение держится. Ни одна ось перечня его не называет: производительность и регрессии чисты (кэш предписан R2), тесты зелёные и R2 для отказа не оговорено. Засчитывается находка, называющая кэширование `unavailable` (временного отказа) на 10 минут; верная severity P1-P2"
     }
@@ -28,7 +28,7 @@
   "expect": {
     "decisions": [
       { "anchor": "src/probe.js:12", "decision": "кэш результата пробы по url на 10 минут (R2)", "root": "квота провайдера на пробы (FEAT.md:6)", "verdict": "illegitimate", "input": "класс «провайдер временно не ответил»: результат unavailable живёт 10 минут, повтор через минуту-две (FEAT.md, Контекст) получает тот же отказ" },
-      { "anchor": "src/probe.js:20-24", "decision": "404 и 415 - unsupported", "root": "FEAT.md:7", "verdict": "legitimate" }
+      { "anchor": "src/probe.js:23", "decision": "404 и 415 - unsupported", "root": "FEAT.md:7", "verdict": "legitimate" }
     ],
     "axes": "оси performance и regressions - clean законен (кэш предписан R2); оси без находки на этом месте - не ошибка, мина ловится только через решение либо через coverage (нет теста на повтор после unavailable)"
   }

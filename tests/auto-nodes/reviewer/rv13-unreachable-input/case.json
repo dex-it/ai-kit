@@ -22,7 +22,7 @@
     {
       "id": "M19",
       "file": "src/shipping.js",
-      "lines": [10, 10],
+      "lines": [9, 10],
       "slack": 0,
       "blocking": false,
       "false_at": ["P0", "P1"],
