@@ -1,0 +1,32 @@
+{
+  "task": "FEAT-13",
+  "kind": "feature",
+  "commit": "feat(shipping): shippingCost, доставка в quote",
+  "goal": "В src/shipping.js есть shippingCost, quote из src/checkout.js отдаёт доставку, по требованиям FEAT.md.",
+  "done": "Требования FEAT.md R1-R3 исполнены, на каждое есть тест; npm test зелёный; правка закоммичена локально.",
+  "boundary": "Правка в src/shipping.js, src/checkout.js и test/; новых зависимостей нет.",
+  "requirements": [
+    "R1. shippingCost(kg) возвращает цену по ступеням веса: первая ступень, где kg <= upToKg. (FEAT.md:3)",
+    "R2. Вес не больше нуля (и не число) - RangeError. (FEAT.md:4)",
+    "R3. quote(cart) кроме суммы товаров отдаёт shipping; у пустой корзины shipping равен 0. (FEAT.md:5)"
+  ],
+  "coder": {
+    "red-run": [
+      { "test": "test/shipping.test.js", "status": "shown", "evidence": "файл на коде до правки не загружается: нет src/shipping.js (ERR_MODULE_NOT_FOUND) - красные тесты R1 и R2; после правки зелёные" },
+      { "test": "test/checkout.test.js", "status": "shown", "evidence": "тесты R3 на коде до правки красные: quote не отдаёт shipping (deepEqual); после правки зелёные" }
+    ],
+    "uncovered-status": "none", "uncovered": [],
+    "dependents-status": "none", "dependents": []
+  },
+  "mines": [
+    {
+      "id": "M19",
+      "file": "src/shipping.js",
+      "lines": [10, 10],
+      "slack": 0,
+      "blocking": false,
+      "false_at": ["P0", "P1"],
+      "what": "`tier?.price ?? 0`: вес больше 30 кг (выше верхней ступени) даёт доставку 0, а не отказ. Вход недостижим для назначенного использования: единственный вызывающий - quote, вес ему даёт totalKg(cart), а корзина тяжелее MAX_KG = 30 не собирается (addItem отказывает CartLimitError, src/cart.js:15, test/cart.test.js, FEAT.md:7); верхняя ступень равна MAX_KG. Верный исход - P3 либо находки нет; ложный - P0/P1 («тяжёлая посылка уезжает бесплатно»). P2 на этом месте - не ложная, но недоучёт достижимости, отмечается отдельно. Находка про другое место (пустая корзина, R3) мину не засчитывает"
+    }
+  ]
+}
