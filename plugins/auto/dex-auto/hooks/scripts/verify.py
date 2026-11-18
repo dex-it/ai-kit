@@ -30,6 +30,10 @@ class Overtime(Exception):
     pass
 
 
+class HeadMoved(Exception):
+    pass
+
+
 def die(message):
     sys.stderr.write(message + "\n")
     sys.exit(64)
@@ -97,6 +101,48 @@ def run_tests(cmd):
         return code, out, parse_reports(d)
     finally:
         shutil.rmtree(d, ignore_errors=True)
+
+
+def head_ref():
+    code, out = sh("git symbolic-ref -q HEAD")
+    if code == 0:
+        return out.strip()
+    code, out = sh("git rev-parse -q --verify HEAD")
+    return out.strip() if code == 0 else ""
+
+
+def heads():
+    code, out = sh("git for-each-ref --format='%(refname:short)' refs/heads")
+    return set(out.split()) if code == 0 else set()
+
+
+def head_state():
+    code, out = sh(OWN)
+    own = out.split() if code == 0 else []
+    return {"ref": head_ref(), "heads": heads(), "first": own[-1] if own else ""}
+
+
+def keep_head(s, r):
+    # Тест, зовущий git в каталоге без своего .git, достаёт до дерева трека: меняет его ветку и заводит ветки на коммитах трека, а ahead и OWN их тогда не видят.
+    ref, now = s["ref"], head_ref()
+    if ref and now != ref:
+        branch = ref[len("refs/heads/"):] if ref.startswith("refs/heads/") else ""
+        p = subprocess.run(["git", "checkout", "-q", branch, "--"] if branch else ["git", "checkout", "-q", "--detach", ref],
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        moved = "команда прогона сменила HEAD дерева: %s -> %s" % (ref, now or "нет HEAD")
+        if p.returncode != 0 or head_ref() != ref:
+            raise HeadMoved("%s; вернуть не удалось: %s" % (moved, p.stdout.decode("utf-8", "replace").strip() or "HEAD после возврата другой"))
+        r["head_restored"].append(moved)
+    if not s["first"]:
+        return
+    for b in sorted(heads() - s["heads"]):
+        if subprocess.run(["git", "merge-base", "--is-ancestor", s["first"], "refs/heads/" + b], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0:
+            continue
+        sha = subprocess.run(["git", "rev-parse", "refs/heads/" + b], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.decode().strip()
+        p = subprocess.run(["git", "branch", "-q", "-D", b], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if p.returncode != 0:
+            raise HeadMoved("команда прогона завела ветку %s на коммитах трека, удалить не удалось: %s" % (b, p.stdout.decode("utf-8", "replace").strip()))
+        r["head_restored"].append("удалена ветка %s (%s), заведённая командой прогона на коммитах трека" % (b, sha))
 
 
 def git_hash(path, write=False):
@@ -168,7 +214,7 @@ def verify(spec):
     snap = spec.get("snap") or {}
     hash_path = spec.get("hash_path") or ""
     r = {"status": "complete", "build_exit": None, "test_exit": None, "build_ok": True, "pass_count": 0, "fail_count": 0,
-         "failing": [], "flaky": [], "counts": "none", "build_tail": "", "test_tail": "", "missing": ""}
+         "failing": [], "flaky": [], "counts": "none", "build_tail": "", "test_tail": "", "missing": "", "head_restored": []}
     # До прогона: артефакты сборки в неигнорируемых путях иначе читаются как правки дерева.
     r["dirty"] = bool(sh("git status --porcelain")[1].strip())
     if snap.get("blob") and snap.get("path"):
@@ -179,15 +225,18 @@ def verify(spec):
             r["snap_hash"] = git_hash(snap["path"])
         else:
             r["snap_hash"] = p.stderr.decode("utf-8", "replace").strip() or "git show упал"
+    hs = head_state()
     try:
         if build:
             r["build_exit"], out = sh(build)
             r["build_tail"] = tail(out)
+            keep_head(hs, r)
             r["build_ok"] = r["build_exit"] == 0
         if not r["build_ok"]:
             r["failing"], r["counts"] = [BUILD], "skipped"
         elif test:
             code, out, rep = run_tests(test)
+            keep_head(hs, r)
             fresh = [] if rep is None else sorted(set(rep[1]) - known)
             # Красное только в первом прогоне - нестабильный тест, а не дефект правки: один повтор, если новых красных не больше FLAKY_MAX.
             if 0 < len(fresh) <= FLAKY_MAX:
@@ -202,8 +251,11 @@ def verify(spec):
                 # Одно имя в нескольких отчётах (тест на каждый target framework) - одно падение, как в failing.
                 r.update(pass_count=rep[0], fail_count=len(set(rep[1])), failing=sorted(set(rep[1])), counts="report")
     finally:
-        if snap.get("blob") and snap.get("path"):
-            subprocess.run(["git", "checkout", "--", snap["path"]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            keep_head(hs, r)
+        finally:
+            if snap.get("blob") and snap.get("path"):
+                subprocess.run(["git", "checkout", "--", snap["path"]], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     r["exit_code"] = r["build_exit"] if not r["build_ok"] else (r["test_exit"] if r["test_exit"] is not None else 0)
     r["head"] = sh("git log --oneline -3")[1].strip()
     r["head_sha"] = sh("git rev-parse HEAD")[1].strip()
@@ -233,6 +285,8 @@ def run(hexed, out):
         put(out, verify(json.loads(bytes.fromhex(hexed).decode("utf-8"))))
     except Overtime:
         put(out, blocked("прогон дольше %d с (DEX_AUTO_VERIFY_LIMIT): команда и её процессы убиты" % LIMIT))
+    except HeadMoved as e:
+        put(out, blocked(str(e)))
     except Exception as e:
         put(out, blocked("verify.py упал: %r" % e))
 
