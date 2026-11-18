@@ -89,6 +89,18 @@ out="$(cd "$R" && DEX_AUTO_VERIFY_LIMIT=1 "$V" "$(hx '{"test": "sleep 37 & sleep
 sleep 0.5
 check "$(echo "$out" | field status)/$(pgrep -f 'sleep 37' | wc -l | tr -d ' ')" "blocked/0" "потолок прогона: blocked, команда и её фоновые процессы убиты"
 
+git -C "$R" checkout -qb auto/T9; echo o > "$R/own.txt"; git -C "$R" add own.txt; git -C "$R" commit -qm own
+out="$(run '{"build": "true", "test": "mkdir -p .runs/clone && git -C .runs/clone branch CHANGEMEy && git -C .runs/clone checkout -qb CHANGEMEx"}')"
+check "$(git -C "$R" branch --show-current)/$(echo "$out" | field status)/$(echo "$out" | field ahead)" "auto/T9/complete/1" "тест через git в подкаталоге без .git сменил ветку и завёл ветки: ветка возвращена, ahead видит коммит трека"
+check "$(git -C "$R" branch --list 'CHANGEME*' | wc -l | tr -d ' ')/$(echo "$out" | field head_restored | grep -o 'удалена ветка CHANGEME[xy]' | sort | tr '\n' ' ')" "0/удалена ветка CHANGEMEx удалена ветка CHANGEMEy " "ветки прогона на коммитах трека удалены и названы"
+git -C "$R" checkout -q --detach
+out="$(run '{"test": "mkdir -p .runs/clone && git -C .runs/clone checkout -qb CHANGEMEz"}')"
+check "$(git -C "$R" rev-parse --abbrev-ref HEAD)/$(echo "$out" | field status)" "HEAD/complete" "detached HEAD до прогона: возвращён detached"
+git -C "$R" checkout -q auto/T9
+out="$(run '{"test": "git checkout -qb moved && echo //m >> ok.test.mjs && git commit -qam m && echo //d >> ok.test.mjs"}')"
+check "$(echo "$out" | field status)/$(echo "$out" | field missing | grep -c 'вернуть не удалось')" "blocked/1" "смену HEAD вернуть не удалось - blocked с причиной"
+git -C "$R" checkout -qf auto/T1; git -C "$R" branch -qD moved auto/T9 CHANGEMEz; rm -rf "$R/.runs/clone"
+
 echo x > "$R/note.txt"; git -C "$R" add note.txt; git -C "$R" commit -qm feat; echo y > "$R/new.txt"
 out="$(run '{"build": "true"}')"
 check "$(echo "$out" | field dirty)/$(echo "$out" | field ahead)/$(echo "$out" | field exit_code)" "true/1/0" "дерево: неотслеживаемый файл - dirty, коммит ветки - ahead; без тестов код по сборке"
