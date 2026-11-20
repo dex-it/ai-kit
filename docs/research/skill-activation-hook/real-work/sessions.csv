@@ -1,0 +1,342 @@
+session,repo,day,period,turns,calls,skills,actions,wrote_xml_doc
+sg3qj97,upcore.backend,2026-10-01,before,7,66,claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s1307thg,upcore.backend,2026-10-02,before,2,11,postgres-reader,db search,0
+s15dfxbc,upcore.frontend,2026-10-02,before,11,82,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-frontend claude-rules-upcore-work-docs,any_edit front_edit search,0
+s1fdrjo1,upcore.backend,2026-10-02,before,15,58,claude-rules-task-implementation claude-rules-upcore-build,build search,0
+shbxtv5,upcore.backend,2026-10-02,before,5,36,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-naming claude-rules-upcore-tests,search,0
+sivln3c,upcore.backend,2026-10-02,before,14,71,,search,0
+s14eu6wn,upcore.frontend,2026-10-05,before,10,39,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-work-docs,any_edit search,0
+s1emegwe,upcore.backend,2026-10-05,before,11,135,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-dto-records claude-rules-csharp-linq claude-rules-csharp-options claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-naming claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1klj7n3,upcore.backend,2026-10-05,before,1,23,claude-rules-code-search,search,0
+s1rb4fme,upcore.frontend,2026-10-05,before,6,38,claude-rules-code-search claude-rules-upcore-frontend,any_edit front_edit search,0
+s1vunra3,upcore.frontend,2026-10-05,before,2,16,,search,0
+s1x1jtyj,upcore.backend,2026-10-05,before,9,45,claude-rules-chat-reply claude-rules-code-search claude-rules-review-fix claude-rules-upcore-build,any_edit build cs_edit search,0
+s3je3kg,upcore.backend,2026-10-05,before,13,143,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-dto-records claude-rules-csharp-specificatio claude-rules-csharp-tests claude-rules-interaction-mode claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s6cnkcv,upcore.backend,2026-10-05,before,3,12,claude-rules-gitlab,gitlab search,0
+s72m0rt,upcore.frontend,2026-10-05,before,1,2,,search,0
+sboax3x,upcore.backend,2026-10-05,before,1,8,claude-rules-chat-reply claude-rules-code-search,search,0
+sbxdm8e,upcore.frontend,2026-10-05,before,7,49,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation,any_edit front_edit search,0
+sf9i9gp,upcore.backend,2026-10-05,before,13,110,claude-rules-chat-reply claude-rules-code-writing claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+shicxq0,upcore.frontend,2026-10-05,before,4,18,,any_edit front_edit search,0
+shzzmcr,upcore.backend,2026-10-05,before,21,154,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-dto-records claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests claude-rules-upcore-work-docs,any_edit build cs_edit search,1
+ssyukfy,upcore.frontend,2026-10-05,before,4,12,,search,0
+s12fwymi,upcore.backend,2026-10-06,before,9,68,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-tests claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s14g4aso,upcore.backend,2026-10-06,before,10,80,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-dto-records claude-rules-csharp-linq claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-tests,any_edit cs_edit search test_edit,1
+s1ihpu10,upcore.backend,2026-10-06,before,11,75,claude-rules-code-search claude-rules-task-implementation,any_edit cs_edit search test_edit,1
+s1mj873i,upcore.backend,2026-10-06,before,14,49,claude-rules-interaction-mode,any_edit db search,0
+s2oxm8m,upcore.backend,2026-10-06,before,5,15,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation,any_edit search,0
+s57e1iv,upcore.backend,2026-10-06,before,2,66,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-options claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef,any_edit build cs_edit search test_edit,1
+shfrxc8,upcore.backend,2026-10-06,before,2,24,,search,0
+shhpz33,upcore.backend,2026-10-06,before,13,80,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore-build,any_edit build cs_edit search,1
+snsffpm,upcore.backend,2026-10-06,before,3,19,claude-rules-chat-reply claude-rules-code-search,search,0
+snykopk,upcore.frontend,2026-10-06,before,1,14,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore-frontend,any_edit front_edit search,0
+st7w7el,upcore.backend,2026-10-06,before,20,125,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-dto-records claude-rules-csharp-options claude-rules-csharp-specifications claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-ef,any_edit build cs_edit search,1
+s169az16,upcore.backend,2026-10-07,before,7,36,claude-rules-chat-reply claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,any_edit build search,0
+s1agzj8y,upcore.backend,2026-10-07,before,2,33,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-naming claude-rules-upcore-work-docs,any_edit search,0
+s1fa079m,upcore.backend,2026-10-07,before,5,109,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-linq claude-rules-csharp-methods claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit cs_edit db search test_edit,1
+s1w5dw35,upcore.backend,2026-10-07,before,3,38,claude-rules-chat-reply claude-rules-debugging,db search,0
+s6l5hjs,upcore.frontend,2026-10-07,before,1,9,,search,0
+s85it9b,upcore.frontend,2026-10-07,before,1,23,,any_edit front_edit search,0
+sbs0cqe,upcore.backend,2026-10-07,before,1,11,claude-rules-chat-reply claude-rules-code-search,search,0
+sbxzmf4,upcore.backend,2026-10-07,before,5,54,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-aspnet-endpoints claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-rules-from-review claude-rules-upcore claude-rules-upcore-code claude-rules-upcore-naming claude-rules-upcore-tests claude-rules-writing-rules,any_edit search,0
+scuw8nj,upcore.backend,2026-10-07,before,18,167,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-linq claude-rules-csharp-methods claude-rules-csharp-tests claude-rules-definition-of-done claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+sdws4gb,upcore.backend,2026-10-07,before,14,97,claude-rules-chat-reply claude-rules-code-general claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+sg4casx,upcore.backend,2026-10-07,before,1,14,claude-rules-chat-reply,search,0
+sl22ndl,upcore.backend,2026-10-07,before,2,55,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+sn0cos0,upcore.backend,2026-10-07,before,1,8,,any_edit cs_edit search,0
+so4toe2,upcore.frontend,2026-10-07,before,10,58,claude-rules-task-implementation claude-rules-upcore-frontend,any_edit search,0
+so7osdj,upcore.backend,2026-10-07,before,1,27,claude-rules-chat-reply claude-rules-upcore-build,any_edit build cs_edit search,0
+ssqr7hf,upcore.backend,2026-10-07,before,2,17,claude-rules-chat-reply claude-rules-upcore-build,build search,0
+s11seatj,upcore.frontend,2026-10-08,before,4,23,claude-rules-chat-reply,any_edit front_edit search,0
+s13fkblv,upcore.frontend,2026-10-08,before,4,64,claude-rules-chat-reply claude-rules-task-implementation claude-rules-upcore-frontend,any_edit search subagent,0
+s1mlv09p,upcore.frontend,2026-10-08,before,1,8,,search,0
+s1ro6ett,upcore.frontend,2026-10-08,before,2,10,claude-rules-chat-reply,search,0
+s1xqdhml,upcore.frontend,2026-10-08,before,2,13,,any_edit front_edit search,0
+s2unpys,upcore.frontend,2026-10-08,before,5,32,claude-rules-upcore-frontend,search,0
+s3hwdy2,upcore.backend,2026-10-08,before,8,57,claude-rules-postgres-reader claude-rules-upcore-work-docs,db search,0
+s3piz0a,upcore.backend,2026-10-08,before,7,132,claude-rules-chat-reply claude-rules-code-writing claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s4eov5c,upcore.backend,2026-10-08,before,4,50,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-upcore-build,build search,0
+s5xmpkt,upcore.backend,2026-10-08,before,1,10,claude-rules-chat-reply claude-rules-debugging,search,0
+s7vuhfq,upcore.frontend,2026-10-08,before,3,31,claude-rules-chat-reply claude-rules-code-search claude-rules-task-implementation claude-rules-upcore-frontend,any_edit search,0
+sa54cvw,upcore.backend,2026-10-08,before,2,17,claude-rules-chat-reply,search,0
+sbikwq3,upcore.frontend,2026-10-08,before,3,23,claude-rules-chat-reply,search,0
+sd0oehf,upcore.frontend,2026-10-08,before,4,16,claude-rules-chat-reply,any_edit search,0
+sequ2hq,upcore.frontend,2026-10-08,before,5,8,claude-rules-chat-reply,search,0
+sj8lujd,upcore.frontend,2026-10-08,before,3,12,claude-rules-chat-reply,search,0
+swncht7,upcore.frontend,2026-10-08,before,3,29,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-frontend,any_edit front_edit search,0
+s17wkksx,upcore.backend,2026-10-09,before,5,49,claude-rules-chat-reply claude-rules-debugging claude-rules-upcore-build,any_edit build cs_edit search test_edit,0
+s1aq1ol9,upcore.backend,2026-10-09,before,8,70,claude-rules-chat-reply claude-rules-code-general claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1ksjyqu,upcore.frontend,2026-10-09,before,22,44,,any_edit front_edit search,0
+s1suz0ju,upcore.backend,2026-10-09,before,3,35,claude-rules-chat-reply claude-rules-upcore-build,build search,0
+s3hoxc7,upcore.backend,2026-10-09,before,23,312,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search subagent test_edit,1
+sd2ihpe,upcore.frontend,2026-10-09,before,5,19,claude-rules-chat-reply,search,0
+sfib3ye,upcore.backend,2026-10-09,before,18,178,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-tests claude-rules-debugging claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit db search subagent test_edit,1
+srvxtr3,upcore.frontend,2026-10-09,before,3,20,claude-rules-chat-reply claude-rules-code-search,any_edit front_edit search,0
+s101rkj9,upcore.frontend,2026-10-12,before,2,9,claude-rules-chat-reply claude-rules-code-search,search,0
+s14jgvlv,upcore.backend,2026-10-12,before,9,117,claude-rules-definition-of-done claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,build search,0
+s162agi6,upcore.backend,2026-10-12,before,2,18,claude-rules-chat-reply,search,0
+s1c9d1mo,upcore.backend,2026-10-12,before,2,9,claude-rules-chat-reply claude-rules-code-search,search,0
+s1dsfgsy,upcore.frontend,2026-10-12,before,2,27,claude-rules-chat-reply claude-rules-task-implementation claude-rules-upcore-frontend,search,0
+s1gelatb,upcore.backend,2026-10-12,before,9,61,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-code claude-rules-postgres-reader claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+s1k9pvra,upcore.backend,2026-10-12,before,4,28,claude-rules-chat-reply claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1kqhfx6,upcore.backend,2026-10-12,before,4,49,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-csharp-code claude-rules-upcore-code claude-rules-upcore-tests,search,0
+s46qehv,upcore.backend,2026-10-12,before,47,165,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader,db search,0
+sk9mozf,upcore.backend,2026-10-12,before,15,151,claude-rules-chat-reply claude-rules-debugging claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search subagent test_edit,1
+sp7xud2,upcore.backend,2026-10-12,before,15,36,claude-rules-review-fix claude-rules-upcore-build,any_edit build cs_edit search,0
+suj4ftl,upcore.backend,2026-10-12,before,4,49,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build,any_edit build search,0
+s165a9,upcore.backend,2026-10-13,before,18,118,claude-rules-chat-reply claude-rules-csharp-aspnet-endpoints claude-rules-postgres-reader claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-frontend claude-rules-upcore-naming,any_edit build cs_edit db search,0
+s1coyz2j,upcore.frontend,2026-10-13,before,4,25,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore-frontend,search,0
+s1g2imrg,upcore.backend,2026-10-13,before,5,53,claude-rules-chat-reply claude-rules-code-search claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search,1
+s1g5jzwo,upcore.backend,2026-10-13,before,20,93,claude-rules-chat-reply claude-rules-csharp-specifications claude-rules-debugging claude-rules-postgres-reader claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+s1r80a0e,upcore.backend,2026-10-13,before,8,94,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit db search,1
+s1uryn0n,upcore.backend,2026-10-13,before,1,23,claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-build,build search,0
+s37q4om,upcore.backend,2026-10-13,before,1,3,claude-rules-chat-reply,search,0
+sco90t4,upcore.backend,2026-10-13,before,3,24,claude-rules-chat-reply claude-rules-code-search claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,build search,0
+sdve69r,upcore.backend,2026-10-13,before,1,10,,search,0
+sj15r8k,upcore.frontend,2026-10-13,before,10,28,claude-rules-chat-reply claude-rules-interaction-mode,any_edit front_edit search,0
+s15pcmp,upcore.frontend,2026-10-14,before,4,7,claude-rules-chat-reply,search,0
+s1brf2q3,upcore.backend,2026-10-14,before,7,176,claude-rules-csharp-specifications claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1caxd3,upcore.backend,2026-10-14,before,9,153,claude-rules-chat-reply claude-rules-debugging claude-rules-postgres-reader claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+s1dts07i,upcore.backend,2026-10-14,before,10,73,claude-rules-chat-reply claude-rules-code-search claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s1tf7o9k,upcore.backend,2026-10-14,before,7,64,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-postgres-reader claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+s6jdp8k,upcore.backend,2026-10-14,before,3,24,claude-rules-chat-reply claude-rules-csharp-dto-records claude-rules-task-implementation claude-rules-upcore-build,any_edit build cs_edit search,1
+s7zlin1,upcore.frontend,2026-10-14,before,7,29,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-frontend,any_edit front_edit search,0
+sa2cj0l,upcore.frontend,2026-10-14,before,9,39,claude-rules-chat-reply claude-rules-review-fix claude-rules-task-implementation,any_edit search,0
+sfhxwwp,upcore.frontend,2026-10-14,before,10,29,claude-rules-chat-reply claude-rules-task-implementation claude-rules-upcore-frontend,any_edit search,0
+sg9r8v2,upcore.frontend,2026-10-14,before,1,5,,search,0
+s12elam7,upcore.frontend,2026-10-15,before,3,8,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation,any_edit search,0
+s134k5d2,upcore.backend,2026-10-15,before,3,37,claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,build search,0
+s168v7ep,upcore.backend,2026-10-15,before,2,0,,,0
+s17ti4h9,upcore.frontend,2026-10-15,before,3,19,claude-rules-chat-reply claude-rules-task-implementation,any_edit front_edit search,0
+s19ag0nh,upcore.backend,2026-10-15,before,3,55,claude-rules-chat-reply claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+s1ln65xu,upcore.backend,2026-10-15,before,1,21,claude-rules-chat-reply,search,0
+s1nxrigk,upcore.backend,2026-10-15,before,9,37,claude-rules-chat-reply claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1p47czh,upcore.backend,2026-10-15,before,2,20,claude-rules-chat-reply claude-rules-upcore-build,build search,0
+s1trml04,upcore.backend,2026-10-15,before,2,26,claude-rules-chat-reply claude-rules-csharp-code claude-rules-csharp-enum claude-rules-upcore-code claude-rules-upcore-messaging,search,0
+s1yuq9qr,upcore.backend,2026-10-15,before,1,18,claude-rules-chat-reply claude-rules-upcore-code,search,0
+s6pfpwq,upcore.backend,2026-10-15,before,15,126,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-ef,any_edit build cs_edit search,1
+sgi8upt,upcore.backend,2026-10-15,before,1,29,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-task-implementation,any_edit db search,0
+stmj2fs,upcore.backend,2026-10-15,before,2,11,claude-rules-csharp-xml-docs claude-rules-review-fix,search,0
+svl18el,upcore.backend,2026-10-15,before,28,206,claude-rules-chat-reply claude-rules-code-writing claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-code claude-rules-upcore-messaging claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+swtt6iw,upcore.backend,2026-10-15,before,5,145,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-enum claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-messaging claude-rules-upcore-tests claude-rules-upcore-work-docs,any_edit build cs_edit search test_edit,1
+s1tqv8d2,upcore.backend,2026-10-16,before,9,92,claude-rules-chat-reply claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s2p0t1l,upcore.backend,2026-10-16,before,2,41,claude-rules-chat-reply,search,0
+s4mrml1,upcore.backend,2026-10-16,before,3,11,claude-rules-chat-reply claude-rules-postgres-reader,db search,0
+s8ggsdj,upcore.backend,2026-10-16,before,64,393,claude-rules-chat-reply,any_edit search subagent,0
+s8zxb1o,upcore.backend,2026-10-16,before,5,64,,search,0
+setifsv,upcore.backend,2026-10-16,before,2,4,claude-rules-chat-reply,search,0
+sjpfzkf,upcore.backend,2026-10-16,before,5,72,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-tests claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+s1f80t2b,upcore.backend,2026-10-19,before,3,26,claude-rules-upcore-build,build search,0
+s1muyy1a,upcore.backend,2026-10-19,before,18,137,claude-rules-chat-reply claude-rules-debugging claude-rules-interaction-mode claude-rules-postgres-reader,any_edit db search,0
+s1nsz8fr,upcore.backend,2026-10-19,before,10,51,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader,db search,0
+s2hm2qm,upcore.backend,2026-10-19,before,5,23,claude-rules-chat-reply claude-rules-review-fix claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s15ml7p4,upcore.backend,2026-10-20,before,1,49,claude-rules-chat-reply claude-rules-code-search,search,0
+s1lg6bol,upcore.backend,2026-10-20,before,1,9,,any_edit cs_edit search,0
+s1nxmf8n,upcore.backend,2026-10-20,before,48,82,claude-rules-chat-reply,any_edit search,0
+s1xgtyk7,upcore.backend,2026-10-20,before,47,169,claude-rules-chat-reply claude-rules-code-writing claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-postgres-reader claude-rules-upcore-build claude-rules-upcore-tests claude-rules-upcore-work-docs,any_edit build cs_edit db search test_edit,1
+s1yx322n,upcore.backend,2026-10-20,before,3,17,claude-rules-upcore-build,any_edit build cs_edit search,0
+s2ut7hw,upcore.backend,2026-10-20,before,9,108,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-upcore-work-docs,any_edit cs_edit db search,0
+s4vho8k,upcore.backend,2026-10-20,before,4,86,claude-rules-chat-reply claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s5pmhpv,upcore.backend,2026-10-20,before,21,132,claude-rules-chat-reply claude-rules-upcore-work-docs,any_edit build search subagent,0
+smti5wa,upcore.backend,2026-10-20,before,7,35,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-build claude-rules-upcore-messaging claude-rules-upcore-tests,any_edit build cs_edit search,1
+st1bcv6,upcore.backend,2026-10-20,before,7,58,claude-rules-chat-reply claude-rules-interaction-mode,any_edit search,0
+st1koy8,upcore.backend,2026-10-20,before,5,115,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-upcore-build,build search subagent,0
+szv2lkg,upcore.backend,2026-10-20,before,2,27,claude-rules-chat-reply,search,0
+s163pi0j,upcore.backend,2026-10-21,before,4,93,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migration claude-rules-csharp-xml-docs claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s16nyqb4,upcore.backend,2026-10-21,before,1,12,,build search,0
+s17cb4oe,upcore.backend,2026-10-21,before,16,216,claude-rules-chat-reply claude-rules-code-writing claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit search subagent test_edit,1
+s1azssv2,upcore.backend,2026-10-21,before,6,97,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-messaging claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1evqoxg,upcore.backend,2026-10-21,before,6,36,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s1h57d6h,upcore.backend,2026-10-21,before,2,21,claude-rules-chat-reply claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,build search,0
+s1m2tg7d,upcore.backend,2026-10-21,before,1,17,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-ef-migrations claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-code,search,0
+s1p5uniw,upcore.frontend,2026-10-21,before,41,147,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-interaction-mode claude-rules-upcore-frontend,any_edit front_edit search subagent,0
+s1pzszfc,upcore.backend,2026-10-21,before,6,73,claude-rules-chat-reply claude-rules-code-general claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-messaging claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1sfiqn7,upcore.backend,2026-10-21,before,1,13,claude-rules-chat-reply claude-rules-upcore-code,search,0
+s3e1a1w,upcore.backend,2026-10-21,before,1,45,claude-rules-chat-reply self-review,search subagent,0
+s5j3149,upcore.backend,2026-10-21,before,1,14,claude-rules-chat-reply claude-rules-upcore-build,build search,0
+s6ikcjx,upcore.backend,2026-10-21,before,49,180,claude-rules-chat-reply claude-rules-postgres-reader,any_edit db search,0
+sk40fak,upcore.backend,2026-10-21,before,1,8,claude-rules-chat-reply,search,0
+snbev6r,upcore.backend,2026-10-21,before,2,58,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-enum claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+ssdec36,upcore.backend,2026-10-21,before,24,160,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-naming claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+ssw953r,upcore.backend,2026-10-21,before,13,74,claude-rules-chat-reply claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s9xd7nk,upcore.frontend,2026-10-22,before,124,238,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-upcore-frontend,any_edit front_edit search,0
+s1945bv5,upcore.backend,2026-10-23,before,13,81,claude-rules-chat-reply claude-rules-csharp-ef-migrations claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit migration_edit search test_edit,1
+s1gbw3sc,upcore.backend,2026-10-23,before,1,12,claude-rules-chat-reply claude-rules-upcore-code,search,0
+s1lr2y4,upcore.frontend,2026-10-23,before,3,13,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore-frontend,any_edit search,0
+s1rzewpu,upcore.backend,2026-10-23,before,6,36,claude-rules-chat-reply claude-rules-debugging claude-rules-postgres-reader,db search,0
+s1tfqq61,upcore.frontend,2026-10-23,before,9,87,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation,any_edit front_edit search subagent,0
+s1xxbujp,upcore.backend,2026-10-23,before,28,137,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-upcore-build,any_edit build cs_edit db search,1
+se80rw7,upcore.frontend,2026-10-23,before,48,141,claude-rules-chat-reply,any_edit front_edit search,0
+spain74,upcore.frontend,2026-10-23,before,10,112,claude-rules-chat-reply claude-rules-task-implementation,any_edit search subagent,0
+s11c9o09,upcore.frontend,2026-10-26,before,48,200,claude-rules-chat-reply claude-rules-interaction-mode dataviz,search,0
+s8p7uvv,upcore.frontend,2026-10-26,before,10,49,,search,0
+srfgpix,upcore.backend,2026-10-26,before,14,117,claude-rules-chat-reply claude-rules-code-search claude-rules-debugging claude-rules-interaction-mode claude-rules-postgres-reader,db search,0
+s166n5ia,upcore.backend,2026-10-27,before,35,504,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode,any_edit build search subagent,0
+s16fqlyz,upcore.frontend,2026-10-27,before,33,108,claude-rules-interaction-mode,any_edit front_edit search,0
+s1dm78o5,upcore.frontend,2026-10-27,before,45,130,,any_edit search,0
+s1eehjfs,upcore.frontend,2026-10-27,before,4,21,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-upcore-frontend,any_edit front_edit search,0
+s1fzmju7,upcore.frontend,2026-10-27,before,7,46,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-frontend,search,0
+s1s09oyn,upcore.frontend,2026-10-27,before,5,109,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-frontend,any_edit front_edit search,0
+s1x9da17,upcore.frontend,2026-10-27,before,11,44,,search,0
+siatdkz,upcore.frontend,2026-10-27,before,27,92,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-work-docs,any_edit search,0
+sopqi6t,upcore.frontend,2026-10-27,before,11,64,claude-rules-chat-reply,any_edit search,0
+sp0lttb,upcore.frontend,2026-10-27,before,12,30,claude-rules-chat-reply claude-rules-interaction-mode,search,0
+stynsxs,upcore.backend,2026-10-27,before,4,21,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-build,search,0
+sy1gvsr,upcore.backend,2026-10-27,before,19,149,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-debugging claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit db search test_edit,1
+s19bz7k5,upcore.backend,2026-10-28,before,6,69,claude-rules-chat-reply claude-rules-code-writing claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s1eju0sv,upcore.backend,2026-10-28,before,13,210,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests claude-rules-upcore-work-docs,any_edit build cs_edit search subagent,1
+s1gwt4q9,upcore.backend,2026-10-28,before,44,157,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1tdfzol,upcore.backend,2026-10-28,before,4,37,claude-rules-chat-reply claude-rules-upcore-build,build search,0
+s1v2bfh0,upcore.backend,2026-10-28,before,14,56,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-task-implementation,any_edit search,0
+s1xie8n7,upcore.frontend,2026-10-28,before,3,50,claude-rules-code-search claude-rules-interaction-mode,search,0
+s2qtivp,upcore.frontend,2026-10-28,before,1,98,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-interaction-mode claude-rules-upcore-frontend,search,0
+s2rmwza,upcore.backend,2026-10-28,before,1,21,claude-rules-chat-reply claude-rules-upcore-build,build search,0
+s3tmb3q,upcore.backend,2026-10-28,before,16,161,claude-rules-chat-reply claude-rules-code-writing claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s6d345a,upcore.backend,2026-10-28,before,7,31,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-upcore-build,any_edit cs_edit search test_edit,1
+sa1j6rj,upcore.backend,2026-10-28,before,14,120,claude-rules-chat-reply claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+sabtcv7,upcore.backend,2026-10-28,before,2,15,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-specifications claude-rules-csharp-xml-docs claude-rules-upcore-build,any_edit build cs_edit search,1
+sac7svh,upcore.backend,2026-10-28,before,18,154,claude-rules-chat-reply claude-rules-code-writing claude-rules-csharp-aspnet-endpo claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit search subagent test_edit,1
+sdwyuii,upcore.frontend,2026-10-28,before,1,123,claude-rules-chat-reply claude-rules-upcore-frontend,search subagent,0
+se0rkea,upcore.backend,2026-10-28,before,10,76,claude-rules-chat-reply claude-rules-csharp-specifications claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+se9rc2v,upcore.backend,2026-10-28,before,9,58,claude-rules-chat-reply claude-rules-code-general claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-enum claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+sex072b,upcore.frontend,2026-10-28,before,12,21,claude-rules-chat-reply,any_edit front_edit search,0
+sg34vri,upcore.backend,2026-10-28,before,10,112,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build,any_edit build cs_edit search subagent,1
+soztsms,upcore.backend,2026-10-28,before,13,40,claude-rules-chat-reply claude-rules-code-search claude-rules-gitlab claude-rules-upcore-work-docs,any_edit gitlab search,0
+sqvvdje,upcore.backend,2026-10-28,before,1,4,claude-rules-chat-reply,search,0
+sv279bo,upcore.backend,2026-10-28,before,2,50,claude-rules-chat-reply,search,0
+sx07eqo,upcore.backend,2026-10-28,before,4,17,claude-rules-chat-reply,search,0
+s13fslw7,upcore.frontend,2026-10-29,before,18,95,claude-rules-chat-reply claude-rules-visual-check,gitlab search,0
+s155k2fw,upcore.backend,2026-10-29,before,18,366,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-work-docs,any_edit build cs_edit search subagent test_edit,1
+s1bvppay,upcore.backend,2026-10-29,before,6,88,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-specifications claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1cs70z6,upcore.backend,2026-10-29,before,4,116,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+sc7vund,upcore.backend,2026-10-29,before,37,149,claude-rules-chat-reply claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-naming,any_edit db search subagent,0
+sl5fu9j,upcore.backend,2026-10-29,before,6,28,claude-rules-csharp-ef-migrations claude-rules-interaction-mode claude-rules-upcore-build claude-rules-upcore-ef,search,0
+sosx5va,upcore.frontend,2026-10-29,before,8,25,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-upcore-frontend,any_edit front_edit search,0
+ss8voo7,upcore.backend,2026-10-29,before,2,28,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-interaction-mode claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+su82xxn,upcore.backend,2026-10-29,before,6,54,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode,search,0
+sxbmsv6,upcore.backend,2026-10-29,before,1,22,claude-rules-chat-reply claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-code,search,0
+s19ikjqa,upcore.frontend,2026-10-30,before,1,8,claude-rules-upcore-frontend,search,0
+s1hg1880,upcore.frontend,2026-10-30,before,26,119,claude-rules-code-search claude-rules-interaction-mode claude-rules-visual-check,any_edit front_edit search,0
+s1kw6qee,upcore.backend,2026-10-30,before,25,212,claude-rules-code-general claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-specifications claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit db search subagent test_edit,1
+s1m4cx0r,upcore.backend,2026-10-30,before,1,63,claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-upcore claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,db search,0
+s1sszhw3,upcore.backend,2026-10-30,before,1,12,,search,0
+s1wius43,upcore.backend,2026-10-30,before,4,29,claude-rules-postgres-reader claude-rules-task-implementation,any_edit db search,0
+s1y6swd9,upcore.backend,2026-10-30,before,1,10,,search,0
+s8ud4ai,upcore.frontend,2026-10-30,before,2,8,,search,0
+sal2dfc,upcore.backend,2026-10-30,before,18,104,claude-rules-code-writing claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-build,any_edit build cs_edit db search test_edit,1
+scoj54y,upcore.backend,2026-10-30,before,15,226,claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+sed5mvz,upcore.backend,2026-10-30,before,16,103,claude-rules-interaction-mode claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+sfrru8c,upcore.backend,2026-10-30,before,1,3,,search,0
+sg1t0lv,upcore.backend,2026-10-30,before,13,128,claude-rules-code-writing claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-tests,any_edit build cs_edit search subagent test_edit,1
+si9i8m5,upcore.backend,2026-10-30,before,7,58,claude-rules-interaction-mode claude-rules-task-implementation claude-rules-upcore-build,build search,0
+sil9knx,upcore.backend,2026-10-30,before,12,269,claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-tests claude-rules-upcore-work-docs,any_edit build cs_edit db search subagent test_edit,1
+smk3onx,upcore.frontend,2026-10-30,before,23,62,claude-rules-upcore-frontend,search,0
+so0p563,upcore.frontend,2026-10-30,before,1,65,claude-rules-code-search claude-rules-code-writing claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-upcore-frontend claude-rules-visual-check,any_edit front_edit search,0
+so8khp9,upcore.frontend,2026-10-30,before,1,16,claude-rules-code-search claude-rules-interaction-mode claude-rules-upcore-frontend,search,0
+sq24ocs,upcore.frontend,2026-10-30,before,1,8,claude-rules-upcore-frontend,search,0
+sy6vnxh,upcore.backend,2026-10-30,before,3,81,claude-rules-code-general claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-interaction-mode claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests,build search,0
+sy79smb,upcore.frontend,2026-10-30,before,12,143,claude-rules-code-search claude-rules-definition-of-done claude-rules-interaction-mode claude-rules-task-implementation,any_edit front_edit search,0
+s132fpd8,upcore.backend,2026-11-09,before,49,125,claude-rules-postgres-reader,any_edit db search,0
+s154k1sg,upcore.frontend,2026-11-09,before,1,3,,search,0
+s1nquomq,upcore.backend,2026-11-09,before,7,39,claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search,0
+s1qxsp7j,upcore.backend,2026-11-09,before,1,9,,search,0
+s1wxnd,upcore.backend,2026-11-09,before,10,23,claude-rules-code-search claude-rules-debugging claude-rules-task-implementation claude-rules-upcore-build,any_edit cs_edit search,0
+s1x8m44s,upcore.backend,2026-11-09,before,9,35,claude-rules-code-search claude-rules-upcore-build,any_edit build cs_edit migration_edit search,0
+s1xmzsps,upcore.backend,2026-11-09,before,5,44,claude-rules-postgres-reader,search,0
+s1yx5a5i,upcore.backend,2026-11-09,before,11,132,claude-rules-chat-reply claude-rules-collect-adr,any_edit search subagent,0
+s7m2s8l,upcore.frontend,2026-11-09,before,6,15,,any_edit front_edit search,0
+s8oxty3,upcore.backend,2026-11-09,before,7,32,claude-rules-postgres-reader,any_edit db search,0
+sf589uc,upcore.backend,2026-11-09,before,1,2,,search,0
+sj37l2y,upcore.backend,2026-11-09,before,5,38,claude-rules-code-search,search,0
+sjiye2f,upcore.frontend,2026-11-09,before,9,131,claude-rules-code-search claude-rules-task-implementation,any_edit search subagent,0
+spfk2xl,upcore.backend,2026-11-09,before,7,40,claude-rules-code-search claude-rules-postgres-reader,any_edit db search,0
+spodu94,upcore.backend,2026-11-09,before,3,54,claude-rules-csharp-ef-migrations claude-rules-upcore-build claude-rules-upcore-ef,build search,0
+sr86vnn,upcore.backend,2026-11-09,before,28,296,claude-rules-task-implementation claude-rules-upcore-build,any_edit build cs_edit search subagent test_edit,1
+srlhps3,upcore.backend,2026-11-09,before,3,76,claude-rules-task-implementation,search subagent,0
+sx4b2hd,upcore.backend,2026-11-09,before,11,37,claude-rules-code-search claude-rules-postgres-reader,db search,0
+szcd0j5,upcore.backend,2026-11-09,before,5,43,claude-rules-postgres-reader claude-rules-task-implementation,any_edit db search,0
+s12sm8em,upcore.backend,2026-11-10,before,11,139,claude-rules-code-search,any_edit search subagent,0
+s12why9l,upcore.backend,2026-11-10,before,3,32,claude-rules-code-search,search,0
+s14wq4z5,upcore.backend,2026-11-10,before,58,121,claude-rules-postgres-reader,any_edit db search,0
+s14x8ul5,upcore.backend,2026-11-10,before,14,218,claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-ef,any_edit build cs_edit search test_edit,1
+s1b6e9ua,upcore.backend,2026-11-10,before,2,15,,search,0
+s1drm72j,upcore.backend,2026-11-10,before,4,26,claude-rules-postgres-reader,any_edit db search,0
+s1nrh0io,upcore.backend,2026-11-10,before,1,12,,search,0
+s1nxl22w,upcore.backend,2026-11-10,before,13,75,claude-rules-code-search claude-rules-code-writing claude-rules-postgres-reader claude-rules-upcore-build,any_edit build cs_edit db search,1
+s1of6iyt,upcore.backend,2026-11-10,before,1,5,,search,0
+s1y764r7,upcore.backend,2026-11-10,before,2,2,,search,0
+s7a8leo,upcore.backend,2026-11-10,before,2,27,claude-rules-postgres-reader claude-rules-task-implementation,any_edit db search,0
+s9huv64,upcore.frontend,2026-11-10,before,2,13,claude-rules-code-search claude-rules-task-implementation,any_edit front_edit search,0
+sf5pt1k,upcore.backend,2026-11-10,before,18,85,claude-rules-task-implementation,any_edit search subagent,0
+sqp4z81,upcore.backend,2026-11-10,before,4,44,claude-rules-postgres-reader,search,0
+ss7vx1y,upcore.backend,2026-11-10,before,15,48,claude-rules-code-search claude-rules-code-writing claude-rules-csharp-xml-docs claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+su4xwr,upcore.backend,2026-11-10,before,1,30,claude-rules-upcore-build,build search,0
+suisrjr,upcore.frontend,2026-11-10,before,4,15,claude-rules-code-search claude-rules-task-implementation,any_edit front_edit search,0
+sx73gt,upcore.backend,2026-11-10,before,4,102,claude-rules-code-search claude-rules-code-writing claude-rules-csharp-ef-migrations claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-ef,any_edit build search subagent,0
+szqm6ou,upcore.backend,2026-11-10,before,6,35,claude-rules-task-implementation claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s135eml4,upcore.frontend,2026-11-11,before,25,42,claude-rules-code-search,any_edit front_edit search,0
+s19okvsd,upcore.backend,2026-11-11,before,16,86,claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,any_edit build cs_edit search test_edit,1
+s1k1ega0,upcore.backend,2026-11-11,before,1,2,,search,0
+s1ss77dc,upcore.backend,2026-11-11,before,2,15,,any_edit search,0
+sg2ej2,upcore.backend,2026-11-11,before,1,7,claude-rules-code-search,search,0
+stng64v,upcore.frontend,2026-11-11,before,5,20,,search,0
+strdqni,upcore.backend,2026-11-11,before,7,26,,search,0
+s19uogvw,upcore.backend,2026-11-13,before,2,0,,,0
+s1a7qcvd,upcore.frontend,2026-11-13,before,5,12,claude-rules-chat-reply claude-rules-code-search claude-rules-task-implementation,search,0
+s1g8umj5,upcore.backend,2026-11-13,before,20,68,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-upcore-build,any_edit build cs_edit search test_edit,1
+s1goxh7n,upcore.backend,2026-11-13,before,1,12,claude-rules-chat-reply claude-rules-upcore-build,build search,0
+s1gyf4wx,upcore.backend,2026-11-13,before,54,133,claude-rules-chat-reply claude-rules-postgres-reader,any_edit search,0
+s1nf36yu,upcore.frontend,2026-11-13,before,3,13,claude-rules-task-implementation,any_edit front_edit search,0
+s8seu0v,upcore.backend,2026-11-13,before,4,17,,any_edit search,0
+s9rcx3k,upcore.backend,2026-11-13,before,4,19,claude-rules-chat-reply claude-rules-task-implementation claude-rules-upcore-build,build search,0
+saj8pzd,upcore.backend,2026-11-13,before,6,21,claude-rules-chat-reply claude-rules-gitlab claude-rules-upcore-build,build search,0
+sbdvvbh,upcore.backend,2026-11-13,before,2,4,claude-rules-chat-reply,search,0
+sm1xx35,upcore.backend,2026-11-13,before,4,31,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader,db search,0
+ss79lhl,upcore.backend,2026-11-13,before,7,18,claude-rules-postgres-reader,search,0
+s1cl7qhx,upcore.backend,2026-11-16,before,1,18,claude-rules-chat-reply claude-rules-code-search claude-rules-task-implementation,search,0
+s1d69nj4,upcore.backend,2026-11-16,before,3,37,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader claude-rules-task-implementation,db search,0
+s1fiswm0,upcore.backend,2026-11-16,before,1,18,claude-rules-chat-reply claude-rules-code-search,search,0
+s1gthsqj,upcore.backend,2026-11-16,before,1,3,,any_edit search,0
+s1mk43l2,upcore.backend,2026-11-16,before,2,15,claude-rules-gitlab claude-rules-upcore-build,gitlab search,0
+s1ts0hgk,upcore.backend,2026-11-16,before,4,14,claude-rules-chat-reply claude-rules-code-search,search,0
+s1vtey5f,upcore.backend,2026-11-16,before,4,55,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-specifications claude-rules-csharp-tests claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search subagent test_edit,1
+s29nqhj,upcore.backend,2026-11-16,before,35,64,claude-rules-chat-reply claude-rules-code-search claude-rules-gitlab claude-rules-task-implementation claude-rules-upcore-build,any_edit build gitlab search,0
+s4nalyz,upcore.frontend,2026-11-16,before,3,17,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing,search,0
+sb9n7b4,upcore.backend,2026-11-16,before,8,33,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-review-fix claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests,build search,0
+scenzuy,upcore.backend,2026-11-16,before,2,6,claude-rules-upcore-build,build search,0
+se7gqje,upcore.backend,2026-11-16,before,8,19,claude-rules-chat-reply claude-rules-code-search,search,0
+sf1g3tj,upcore.backend,2026-11-16,before,26,175,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore-build,any_edit cs_edit db search subagent,0
+sh7yk8r,upcore.backend,2026-11-16,before,3,16,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-upcore-build,any_edit cs_edit search,0
+sqd9n7b,upcore.backend,2026-11-16,before,3,6,claude-rules-chat-reply,any_edit search,0
+svx89nc,upcore.backend,2026-11-16,before,3,25,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-upcore-build claude-rules-upcore-tests,build search,0
+szdu971,upcore.frontend,2026-11-16,before,2,15,claude-rules-chat-reply claude-rules-task-implementation claude-rules-upcore-frontend,search,0
+s12vmxrt,upcore.backend,2026-11-17,after,7,38,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader,any_edit db search,0
+s1czdfe5,upcore.backend,2026-11-17,after,15,85,claude-rules-chat-reply claude-rules-code-search claude-rules-debugging claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore,any_edit db search,0
+s1l18oo1,upcore.backend,2026-11-17,after,3,0,,,0
+s1llwv9v,upcore.backend,2026-11-17,after,29,163,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-gitlab claude-rules-postgres-reader claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests,any_edit build cs_edit db gitlab search subagent test_edit,1
+s3iezw3,upcore.backend,2026-11-17,after,3,28,claude-rules-chat-reply,search,0
+sqg9s32,upcore.backend,2026-11-17,after,12,33,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader,any_edit db search,0
+s10p75qw,upcore.backend,2026-11-18,after,6,20,claude-rules-chat-reply claude-rules-code-search,search,0
+s18kvqb2,upcore.frontend,2026-11-18,after,2,8,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-upcore-frontend,any_edit front_edit search,0
+s1kgbn09,upcore.backend,2026-11-18,after,16,63,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-work-docs,any_edit db search,0
+s1rth9mr,upcore.backend,2026-11-18,after,2,27,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-code claude-rules-upcore-tests,search,0
+s1su43yh,upcore.backend,2026-11-18,after,8,20,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-aspnet-endpoints claude-rules-upcore-build,any_edit build cs_edit search,0
+s1sxdosk,upcore.backend,2026-11-18,after,4,28,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-csharp-code claude-rules-upcore-code claude-rules-upcore-ef,search,0
+s6kxdjv,upcore.backend,2026-11-18,after,31,215,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-aspnet-endpoints claude-rules-csharp-dto-records claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-naming claude-rules-upcore-work-docs,any_edit search subagent,0
+s7sf030,upcore.backend,2026-11-18,after,1,18,claude-rules-chat-reply,search,0
+sgxdpqs,upcore.backend,2026-11-18,after,7,82,claude-rules-chat-reply claude-rules-code-search claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-work-docs,any_edit search subagent,0
+skqumyz,upcore.frontend,2026-11-18,after,2,24,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-upcore-front-components claude-rules-upcore-front-data claude-rules-upcore-front-helpers claude-rules-upcore-front-styles claude-rules-upcore-frontend,search,0
+sl74xqi,upcore.backend,2026-11-18,after,15,211,claude-rules-chat-reply claude-rules-code-search claude-rules-definition-of-done claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-tests claude-rules-upcore-work-docs,any_edit search subagent,0
+sse6gzi,upcore.backend,2026-11-18,after,31,400,claude-rules-chat-reply claude-rules-code-search claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-work-docs,any_edit build cs_edit search subagent,1
+supe276,upcore.frontend,2026-11-18,after,21,227,claude-rules-chat-reply claude-rules-code-search claude-rules-definition-of-done claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-frontend claude-rules-upcore-work-docs claude-rules-visual-check,any_edit search subagent,0
+sv5gfo9,upcore.backend,2026-11-18,after,21,282,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-specifications claude-rules-definition-of-done claude-rules-postgres-reader claude-rules-review-fix claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-tests claude-rules-upcore-work-docs,any_edit build cs_edit db search subagent test_edit,1
+s11rknu6,upcore.frontend,2026-11-19,after,24,120,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-debugging claude-rules-ui-copy claude-rules-ui-craft claude-rules-ui-fallbacks claude-rules-upcore-front-components claude-rules-upcore-front-helpers claude-rules-upcore-front-styles claude-rules-upcore-frontend claude-rules-visual-check,search,0
+s14nvwt3,upcore.backend,2026-11-19,after,12,222,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-aspnet-endpoints claude-rules-csharp-tests claude-rules-definition-of-done claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-tests,any_edit build cs_edit search subagent test_edit,1
+s1821b9u,upcore.frontend,2026-11-19,after,1,19,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore-front-components claude-rules-upcore-front-data claude-rules-upcore-front-helpers claude-rules-upcore-front-styles claude-rules-upcore-frontend,search,0
+s19to4mw,upcore.backend,2026-11-19,after,1,8,claude-rules-chat-reply claude-rules-code-search,search,0
+s1rpqm59,upcore.backend,2026-11-19,after,5,28,claude-rules-chat-reply claude-rules-code-search claude-rules-debugging claude-rules-postgres-reader claude-rules-task-implementation,any_edit db search,0
+s1vd9d8c,upcore.backend,2026-11-19,after,2,23,claude-rules-chat-reply claude-rules-code-search claude-rules-debugging claude-rules-postgres-reader claude-rules-task-implementation,db search,0
+s3k6cpc,upcore.backend,2026-11-19,after,3,21,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader,db search,0
+sg54fya,upcore.backend,2026-11-19,after,2,7,claude-rules-chat-reply claude-rules-code-search,search,0
+sxozugn,upcore.backend,2026-11-19,after,11,65,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-naming,any_edit build cs_edit search test_edit,0
+szxlarz,upcore.frontend,2026-11-19,after,14,108,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-ui-craft claude-rules-upcore-front-components claude-rules-upcore-front-styles claude-rules-upcore-frontend claude-rules-visual-check,any_edit search,0
