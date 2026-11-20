@@ -1,0 +1,650 @@
+[
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-chat-reply",
+  "before": [
+   149,
+   180
+  ],
+  "after": [
+   23,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-code-general",
+  "before": [
+   12,
+   231
+  ],
+  "before_trig": [
+   10,
+   130
+  ],
+  "after": [
+   3,
+   24
+  ],
+  "after_trig": [
+   1,
+   14
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-code-search",
+  "before": [
+   88,
+   231
+  ],
+  "before_trig": [
+   88,
+   229
+  ],
+  "after": [
+   21,
+   24
+  ],
+  "after_trig": [
+   21,
+   23
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-code-writing",
+  "before": [
+   45,
+   231
+  ],
+  "before_trig": [
+   43,
+   130
+  ],
+  "after": [
+   2,
+   24
+  ],
+  "after_trig": [
+   2,
+   14
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-aspnet-endpoints",
+  "before": [
+   2,
+   231
+  ],
+  "after": [
+   3,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-code",
+  "before": [
+   27,
+   231
+  ],
+  "before_trig": [
+   23,
+   95
+  ],
+  "after": [
+   5,
+   24
+  ],
+  "after_trig": [
+   3,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-dto-records",
+  "before": [
+   18,
+   231
+  ],
+  "before_trig": [
+   16,
+   95
+  ],
+  "after": [
+   1,
+   24
+  ],
+  "after_trig": [
+   0,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-ef-migrations",
+  "before": [
+   13,
+   231
+  ],
+  "before_trig": [
+   1,
+   2
+  ],
+  "after": [
+   0,
+   24
+  ],
+  "after_trig": [
+   0,
+   0
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-enum",
+  "before": [
+   4,
+   231
+  ],
+  "after": [
+   0,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-linq",
+  "before": [
+   4,
+   231
+  ],
+  "after": [
+   0,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-options",
+  "before": [
+   3,
+   231
+  ],
+  "after": [
+   0,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-specifications",
+  "before": [
+   8,
+   231
+  ],
+  "after": [
+   1,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-tests",
+  "before": [
+   20,
+   231
+  ],
+  "before_trig": [
+   17,
+   69
+  ],
+  "after": [
+   3,
+   24
+  ],
+  "after_trig": [
+   2,
+   4
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-csharp-xml-docs",
+  "before": [
+   38,
+   231
+  ],
+  "before_trig": [
+   31,
+   95
+  ],
+  "after": [
+   2,
+   24
+  ],
+  "after_trig": [
+   1,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-debugging",
+  "before": [
+   12,
+   231
+  ],
+  "after": [
+   3,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-definition-of-done",
+  "before": [
+   10,
+   231
+  ],
+  "after": [
+   3,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-gitlab",
+  "before": [
+   5,
+   231
+  ],
+  "before_trig": [
+   4,
+   4
+  ],
+  "after": [
+   1,
+   24
+  ],
+  "after_trig": [
+   1,
+   1
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-interaction-mode",
+  "before": [
+   58,
+   231
+  ],
+  "after": [
+   0,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-postgres-reader",
+  "before": [
+   45,
+   231
+  ],
+  "before_trig": [
+   41,
+   45
+  ],
+  "after": [
+   9,
+   24
+  ],
+  "after_trig": [
+   9,
+   9
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-review-fix",
+  "before": [
+   39,
+   231
+  ],
+  "after": [
+   2,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-task-implementation",
+  "before": [
+   61,
+   231
+  ],
+  "after": [
+   10,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore",
+  "before": [
+   10,
+   231
+  ],
+  "after": [
+   9,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore-build",
+  "before": [
+   122,
+   231
+  ],
+  "before_trig": [
+   113,
+   117
+  ],
+  "after": [
+   7,
+   24
+  ],
+  "after_trig": [
+   6,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore-code",
+  "before": [
+   44,
+   231
+  ],
+  "before_trig": [
+   33,
+   95
+  ],
+  "after": [
+   5,
+   24
+  ],
+  "after_trig": [
+   3,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore-ef",
+  "before": [
+   36,
+   231
+  ],
+  "before_trig": [
+   30,
+   95
+  ],
+  "after": [
+   5,
+   24
+  ],
+  "after_trig": [
+   2,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore-messaging",
+  "before": [
+   6,
+   231
+  ],
+  "after": [
+   0,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore-naming",
+  "before": [
+   12,
+   231
+  ],
+  "after": [
+   5,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore-tests",
+  "before": [
+   69,
+   231
+  ],
+  "before_trig": [
+   51,
+   69
+  ],
+  "after": [
+   5,
+   24
+  ],
+  "after_trig": [
+   3,
+   4
+  ]
+ },
+ {
+  "repo": "upcore.backend",
+  "skill": "claude-rules-upcore-work-docs",
+  "before": [
+   11,
+   231
+  ],
+  "after": [
+   6,
+   24
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-chat-reply",
+  "before": [
+   46,
+   65
+  ],
+  "after": [
+   6,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-code-general",
+  "before": [
+   3,
+   80
+  ],
+  "before_trig": [
+   3,
+   45
+  ],
+  "after": [
+   1,
+   6
+  ],
+  "after_trig": [
+   0,
+   3
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-code-search",
+  "before": [
+   28,
+   80
+  ],
+  "before_trig": [
+   28,
+   80
+  ],
+  "after": [
+   6,
+   6
+  ],
+  "after_trig": [
+   6,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-code-writing",
+  "before": [
+   7,
+   80
+  ],
+  "before_trig": [
+   5,
+   45
+  ],
+  "after": [
+   3,
+   6
+  ],
+  "after_trig": [
+   2,
+   3
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-definition-of-done",
+  "before": [
+   2,
+   80
+  ],
+  "after": [
+   1,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-interaction-mode",
+  "before": [
+   21,
+   80
+  ],
+  "after": [
+   0,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-task-implementation",
+  "before": [
+   22,
+   80
+  ],
+  "after": [
+   1,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-upcore-front-components",
+  "before": [
+   0,
+   80
+  ],
+  "after": [
+   4,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-upcore-front-helpers",
+  "before": [
+   0,
+   80
+  ],
+  "after": [
+   3,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-upcore-front-styles",
+  "before": [
+   0,
+   80
+  ],
+  "after": [
+   4,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-upcore-frontend",
+  "before": [
+   27,
+   80
+  ],
+  "after": [
+   6,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-upcore-work-docs",
+  "before": [
+   3,
+   80
+  ],
+  "after": [
+   1,
+   6
+  ]
+ },
+ {
+  "repo": "upcore.frontend",
+  "skill": "claude-rules-visual-check",
+  "before": [
+   3,
+   80
+  ],
+  "before_trig": [
+   2,
+   31
+  ],
+  "after": [
+   3,
+   6
+  ],
+  "after_trig": [
+   0,
+   1
+  ]
+ }
+]
