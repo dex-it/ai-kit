@@ -5,7 +5,7 @@
 где писали `///`.
 Что нужно: только sessions.csv и problem.csv рядом со скриптом, стандартная библиотека.
 Чем отличается от activation.py: нет разбора транскриптов, сверки хука с датой и сводки сокращённых имён скилов -
-период, список доступных скилов и полные имена уже лежат в sessions.csv. Результат отчёта пишется в from_csv.json.
+период, список доступных скилов и полные имена уже лежат в sessions.csv. Файлов не пишет, только печатает.
 Запуск: python3 from_csv.py
 """
 import collections
@@ -82,7 +82,7 @@ def main():
     sessions = load_sessions(os.path.join(HERE, "sessions.csv"))
     archived = [s for s in sessions.values() if s["hook"] is not None]
     print(f"сессий {len(sessions)}, без архива транскрипта {len(sessions) - len(archived)} (из таблицы исключены)")
-    activation.report(sessions, "from_csv.json")
+    activation.report(sessions)
     problem_table(os.path.join(HERE, "problem.csv"))
     print()
     xml_docs(sessions)

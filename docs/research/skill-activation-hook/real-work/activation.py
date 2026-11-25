@@ -253,8 +253,8 @@ def main():
     report(sessions, "activation.json")
 
 
-def report(sessions, json_path):
-    """Таблица, медианы, Холм, «до первой правки», длина сессии и json по готовым сессиям."""
+def report(sessions, json_path=None):
+    """Таблица, медианы, Холм, «до первой правки», длина сессии по готовым сессиям; json - если задан json_path."""
     rows = table(sessions)
     med = medians(sessions)
     for repo in REPOS:
@@ -287,7 +287,8 @@ def report(sessions, json_path):
     for r in lengths:
         groups = " | ".join(f"{g}: {pct(*r['before_groups'][g])} -> {pct(*r['after_groups'][g])}" for g in r["before_groups"])
         print(f"{r['repo'][7:12]} {r['skill'][13:]:24} 1-й ход: {pct(*r['before_first_turn'])} -> {pct(*r['after_first_turn'])} | ходов {groups}")
-    json.dump({"rows": rows, "medians": med, "before_first_edit": early, "by_length": lengths}, open(json_path, "w"), ensure_ascii=False, indent=1)
+    if json_path:
+        json.dump({"rows": rows, "medians": med, "before_first_edit": early, "by_length": lengths}, open(json_path, "w"), ensure_ascii=False, indent=1)
 
 
 if __name__ == "__main__":
