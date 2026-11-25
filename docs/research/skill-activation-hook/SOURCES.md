@@ -5,13 +5,15 @@
 Закрытый репозиторий правил автора claude-rules, каталог `research/2026-11-skill-loading/`, коммит
 `7b2ea11` (17.11.2026). Ссылки нет: репозиторий приватный. Оттуда в README перенесены: разбор
 сессий 13-16.11, замер «открыт / был в списке» за 30 дней, стенд на сабагентах и на `claude -p`,
-все серии с хуком и описаниями. Итог - плагин skill-check (`UserPromptSubmit` + `SubagentStart`).
+все серии с хуком и описаниями. Таблицы серий лежат здесь же, в [`bench/results/`](bench/results/).
+Итог - плагин skill-check (`UserPromptSubmit` + `SubagentStart`).
 
 ## 2. Аудит загрузки скилов в каталоге
 
 Issue #128, PR #130 `feat/skills-load-audit-128` (17.11.2026): pre-load скилов у ревьюеров изменения,
-строка про загруженные скилы в командах. Тот же вывод с другой стороны: нужные агенту скилы
-надёжнее подать заранее, чем ждать, пока модель откроет их по описанию.
+строка про загруженные скилы в командах. Та же идея с другой стороны: подать агенту нужные скилы
+заранее, а не ждать, пока модель откроет их по описанию. Замера, что pre-load работает, нет: он
+вынесен в ai-kit#131.
 
 ## 3. Что пишут другие
 
@@ -29,13 +31,15 @@ Issue #128, PR #130 `feat/skills-load-audit-128` (17.11.2026): pre-load скил
   https://pavliuko.github.io/about/2026/05/05/claude-code-keeps-ignoring-my-skills/
 - Пересказ исследования Селезнёва (Medium, февраль 2026; 650 прогонов, директивное описание
   «ALWAYS invoke ...» - 100%): https://mcp.directory/blog/why-your-claude-skill-isnt-activating-2026-fixes
-- Issue в Claude Code про хуки и скилы: https://github.com/anthropics/claude-code/issues/10225
 
 ## 4. Документация Claude Code
 
 - Хуки, события `UserPromptSubmit` и `SubagentStart`, поле `additionalContext`:
   https://code.claude.com/docs/en/hooks
-- Скилы, `description` и `paths` во frontmatter: https://code.claude.com/docs/en/skills
+- Скилы, `description` и `paths` во frontmatter: https://code.claude.com/docs/en/skills. Бюджет
+  списка скилов - раздел «Skill descriptions are cut short»: 1% окна контекста модели, настройка
+  `skillListingBudgetFraction`, при нехватке убираются описания начиная с редко вызываемых скилов,
+  имена остаются (сверено 25.11.2026).
 
 ## 5. Данные реальной работы
 

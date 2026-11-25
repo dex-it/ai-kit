@@ -10,7 +10,7 @@ subagent-runs.csv - одна строка на прогон сабагента: 
 import csv
 import sys
 
-from activation import HOOK_DAY, load, period
+from activation import HOOK_DATE, load, period
 from xmldocs import wrote_xml
 
 import sqlite3
@@ -37,7 +37,7 @@ def export_sessions(db, sessions):
         for sid, s in sorted(sessions.items(), key=lambda item: item[1]["day"]):
             turns, calls, sources = db.execute("SELECT turns, calls, sources FROM trace_sessions WHERE id = ?", (sid,)).fetchone()
             xml = wrote_xml(sid, sources) if "cs_edit" in s["why"] else False
-            writer.writerow([sid, s["repo"], s["day"], period(s["day"]), turns, calls,
+            writer.writerow([sid, s["repo"], s["day"], "" if s["hook"] is None else period(s), turns, calls,
                              " ".join(sorted(s["skills"])), " ".join(sorted(s["why"])),
                              "" if xml is None else int(xml)])
 
@@ -52,7 +52,7 @@ def export_runs(db, sessions):
                 continue
             skills = sorted({row[0].split(":")[-1] for row in db.execute(
                 "SELECT DISTINCT target FROM trace_calls WHERE session_id = ? AND parent = ? AND tool = 'Skill' AND target IS NOT NULL", (sid, run_id))})
-            writer.writerow([sid, run_id, s["day"], period(s["day"]), run_kind(target), " ".join(skills)])
+            writer.writerow([sid, run_id, s["day"], "" if s["hook"] is None else period(s), run_kind(target), " ".join(skills)])
 
 
 def main():
@@ -60,7 +60,7 @@ def main():
     sessions = load(db)
     export_sessions(db, sessions)
     export_runs(db, sessions)
-    print("hook day", HOOK_DAY, "sessions", len(sessions))
+    print("hook date", HOOK_DATE, "sessions", len(sessions))
 
 
 main()

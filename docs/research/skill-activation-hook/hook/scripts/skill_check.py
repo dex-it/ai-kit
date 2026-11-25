@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Hooks UserPromptSubmit и SubagentStart: напоминание пройти по списку скилов. Сабагенту UserPromptSubmit не приходит, поэтому то же напоминание - на его старте. Текст не зависит от кита и проекта.
-Замеры - claude-rules research/2026-11-skill-loading/results/2026-11-17-sonnet-hook-descriptions.md."""
+Замеры - bench/results/2026-11-17-sonnet-hook-descriptions.md."""
 import json
 import sys
 

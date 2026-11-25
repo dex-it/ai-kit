@@ -9,7 +9,12 @@ for f in glob.glob(os.path.expanduser('~/.claude/projects/') + '*/*.jsonl'):
             try: a = json.loads(line).get('attachment') or {}
             except Exception: continue
             for m in re.finditer(r'^- ([\w-]+:claude-rules-[\w-]+)', a.get('content', ''), re.M): names.add(m.group(1).split(':')[1])
-        for m in re.finditer(r'"skill":"([^"]+)"', line): used.add(m.group(1).split(':')[-1])
+        if '"Skill"' in line:
+            try: message = json.loads(line).get('message')
+            except Exception: continue
+            for part in (message.get('content') if isinstance(message, dict) else None) or []:
+                if isinstance(part, dict) and part.get('type') == 'tool_use' and part.get('name') == 'Skill':
+                    used.add(part['input'].get('skill', '').split(':')[-1])
     for n in names:
         listed[n] += 1; loaded[n] += n in used
 for n, c in sorted(listed.items(), key=lambda x: -loaded[x[0]]/x[1]):
