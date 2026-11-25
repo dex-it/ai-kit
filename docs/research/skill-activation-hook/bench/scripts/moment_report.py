@@ -13,7 +13,7 @@ import sys
 
 RUN_PATH = re.compile(r'/runs/([\w-]+)/cart')
 CODE_FILE = re.compile(r'(?:^|[\s/"\'])(?:src|test)/[\w.-]+\.js')
-BASH_WRITE = re.compile(r'(>|sed -i|tee )')
+BASH_WRITE = re.compile(r'((?<![0-9&])>(?!&)|sed -i|tee )')  # `>` без `2>&1` и `>&`
 
 
 def events(path):

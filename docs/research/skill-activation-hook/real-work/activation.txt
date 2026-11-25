@@ -1,7 +1,7 @@
 сессий 375, без архива транскрипта 0 (из таблицы исключены)
 окно: до хука: 2026-10-01 - 2026-11-16, после: 2026-11-17 - 2026-11-24 (по Киеву, не позже 2026-11-24)
 сверка хука с датой 2026-11-17: до даты с хуком 0, с даты без хука 0
-разбор списков: списков 484, имён из names без разобранной строки 0, расхождений со skillCount 0, имён из скобок 1185, посторонних строк '- ' (описания) 630
+разбор списков: списков 484, имён из names без разобранной строки 0, расхождений со skillCount 0, имён из скобок 1185, посторонних строк '- ' (описания) 630, строк скила без описания 0
   посторонняя строка: - UI/Layout: Modals, dialogs, popovers, Glassmorphism/backdrop-filters, anchor positioning
   посторонняя строка: - Scroll/Motion: View Transitions, Scroll-driven animations, scroll parallax/reveals.
   посторонняя строка: - Performance: CWV (LCP, INP), content-visibility, Fetch Priority, image optimization.

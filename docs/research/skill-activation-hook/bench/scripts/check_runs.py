@@ -2,7 +2,7 @@
 check_runs.py [маска каталогов транскриптов claude -p] [каталог родительской сессии ...]
 Прогоны claude -p - *.jsonl в каталогах по маске: ответ - финальный текст ассистента.
 Сабагенты стенда запускались из обычных сессий - <родитель>/subagents/*.jsonl: ответ - последний вызов инструмента SubagentHandback.
-Родители по умолчанию - две сессии 17.11 в ~/.claude/projects/-data-repositories-switchyard."""
+Родители по умолчанию - две сессии 17.11 в ~/.claude/projects/-data-repositories-switchyard и сессия S5 25.11."""
 import glob
 import json
 import os
@@ -12,6 +12,7 @@ mask = os.path.expanduser(sys.argv[1] if len(sys.argv) > 1 else '~/.claude/proje
 PARENTS = sys.argv[2:] or [
     '~/.claude/projects/-data-repositories-switchyard/d128c666-18d9-4140-8e84-5372c3427abc',
     '~/.claude/projects/-data-repositories-switchyard/b318b76b-8f27-43f3-b39e-07827c5afefb',
+    '~/.claude/projects/-data-repositories--sy-ai-kit-docs-research-skily-ne-otkry/39e53999-313a-410d-bffa-4817139c8c96',  # S5, 25.11
 ]
 
 
@@ -52,20 +53,18 @@ for path in runs:
         print(f'прогон\t{path}\tошибок API: {errors}\t{"с ответом" if answered else "без ответа"}')
 print(f'прогонов (каталогов) {len(dirs)}, транскриптов {len(runs)}, с ошибкой: {bad}, без ответа: {silent}')
 
-total = bad = silent = cart = cart_bad = cart_silent = 0
+cart = bad = silent = other = 0
 for parent in PARENTS:
     for path in sorted(glob.glob(os.path.join(os.path.expanduser(parent), 'subagents/*.jsonl'))):
-        errors, answered = check(path, handback=True)
         first = next((json.loads(l) for l in open(path, encoding='utf-8', errors='replace') if '"type":"user"' in l), {})
         content = (first.get('message') or {}).get('content')
-        about_cart = 'корзин' in (content if isinstance(content, str) else json.dumps(content, ensure_ascii=False))
-        total += 1
+        if 'корзин' not in (content if isinstance(content, str) else json.dumps(content, ensure_ascii=False)):
+            other += 1  # сабагент сессии не про стенд (разведка, чтение доки): не прогон, не проверяется
+            continue
+        errors, answered = check(path, handback=True)
+        cart += 1
         bad += errors > 0
         silent += not answered
-        cart += about_cart
-        cart_bad += about_cart and errors > 0
-        cart_silent += about_cart and not answered
         if errors or not answered:
             print(f'сабагент\t{path}\tошибок API: {errors}\t{"с ответом" if answered else "без ответа"}')
-print(f'сабагентов: {total}, с ошибкой: {bad}, без ответа: {silent}')
-print(f'из них про корзину стенда: {cart}, с ошибкой: {cart_bad}, без ответа: {cart_silent}')
+print(f'сабагентов стенда (про корзину): {cart}, с ошибкой: {bad}, без ответа: {silent}; прочих сабагентов этих сессий не проверялось: {other}')

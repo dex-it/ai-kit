@@ -26,6 +26,11 @@ def top_model(db, sid, parent):
     return counts.most_common(1)[0][0] if counts else None
 
 
+def family(model):
+    """Семейство модели: в meta сабагента бывает короткое имя (haiku), в trace_calls - полное (claude-haiku-5-5)."""
+    return next((name for name in ("haiku", "sonnet", "opus") if name in model), model)
+
+
 def transcripts(db, sid, sources, session_models):
     """(agent, model, текст) основного транскрипта и каждого сабагента; None вместо текста, если архива нет."""
     main = traces.main_raws(sid, sources)
@@ -49,7 +54,7 @@ def transcripts(db, sid, sources, session_models):
 def main():
     traces.need_zstd()
     db = sqlite3.connect(os.path.expanduser(sys.argv[1]) if len(sys.argv) > 1 else os.path.expanduser("~/.switchyard/switchyard.db"))
-    stats = traces.ListingStats()
+    stats, agent_stats = traces.ListingStats(), traces.ListingStats()  # списки основных сессий и сабагентов
     records = []  # (session, agent, model, listed, opened-по-транскрипту)
     no_listing = collections.Counter()
     no_archive = after_hook = used = 0
@@ -67,7 +72,7 @@ def main():
             continue
         used += 1
         for agent, model, text in found:
-            listed = {name for name in traces.scan(text, stats)[1] if name.startswith(KIT)}
+            listed = {name for name in traces.scan(text, stats if agent == "main" else agent_stats)[1] if name.startswith(KIT)}
             if not listed:
                 no_listing["main" if agent == "main" else "agent"] += 1
                 continue
@@ -91,9 +96,12 @@ def main():
                     main_skills[skill][1] += 1
                     main_skills[skill][0] += skill in opened
             else:
-                by_model[model][1] += 1
-                by_model[model][0] += bool(opened)
+                by_model[family(model)][1] += 1
+                by_model[family(model)][0] += bool(opened)
+    print("основные сессии:", end=" ")
     stats.report()
+    print("сабагенты:", end=" ")
+    agent_stats.report()
     names.report()
     print(f"основных сессий {used} ({FROM_DAY} - {TO_DAY}, без хука); без архива {no_archive}; с хуком в этом окне {after_hook} (исключены)")
     print("\n(а) основные сессии: скил открыт / в списке")

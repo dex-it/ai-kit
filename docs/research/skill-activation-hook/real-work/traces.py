@@ -57,15 +57,16 @@ def attachments(text):
 
 
 class ListingStats:
-    """Счётчики разбора skill_listing: имена из поля names без своей строки, посторонние строки "- ", сверка со skillCount, имена из скобок."""
+    """Счётчики разбора skill_listing: имена из поля names без своей строки, посторонние строки "- ", сверка со skillCount, имена из скобок, строки скила без описания."""
 
     def __init__(self):
-        self.listings = self.mismatch = self.from_paren = self.missing = self.foreign = 0
+        self.listings = self.mismatch = self.from_paren = self.missing = self.foreign = self.no_description = 0
         self.examples, self.mismatches = [], []
 
     def report(self):
         print(f"разбор списков: списков {self.listings}, имён из names без разобранной строки {self.missing}, "
-              f"расхождений со skillCount {self.mismatch}, имён из скобок {self.from_paren}, посторонних строк '- ' (описания) {self.foreign}")
+              f"расхождений со skillCount {self.mismatch}, имён из скобок {self.from_paren}, посторонних строк '- ' (описания) {self.foreign}, "
+              f"строк скила без описания {self.no_description}")
         for line in self.examples:
             print(f"  посторонняя строка: {line[:90]}")
         for found, count in self.mismatches[:5]:
@@ -75,7 +76,7 @@ class ListingStats:
 def listing_names(content, names=None, stats=None):
     """Имена скилов (без префикса плагина) из текста skill_listing. Формат строки: `- plugin:name: ...` или `- plugin:обрезанное (plugin:полное): ...`.
     names - поле names вложения (в нём имя как в строке до скобок): строки "- ..." из описаний скилов (там тоже бывают маркированные списки) отсеиваются по нему."""
-    tokens, parenthesized, foreign = [], 0, 0
+    tokens, parenthesized, foreign, bare = [], 0, 0, 0
     for line in content.splitlines():
         if not line.startswith("- "):
             continue
@@ -86,10 +87,12 @@ def listing_names(content, names=None, stats=None):
                 stats.examples.append(line)
             continue
         parenthesized += bool(match.group("full"))
+        bare += not line[match.end():].strip()
         tokens.append((match.group("short"), match.group("full") or match.group("short")))
     if stats is not None:
         stats.foreign += foreign
         stats.from_paren += parenthesized
+        stats.no_description += bare
         stats.missing += len(set(names) - {short for short, _ in tokens}) if names is not None else 0
     return [full.split(":")[-1] for _, full in tokens]
 
