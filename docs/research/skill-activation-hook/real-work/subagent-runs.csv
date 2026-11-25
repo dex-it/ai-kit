@@ -1,0 +1,143 @@
+session,run,day,period,kind,skills
+s13fkblv,toolu_014zkcX8mAiVLFbFpMfYRCYK,2026-10-08,before,explore,claude-rules-code-search
+s13fkblv,toolu_014HtS9fcQ7Edspz6jJdCL42,2026-10-08,before,other,claude-rules-code-general claude-rules-code-search claude-rules-code-writing
+sfib3ye,toolu_01QBAAsuUktEgDdSJGxbuKT7,2026-10-09,before,explore,
+s3hoxc7,toolu_01TKWdTrnevtapybNYJzAnuA,2026-10-09,before,other,
+s3hoxc7,toolu_01UU6cxbJcFys8yHzZhXfKMq,2026-10-09,before,other,
+sk9mozf,toolu_01Uk13QH9xsGUkGB2ZrSbghd,2026-10-12,before,explore,claude-rules-code-search
+s8ggsdj,toolu_016YKp3eTkGy5yrQWApDCyeC,2026-10-16,before,explore,
+s8ggsdj,toolu_018HFAwBuBpyvKtVkfVnJa7B,2026-10-16,before,explore,
+s8ggsdj,toolu_01ABizjYNeZAbqjMDDK4igjh,2026-10-16,before,explore,claude-rules-code-search
+s8ggsdj,toolu_01JyWg1LiKkfFfxDkKQqNZay,2026-10-16,before,explore,
+s8ggsdj,toolu_012K1N9QeyEccasZ9cU4mfsZ,2026-10-16,before,explore,
+s5pmhpv,toolu_01Rwyi3mNTNJWJV3LvruQqz2,2026-10-20,before,other,
+st1koy8,toolu_01CW9KiNx5wjvqdBd2siEsrH,2026-10-20,before,other,
+s17cb4oe,toolu_01Kw9fPNbUyKjvhpnBJZ29zk,2026-10-21,before,explore,
+s3e1a1w,toolu_01WdoQocLv291ALRBVb6NEeY,2026-10-21,before,reviewer,
+s1p5uniw,toolu_014HuNxjj9THaub1RTgJyMZo,2026-10-21,before,explore,
+spain74,toolu_01X9B9HJiZSHswMCUpvY39T5,2026-10-23,before,explore,claude-rules-code-search
+spain74,toolu_01V7A717btAGphnQjeYrkBgA,2026-10-23,before,executor,claude-rules-code-search
+s1tfqq61,toolu_01SbR8tqpTSrR8SGMgL1ZcDh,2026-10-23,before,explore,claude-rules-code-search
+s1tfqq61,toolu_01Y1otQYw3DsHmjz67XhHCs1,2026-10-23,before,explore,claude-rules-code-search
+s1tfqq61,toolu_01FC7ukdNs4pU46ma6aN4rQa,2026-10-23,before,other,
+s166n5ia,toolu_01YGP4q8dtpUoZSMBtGKFXTE,2026-10-27,before,explore,
+s166n5ia,toolu_01MABDCWtshruhvH2YaQ5GBz,2026-10-27,before,other,
+s166n5ia,toolu_01HymfBRmBF3S6bANtEVaDXA,2026-10-27,before,other,
+s166n5ia,toolu_019HYcb1DGVaVYVfbbuwyf73,2026-10-27,before,other,
+s166n5ia,toolu_01XiFXLR5sm1dnfnJ3aWcw4W,2026-10-27,before,other,
+s166n5ia,toolu_017PKpz47MnpFzvjjP2BmFoh,2026-10-27,before,other,
+s166n5ia,toolu_01Rz1bi5rPFkbFHbnz4aKkeK,2026-10-27,before,other,claude-rules-chat-reply claude-rules-code-search
+s166n5ia,toolu_014tiLjX28pSRUXMnJfdvGJL,2026-10-27,before,executor,
+s166n5ia,toolu_01SUM8mnjAKqNgiXz2yUfKy5,2026-10-27,before,executor,claude-rules-code-search
+s166n5ia,toolu_01E1U6wbxGkmoqpLmQWH9xe8,2026-10-27,before,executor,claude-rules-code-search
+s166n5ia,toolu_01KibsR5Tpy7tPxRR1GLbBor,2026-10-27,before,executor,claude-rules-code-search claude-rules-csharp-dto-records
+s166n5ia,toolu_01XgSzPp7WyZbDCBqGS4dhZA,2026-10-27,before,executor,
+s166n5ia,toolu_01EAcQXsnym3XsWPAkPMY7sF,2026-10-27,before,other,claude-rules-code-search claude-rules-upcore-build
+s166n5ia,toolu_012MCBnDT9VRTEuMxB3AFArh,2026-10-27,before,other,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore-build
+s166n5ia,toolu_0139PkytAozmdWxJrtuvHwKR,2026-10-27,before,other,claude-rules-code-search claude-rules-upcore-build
+sdwyuii,toolu_012WPX7uTsLRhk1RX1NyWawY,2026-10-28,before,reviewer,claude-rules-code-search
+sdwyuii,toolu_01Fyub9Y6dBdkVuiVzASrd43,2026-10-28,before,reviewer,claude-rules-code-search
+sdwyuii,toolu_014Rir9jkD2SFtD4BjisBurL,2026-10-28,before,reviewer,
+sdwyuii,toolu_01JEXPjaY7xSy1RSvCQgu6AB,2026-10-28,before,reviewer,claude-rules-code-search
+s1eju0sv,toolu_01PTntN5bmNu5CtcDqrHCQcg,2026-10-28,before,executor,claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests
+s1eju0sv,toolu_01Gm5mnqHtiBtCMHjec5rigg,2026-10-28,before,executor,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-naming
+sg34vri,toolu_018iWedixGstQ247TTzbMRfD,2026-10-28,before,executor,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-tests
+sac7svh,toolu_01SgocVbradmASJRSrr3JyEb,2026-10-28,before,executor,claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests
+sg34vri,toolu_01Gi5Uc7ntJ2FRkBAuX9kF1e,2026-10-28,before,executor,claude-rules-chat-reply claude-rules-code-writing claude-rules-csharp-aspnet-endpoints claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code
+s155k2fw,toolu_01MziJ1sG8sx4jsMTi165FzT,2026-10-29,before,executor,claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef
+s155k2fw,toolu_01AEyjRdzc7FX4FKK1qySjbV,2026-10-29,before,executor,claude-rules-code-search claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-tests
+s155k2fw,toolu_01STBp6HwiyJKG9NedVq6aK7,2026-10-29,before,executor,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-specifications claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef
+s155k2fw,toolu_012Qfoaoku11m8VMhrNS3fZz,2026-10-29,before,executor,claude-rules-code-search claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-tests
+sc7vund,toolu_01FYrkJtra25AaSvAJ4HXQfZ,2026-10-29,before,explore,
+sc7vund,toolu_01Rejh9CYs9yMR1c91xcmQxB,2026-10-29,before,explore,claude-rules-code-search
+sil9knx,toolu_01XfXr3G3J4H2Yswv8PrCuDv,2026-10-30,before,executor,claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-tests
+sil9knx,toolu_01TphDovirdTzRYCeos7L2Lc,2026-10-30,before,executor,claude-rules-code-general claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef
+sg1t0lv,toolu_017WoSZG59gAtmQv21VarfNY,2026-10-30,before,explore,
+sg1t0lv,toolu_018Y9FiBLkaaA1azBhyxV2ku,2026-10-30,before,explore,claude-rules-code-search
+s1kw6qee,toolu_014z1Qt9AdZ6PvgkeTzNhfy9,2026-10-30,before,explore,claude-rules-code-search
+s1kw6qee,toolu_01QBcA3BwwDaGy84V1jzNbYP,2026-10-30,before,explore,claude-rules-code-search
+srlhps3,toolu_01Nq1mZZB9T68mTYiSnWeFGG,2026-11-09,before,other,
+s1yx5a5i,toolu_01FcnL4PCZuvGe35FwFadgg6,2026-11-09,before,explore,claude-rules-code-search
+s1yx5a5i,toolu_016hAfHi3bpMhs9gMfqsRSCw,2026-11-09,before,explore,
+sr86vnn,toolu_01RB9GGhBoKw9zhtmxWSLXFQ,2026-11-09,before,explore,
+sr86vnn,toolu_01TwgU6ehgtfxmctEtpLrFd1,2026-11-09,before,explore,
+sr86vnn,toolu_01FpuZb5iP9TxnU4Z9fFFr2k,2026-11-09,before,explore,
+sr86vnn,toolu_01WGMmPbdpn4aegPnD2brrPT,2026-11-09,before,executor,
+sr86vnn,toolu_01KBHLkjS84U9ta4SrorJbpX,2026-11-09,before,reviewer,
+sr86vnn,toolu_01QdYbuXcQfVUnZwR5BF22iX,2026-11-09,before,explore,
+sr86vnn,toolu_01Kb7w7s9y7dCbW6JrgQQNfX,2026-11-09,before,reviewer,
+sr86vnn,toolu_01Kymrux3N7qYqHgiV4gou4g,2026-11-09,before,executor,
+sr86vnn,toolu_01FDgoyFS5wdmypgmdLMPsbT,2026-11-09,before,reviewer,
+sjiye2f,toolu_013849GBPK5ceqjjzzzEDdbQ,2026-11-09,before,explore,claude-rules-code-search
+sjiye2f,toolu_01Y9PLTz1myjVDbYVETReH3b,2026-11-09,before,explore,claude-rules-code-search
+sjiye2f,toolu_01Vx26S2xSKrvDxgVkUaBDdn,2026-11-09,before,executor,
+sjiye2f,toolu_015SeqhwjS5zLzuF9o9LrmsG,2026-11-09,before,reviewer,
+sjiye2f,toolu_01XqrwYV4RLpCM35Sj3f6ocX,2026-11-09,before,other,
+sf5pt1k,toolu_01UpgmPap5U1abCGAsndvUTR,2026-11-10,before,explore,
+sf5pt1k,toolu_01SGa1m6jr4qjbEN8whF9vjR,2026-11-10,before,explore,
+s12sm8em,toolu_0199sC3Cetuoa7Ee9kdAkXHK,2026-11-10,before,executor,claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests
+sx73gt,toolu_01AWZu5HxA6GEXRs6UG58wmc,2026-11-10,before,reviewer,
+s1vtey5f,toolu_01VeyCNRgxDsRDeXBsJUEbYw,2026-11-16,before,reviewer,
+sf1g3tj,toolu_01PgUsdz3Wao95d43fNaTZCk,2026-11-16,before,executor,claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-ef-migrations claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests
+sf1g3tj,toolu_01QNW9cgcQCFB4N71G9A2zwQ,2026-11-16,before,reviewer,
+sf1g3tj,toolu_01UdEcerMUrn2SuNJSReKGpk,2026-11-16,before,other,
+s1llwv9v,toolu_0126B6osZhtJdiWAWC3dytoS,2026-11-17,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-postgres-reader
+s6kxdjv,toolu_01LSGvSWNnJ47tu8DBLp288x,2026-11-18,after,explore,claude-rules-code-search claude-rules-csharp-aspnet-endpoints claude-rules-upcore-naming
+s6kxdjv,toolu_01B1YUWzM3bHkWn7Fw6fzSaJ,2026-11-18,after,explore,claude-rules-code-search claude-rules-upcore
+s6kxdjv,toolu_01TBRmu1g9VeztvfsMv5984t,2026-11-18,after,other,claude-rules-code-writing claude-rules-csharp-aspnet-endpoints claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-task-implementation claude-rules-upcore-build
+sl74xqi,toolu_01FDME163QrpYCDzZUi1fyFw,2026-11-18,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore claude-rules-upcore-ef
+sl74xqi,toolu_01TJRa1zhNVa5JoAtiLpPjqL,2026-11-18,after,explore,claude-rules-code-search claude-rules-upcore-ef
+supe276,toolu_014kMv2SfpCop5m43BbXpdKN,2026-11-18,after,explore,claude-rules-code-search claude-rules-upcore
+supe276,toolu_016qdrqtvAhTUELHD2e1y988,2026-11-18,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore claude-rules-upcore-front-components claude-rules-upcore-front-helper
+sv5gfo9,toolu_01NdAVg5ku1V54UL2frgyjGm,2026-11-18,after,explore,claude-rules-code-search claude-rules-upcore-ef claude-rules-upcore-tests
+sv5gfo9,toolu_01P18ybi4T57ZwJoMMAmjzxQ,2026-11-18,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore claude-rules-upcore-tests
+sl74xqi,toolu_012p6DkecCxJs1mvTbFFiqAE,2026-11-18,after,executor,claude-rules-code-search
+sl74xqi,toolu_01DDXbuGMVtDuNoMiEWUrxwo,2026-11-18,after,reviewer,claude-rules-code-general claude-rules-code-writing claude-rules-csharp-aspnet-endpoints claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-naming claude-rules-upcore-tests
+sv5gfo9,toolu_01XA1EoT5quNkuG6raYWGghP,2026-11-18,after,executor,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-tests
+supe276,toolu_01EcLsZEYf9y9HQXCcnnfU6X,2026-11-18,after,executor,claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-definition-of-done claude-rules-task-implementation claude-rules-ui-copy claude-rules-ui-craft claude-rules-ui-fallbacks claude-rules-upcore-front-components claude-rules-upcore-front-data claude-rules-upcore-front-helpers claude-rules-upcore-front-styles claude-rules-upcore-frontend claude-rules-visual-check
+sse6gzi,toolu_018WAzoHaTCb8QfSTaGdcvyQ,2026-11-18,after,explore,claude-rules-code-search claude-rules-upcore
+sse6gzi,toolu_01EVRT1t6SqNEK1VQ8fKwTZu,2026-11-18,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-csharp-dto-records claude-rules-upcore
+sv5gfo9,toolu_01SFrmJh98kv62UQQjpnq88j,2026-11-18,after,executor,claude-rules-code-general claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-definition-of-done claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests
+sv5gfo9,toolu_01QV2KGJhCxKST9NQAnT3Zrp,2026-11-18,after,reviewer,
+supe276,toolu_012ooNwRMKU7fVWGwKZceRki,2026-11-18,after,reviewer,
+sse6gzi,toolu_014pBcrhyimEa5hctwd2KzXJ,2026-11-18,after,executor,claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests
+sse6gzi,toolu_01SJfey6aJk62HqmPDegS96S,2026-11-18,after,other,claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-definition-of-done claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-tests
+sgxdpqs,toolu_01K9tG6eZCnrNiK9D8s5uRa2,2026-11-18,after,explore,claude-rules-chat-reply claude-rules-code-search
+sgxdpqs,toolu_0146eYoNFnNuLUgAhqXNEsgp,2026-11-18,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore
+sse6gzi,toolu_01LrUbzU8ZLi5bxv2FMtNJAP,2026-11-18,after,other,claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code
+sse6gzi,toolu_01HvE19xgEDac8uSd4myWrmY,2026-11-18,after,other,claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef
+sse6gzi,toolu_0136mTBcARsTKghXgkkQi34p,2026-11-18,after,executor,claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-naming
+s14nvwt3,toolu_01Qw4W1TFFa84xr3YKuA4EMq,2026-11-19,after,executor,claude-rules-code-general claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-tests
+s14nvwt3,toolu_01TdRpy3vZ3DqLMLUQp3QUu6,2026-11-19,after,executor,claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-aspnet-endpoints claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef
+s14nvwt3,toolu_01FvxErEeF2jwMHHswnBHePs,2026-11-19,after,reviewer,
+s1uqkwwv,toolu_01E6bnZQHfBZPFLc6SjNGtqe,2026-11-20,after,explore,claude-rules-code-search claude-rules-upcore
+s1vym668,toolu_01RmX9jofvpjcMvYDRqWSK5w,2026-11-20,after,reviewer,claude-rules-code-general claude-rules-code-writing claude-rules-upcore-front-helpers claude-rules-upcore-frontend
+s1rpqm59,toolu_01SGELVo9XH8MzHFU7ubY9X9,2026-11-19,after,explore,claude-rules-chat-reply claude-rules-code-search
+s1rpqm59,toolu_01AvoSaXZDWsKpbaKoqjmPJj,2026-11-19,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore
+s1rpqm59,toolu_014qmCeGicUrBQepth4Qa3Zs,2026-11-19,after,executor,claude-rules-chat-reply claude-rules-code-search claude-rules-code-writing claude-rules-csharp-tests claude-rules-task-implementation claude-rules-upcore claude-rules-upcore-build claude-rules-upcore-tests
+s1rpqm59,toolu_01TDBY3S1ut2AEWzWu51sej8,2026-11-19,after,executor,claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-upcore-code
+s1rpqm59,toolu_01VB5c2pAt5DCr2sYE8Jmud6,2026-11-19,after,reviewer,
+sqfpinr,toolu_01KZkTyTPswgWfWch2u9wKL4,2026-11-23,after,reviewer,claude-rules-code-general claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-upcore-ef claude-rules-upcore-tests
+sqfpinr,toolu_01Bd6okmEqsMYchupXCDdnkJ,2026-11-23,after,executor,claude-rules-code-general claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code
+s9ancxg,toolu_01JQaxBSPyHiLb3p9KpjgyqB,2026-11-23,after,other,claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code
+s1t2954e,toolu_011JnAGiArxTeSoUZtsKko1W,2026-11-23,after,other,
+s1t2954e,toolu_01WewrQyknzTDnscrPcZH1YU,2026-11-23,after,other,
+sbhusov,toolu_01QjeyAS2LtMbCRozaQSiene,2026-11-23,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore claude-rules-upcore-messaging
+sbhusov,toolu_01LdHYCip63z5AkVTQvyqrrb,2026-11-23,after,explore,claude-rules-code-search claude-rules-upcore claude-rules-upcore-messaging
+svdw27j,toolu_01Uh8VfnyrLBzyHQEVp5dgV8,2026-11-23,after,executor,claude-rules-code-general claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-naming
+sbhusov,toolu_01BvAzrSTBb3KsGHkAMKERFN,2026-11-23,after,executor,claude-rules-chat-reply claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-tests
+svdw27j,toolu_018ogtjkq2dduuNvAaH2FBmw,2026-11-23,after,reviewer,
+sbhusov,toolu_01AwJxwUpxv1CiXLzvxMWDJ8,2026-11-23,after,executor,claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-specifications claude-rules-csharp-xml-docs claude-rules-definition-of-done claude-rules-task-implementation claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef claude-rules-upcore-messaging
+sbhusov,toolu_01CBTrcvkedFNHXCT8zxLEU5,2026-11-23,after,reviewer,
+s5y8ez1,toolu_01QAxCx4vdxkuJAdSQiLxrWa,2026-11-24,after,other,claude-rules-chat-reply
+s5y8ez1,toolu_017E1jika5n1t5VDdpaj4oTx,2026-11-24,after,other,claude-rules-chat-reply
+s872own,toolu_0162XqXkK1qmBwDzZpJEVSdG,2026-11-24,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore
+s872own,toolu_015Nx4rwnVRx2XoFizQXUUmR,2026-11-24,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-upcore
+s872own,toolu_01WyJoWuufEFPNjeCzRLEqkg,2026-11-24,after,executor,claude-rules-code-general claude-rules-code-writing claude-rules-csharp-aspnet-endpoints claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code claude-rules-upcore-ef
+s1al57gl,toolu_015QMtnC1Sca7LWoHc8CV5L8,2026-11-24,after,explore,claude-rules-chat-reply claude-rules-code-search claude-rules-ui-fallbacks claude-rules-upcore-frontend
+s1al57gl,toolu_019TBoqeRp1uvSkJrYmwy3vM,2026-11-24,after,explore,claude-rules-code-search claude-rules-upcore-front-components claude-rules-upcore-front-data claude-rules-upcore-frontend
+s1al57gl,toolu_0146ttpep2L36SsWS5yY67i3,2026-11-24,after,executor,claude-rules-code-general claude-rules-code-search claude-rules-code-writing claude-rules-definition-of-done claude-rules-upcore-front-components claude-rules-upcore-front-styles claude-rules-upcore-frontend
+s1al57gl,toolu_012LssxMHAKwdZk3ZvUsszxu,2026-11-24,after,reviewer,
+swbjzhm,toolu_0191p79D9M6PuzGitAFTTjXd,2026-11-24,after,executor,claude-rules-code-general claude-rules-code-writing claude-rules-csharp-code claude-rules-csharp-dto-records claude-rules-csharp-ef-migrations claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-code
+swbjzhm,toolu_01UqmJBU2eRaqXmMtYHVGiAg,2026-11-24,after,executor,claude-rules-code-search claude-rules-code-writing claude-rules-csharp-tests claude-rules-csharp-xml-docs claude-rules-upcore-build claude-rules-upcore-tests
+swbjzhm,toolu_01EaCuZjUSw9j4vCw1TgpGv1,2026-11-24,after,reviewer,
