@@ -30,16 +30,24 @@ def run_kind(target):
     return "other"
 
 
+def positions(pos):
+    return " ".join(f"{name}@{turn}.{n}" for name, (turn, n) in sorted(pos.items()))
+
+
 def export_sessions(db, sessions):
     with open("sessions.csv", "w", newline="", encoding="utf-8") as out:
         writer = csv.writer(out)
-        writer.writerow(["session", "repo", "day", "period", "turns", "calls", "skills", "actions", "wrote_xml_doc"])
+        writer.writerow(["session", "repo", "day", "period", "turns", "calls", "skills", "actions", "wrote_xml_doc",
+                         "listed", "main_calls", "first_turn", "skill_pos", "edit_pos"])
         for sid, s in sorted(sessions.items(), key=lambda item: item[1]["day"]):
             turns, calls, sources = db.execute("SELECT turns, calls, sources FROM trace_sessions WHERE id = ?", (sid,)).fetchone()
             xml = wrote_xml(sid, sources) if "cs_edit" in s["why"] else False
             writer.writerow([sid, s["repo"], s["day"], "" if s["hook"] is None else period(s), turns, calls,
                              " ".join(sorted(s["skills"])), " ".join(sorted(s["why"])),
-                             "" if xml is None else int(xml)])
+                             "" if xml is None else int(xml),
+                             "" if s["listed"] is None else " ".join(sorted(s["listed"])), s["calls"],
+                             "" if s["first_turn"] is None else s["first_turn"],
+                             positions(s["pos"]), positions(s["edit_pos"])])
 
 
 def export_runs(db, sessions):
